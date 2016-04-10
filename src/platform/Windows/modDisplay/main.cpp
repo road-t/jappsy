@@ -1,5 +1,25 @@
+/*
+ * Created by VipDev on 01.04.16.
+ *
+ * Copyright (C) 2016 The Jappsy Open Source Project
+ *
+ * Project Web Page http://jappsy.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #ifndef WINVER
-#define WINVER 0x0501	// AlphaBlend requires WinME or Win2000 minimum + Display functions
+#define WINVER 0x0501	// requires WinME or Win2000 minimum for Display functions
 #endif
 
 #include <windows.h>
@@ -320,7 +340,7 @@ void dis_update(bool skipCallback = false) {
 
 	slSingleUnlock(&dis_lock);
 
-	/*
+	/* DEBUG
 	if (changed) {
 		printf("Display Count: %d\r\n", dis_id);
 
@@ -433,7 +453,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 	switch (msg) {
 		case WM_CREATE:
 			SetWindowLong(hWnd,GWL_USERDATA,(long)((LPCREATESTRUCT)lParam)->lpCreateParams);
-//			userData = (void*)lParam;
+			//userData = (void*)lParam;
 
 			// Monitor Plug-n-play detect
 			DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;

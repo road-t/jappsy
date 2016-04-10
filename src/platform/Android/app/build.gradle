@@ -1,0 +1,83 @@
+apply plugin: 'com.android.model.application'
+
+model {
+    android {
+        compileSdkVersion 23
+        buildToolsVersion "23.0.3"
+
+        defaultConfig {
+            applicationId "com.jappsy"
+            minSdkVersion.apiLevel 13
+            targetSdkVersion.apiLevel 13
+            versionCode 1
+            versionName "1.0"
+        }
+/*
+        signingConfigs {
+            create("release") {
+                keyAlias = KEY_ALIAS
+                keyPassword = STORE_PASSWORD
+                storeFile = file(STORE_FILE)
+                storePassword = KEY_PASSWORD
+            }
+        }
+*/
+        buildTypes {
+            release {
+                minifyEnabled false
+                shrinkResources = true
+                useProguard = true
+                proguardFiles.add(file('proguard-rules.pro'))
+                //signingConfig = signingConfigs.release
+
+                ndk.with {
+                    debuggable = true
+                }
+            }
+            debug {
+                ndk.with {
+                    debuggable = true
+                }
+            }
+        }
+
+        ndk {
+            moduleName "jappsy-jni"
+            ldLibs.addAll(["android", "log", "GLESv2"])
+            cppFlags.addAll(["-fexceptions"])
+            stl = "stlport_static"
+
+            cppFlags.addAll(["-I" + file("src/main/jni/include").absolutePath])
+            CFlags.addAll(["-I" + file("src/main/jni/include").absolutePath])
+            cppFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+            CFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+            cppFlags.addAll(["-I" + file("../libpng/src/main/jni/libpng").absolutePath])
+            CFlags.addAll(["-I" + file("../libpng/src/main/jni/libpng").absolutePath])
+            cppFlags.addAll(["-I" + file("../libjpeg/src/main/jni/libjpeg").absolutePath])
+            CFlags.addAll(["-I" + file("../libjpeg/src/main/jni/libjpeg").absolutePath])
+        }
+    }
+    android.sources {
+        main {
+            jni {
+                source {
+                    includes += "../libpng/src/main/jni/libpng/png.h"
+                }
+                dependencies {
+                    project ":libz" linkage "static"
+                    project ":libpng" linkage "static"
+                    project ":libjpeg" linkage "static"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile project(':libz')
+    compile project(':libpng')
+    compile project(':libjpeg')
+}

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+                android:minHeight="64dp"
+                android:minWidth="64dp"
+              android:orientation="vertical">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/imageView"
+            android:src="@mipmap/ic_launcher"
+            android:minHeight="48dp"
+            android:minWidth="48dp"
+            android:maxHeight="48dp"
+            android:maxWidth="48dp"
+            android:padding="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Jappsy Crash Detected"
+            android:gravity="center_vertical|left"
+            android:padding="8dp"
+            android:clickable="false"
+            android:singleLine="true"
+            />
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:id="@+id/scrollView"
+        android:layout_gravity="center_horizontal|left"
+        android:background="#80400000"
+        android:layout_margin="8dp"
+        android:padding="8dp"
+        android:layout_weight="1"
+        >
+
+        <HorizontalScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/horizontalScrollView">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Crash Log Details"
+                android:id="@+id/crashlog"
+                android:typeface="monospace"
+                android:singleLine="false"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:focusableInTouchMode="false"
+                android:textSize="10dp"/>
+        </HorizontalScrollView>
+    </ScrollView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Send Crash Report"
+        android:id="@+id/sendlog"
+        android:layout_gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"/>
+
+</LinearLayout>

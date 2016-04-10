@@ -1,0 +1,73 @@
+apply plugin: 'com.android.model.library'
+
+model {
+    android {
+        compileSdkVersion 23
+        buildToolsVersion "23.0.3"
+
+        defaultConfig {
+            minSdkVersion.apiLevel 13
+            targetSdkVersion.apiLevel 23
+            versionCode 1
+            versionName "1.0"
+        }
+        buildTypes {
+            release {
+                minifyEnabled false
+                proguardFiles.add(file('proguard-rules.pro'))
+
+                ndk.with {
+                    debuggable = false
+                }
+            }
+            debug {
+                ndk.with {
+                    debuggable = true
+                }
+            }
+        }
+        ndk {
+            moduleName "png"
+            stl = "stlport_static"
+
+            /* DISABLE NEON AND CONSOLE IO */
+            cppFlags.addAll(["-DPNG_ARM_NEON_OPT=0", "-DPNG_NO_CONSOLE_IO"])
+            CFlags.addAll(["-DPNG_ARM_NEON_OPT=0", "-DPNG_NO_CONSOLE_IO"])
+
+            /* DEBUG LOGS FOR LIBPNG
+            cppFlags.addAll(["-DPNG_DEBUG=2", "-DPNG_DEBUG_JNI"])
+            CFlags.addAll(["-DPNG_DEBUG=2", "-DPNG_DEBUG_JNI"])
+            */
+
+            cppFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+            CFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+        }
+    }
+
+    android.sources {
+        main {
+            jni {
+                source {
+                    //srcDirs "src/main/jni/libpng"
+                    excludes += "**/contrib/*"
+                    excludes += "**/scripts/*"
+                    excludes += "**/pngtest.c"
+                    //includes += "src/main/jni/libpng/contrib/arm-neon/android-ndk.c"
+                }
+                exportedHeaders {
+                    srcDir "src/main/jni/libpng"
+                }
+                dependencies {
+                    project ":libz" linkage "static"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+    compile project(':libz')
+}

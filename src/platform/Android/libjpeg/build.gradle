@@ -1,0 +1,67 @@
+apply plugin: 'com.android.model.library'
+
+model {
+    android {
+        compileSdkVersion 23
+        buildToolsVersion "23.0.3"
+
+        defaultConfig {
+            minSdkVersion.apiLevel 13
+            targetSdkVersion.apiLevel 23
+            versionCode 1
+            versionName "1.0"
+        }
+        buildTypes {
+            release {
+                minifyEnabled false
+                proguardFiles.add(file('proguard-rules.pro'))
+
+                ndk.with {
+                    debuggable = false
+                }
+            }
+            debug {
+                ndk.with {
+                    debuggable = true
+                }
+            }
+        }
+        ndk {
+            moduleName "jpeg"
+            stl = "stlport_static"
+        }
+    }
+
+    android.sources {
+        main {
+            jni {
+                source {
+                    excludes += "**/cd*"
+                    excludes += "**/cj*"
+                    excludes += "**/ck*"
+                    excludes += "**/dj*"
+                    excludes += "**/example.c"
+                    excludes += "**/jpegtran.c"
+                    excludes += "**/rd*"
+                    excludes += "**/tran*"
+                    excludes += "**/wr*"
+
+                    excludes += "**/jmemansi.c"
+                    excludes += "**/jmemdos.c"
+                    excludes += "**/jmemmac.c"
+                    excludes += "**/jmemname.c"
+                    //excludes += "**/jmemnobs.c"
+                }
+                exportedHeaders {
+                    srcDir "src/main/jni/libjpeg"
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile 'junit:junit:4.12'
+    compile 'com.android.support:appcompat-v7:23.2.1'
+}

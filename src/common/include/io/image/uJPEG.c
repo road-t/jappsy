@@ -1,9 +1,5 @@
 /*
- * Created by VipDev on 09.04.16.
- *
- * Copyright (C) 2016 The Jappsy Open Source Project
- *
- * Project Web Page http://jappsy.com
+ * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

@@ -1,2 +1,2 @@
-# jappsy
+# Jappsy
 JavaScript Application Sysyem

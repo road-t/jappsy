@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -152,9 +152,9 @@
 
     static inline int32_t AtomicAdd_Inline(volatile int32_t* ptr, int32_t val) {
         #if defined(OSAtomicAdd32)
-            return OSAtomicAdd32(val, ptr);
+            return OSAtomicAdd32(val, ptr) - val;
         #else
-            return __sync_add_and_fetch(ptr, val);
+            return __sync_fetch_and_add(ptr, val);
         #endif
     }
 #endif
@@ -164,9 +164,9 @@
 
     static inline int32_t AtomicSub_Inline(volatile int32_t* ptr, int32_t val) {
         #if defined(OSAtomicAdd32)
-            return OSAtomicAdd32(-val, ptr);
+            return OSAtomicAdd32(-val, ptr) + val;
         #else
-            return __sync_sub_and_fetch(ptr, val);
+            return __sync_fetch_and_sub(ptr, val);
         #endif
     }
 #endif
@@ -176,9 +176,9 @@
 
     static inline int32_t AtomicIncrement_Inline(volatile int32_t* ptr) {
         #if defined(OSAtomicIncrement32)
-            return OSAtomicIncrement32(ptr);
+            return OSAtomicIncrement32(ptr) - 1;
         #else
-            return __sync_add_and_fetch(ptr, (int32_t)1);
+            return __sync_fetch_and_add(ptr, (int32_t)1);
         #endif
     }
 #endif
@@ -188,9 +188,9 @@
 
     static inline int32_t AtomicDecrement_Inline(volatile int32_t* ptr) {
         #if defined(OSAtomicDecrement32)
-            return OSAtomicDecrement32(ptr);
+            return OSAtomicDecrement32(ptr) + 1;
         #else
-            return __sync_sub_and_fetch(ptr, (int32_t)1);
+            return __sync_fetch_and_sub(ptr, (int32_t)1);
         #endif
     }
 #endif
@@ -199,10 +199,10 @@
     #define AtomicOr AtomicOr_Inline
 
     static inline int32_t AtomicOr_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicOr32)
-            return OSAtomicOr32(val, ptr);
+        #if defined(OSAtomicOr32Orig)
+            return OSAtomicOr32Orig(val, ptr);
         #else
-            return __sync_or_and_fetch(ptr, val);
+            return __sync_fetch_and_or(ptr, val);
         #endif
     }
 #endif
@@ -211,10 +211,10 @@
     #define AtomicXor AtomicXor_Inline
 
     static inline int32_t AtomicXor_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicXor32)
-            return OSAtomicXor32(val, ptr);
+        #if defined(OSAtomicXor32Orig)
+            return OSAtomicXor32Orig(val, ptr);
         #else
-            return __sync_xor_and_fetch(ptr, val);
+            return __sync_fetch_and_xor(ptr, val);
         #endif
     }
 #endif
@@ -223,10 +223,10 @@
     #define AtomicNor AtomicNor_Inline
 
     static inline int32_t AtomicNor_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAnd32)
-            return OSAtomicAnd32(~val, ptr);
+        #if defined(OSAtomicAnd32Orig)
+            return OSAtomicAnd32Orig(~val, ptr);
         #else
-            return __sync_and_and_fetch(ptr, ~val);
+            return __sync_fetch_and_and(ptr, ~val);
         #endif
     }
 #endif
@@ -235,10 +235,10 @@
     #define AtomicAnd AtomicAnd_Inline
 
     static inline int32_t AtomicAnd_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAnd32)
-            return OSAtomicAnd32(val, ptr);
+        #if defined(OSAtomicAnd32Orig)
+            return OSAtomicAnd32Orig(val, ptr);
         #else
-            return __sync_and_and_fetch(ptr, val);
+            return __sync_fetch_and_and(ptr, val);
         #endif
     }
 #endif
@@ -248,7 +248,7 @@
 
     static inline int32_t AtomicNand_Inline(volatile int32_t* ptr, int32_t val) {
         #if GCC_VERSION >= 40400
-            return __sync_nand_and_fetch(ptr, val);
+            return __sync_fetch_and_nand(ptr, val);
         #else
             int32_t i,j;
             j = *ptr;
@@ -317,9 +317,9 @@
 
     static inline int64_t AtomicAdd64_Inline(volatile int64_t* ptr, int64_t val) {
         #if defined(OSAtomicAdd64)
-            return OSAtomicAdd64(val, ptr);
+            return OSAtomicAdd64(val, ptr) - val;
         #else
-            return __sync_add_and_fetch(ptr, val);
+            return __sync_fetch_and_add(ptr, val);
         #endif
     }
 #endif
@@ -329,9 +329,9 @@
 
     static inline int64_t AtomicSub64_Inline(volatile int64_t* ptr, int64_t val) {
         #if defined(OSAtomicAdd64)
-            return OSAtomicAdd64(-val, ptr);
+            return OSAtomicAdd64(-val, ptr) + val;
         #else
-            return __sync_sub_and_fetch(ptr, val);
+            return __sync_fetch_and_sub(ptr, val);
         #endif
     }
 #endif
@@ -341,9 +341,9 @@
 
     static inline int64_t AtomicIncrement64_Inline(volatile int64_t* ptr) {
         #if defined(OSAtomicIncrement64)
-            return OSAtomicIncrement64(ptr);
+            return OSAtomicIncrement64(ptr) - 1;
         #else
-            return __sync_add_and_fetch(ptr, (int64_t)1);
+            return __sync_fetch_and_add(ptr, (int64_t)1);
         #endif
     }
 #endif
@@ -353,9 +353,9 @@
 
     static inline int64_t AtomicDecrement64_Inline(volatile int64_t* ptr) {
         #if defined(OSAtomicDecrement64)
-            return OSAtomicDecrement64(ptr);
+            return OSAtomicDecrement64(ptr) + 1;
         #else
-            return __sync_sub_and_fetch(ptr, (int64_t)1);
+            return __sync_fetch_and_sub(ptr, (int64_t)1);
         #endif
     }
 #endif
@@ -364,11 +364,7 @@
     #define AtomicOr64 AtomicOr64_Inline
 
     static inline int64_t AtomicOr64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicOr64)
-            return OSAtomicOr64(val, ptr);
-        #else
-            return __sync_or_and_fetch(ptr, val);
-        #endif
+        return __sync_fetch_and_or(ptr, val);
     }
 #endif
 
@@ -376,11 +372,7 @@
     #define AtomicXor64 AtomicXor64_Inline
 
     static inline int64_t AtomicXor64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicXor64)
-            return OSAtomicXor64(val, ptr);
-        #else
-            return __sync_xor_and_fetch(ptr, val);
-        #endif
+        return __sync_fetch_and_xor(ptr, val);
     }
 #endif
 
@@ -388,11 +380,7 @@
     #define AtomicNor64 AtomicNor64_Inline
 
     static inline int64_t AtomicNor64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicAnd64)
-            return OSAtomicAnd64(~val, ptr);
-        #else
-            return __sync_and_and_fetch(ptr, ~val);
-        #endif
+        return __sync_fetch_and_and(ptr, ~val);
     }
 #endif
 
@@ -400,11 +388,7 @@
     #define AtomicAnd64 AtomicAnd64_Inline
 
     static inline int64_t AtomicAnd64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicAnd64)
-            return OSAtomicAnd64(val, ptr);
-        #else
-            return __sync_and_and_fetch(ptr, val);
-        #endif
+		return __sync_fetch_and_and(ptr, val);
     }
 #endif
 
@@ -413,7 +397,7 @@
 
     static inline int64_t AtomicNand64_Inline(volatile int64_t* ptr, int64_t val) {
         #if GCC_VERSION >= 40400
-            return __sync_nand_and_fetch(ptr, val);
+            return __sync_fetch_and_nand(ptr, val);
         #else
             int64_t i,j;
             j = *ptr;

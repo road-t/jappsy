@@ -21,6 +21,8 @@
 
 #ifdef BUILD_DLL
     #define DLL_EXPORT __declspec(dllexport)
+#elseif BUILD_TEST
+    #define DLL_EXPORT
 #else
     #define DLL_EXPORT __declspec(dllimport)
 #endif

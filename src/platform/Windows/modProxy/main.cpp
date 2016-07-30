@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <conio.h>
 
+#include <jappsy.h>
 #include "modProxy.h"
 
 static HANDLE hThread = 0;
@@ -106,32 +107,86 @@ uint32_t threadProc(void* userData) {
 	ExitThread(0);
 }
 
-extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
-{
-    switch (fdwReason)
-    {
-        case DLL_PROCESS_ATTACH:
-            // attach to process
-            // return FALSE to fail DLL load
-			hThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)threadProc, 0, CREATE_SUSPENDED, &dwThreadId);
-			hExitEvent = CreateEvent(0, false, false, 0);
-			hQueryExitEvent = CreateEvent(0, false, false, 0);
-			ResumeThread(hThread);
-            break;
+#ifdef BUILD_DLL
+	extern "C" DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+	{
+		switch (fdwReason)
+		{
+			case DLL_PROCESS_ATTACH:
+				// attach to process
+				// return FALSE to fail DLL load
+				hThread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE)threadProc, 0, CREATE_SUSPENDED, &dwThreadId);
+				hExitEvent = CreateEvent(0, false, false, 0);
+				hQueryExitEvent = CreateEvent(0, false, false, 0);
+				ResumeThread(hThread);
+				break;
 
-        case DLL_PROCESS_DETACH:
-            // detach from process
-			SetEvent(hQueryExitEvent);
-			WaitForSingleObject(hThread, INFINITE);
-            break;
+			case DLL_PROCESS_DETACH:
+				// detach from process
+				SetEvent(hQueryExitEvent);
+				WaitForSingleObject(hThread, INFINITE);
+				break;
 
-        case DLL_THREAD_ATTACH:
-            // attach to thread
-            break;
+			case DLL_THREAD_ATTACH:
+				// attach to thread
+				break;
 
-        case DLL_THREAD_DETACH:
-            // detach from thread
-            break;
-    }
-    return TRUE; // succesful
-}
+			case DLL_THREAD_DETACH:
+				// detach from thread
+				break;
+		}
+		return TRUE; // succesful
+	}
+#else
+	int WINAPI _WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+		/*
+		// Задаем рабочий путь откуда запущено приложение
+		wchar_t appPath[MAX_PATH] = s_empty;
+		GetModuleFileNameW(0, appPath, MAX_PATH);
+		wchar_t *appDir = wcsrchr(appPath, L'\\');
+		if(appDir) {
+			++appDir;
+			if(appDir) {
+				*appDir = 0;
+				SetCurrentDirectoryW(appPath);
+			}
+		}
+		*/
+		return 0;
+	}
+
+	int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+		// Задаем рабочий путь откуда запущено приложение
+		wchar_t appPath[MAX_PATH] = L"";
+		GetModuleFileNameW(0, appPath, MAX_PATH);
+		wchar_t *appDir = wcsrchr(appPath, L'\\');
+		if(appDir) {
+			++appDir;
+			if(appDir) {
+				*appDir = 0;
+				SetCurrentDirectoryW(appPath);
+			}
+		}
+
+		jappsyInit();
+		/*
+		init_cString();
+		init_cObject();
+		int res = _WinMain(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
+		uninit_cObject();
+		uninit_cString();
+
+	#ifdef DEBUG
+		uint32_t count = 0;
+		memLogSort();
+		memLogStats(&count, 0, 0, 0);
+	#endif
+
+		mmCleanup();
+		return res;
+		*/
+
+		jappsyQuit();
+		return 0;
+	}
+#endif

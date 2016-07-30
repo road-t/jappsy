@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,6 +129,22 @@
 #elif defined(__WINNT__)
     #include <stdint.h>
     #include <windows.h>
+    #include <unistd.h>
+    #include <string.h>
+    #include <stdlib.h>
+    #include <stdio.h>
+    #include <time.h>
+    #include <errno.h>
+
+    #include <core/uError.h>
+
+    #ifndef __cplusplus
+        #ifndef bool
+            #define bool int8_t
+            #define false 0
+            #define true 1
+        #endif
+    #endif
 #elif defined(__JNI__)
     #include <jni.h>
     #include <stdint.h>

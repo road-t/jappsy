@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,59 +192,6 @@ void mmCleanup() {
 #endif
 }
 
-#if defined(__WINNT__)
-#if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
-    static volatile int32_t mmPageSize = 0;
-
-    inline HANDLE mmInit() {
-        long heapState = AtomicCompareExchange(&mmHeapInit, 1, 0);
-        if (heapState < 0)
-            return 0;
-        if (heapState == 0) {
-            void* mem = VirtualAlloc(0, 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-            if (mem != 0) {
-                MEMORY_BASIC_INFORMATION info = {};
-                if (VirtualQuery(mem, &info, sizeof(info)) != 0) {
-                    AtomicExchange(&mmPageSize, info.RegionSize);
-                }
-                VirtualFree(mem, 0, MEM_RELEASE);
-            }
-            (void)AtomicExchange(&mmHeapInit, 2);
-        } else if (heapState == 1) {
-            do {
-                mmSleep(1);
-                heapState = AtomicCompareExchange(&mmHeapInit, 0, 0);
-            } while (heapState == 1);
-        }
-        return 0;
-    }
-#else
-    inline HANDLE mmInit() {
-        long heapState = AtomicCompareExchange(&mmHeapInit, 1, 0);
-        if (heapState < 0)
-            return 0;
-        if (heapState == 0) {
-            HANDLE hHeap = HeapCreate(HEAP_GENERATE_EXCEPTIONS, 0, 0);
-            if (hHeap == 0) {
-                (void)AtomicExchange(&mmHeapInit, -1);
-                return 0;
-            }
-            (void)AtomicExchange(&mmHeap, long(hHeap));
-            (void)AtomicExchange(&mmHeapInit, 2);
-            return hHeap;
-        } else if (heapState == 1) {
-            do {
-                mmSleep(1);
-                heapState = AtomicCompareExchange(&mmHeapInit, 0, 0);
-            } while (heapState == 1);
-            if (heapState < 0)
-                return 0;
-        }
-        return HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
-    }
-#endif
-#endif
-
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
 void* mmvalloc(uint32_t dwSize) {
     if (dwSize == 0)
@@ -304,14 +251,17 @@ void* mmvalloc(uint32_t dwSize) {
 }
 #endif
 
+#if defined(__WINNT__)
+#if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
+    static volatile int32_t mmPageSize = 0;
+#endif
+#endif
+
 void* mmalloc(uint32_t dwSize) {
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
-#if defined(__WINNT__)
-    mmInit();
-#endif
     return mmvalloc(dwSize);
 #elif defined(__WINNT__)
-    HANDLE hHeap = mmInit();
+    HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
     if (hHeap == 0)
         return 0;
     if (dwSize == 0)
@@ -324,7 +274,6 @@ void* mmalloc(uint32_t dwSize) {
 
 void* mmrealloc(void* mem, uint32_t dwSize) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
-    mmInit();
     if (mem == 0) {
         return mmvalloc(dwSize);
     }
@@ -355,10 +304,6 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
     }
     return 0;
 #elif MM_VIRTUAL != 0
-#if defined(__WINNT__)
-    mmInit();
-#endif
-
     if (mem == 0)
         return mmvalloc(dwSize);
 
@@ -428,7 +373,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
             uint32_t pSize = (dwSize + 8 + pageSize - 1); pSize -= pSize % pageSize;
             if (pSize == info.RegionSize) {
                 *ptr = dwSize;
-                *(ptr+1) = mmcrc32(ptr, 4);
+                *(ptr+1) = mmcrc32(0xFFFFFFFF, ptr, 4);
                 return mem;
             }
 #else
@@ -455,7 +400,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
     }
     return 0;
 #elif defined(__WINNT__)
-    HANDLE hHeap = mmInit();
+    HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
     if (hHeap == 0)
         return 0;
     if (mem == 0) {
@@ -485,7 +430,6 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 void mmfree(void* mem) {
     if (mem != 0) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
-        mmInit();
         uint32_t pageSize = (uint32_t)AtomicCompareExchange(&mmPageSize, 0, 0);
         uint8_t* page = (uint8_t*)mem;
         #ifdef MM_CHECK_LEFT
@@ -497,9 +441,6 @@ void mmfree(void* mem) {
             mmerror();
         }
 #elif MM_VIRTUAL != 0
-#if defined(__WINNT__)
-        mmInit();
-#endif
         uint32_t* ptr = (uint32_t*)mem; ptr-=2;
         uint32_t prevSize = *ptr;
         uint32_t crc = mmcrc32(0xFFFFFFFF, ptr, 4);
@@ -523,7 +464,7 @@ void mmfree(void* mem) {
             mmVirtualFree(ptr);
         }
 #elif defined(__WINNT__)
-        HANDLE hHeap = mmInit();
+        HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
         if (hHeap != 0)
             HeapFree(hHeap, 0, mem);
     #else
@@ -950,11 +891,64 @@ void mmQuit() {
     }
 }
 
+#if defined(__WINNT__)
+#if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
+    inline HANDLE mmInitHeap() {
+        long heapState = AtomicCompareExchange(&mmHeapInit, 1, 0);
+        if (heapState < 0)
+            return 0;
+        if (heapState == 0) {
+            void* mem = VirtualAlloc(0, 1, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+            if (mem != 0) {
+                MEMORY_BASIC_INFORMATION info = {};
+                if (VirtualQuery(mem, &info, sizeof(info)) != 0) {
+                    AtomicExchange(&mmPageSize, info.RegionSize);
+                }
+                VirtualFree(mem, 0, MEM_RELEASE);
+            }
+            (void)AtomicExchange(&mmHeapInit, 2);
+        } else if (heapState == 1) {
+            do {
+				Sleep(1);
+                heapState = AtomicCompareExchange(&mmHeapInit, 0, 0);
+            } while (heapState == 1);
+        }
+        return 0;
+    }
+#else
+    inline HANDLE mmInitHeap() {
+        long heapState = AtomicCompareExchange(&mmHeapInit, 1, 0);
+        if (heapState < 0)
+            return 0;
+        if (heapState == 0) {
+            HANDLE hHeap = HeapCreate(HEAP_GENERATE_EXCEPTIONS, 0, 0);
+            if (hHeap == 0) {
+                (void)AtomicExchange(&mmHeapInit, -1);
+                return 0;
+            }
+            (void)AtomicExchange(&mmHeap, long(hHeap));
+            (void)AtomicExchange(&mmHeapInit, 2);
+            return hHeap;
+        } else if (heapState == 1) {
+            do {
+                Sleep(1);
+                heapState = AtomicCompareExchange(&mmHeapInit, 0, 0);
+            } while (heapState == 1);
+            if (heapState < 0)
+                return 0;
+        }
+        return HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
+    }
+#endif
+#endif
+
 void mmInit() {
     if (AtomicIncrement(&mmInitCounter) == 0) {
 #if defined(__WINNT__)
         (void)AtomicSet(&mmHeapInit, 0);
         (void)AtomicSet(&mmHeap, 0);
+
+		mmInitHeap();
 #endif
 
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)

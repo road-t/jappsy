@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="libz" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option platforms="Windows;" />
+				<Option output="../../../../bin/Windows/Debug/zlib" imp_lib="obj/Debug/libz" def_file="obj/Debug/libz" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-march=pentium2" />
+					<Add option="-Wall" />
+					<Add option="-g" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option platforms="Windows;" />
+				<Option output="../../../../bin/Windows/Release/zlib" imp_lib="obj/Release/libz" def_file="obj/Release/libz" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-march=pentium2" />
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-O3" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-DGCC_WINDRES" />
+		</Compiler>
+		<Unit filename="../../../libs/zlib-1.2.8/adler32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/compress.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/crc32.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/crc32.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/deflate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/deflate.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/infback.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/inffast.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/inffast.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/inffixed.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/inflate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/inflate.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/inftrees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/inftrees.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/trees.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/trees.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/uncompr.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/win32/zlib1.rc">
+			<Option compilerVar="WINDRES" />
+			<Option compiler="gcc" use="1" buildCommand="$rescomp $res_includes -J rc -O coff -D GCC_WINDRES -i $file -o $resource_output" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/zconf.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/zlib.h" />
+		<Unit filename="../../../libs/zlib-1.2.8/zutil.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="../../../libs/zlib-1.2.8/zutil.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+			<envvars />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

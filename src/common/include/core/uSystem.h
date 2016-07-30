@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,7 +42,7 @@ void uSystemQuit();
     #elif defined(__WINNT__)
         LARGE_INTEGER Counter;
         QueryPerformanceCounter(&Counter);
-        return (Counter.QuadPart - CounterShift.QuadPart) * 1000000000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftNS;
+        return (Counter.QuadPart - uSystem_CounterShift.QuadPart) * 1000000000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftNS;
     #elif defined(__JNI__)
         struct timespec ts;
         clock_gettime(CLOCK_REALTIME, &ts);
@@ -63,7 +63,7 @@ void uSystemQuit();
     #elif defined(__WINNT__)
         LARGE_INTEGER Counter;
         QueryPerformanceCounter(&Counter);
-        return (Counter.QuadPart - CounterShift.QuadPart) * 1000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftMS;
+        return (Counter.QuadPart - uSystem_CounterShift.QuadPart) * 1000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftMS;
     #elif defined(__JNI__)
         struct timespec ts;
         clock_gettime(CLOCK_REALTIME, &ts);

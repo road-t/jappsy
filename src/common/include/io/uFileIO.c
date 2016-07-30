@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,6 +199,43 @@ bool fio_seek(const int fd, uint32_t ofs, char** error) {
 
     return true;
 }
+
+#if defined(__WINNT__)
+	int fsync (int fd) {
+		HANDLE h = (HANDLE) _get_osfhandle (fd);
+		DWORD err;
+
+		if (h == INVALID_HANDLE_VALUE) {
+			errno = EBADF;
+			return -1;
+		}
+
+		if (!FlushFileBuffers (h)) {
+			/* Translate some Windows errors into rough approximations of Unix
+			* errors.  MSDN is useless as usual - in this case it doesn't
+			* document the full range of errors.
+			*/
+			err = GetLastError ();
+			switch (err) {
+				case ERROR_ACCESS_DENIED:
+					/* For a read-only handle, fsync should succeed, even though we have
+					no way to sync the access-time changes.  */
+					return 0;
+
+				/* eg. Trying to fsync a tty. */
+				case ERROR_INVALID_HANDLE:
+					errno = EINVAL;
+					break;
+
+				default:
+					errno = EIO;
+			}
+			return -1;
+		}
+
+		return 0;
+	}
+#endif
 
 bool fio_flush(const int fd, char** error) {
     int res = fsync(fd);

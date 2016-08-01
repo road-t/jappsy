@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UATOMIC_H
-#define ANDROID_UATOMIC_H
+#ifndef UATOMIC_H
+#define UATOMIC_H
 
 #include <platform.h>
 

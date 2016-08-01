@@ -257,10 +257,16 @@ void* mmvalloc(uint32_t dwSize) {
 #endif
 #endif
 
+static volatile int32_t mmInitCounter = 0;
+
 void* mmalloc(uint32_t dwSize) {
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
+	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+		return malloc(dwSize);
     return mmvalloc(dwSize);
 #elif defined(__WINNT__)
+	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+		return malloc(dwSize);
     HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
     if (hHeap == 0)
         return 0;
@@ -274,6 +280,18 @@ void* mmalloc(uint32_t dwSize) {
 
 void* mmrealloc(void* mem, uint32_t dwSize) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
+	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
+		if (mem == 0) {
+			if (dwSize == 0)
+				return 0;
+			return malloc(dwSize);
+		}
+		if (dwSize == 0) {
+			free(mem);
+			return 0;
+		}
+		return realloc(mem, dwSize);
+	}
     if (mem == 0) {
         return mmvalloc(dwSize);
     }
@@ -304,8 +322,20 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
     }
     return 0;
 #elif MM_VIRTUAL != 0
+	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
+		if (mem == 0) {
+			if (dwSize == 0)
+				return 0;
+			return malloc(dwSize);
+		}
+		if (dwSize == 0) {
+			free(mem);
+			return 0;
+		}
+		return realloc(mem, dwSize);
+	}
     if (mem == 0)
-        return mmvalloc(dwSize);
+		return mmvalloc(dwSize);
 
     uint32_t* ptr = (uint32_t*)mem; ptr-=2;
     uint32_t prevSize = *ptr;
@@ -400,6 +430,18 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
     }
     return 0;
 #elif defined(__WINNT__)
+	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
+		if (mem == 0) {
+			if (dwSize == 0)
+				return 0;
+			return malloc(dwSize);
+		}
+		if (dwSize == 0) {
+			free(mem);
+			return 0;
+		}
+		return realloc(mem, dwSize);
+	}
     HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
     if (hHeap == 0)
         return 0;
@@ -430,6 +472,8 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 void mmfree(void* mem) {
     if (mem != 0) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+			free(mem);
         uint32_t pageSize = (uint32_t)AtomicCompareExchange(&mmPageSize, 0, 0);
         uint8_t* page = (uint8_t*)mem;
         #ifdef MM_CHECK_LEFT
@@ -441,6 +485,8 @@ void mmfree(void* mem) {
             mmerror();
         }
 #elif MM_VIRTUAL != 0
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+			free(mem);
         uint32_t* ptr = (uint32_t*)mem; ptr-=2;
         uint32_t prevSize = *ptr;
         uint32_t crc = mmcrc32(0xFFFFFFFF, ptr, 4);
@@ -464,6 +510,8 @@ void mmfree(void* mem) {
             mmVirtualFree(ptr);
         }
 #elif defined(__WINNT__)
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+			free(mem);
         HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
         if (hHeap != 0)
             HeapFree(hHeap, 0, mem);
@@ -491,7 +539,7 @@ struct tMemElement {
 
 #if MEMORY_LOG == 1
 static struct tMemElement* memElements = 0;
-static uint32_t memElementsCount = 0;
+static volatile uint32_t memElementsCount = 0;
 #endif
 static volatile int32_t memLockTrigger = 0;
 
@@ -530,7 +578,7 @@ void memAdd(const char* location, const char* type, const char* var, const void*
         memElementsCount = 1024;
         el = memElements;
     } else {
-        int i = 0;
+        uint32_t i = 0;
         for (; i < memElementsCount; i++) {
             if (memElements[i].ptr == 0) {
                 el = &(memElements[i]);
@@ -577,7 +625,7 @@ void memDel(const char* var, const void* ptr) {
     struct tMemElement* el = 0;
     uint32_t freeCount = 0;
     if (memElements != 0) {
-        int i = 0;
+        uint32_t i = 0;
         for (; i < memElementsCount; i++) {
             if (memElements[i].ptr != 0) {
                 if (memElements[i].ptr == ptr) {
@@ -616,7 +664,7 @@ void memLogSort() {
 #if MEMORY_LOG == 1
     memLock();
     if (memElements != 0) {
-        int i = 0; int j = 0;
+        uint32_t i = 0; uint32_t j = 0;
         while (i < memElementsCount) {
             if (memElements[i].ptr != 0) {
                 i++; j = i+1;
@@ -651,7 +699,7 @@ void memLogRealloc(const char* location, const char* type, const char* varNew, c
         memDel(varOld,ptrOld);
         (void)AtomicDecrement(&memCount);
         (void)AtomicDecrement(&memAllocCount);
-    } else if (varOld != 0) {
+    } else if (ptrOld != 0) {
         if (ptrNew != 0) {
             memDel(varOld,ptrOld);
             memAdd(location,type,varNew,ptrNew,sizeNew);
@@ -787,10 +835,10 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
                 j++;
             }
 #if defined(__JNI__)
-            snprintf(buf, 2048, "/* %s */\n%s %s = (%s*)malloc(%d); // 0x%08lx\n",
+            snprintf(buf, 2048, "/* %s */\n%s* %s = (%s*)malloc(%d); // 0x%08lx\n",
                      item->loc, item->type, item->var, item->type, item->size, (intptr_t)item->ptr);
 #else
-            sprintf(buf, "/* %s */\r\n%s %s = (%s*)malloc(%d); // 0x%08x\r\n",
+            sprintf(buf, "/* %s */\r\n%s* %s = (%s*)malloc(%d); // 0x%08x\r\n",
                 item->loc, item->type, item->var, item->type, item->size, (uint32_t)item->ptr);
 #endif
 #if defined(__WINNT__)
@@ -883,8 +931,6 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
 #endif
 }
 
-static int32_t mmInitCounter = 0;
-
 void mmQuit() {
     if (AtomicDecrement(&mmInitCounter) == 1) {
         mmCleanup();
@@ -943,7 +989,7 @@ void mmQuit() {
 #endif
 
 void mmInit() {
-    if (AtomicIncrement(&mmInitCounter) == 0) {
+	if (AtomicIncrement(&mmInitCounter) == 0) {
 #if defined(__WINNT__)
         (void)AtomicSet(&mmHeapInit, 0);
         (void)AtomicSet(&mmHeap, 0);

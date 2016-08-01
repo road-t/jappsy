@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_USTRING_H
-#define ANDROID_USTRING_H
+#ifndef USTRING_H
+#define USTRING_H
 
 #include <platform.h>
 
@@ -52,6 +52,14 @@ extern "C" {
 		#define utf8_towcs(src, dst, size)	utf8_toutf16((src), (uint16_t*)(dst), (size))
 	#endif
 
+	#include <wchar.h>
+
+	#ifndef wcslwr
+		#define STRING_WCSLWR
+		wchar_t* wcslwr(wchar_t* s);
+		wchar_t* wcsupr(wchar_t* s);
+	#endif
+
 	void uStringInit();
 	void uStringQuit();
 
@@ -80,12 +88,12 @@ extern "C" {
 		uint32_t m_size = 0;
 		uint32_t m_memorySize = 0;
 
-		inline uint32_t setSize(uint32_t size) throw(const char*);
+		/**
+		 * @throws eOutOfMemory
+		 */
+		inline uint32_t setSize(uint32_t size) throw(const char*); // eOutOfMemory
 		inline uint32_t getLength() { return m_length; }
-		inline uint32_t setLength(uint32_t length) throw(const char*);
-
-		//bool resetLength(uint32_t length);
-		//bool setLength(uint32_t length);
+		inline uint32_t setLength(uint32_t length) throw(const char*); // eOutOfMemory
 
 		static inline int swprintf(wchar_t* target, int8_t value);
 		static inline int swprintf(wchar_t* target, uint8_t value);
@@ -97,9 +105,13 @@ extern "C" {
 		static inline int swprintf(wchar_t* target, uint64_t value);
 		static inline int swprintf(wchar_t* target, float value);
 		static inline int swprintf(wchar_t* target, double value);
+
+		static int getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len);
+		inline static int64_t wtoll(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*); // eConvert
+		inline static long double wtod(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*); // eConvert
 	public:
-		void* operator new(size_t) throw(const char*);
-		void* operator new[](size_t) throw(const char*);
+		void* operator new(size_t) throw(const char*); // eOutOfMemory
+		void* operator new[](size_t) throw(const char*); // eOutOfMemory
 		void operator delete(void*);
 		void operator delete[](void*);
 
@@ -112,94 +124,91 @@ extern "C" {
 		Property<String, uint32_t> length;
 
 		String();
-		explicit String(const void* string) throw(const char*);
-		String(const String& string) throw(const char*);
+		explicit String(const void* string) throw(const char*); // eOutOfMemory
+		String(const String& string) throw(const char*); // eOutOfMemory
 		#if defined(__IOS__)
-			String(const NSString* string) throw(const char*);
+			String(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif
-		String(const char* string) throw(const char*);
-		explicit String(const char* string, uint32_t length) throw(const char*);
-		String(const wchar_t* string) throw(const char*);
-		explicit String(const wchar_t* string, uint32_t length) throw(const char*);
-		explicit String(const char character) throw(const char*);
-		explicit String(const wchar_t character) throw(const char*);
-		explicit String(bool value) throw(const char*);
-		String(int8_t value) throw(const char*);
-		String(uint8_t value) throw(const char*);
-		String(int16_t value) throw(const char*);
-		String(uint16_t value) throw(const char*);
-		String(int32_t value) throw(const char*);
-		String(uint32_t value) throw(const char*);
-		String(int64_t value) throw(const char*);
-		String(uint64_t value) throw(const char*);
-		String(float value) throw(const char*);
-		String(double value) throw(const char*);
+		String(const char* string) throw(const char*); // eOutOfMemory
+		explicit String(const char* string, uint32_t length) throw(const char*); // eOutOfMemory
+		String(const wchar_t* string) throw(const char*); // eOutOfMemory
+		explicit String(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
+		explicit String(const char character) throw(const char*); // eOutOfMemory
+		explicit String(const wchar_t character) throw(const char*); // eOutOfMemory
+		explicit String(bool value) throw(const char*); // eOutOfMemory
+		String(int8_t value) throw(const char*); // eOutOfMemory
+		String(uint8_t value) throw(const char*); // eOutOfMemory
+		String(int16_t value) throw(const char*); // eOutOfMemory
+		String(uint16_t value) throw(const char*); // eOutOfMemory
+		String(int32_t value) throw(const char*); // eOutOfMemory
+		String(uint32_t value) throw(const char*); // eOutOfMemory
+		String(int64_t value) throw(const char*); // eOutOfMemory
+		String(uint64_t value) throw(const char*); // eOutOfMemory
+		String(float value) throw(const char*); // eOutOfMemory
+		String(double value) throw(const char*); // eOutOfMemory
 		~String();
 
-		static inline String valueOf(char value) throw(const char*) { return String(value); }
-		static inline String valueOf(wchar_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(bool value) throw(const char*) { return String(value); }
-		static inline String valueOf(int8_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(uint8_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(int16_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(uint16_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(int32_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(uint32_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(int64_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(uint64_t value) throw(const char*) { return String(value); }
-		static inline String valueOf(float value) throw(const char*) { return String(value); }
-		static inline String valueOf(double value) throw(const char*) { return String(value); }
+		static inline String valueOf(char value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(wchar_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(bool value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(int8_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(uint8_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(int16_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(uint16_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(int32_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(uint32_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(int64_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(uint64_t value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(float value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline String valueOf(double value) throw(const char*) { return String(value); } // eOutOfMemory
 
-		String& operator =(const void* string) throw(const char*);
-		String& operator =(const String& string) throw(const char*);
+		String& operator =(const void* string) throw(const char*); // eOutOfMemory
+		String& operator =(const String& string) throw(const char*); // eOutOfMemory
 		#if defined(__IOS__)
-			String& operator =(const NSString* string) throw(const char*);
+			String& operator =(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif
-		String& operator =(const char* string) throw(const char*);
-		String& operator =(const wchar_t* string) throw(const char*);
-		String& operator =(const char character) throw(const char*);
-		String& operator =(const wchar_t character) throw(const char*);
-		inline String& operator =(bool value) throw(const char*);
-		String& operator =(int8_t value) throw(const char*);
-		String& operator =(uint8_t value) throw(const char*);
-		String& operator =(int16_t value) throw(const char*);
-		String& operator =(uint16_t value) throw(const char*);
-		String& operator =(int32_t value) throw(const char*);
-		String& operator =(uint32_t value) throw(const char*);
-		String& operator =(int64_t value) throw(const char*);
-		String& operator =(uint64_t value) throw(const char*);
-		String& operator =(float value) throw(const char*);
-		String& operator =(double value) throw(const char*);
+		String& operator =(const char* string) throw(const char*); // eOutOfMemory
+		String& operator =(const wchar_t* string) throw(const char*); // eOutOfMemory
+		String& operator =(const char character) throw(const char*); // eOutOfMemory
+		String& operator =(const wchar_t character) throw(const char*); // eOutOfMemory
+		inline String& operator =(bool value) throw(const char*); // eOutOfMemory
+		String& operator =(int8_t value) throw(const char*); // eOutOfMemory
+		String& operator =(uint8_t value) throw(const char*); // eOutOfMemory
+		String& operator =(int16_t value) throw(const char*); // eOutOfMemory
+		String& operator =(uint16_t value) throw(const char*); // eOutOfMemory
+		String& operator =(int32_t value) throw(const char*); // eOutOfMemory
+		String& operator =(uint32_t value) throw(const char*); // eOutOfMemory
+		String& operator =(int64_t value) throw(const char*); // eOutOfMemory
+		String& operator =(uint64_t value) throw(const char*); // eOutOfMemory
+		String& operator =(float value) throw(const char*); // eOutOfMemory
+		String& operator =(double value) throw(const char*); // eOutOfMemory
 
-		inline String& operator +=(const String& string) throw(const char*);
+		inline String& operator +=(const String& string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
 		#if defined(__IOS__)
-			inline String& operator +=(const NSString* string) throw(const char*);
+			inline String& operator +=(const NSString* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
 		#endif
-		inline String& operator +=(const char* string) throw(const char*);
-		inline String& operator +=(const wchar_t* string) throw(const char*);
-		inline String& operator +=(const char character) throw(const char*);
-		inline String& operator +=(const wchar_t character) throw(const char*);
-		inline String& operator +=(bool value) throw(const char*);
-		inline String& operator +=(int8_t value) throw(const char*);
-		inline String& operator +=(uint8_t value) throw(const char*);
-		inline String& operator +=(int16_t value) throw(const char*);
-		inline String& operator +=(uint16_t value) throw(const char*);
-		inline String& operator +=(int32_t value) throw(const char*);
-		inline String& operator +=(uint32_t value) throw(const char*);
-		inline String& operator +=(int64_t value) throw(const char*);
-		inline String& operator +=(uint64_t value) throw(const char*);
-		inline String& operator +=(float value) throw(const char*);
-		inline String& operator +=(double value) throw(const char*);
+		inline String& operator +=(const char* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+		inline String& operator +=(const wchar_t* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+		inline String& operator +=(const char character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
+		inline String& operator +=(const wchar_t character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
+		inline String& operator +=(bool value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(int8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(int16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(int32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(int64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(float value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(double value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
 
-/*
 		#if defined(__IOS__)
-			operator NSString*() const;
-			explicit operator Char*() const;
-		#else
-			operator Char*() const;
+			explicit operator NSString*() const;
 		#endif
+		explicit inline operator wchar_t*() const { return this->m_data; };
 		explicit operator bool() const;
-		explicit operator int8_t() const;
+		explicit operator int8_t() const throw(const char*); // eConvert
 		explicit operator uint8_t() const;
 		explicit operator int16_t() const;
 		explicit operator uint16_t() const;
@@ -210,6 +219,12 @@ extern "C" {
 		explicit operator float() const;
 		explicit operator double() const;
 
+		inline double operator +() const { return this->operator double(); }
+		inline double operator -() const { return -(this->operator double()); }
+
+		//friend int8_t operator +(int8_t value1, const String& value2);
+
+/*
 		bool operator ==(const String& src) const;
 		bool operator ==(const wchar_t* src) const;
 		bool operator ==(const char* src) const;
@@ -228,25 +243,27 @@ extern "C" {
 		bool operator >=(const wchar_t* src) const;
 */
 
-		String& concat(const String& string) throw(const char*);
+		String& concat(const String& string) throw(const char*); // eOutOfMemory
 		#if defined(__IOS__)
-			String& concat(const NSString* string) throw(const char*);
+			String& concat(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif
-		String& concat(const char* string) throw(const char*);
-		String& concat(const wchar_t* string) throw(const char*);
-		String& concat(const char character) throw(const char*);
-		String& concat(const wchar_t character) throw(const char*);
-		String& concat(const bool value) throw(const char*);
-		String& concat(const int8_t value) throw(const char*);
-		String& concat(const uint8_t value) throw(const char*);
-		String& concat(const int16_t value) throw(const char*);
-		String& concat(const uint16_t value) throw(const char*);
-		String& concat(const int32_t value) throw(const char*);
-		String& concat(const uint32_t value) throw(const char*);
-		String& concat(const int64_t value) throw(const char*);
-		String& concat(const uint64_t value) throw(const char*);
-		String& concat(const float value) throw(const char*);
-		String& concat(const double value) throw(const char*);
+		// Convert value to String
+		// Throw eOutOfMemory
+		String& concat(const char* string) throw(const char*); // eOutOfMemory
+		String& concat(const wchar_t* string) throw(const char*); // eOutOfMemory
+		String& concat(const char character) throw(const char*); // eOutOfMemory
+		String& concat(const wchar_t character) throw(const char*); // eOutOfMemory
+		String& concat(const bool value) throw(const char*); // eOutOfMemory
+		String& concat(const int8_t value) throw(const char*); // eOutOfMemory
+		String& concat(const uint8_t value) throw(const char*); // eOutOfMemory
+		String& concat(const int16_t value) throw(const char*); // eOutOfMemory
+		String& concat(const uint16_t value) throw(const char*); // eOutOfMemory
+		String& concat(const int32_t value) throw(const char*); // eOutOfMemory
+		String& concat(const uint32_t value) throw(const char*); // eOutOfMemory
+		String& concat(const int64_t value) throw(const char*); // eOutOfMemory
+		String& concat(const uint64_t value) throw(const char*); // eOutOfMemory
+		String& concat(const float value) throw(const char*); // eOutOfMemory
+		String& concat(const double value) throw(const char*); // eOutOfMemory
 /*
 		bool equals(const String& string) const;
 		bool equals(const wchar_t* string) const;

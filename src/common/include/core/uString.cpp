@@ -724,16 +724,34 @@ uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
 
 //==============================================================
 
+#ifdef STRING_WCSLWR
+	wchar_t* wcslwr(wchar_t* s) {
+		wchar_t* p = s;
+		while ((*p = towlower(*p)) != 0) p++;
+		return s;
+	}
+
+	wchar_t* wcsupr(wchar_t* s) {
+		wchar_t* p = s;
+		while ((*p = towupper(*p)) != 0) p++;
+		return s;
+	}
+#endif
+
+//==============================================================
+
 #include <core/uMemory.h>
+#include <core/uError.h>
 
 #define StringTrue L"true"
 #define StringFalse L"false"
-#define StringNan L"NAN"
-#define StringInfinite L"INFINITE"
-#define StringNegInfinite L"-INFINITE"
+#define StringNan L"NaN"
+#define StringInfinite L"Infinity"
+#define StringNegInfinite L"-Infinity"
 #define StringEmpty L""
 #define StringNil NULL
-#define StringNull L"(null)"
+#define StringNull L"null"
+#define StringUndefined L"undefined"
 
 void String::create() {
 	this->length.initialize(this, &(this->getLength), &(this->setLength));
@@ -744,13 +762,13 @@ void String::release() {
 
 void* String::operator new(size_t size) throw(const char*) {
     void *p = memAlloc(void, p, size);
-    if (!p) throw "Error: Out of memory ( String::operator new() )";
+    if (!p) throw eOutOfMemory;
     return p;
 }
 
 void* String::operator new[](size_t size) throw(const char*) {
     void *p = memAlloc(void, p, size);
-    if (!p) throw "Error: Out of memory ( String::operator new[]() )";
+    if (!p) throw eOutOfMemory;
     return p;
 }
 
@@ -790,7 +808,7 @@ uint32_t String::setSize(uint32_t size) throw(const char*) {
             this->m_memorySize = newMemSize;
             return newSize;
         } else {
-			throw "Error: Out of memory ( String::setSize() )";
+			throw eOutOfMemory;
         }
     }
 
@@ -813,7 +831,7 @@ uint32_t String::setLength(uint32_t length) throw(const char*) {
             this->m_memorySize = newMemSize;
             return length;
         } else {
-			throw "Error: Out of memory ( String::setLength() )";
+			throw eOutOfMemory;
         }
     }
 
@@ -830,13 +848,13 @@ String::String() {
 String::String(const void* string) throw(const char*) {
 	this->create();
 	if (string != NULL) {
-		throw "Error: Invalid pointer ( String::String(void*) )";
+		throw eInvalidPointer;
 	}
 }
 
 String& String::operator =(const void* string) throw(const char*) {
 	if (string != NULL) {
-		throw "Error: Invalid pointer ( String::String(void*) )";
+		throw eInvalidPointer;
 	}
 	this->setSize(0);
 	return *this;
@@ -865,13 +883,6 @@ String& String::concat(const String& string) throw(const char*) {
 		memcpy(this->m_data + prevLength, string.m_data, string.m_size);
 	}
     return *this;
-}
-
-String& String::operator +=(const String& string) throw(const char*) {
-    if (this->m_data == NULL)
-        return this->operator=(string);
-    else
-		return this->concat(string);
 }
 
 #if defined(__IOS__)
@@ -917,14 +928,6 @@ String& String::operator +=(const String& string) throw(const char*) {
 		}
 		return *this;
 	}
-
-	String& String::operator +=(const NSString* string) throw(const char*) {
-		if (this->m_data == NULL)
-			return this->operator=(string);
-		else
-			return this->concat(string);
-	}
-
 #endif
 
 String::String(const char* string) throw(const char*) {
@@ -968,13 +971,6 @@ String& String::concat(const char* string) throw(const char*) {
         }
     }
     return *this;
-}
-
-String& String::operator +=(const char* string) throw(const char*) {
-	if (this->m_data == NULL)
-		return this->operator=(string);
-	else
-		return this->concat(string);
 }
 
 String::String(const char* string, uint32_t length) throw(const char*) {
@@ -1035,13 +1031,6 @@ String& String::concat(const wchar_t* string) throw(const char*) {
     return *this;
 }
 
-String& String::operator +=(const wchar_t* string) throw(const char*) {
-	if (this->m_data == NULL)
-		return this->operator=(string);
-	else
-		return this->concat(string);
-}
-
 String::String(const wchar_t* string, uint32_t length) throw(const char*) {
 	this->create();
 	if (string != NULL) {
@@ -1070,13 +1059,6 @@ String& String::concat(const char character) throw(const char*) {
     return *this;
 }
 
-String& String::operator +=(const char character) throw(const char*) {
-	if (this->m_data == NULL)
-		return this->operator=(character);
-	else
-		return this->concat(character);
-}
-
 String::String(const wchar_t character) throw(const char*) {
 	this->create();
 	this->setLength(1);
@@ -1096,13 +1078,6 @@ String& String::concat(const wchar_t character) throw(const char*) {
     return *this;
 }
 
-String& String::operator +=(const wchar_t character) throw(const char*) {
-	if (this->m_data == NULL)
-		return this->operator=(character);
-	else
-		return this->concat(character);
-}
-
 String::String(bool value) throw(const char*) {
 	this->create();
 	this->operator =(value);
@@ -1110,10 +1085,16 @@ String::String(bool value) throw(const char*) {
 
 String& String::operator =(bool value) throw(const char*) {
 	if (value)
-		this->operator =(StringTrue);
+		return this->operator =(StringTrue);
 	else
-		this->operator =(StringFalse);
-	return *this;
+		return this->operator =(StringFalse);
+}
+
+String& String::concat(const bool value) throw(const char*) {
+    if (value)
+        return this->concat(StringTrue);
+    else
+        return this->concat(StringFalse);
 }
 
 int String::swprintf(wchar_t* target, int8_t value) {
@@ -1134,6 +1115,16 @@ String& String::operator =(int8_t value) throw(const char*) {
 	int length = String::swprintf(this->m_data, value);
 	if (length != 4) {
 		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+String& String::concat(const int8_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 4);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 4) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     }
     return *this;
 }
@@ -1160,6 +1151,16 @@ String& String::operator =(uint8_t value) throw(const char*) {
     return *this;
 }
 
+String& String::concat(const uint8_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 3);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 3) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
 int String::swprintf(wchar_t* target, int16_t value) {
 	return ::swprintf(target, 6, L"%hd", value);
 }
@@ -1178,6 +1179,16 @@ String& String::operator =(int16_t value) throw(const char*) {
 	int length = String::swprintf(this->m_data, value);
 	if (length != 6) {
 		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+String& String::concat(const int16_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 6);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 6) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     }
     return *this;
 }
@@ -1204,6 +1215,16 @@ String& String::operator =(uint16_t value) throw(const char*) {
     return *this;
 }
 
+String& String::concat(const uint16_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 5);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 5) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
 int String::swprintf(wchar_t* target, int32_t value) {
 	return ::swprintf(target, 11, L"%ld", value);
 }
@@ -1222,6 +1243,16 @@ String& String::operator =(int32_t value) throw(const char*) {
 	int length = String::swprintf(this->m_data, value);
 	if (length != 11) {
 		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+String& String::concat(const int32_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 11);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 11) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     }
     return *this;
 }
@@ -1248,6 +1279,16 @@ String& String::operator =(uint32_t value) throw(const char*) {
     return *this;
 }
 
+String& String::concat(const uint32_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 10);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 10) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
 int String::swprintf(wchar_t* target, int64_t value) {
 	return ::swprintf(target, 21, L"%lld", value);
 }
@@ -1270,6 +1311,16 @@ String& String::operator =(int64_t value) throw(const char*) {
     return *this;
 }
 
+String& String::concat(const int64_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 21);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 21) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
 int String::swprintf(wchar_t* target, uint64_t value) {
 	return ::swprintf(target, 20, L"%llu", value);
 }
@@ -1288,6 +1339,16 @@ String& String::operator =(uint64_t value) throw(const char*) {
 	int length = String::swprintf(this->m_data, value);
 	if (length != 20) {
 		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+String& String::concat(const uint64_t value) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 20);
+    int length = String::swprintf(this->m_data + prevLength, value);
+	if (length != 20) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     }
     return *this;
 }
@@ -1332,30 +1393,53 @@ String::String(float value) throw(const char*) {
     } else {
     	this->setLength(23);
         int length = String::swprintf(this->m_data, value);
-        if (length == EOF)
-			throw "Error: swprintf ( String::String(float) )";
-        else if (length != 23)
+        if (length == EOF) {
+			this->setSize(0);
+			throw eConvert;
+        } else if (length != 23)
 			this->setLength(static_cast<uint32_t>(length));
     }
 }
 
 String& String::operator =(float value) throw(const char*) {
-    if (isnan(value)) {
-        this->operator=(StringNan);
-    } else if (isinf(value)) {
-        if (signbit(value)) {
-            this->operator=(StringNegInfinite);
-        } else {
-            this->operator=(StringInfinite);
-        }
-    } else {
-    	this->setLength(23);
-        int length = String::swprintf(this->m_data, value);
-        if (length == EOF)
-			throw "Error: swprintf ( String::operator =(float) )";
-		else if (length != 23)
-			this->setLength(static_cast<uint32_t>(length));
+    if (isnan(value))
+        return this->operator=(StringNan);
+    else if (isinf(value)) {
+        if (signbit(value))
+            return this->operator=(StringNegInfinite);
+        else
+            return this->operator=(StringInfinite);
     }
+
+	this->setLength(23);
+	int length = String::swprintf(this->m_data, value);
+	if (length == EOF) {
+		this->setSize(0);
+		throw eConvert;
+	} else if (length != 23)
+		this->setLength(static_cast<uint32_t>(length));
+    return *this;
+}
+
+String& String::concat(const float value) throw(const char*) {
+    if (isnan(value))
+        return this->concat(StringNan);
+    else if (isinf(value)) {
+        if (signbit(value))
+            return this->concat(StringNegInfinite);
+        else
+            return this->concat(StringInfinite);
+    }
+
+	uint32_t prevSize = this->m_size;
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 23);
+	int length = String::swprintf(this->m_data + prevLength, value);
+	if (length == EOF) {
+		this->setSize(prevSize);
+		throw "Error: swprintf ( String::concat(float) )";
+	} else if (length != 23)
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     return *this;
 }
 
@@ -1395,36 +1479,487 @@ String::String(double value) throw(const char*) {
     } else {
     	this->setLength(31);
         int length = String::swprintf(this->m_data, value);
-		if (length == EOF)
+		if (length == EOF) {
+			this->setSize(0);
 			throw "Error: swprintf ( String::String(double) )";
-		else if (length != 31)
+		} else if (length != 31)
 			this->setLength(static_cast<uint32_t>(length));
     }
 }
 
 String& String::operator =(double value) throw(const char*) {
-    if (isnan(value)) {
-        this->operator=(StringNan);
-    } else if (isinf(value)) {
-        if (signbit(value)) {
-            this->operator=(StringNegInfinite);
-        } else {
-            this->operator=(StringInfinite);
-        }
-    } else {
-    	this->setLength(31);
-        int length = String::swprintf(this->m_data, value);
-		if (length == EOF)
-			throw "Error: swprintf ( String::operator =(double) )";
-		else if (length != 31)
-			this->setLength(static_cast<uint32_t>(length));
+    if (isnan(value))
+        return this->operator=(StringNan);
+    else if (isinf(value)) {
+        if (signbit(value))
+            return this->operator=(StringNegInfinite);
+        else
+            return this->operator=(StringInfinite);
     }
+
+	this->setLength(31);
+	int length = String::swprintf(this->m_data, value);
+	if (length == EOF) {
+		this->setSize(0);
+		throw "Error: swprintf ( String::operator =(double) )";
+	} else if (length != 31)
+		this->setLength(static_cast<uint32_t>(length));
+    return *this;
+}
+
+String& String::concat(const double value) throw(const char*) {
+    if (isnan(value))
+        return this->concat(StringNan);
+    else if (isinf(value)) {
+        if (signbit(value))
+            return this->concat(StringNegInfinite);
+        else
+            return this->concat(StringInfinite);
+    }
+
+	uint32_t prevSize = this->m_size;
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 31);
+	int length = String::swprintf(this->m_data + prevLength, value);
+	if (length == EOF) {
+		this->setSize(prevSize);
+		throw "Error: swprintf ( String::concat(double) )";
+	} else if (length != 31)
+		this->setLength(prevLength + static_cast<uint32_t>(length));
     return *this;
 }
 
 String::~String() {
 	this->release();
 }
+
+#ifdef __IOS__
+	String::operator NSString*() const {
+		NSString* result = nil;
+		if (_object != nil) {
+			#if __WCHAR_MAX__ > 0x10000
+				result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
+			#else
+				result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
+			#endif
+		}
+		return result;
+	}
+#endif
+
+//==============================================================
+
+enum StringNumberFormat { snfNone, snfUndefined, snfNil, snfNull, snfBoolTrue, snfBoolFalse, snfHex, snfOct, snfBit, snfFloat, snfFloatEx, snfFloatNan, snfFloatInfPos, snfFloatInfNeg, snfInt, snfUInt };
+
+int String::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
+    if (srcLen > 0) {
+        wchar_t* lpStr = src;
+        wchar_t ch = lpStr[0];
+        bool isHex = false;
+        bool isOct = false;
+        bool isBit = false;
+        bool isNeg = false;
+
+        if (pos) *pos = 0;
+        if (len) *len = 0;
+        if ((ch == L'T') || (ch == L't')) { // возможно bool
+            if ((wcscmp(src, L"true") == 0) || (wcscmp(src, L"TRUE") == 0)) {
+                if (len) *len = 4;
+                return snfBoolTrue;
+            }
+            return snfNone;
+        } else if (ch == L'b') { // возможно bit number или hex
+            isBit = true; isHex = true;
+        } else if ((ch == L'F') || (ch == L'f')) { // возможно bool
+            if ((wcscmp(src, L"false") == 0) || (wcscmp(src, L"FALSE") == 0)) {
+                if (len) *len = 5;
+                return snfBoolFalse;
+            }
+            isHex = true;
+        } else if (ch == L'u') { // возможно undefined
+        	if (wcscmp(src, L"undefined") == 0) {
+        		if (len) *len = 9;
+				return snfUndefined;
+        	}
+        	return snfNone;
+        } else if (ch == L'N') { // возможно NaN NULL
+        	if (wcscmp(src, L"NaN") == 0) {
+				if (len) *len = 3;
+				return snfFloatNan;
+        	} else if (wcscmp(src, L"NULL") == 0) {
+        		if (len) *len = 4;
+        		return snfNull;
+        	}
+        	return snfNone;
+        } else if (ch == L'n') { // возможно nil null
+			if (wcscmp(src, L"nil") == 0) {
+				if (len) *len = 3;
+				return snfNil;
+			} else if (wcscmp(src, L"null") == 0) {
+				if (len) *len = 4;
+				return snfNull;
+			}
+			return snfNone;
+        } else if (ch == L'I') { // Возможно INF Inf Infinity
+        	if ((wcscmp(src, L"INF") == 0) || (wcscmp(src, L"Inf") == 0)) {
+				if (len) *len = 3;
+				return snfFloatInfPos;
+        	} else if (wcscmp(src, L"Infinity") == 0) {
+        		if (len) *len = 8;
+        		return snfFloatInfPos;
+        	}
+        	return snfNone;
+        } else if (ch == L'0') { // возможно oct number или hex
+            if (lpStr[1] == L'x') {
+                if (pos) *pos = 2;
+                isHex = true;
+                lpStr++;
+            } else {
+                isOct = true;
+                while (*lpStr == L'0') {
+                    lpStr++;
+                    if (pos) (*pos)++;
+                }
+                lpStr--;
+            }
+        } else if (ch == L'$') {
+            if (pos) *pos = 1;
+            isHex = true;
+        } else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) {
+            isHex = true;
+        } else if (ch == L'-') {
+        	if ((wcscmp(src, L"-INF") == 0) || (wcscmp(src, L"-Inf") == 0)) {
+				if (len) *len = 4;
+				return snfFloatInfNeg;
+        	} else if (wcscmp(src, L"-Infinity") == 0) {
+        		if (len) *len = 9;
+        		return snfFloatInfNeg;
+        	}
+            isNeg = true;
+        } else if ((ch == '.') || (ch == ',')) {
+            lpStr--;
+        } else if (!((ch >= L'0') && (ch <= L'9'))) { // начальный символ не соответствует числовому значению
+            return snfNone;
+        }
+
+        bool isFloat = false;
+        bool isFloatExponent = false;
+        lpStr++;
+        while ((ch = *lpStr) != 0) {
+            if ((ch == L'.') || (ch == L',')) { // float?
+                if ((!isHex) && (!isBit)) {
+                    if (!isFloat)
+						isFloat = true;
+                    else // не может быть 2 раза точка в числе
+                        return snfNone;
+                } else // не может быть hex или bit с точкой
+                    return snfNone;
+            } else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) { // hex?
+                if (!isFloat) {
+                    if (!isNeg) {
+                        if (isBit) isBit = false;
+                        if (isOct) isOct = false;
+                        if (!isHex) isHex = true;
+                    } else // не может быть hex со знаком минус
+                        return snfNone;
+                } else if (((ch == L'e') || (ch == L'E')) && (!isFloatExponent)) {
+                	lpStr++;
+                	if ((ch = *lpStr) == 0) // непредвиденный конец
+						return snfNone;
+					if ((ch != L'+') && (ch != L'-')) // экспонета должна начинатся со знака + или -
+						return snfNone;
+					lpStr++;
+                	if ((ch = *lpStr) == 0) // непредвиденный конец
+						return snfNone;
+					if ((ch < L'0') || (ch > L'9')) // после знака должна быть цифра
+						return snfNone;
+					isFloatExponent = true;
+                } else // не может быть float с буквами
+                    return snfNone;
+            } else if ((ch >= L'2') && (ch <= L'9')) {
+                if (isBit) isBit = false;
+                if ((ch >= L'8') && (ch <= L'9')) {
+                    if (isOct) isOct = false;
+                }
+            } else if (ch == L'h') {
+                if (len) (*len)--;
+                if ((!isHex) || (*(lpStr+1) != 0)) // только hex может заканчиваться на h
+                    return snfNone;
+            } else if (!((ch >= L'0') && (ch <= L'9'))) { // не может число содержать недопустимые символы
+                return snfNone;
+            }
+            lpStr++;
+        }
+        if (srcLen == 1) {
+            if (isOct) isOct = false;
+        }
+        if (isBit) {
+            if (pos) (*pos)++;
+        }
+        if ((len) && (pos)) *len = srcLen-(*pos)+(*len);
+        if (isBit) return snfBit;
+        if (isHex) return snfHex;
+        if (isFloat) {
+            wchar_t* point = wcsstr(src,L",");
+            if (point) *point = L'.';
+            if (isFloatExponent)
+				return snfFloatEx;
+			else
+				return snfFloat;
+        }
+        if (isOct) return snfOct;
+        return (isNeg ? snfInt : snfUInt);
+    }
+    return snfNone;
+}
+
+int64_t String::wtoll(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*) {
+    switch (type) {
+		case snfNone:
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+		case snfFloatNan:
+			return 0;
+
+		case snfBoolTrue:
+			return -1;
+
+		case snfFloatInfPos:
+		case snfFloatInfNeg:
+			throw "Error: Out of range value";
+			break;
+
+        case snfHex:
+            return (int64_t)(wcstoull(data, NULL, 16));
+
+        case snfOct:
+            return (int64_t)(wcstoull(data, NULL, 8));
+
+        case snfBit:
+            return (int64_t)(wcstoull(data, NULL, 2));
+
+        case snfFloat:
+		case snfFloatEx: {
+			long double value = wcstold(data, NULL);
+            return (int64_t)value;
+		}
+
+        case snfInt:
+            return (int64_t)(wcstoll(data, NULL, 10));
+
+        case snfUInt:
+            return (int64_t)(wcstoull(data, NULL, 10));
+    }
+    return 0;
+}
+
+long double String::wtod(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*) {
+    switch (type) {
+		case snfNone:
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+			return 0;
+
+		case snfBoolTrue:
+			return -1;
+
+		case snfFloatNan:
+			return NAN;
+
+		case snfFloatInfPos:
+			return INFINITY;
+
+		case snfFloatInfNeg:
+			return -INFINITY;
+
+        case snfHex:
+            return (long double)(wcstoull(data, NULL, 16));
+
+        case snfOct:
+            return (long double)(wcstoull(data, NULL, 8));
+
+        case snfBit:
+            return (long double)(wcstoull(data, NULL, 2));
+
+        case snfFloat:
+		case snfFloatEx:
+            return wcstold(data, NULL);
+
+        case snfInt:
+            return (long double)(wcstoll(data, NULL, 10));
+
+        case snfUInt:
+            return (long double)(wcstoull(data, NULL, 10));
+    }
+    return 0;
+}
+
+//==============================================================
+
+String::operator bool() const {
+    if (this->m_data == NULL)
+		return false;
+
+    uint32_t pos;
+    uint32_t len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    switch (type) {
+    	case snfNone:
+			return this->m_length != 0; // Не пустое?
+
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+		case snfFloatNan:
+			return false;
+
+		case snfBoolTrue:
+		case snfFloatInfPos:
+		case snfFloatInfNeg:
+			return true;
+    }
+
+    return String::wtoll(this->m_data + pos, len, type) != 0;
+}
+
+String::operator int8_t() const throw(const char*) {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    wchar_t* data = this->m_data;
+
+	switch (type) {
+		case snfNone:
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+		case snfFloatNan:
+			return 0;
+
+		case snfBoolTrue:
+			return -1;
+
+		case snfFloatInfPos:
+		case snfFloatInfNeg:
+			throw "Error: Out of range value";
+			break;
+
+        case snfHex:
+            return (int64_t)(wcstoull(data, NULL, 16));
+
+        case snfOct:
+            return (int64_t)(wcstoull(data, NULL, 8));
+
+        case snfBit:
+            return (int64_t)(wcstoull(data, NULL, 2));
+
+        case snfFloat:
+		case snfFloatEx: {
+			long double value = wcstold(data, NULL);
+            return (int64_t)value;
+		}
+
+        case snfInt:
+            return (int64_t)(wcstoll(data, NULL, 10));
+
+        case snfUInt:
+            return (int64_t)(wcstoull(data, NULL, 10));
+    }
+    return 0;
+
+}
+
+String::operator uint8_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<uint8_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int16_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<int16_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator uint16_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<uint16_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int32_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<int32_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator uint32_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<uint32_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int64_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<int64_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator uint64_t() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return static_cast<uint32_t>(String::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator float() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return (float)(String::wtod(this->m_data + pos, len, type));
+}
+
+String::operator double() const {
+	if (this->m_data == NULL)
+		return 0;
+
+    uint32_t pos, len;
+    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+    return (double)(String::wtod(this->m_data + pos, len, type));
+}
+
+//==============================================================
+
 
 //==============================================================
 

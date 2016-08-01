@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@ extern const char* eInvalidFormat;
 extern const char* eIOFileNotOpen;
 extern const char* eIOInvalidFile;
 extern const char* eIOReadLimit;
+
+extern const char* eInvalidPointer;
+extern const char* eConvert;
+extern const char* eOutOfRange;
 
 extern const char* eUnknown;
 

@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,10 @@ extern "C" {
     static const char _eIOInvalidFile[] = "Invalid File";
     static const char _eIOReadLimit[] = "Read Limit Exceed";
 
+	static const char _eInvalidPointer[] = "Invalid Pointer";
+	static const char _eConvert[] = "Unable to Convert";
+    static const char _eOutOfRange[] = "Out Of Range";
+
     static const char _eUnknown[] = "Unknown";
 #else
     static const char *_eOK = NULL;
@@ -42,6 +46,10 @@ extern "C" {
     static const char _eIOFileNotOpen[] = "com/jappsy/exceptions/EIOFileNotOpen";
     static const char _eIOInvalidFile[] = "com/jappsy/exceptions/EIOInvalidFile";
     static const char _eIOReadLimit[] = "com/jappsy/exceptions/EIOReadLimit";
+
+	static const char _eInvalidPointer[] = "com/jappsy/exceptions/EInvalidPointer";
+	static const char _eConvert[] = "com/jappsy/exceptions/EConvert";
+    static const char _eOutOfRange[] = "com/jappsy/exceptions/EOutOfRange";
 
     static const char _eUnknown[] = "java/lang/Error";
 #endif
@@ -55,6 +63,10 @@ const char *eInvalidFormat = _eInvalidFormat;
 const char* eIOFileNotOpen = _eIOFileNotOpen;
 const char* eIOInvalidFile = _eIOInvalidFile;
 const char* eIOReadLimit = _eIOReadLimit;
+
+const char* eInvalidPointer = _eInvalidPointer;
+const char* eConvert = _eConvert;
+const char* eOutOfRange = _eOutOfRange;
 
 const char *eUnknown = _eUnknown;
 
@@ -79,7 +91,11 @@ bool is_errorPtr(const char* ptr) {
         || (ptr == eInvalidFormat)
         || (ptr == eIOFileNotOpen)
         || (ptr == eIOInvalidFile)
-        || (ptr == eIOReadLimit);
+        || (ptr == eIOReadLimit)
+
+        || (ptr == eInvalidPointer)
+        || (ptr == eConvert)
+        || (ptr == eOutOfRange);
 }
 
 #ifdef __cplusplus

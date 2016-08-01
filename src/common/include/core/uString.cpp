@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ uint32_t utf8_strlen_nzt(const char* src, uint32_t srcsize, uint32_t* strsize) {
             else { // Not UTF8
                 len++; continue;
             }
-            int skip = 0;
+            uint32_t skip = 0;
             while ((skip < srcsize) && ((ch = *ptr) != 0) && (cnt > 0)) {
                 ptr++; skip++;
                 if ((ch & 0xC0) != 0x80) // Not UTF8
@@ -721,6 +721,712 @@ uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
     *dst = 0;
     return ressize - dstsize;
 }
+
+//==============================================================
+
+#include <core/uMemory.h>
+
+#define StringTrue L"true"
+#define StringFalse L"false"
+#define StringNan L"NAN"
+#define StringInfinite L"INFINITE"
+#define StringNegInfinite L"-INFINITE"
+#define StringEmpty L""
+#define StringNil NULL
+#define StringNull L"(null)"
+
+void String::create() {
+	this->length.initialize(this, &(this->getLength), &(this->setLength));
+}
+
+void String::release() {
+}
+
+void* String::operator new(size_t size) throw(const char*) {
+    void *p = memAlloc(void, p, size);
+    if (!p) throw "Error: Out of memory ( String::operator new() )";
+    return p;
+}
+
+void* String::operator new[](size_t size) throw(const char*) {
+    void *p = memAlloc(void, p, size);
+    if (!p) throw "Error: Out of memory ( String::operator new[]() )";
+    return p;
+}
+
+void String::operator delete(void *p) {
+    memFree(p);
+}
+
+void String::operator delete[](void *p) {
+    memFree(p);
+}
+
+#define STRING_BLOCK_SIZE	32
+
+uint32_t String::setSize(uint32_t size) throw(const char*) {
+	uint32_t newSize = size;
+	uint32_t newLength = (newSize / sizeof(wchar_t)) - 1;
+
+	if (newLength < 0) {
+		if (this->m_data != NULL) {
+			memFree(this->m_data);
+			this->m_data = NULL;
+		}
+		this->m_length = 0;
+		this->m_size = 0;
+		this->m_memorySize = 0;
+		return 0;
+	}
+
+    uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
+    if (this->m_memorySize != newMemSize) {
+        wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+        if (newString) {
+            this->m_data = newString;
+            this->m_data[newLength] = 0;
+            this->m_length = newLength;
+            this->m_size = newSize;
+            this->m_memorySize = newMemSize;
+            return newSize;
+        } else {
+			throw "Error: Out of memory ( String::setSize() )";
+        }
+    }
+
+	this->m_data[newLength] = 0;
+	this->m_length = newLength;
+	this->m_size = newSize;
+	return newSize;
+}
+
+uint32_t String::setLength(uint32_t length) throw(const char*) {
+    uint32_t newSize = (length + 1) * sizeof(wchar_t);
+    uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
+    if (this->m_memorySize != newMemSize) {
+        wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+        if (newString) {
+            this->m_data = newString;
+            this->m_data[length] = 0;
+            this->m_length = length;
+            this->m_size = newSize;
+            this->m_memorySize = newMemSize;
+            return length;
+        } else {
+			throw "Error: Out of memory ( String::setLength() )";
+        }
+    }
+
+	this->m_data[length] = 0;
+	this->m_length = length;
+	this->m_size = newSize;
+	return length;
+}
+
+String::String() {
+	this->create();
+}
+
+String::String(const void* string) throw(const char*) {
+	this->create();
+	if (string != NULL) {
+		throw "Error: Invalid pointer ( String::String(void*) )";
+	}
+}
+
+String& String::operator =(const void* string) throw(const char*) {
+	if (string != NULL) {
+		throw "Error: Invalid pointer ( String::String(void*) )";
+	}
+	this->setSize(0);
+	return *this;
+}
+
+String::String(const String& string) throw(const char*) {
+	this->create();
+	if (string.m_size > 0) {
+		this->setSize(string.m_size);
+		memcpy(this->m_data, string.m_data, this->m_size);
+	}
+}
+
+String& String::operator =(const String& string) throw(const char*) {
+	this->setSize(string.m_size);
+	if (string.m_size > 0)
+		memcpy(this->m_data, string.m_data, this->m_size);
+	return *this;
+}
+
+String& String::concat(const String& string) throw(const char*) {
+	uint32_t length = string.m_length;
+	if (length != 0) {
+		uint32_t prevLength = this->m_length;
+		setLength(prevLength + length);
+		memcpy(this->m_data + prevLength, string.m_data, string.m_size);
+	}
+    return *this;
+}
+
+String& String::operator +=(const String& string) throw(const char*) {
+    if (this->m_data == NULL)
+        return this->operator=(string);
+    else
+		return this->concat(string);
+}
+
+#if defined(__IOS__)
+	String::String(const NSString* string) throw(const char*) {
+		this->create();
+		if (string != nil) {
+			uint32_t length = (uint32_t)string.length;
+			if (length > 0) {
+				this->setLength(length);
+				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+				this->setSize(newSize);
+			} else {
+				this->setLength(0);
+			}
+		}
+	}
+
+	String& String::operator =(const NSString* string) throw(const char*) {
+		if (string != nil) {
+			uint32_t length = (uint32_t)string.length;
+			if (length > 0) {
+				this->setLength(length);
+				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+				this->setSize(newSize);
+			} else {
+				this->setLength(0);
+			}
+		} else {
+			this->setSize(0);
+		}
+		return *this;
+	}
+
+	String& String::concat(const NSString* string) throw(const char*) {
+		if (string != nil) {
+			uint32_t prevLength = this->m_length;
+			uint32_t length = (uint32_t)string.length;
+			if (length > 0) {
+				this->setLength(prevLength + length);
+				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
+				this->setSize(newSize);
+			}
+		}
+		return *this;
+	}
+
+	String& String::operator +=(const NSString* string) throw(const char*) {
+		if (this->m_data == NULL)
+			return this->operator=(string);
+		else
+			return this->concat(string);
+	}
+
+#endif
+
+String::String(const char* string) throw(const char*) {
+	this->create();
+	if (string != NULL) {
+		uint32_t newSize = 0;
+		uint32_t length = utf8_strlen(string, &newSize);
+		if (length > 0) {
+			this->setSize(newSize);
+			utf8_towcs(string, this->m_data, this->m_size);
+		} else {
+			this->setLength(0);
+		}
+	}
+}
+
+String& String::operator =(const char* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t newSize = 0;
+		uint32_t length = utf8_strlen(string, &newSize);
+		if (length > 0) {
+			this->setSize(newSize);
+			utf8_towcs(string, this->m_data, this->m_size);
+		} else {
+			this->setLength(0);
+		}
+	} else {
+		this->setSize(0);
+	}
+	return *this;
+}
+
+String& String::concat(const char* string) throw(const char*) {
+    if (string != NULL) {
+        uint32_t prevLength = this->m_length;
+        uint32_t strSize;
+        uint32_t length = utf8_strlen(string, &strSize);
+        if (length > 0) {
+			this->setLength(prevLength + length);
+            utf8_towcs(string, this->m_data + prevLength, strSize);
+        }
+    }
+    return *this;
+}
+
+String& String::operator +=(const char* string) throw(const char*) {
+	if (this->m_data == NULL)
+		return this->operator=(string);
+	else
+		return this->concat(string);
+}
+
+String::String(const char* string, uint32_t length) throw(const char*) {
+	this->create();
+	if (string != NULL) {
+		this->setLength(length);
+		if (length > 0) {
+			wchar_t* dst = this->m_data;
+			char* src = (char*)string;
+			do {
+				(*dst) = (wchar_t)(*src);
+				length--;
+			} while (length > 0);
+		}
+	}
+}
+
+String::String(const wchar_t* string) throw(const char*) {
+	this->create();
+	if (string != NULL) {
+		uint32_t newSize = 0;
+		uint32_t length = wcs_strlen(string, &newSize);
+		if (length > 0) {
+			this->setSize(newSize);
+			memcpy(this->m_data, string, this->m_size);
+		} else {
+			this->setLength(0);
+		}
+	}
+}
+
+String& String::operator =(const wchar_t* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t newSize = 0;
+		uint32_t length = wcs_strlen(string, &newSize);
+		if (length > 0) {
+			this->setSize(newSize);
+			memcpy(this->m_data, string, this->m_size);
+		} else {
+			this->setLength(0);
+		}
+	} else {
+		this->setSize(0);
+	}
+	return *this;
+}
+
+String& String::concat(const wchar_t* string) throw(const char*) {
+    if (string != NULL) {
+        uint32_t prevLength = this->m_length;
+        uint32_t strSize;
+        uint32_t length = wcs_strlen(string, &strSize);
+        if (length > 0) {
+			this->setLength(this->m_length + length);
+			memcpy(this->m_data + prevLength, string, strSize);
+        }
+    }
+    return *this;
+}
+
+String& String::operator +=(const wchar_t* string) throw(const char*) {
+	if (this->m_data == NULL)
+		return this->operator=(string);
+	else
+		return this->concat(string);
+}
+
+String::String(const wchar_t* string, uint32_t length) throw(const char*) {
+	this->create();
+	if (string != NULL) {
+		this->setLength(length);
+		if (length > 0)
+			memcpy(this->m_data, string, length * sizeof(wchar_t));
+	}
+}
+
+String::String(const char character) throw(const char*) {
+	this->create();
+	this->setLength(1);
+	this->m_data[0] = (wchar_t)character;
+}
+
+String& String::operator =(const char character) throw(const char*) {
+	this->setLength(1);
+	this->m_data[0] = (wchar_t)character;
+	return *this;
+}
+
+String& String::concat(const char character) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 1);
+	this->m_data[prevLength] = (wchar_t)character;
+    return *this;
+}
+
+String& String::operator +=(const char character) throw(const char*) {
+	if (this->m_data == NULL)
+		return this->operator=(character);
+	else
+		return this->concat(character);
+}
+
+String::String(const wchar_t character) throw(const char*) {
+	this->create();
+	this->setLength(1);
+	this->m_data[0] = character;
+}
+
+String& String::operator =(const wchar_t character) throw(const char*) {
+	this->setLength(1);
+	this->m_data[0] = character;
+	return *this;
+}
+
+String& String::concat(const wchar_t character) throw(const char*) {
+    uint32_t prevLength = this->m_length;
+    this->setLength(prevLength + 1);
+	this->m_data[prevLength] = character;
+    return *this;
+}
+
+String& String::operator +=(const wchar_t character) throw(const char*) {
+	if (this->m_data == NULL)
+		return this->operator=(character);
+	else
+		return this->concat(character);
+}
+
+String::String(bool value) throw(const char*) {
+	this->create();
+	this->operator =(value);
+}
+
+String& String::operator =(bool value) throw(const char*) {
+	if (value)
+		this->operator =(StringTrue);
+	else
+		this->operator =(StringFalse);
+	return *this;
+}
+
+int String::swprintf(wchar_t* target, int8_t value) {
+	return ::swprintf(target, 4, L"%hhd", value);
+}
+
+String::String(int8_t value) throw(const char*) {
+	this->create();
+    this->setLength(4);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 4) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(int8_t value) throw(const char*) {
+    this->setLength(4);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 4) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, uint8_t value) {
+	return ::swprintf(target, 3, L"%hhu", value);
+}
+
+String::String(uint8_t value) throw(const char*) {
+	this->create();
+    this->setLength(3);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 3) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(uint8_t value) throw(const char*) {
+    this->setLength(3);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 3) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, int16_t value) {
+	return ::swprintf(target, 6, L"%hd", value);
+}
+
+String::String(int16_t value) throw(const char*) {
+	this->create();
+    this->setLength(6);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 6) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(int16_t value) throw(const char*) {
+    this->setLength(6);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 6) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, uint16_t value) {
+	return ::swprintf(target, 5, L"%hu", value);
+}
+
+String::String(uint16_t value) throw(const char*) {
+	this->create();
+    this->setLength(5);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 5) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(uint16_t value) throw(const char*) {
+    this->setLength(5);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 5) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, int32_t value) {
+	return ::swprintf(target, 11, L"%ld", value);
+}
+
+String::String(int32_t value) throw(const char*) {
+	this->create();
+    this->setLength(11);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 11) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(int32_t value) throw(const char*) {
+    this->setLength(11);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 11) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, uint32_t value) {
+	return ::swprintf(target, 10, L"%lu", value);
+}
+
+String::String(uint32_t value) throw(const char*) {
+	this->create();
+    this->setLength(10);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 10) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(uint32_t value) throw(const char*) {
+    this->setLength(10);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 10) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, int64_t value) {
+	return ::swprintf(target, 21, L"%lld", value);
+}
+
+String::String(int64_t value) throw(const char*) {
+	this->create();
+    this->setLength(21);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 21) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(int64_t value) throw(const char*) {
+    this->setLength(21);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 21) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, uint64_t value) {
+	return ::swprintf(target, 20, L"%llu", value);
+}
+
+String::String(uint64_t value) throw(const char*) {
+	this->create();
+    this->setLength(20);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 20) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(uint64_t value) throw(const char*) {
+    this->setLength(20);
+	int length = String::swprintf(this->m_data, value);
+	if (length != 20) {
+		this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+#ifndef __IOS__
+	#include <math.h>
+#endif
+
+int String::swprintf(wchar_t* target, float value) {
+	int length = ::swprintf(target, 23, L"%.7f", value);
+	if (length == EOF)
+		return ::swprintf(target, 23, L"%.7e", value);
+	else {
+		wchar_t* temp = target + length - 1;
+		wchar_t ch;
+		while ( ((ch = *temp) == L'0') || (ch == L'.') || (length > 8) ) {
+			*temp = 0; temp--;
+			length--;
+			if (ch == L'.') break;
+		}
+		int len = length;
+		if (ch == L'.') {
+			while ( len > 7 ) {
+				*temp = L'0'; temp--;
+				len--;
+			}
+		}
+	}
+	return length;
+}
+
+String::String(float value) throw(const char*) {
+	this->create();
+    if (isnan(value)) {
+        this->operator=(StringNan);
+    } else if (isinf(value)) {
+        if (signbit(value)) {
+            this->operator=(StringNegInfinite);
+        } else {
+            this->operator=(StringInfinite);
+        }
+    } else {
+    	this->setLength(23);
+        int length = String::swprintf(this->m_data, value);
+        if (length == EOF)
+			throw "Error: swprintf ( String::String(float) )";
+        else if (length != 23)
+			this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(float value) throw(const char*) {
+    if (isnan(value)) {
+        this->operator=(StringNan);
+    } else if (isinf(value)) {
+        if (signbit(value)) {
+            this->operator=(StringNegInfinite);
+        } else {
+            this->operator=(StringInfinite);
+        }
+    } else {
+    	this->setLength(23);
+        int length = String::swprintf(this->m_data, value);
+        if (length == EOF)
+			throw "Error: swprintf ( String::operator =(float) )";
+		else if (length != 23)
+			this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+int String::swprintf(wchar_t* target, double value) {
+	int length = ::swprintf(target, 31, L"%.15f", value);
+	if (length == EOF)
+		return ::swprintf(target, 31, L"%.15e", value);
+	else {
+		wchar_t* temp = target + length - 1;
+		wchar_t ch;
+		while ( ((ch = *temp) == L'0') || (ch == L'.') || (length > 16) ) {
+			*temp = 0; temp--;
+			length--;
+			if (ch == L'.') break;
+		}
+		int len = length;
+		if (ch == L'.') {
+			while ( len > 15 ) {
+				*temp = L'0'; temp--;
+				len--;
+			}
+		}
+	}
+	return length;
+}
+
+String::String(double value) throw(const char*) {
+	this->create();
+    if (isnan(value)) {
+        this->operator=(StringNan);
+    } else if (isinf(value)) {
+        if (signbit(value)) {
+            this->operator=(StringNegInfinite);
+        } else {
+            this->operator=(StringInfinite);
+        }
+    } else {
+    	this->setLength(31);
+        int length = String::swprintf(this->m_data, value);
+		if (length == EOF)
+			throw "Error: swprintf ( String::String(double) )";
+		else if (length != 31)
+			this->setLength(static_cast<uint32_t>(length));
+    }
+}
+
+String& String::operator =(double value) throw(const char*) {
+    if (isnan(value)) {
+        this->operator=(StringNan);
+    } else if (isinf(value)) {
+        if (signbit(value)) {
+            this->operator=(StringNegInfinite);
+        } else {
+            this->operator=(StringInfinite);
+        }
+    } else {
+    	this->setLength(31);
+        int length = String::swprintf(this->m_data, value);
+		if (length == EOF)
+			throw "Error: swprintf ( String::operator =(double) )";
+		else if (length != 31)
+			this->setLength(static_cast<uint32_t>(length));
+    }
+    return *this;
+}
+
+String::~String() {
+	this->release();
+}
+
+//==============================================================
 
 void uStringInit() {
 

@@ -120,6 +120,27 @@
                             + __GNUC_PATCHLEVEL__)
 #endif
 
+#if defined(__IOS__) || defined(__JNI__) || defined(__WINNT__)
+	#ifdef __cplusplus
+		template <typename Owner, typename Type>
+		class Property
+		{
+		protected:
+			typedef Type (Owner::*getter)();
+			typedef Type (Owner::*setter)(Type);
+			Owner* m_owner;
+			getter m_getter;
+			setter m_setter;
+		public:
+			inline Property() : m_owner((Owner*)0), m_getter((getter)0), m_setter((setter)0) {}
+			inline Property(Owner * const owner, getter getmethod, setter setmethod) : m_owner(owner), m_getter(getmethod), m_setter(setmethod) {}
+			inline operator Type() { if (m_getter) return (m_owner->*m_getter)(); else return (Type)0; }
+			inline Type operator =(Type data) { if (m_setter) return (m_owner->*m_setter)(data); else return (Type)0; }
+			inline void initialize(Owner * const owner, getter getmethod, setter setmethod) { m_owner = owner, m_getter = getmethod; m_setter = setmethod; }
+		};
+	#endif
+#endif
+
 #endif //JAPPSY_PLATFORM_H
 
 /* INCLUDES */
@@ -145,6 +166,14 @@
             #define true 1
         #endif
     #endif
+
+    #ifndef NULL
+		#define NULL ((void*)0)
+	#endif
+
+	#ifndef null
+		#define null ((void*)0)
+	#endif
 #elif defined(__JNI__)
     #include <jni.h>
     #include <stdint.h>

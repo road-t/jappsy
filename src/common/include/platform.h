@@ -126,8 +126,8 @@
 		class Property
 		{
 		protected:
-			typedef Type (Owner::*getter)();
-			typedef Type (Owner::*setter)(Type);
+			typedef Type (*getter)(const Owner& self);
+			typedef Type (*setter)(Owner& self, Type value);
 			Owner* m_owner;
 			getter m_getter;
 			setter m_setter;

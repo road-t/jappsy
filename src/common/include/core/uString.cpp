@@ -753,8 +753,16 @@ uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
 #define StringNull L"null"
 #define StringUndefined L"undefined"
 
+static uint32_t getStringLength(const String& self) {
+    return self.m_length;
+}
+
+static uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
+    self.setLength(length);
+}
+
 void String::create() {
-	this->length.initialize(this, &(this->getLength), &(this->setLength));
+	this->length.initialize(this, &getStringLength, &setStringLength);
 }
 
 void String::release() {

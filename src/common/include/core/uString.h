@@ -261,10 +261,25 @@ extern "C" {
 	#endif
 
 	/**
+	 * Get string length
+	 * @return length
+	 */
+	static uint32_t getStringLength(const String& self);
+
+	/**
+	 * Set string length without null character
+	 * @exception eOutOfMemory
+	 */
+	static uint32_t setStringLength(String& self, uint32_t length) throw(const char*);
+
+	/**
 	 * Java like string class for C++
 	 */
 	class String {
 	private:
+		friend uint32_t getStringLength(const String& self);
+		friend uint32_t setStringLength(String& self, uint32_t length) throw(const char*);
+
 		inline void create();
 		inline void release();
 

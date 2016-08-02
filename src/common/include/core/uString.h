@@ -25,59 +25,198 @@ extern "C" {
 
 	/**
 	 * Get string length
-	 * @param char* src - UTF8 encoded null terminated string
-	 * @param [out] uint32_t* strsize - source string memory size with null character
+	 * @param			char*		src			UTF8 encoded null terminated source string
+	 * @param	[out]	uint32_t*	strsize		source string memory size with null character
+	 * @return			uint32_t				source string length without null character
 	 */
 	uint32_t utf8_strlen(const char* src, uint32_t* strsize);
 
 	/**
 	 * Get string length
-	 * @param char* src - UTF8 encoded null terminated string
-	 * @param uint32_t srcsize - source string memory size
-	 * @param [out] uint32_t* strsize - source string memory size without null character
+	 * @param			char*		src			UTF8 encoded null terminated source string
+	 * @param			uint32_t	srcsize		source string memory size
+	 * @param	[out]	uint32_t*	strsize		source string memory size without null character
+	 * @return			uint32_t				source string length without null character
 	 */
 	uint32_t utf8_strlen_nzt(const char* src, uint32_t srcsize, uint32_t* strsize);
 
 	/**
 	 * Calculate memory size required for string encoding from UTF8 to UTF16
-	 * @param char* src - UTF8 encoded null terminated string
+	 * @param			char*		src			UTF8 encoded null terminated source string
+	 * @return			uint32_t				UTF16 encoded string memory size with null character
 	 */
 	uint32_t utf8_toutf16_size(const char* src);
 
 	/**
 	 * Convert string
-	 * @param char* src - UTF8 encoded null terminated source string
-	 * @param uint16_t* dst - UTF16 encoded null terminated destination string
-	 * @param uint32_t dstsize - destination string memory size with null character
+	 * @param			char*		src			UTF8 encoded null terminated source string
+	 * @param	[out]	uint16_t*	dst			UTF16 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF16 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF16 destination string used memory size with null character
 	 */
 	uint32_t utf8_toutf16(const char* src, uint16_t* dst, uint32_t dstsize);
 
 	/**
 	 * Convert string
-	 * @param char* src
+	 * @param			char*		src			UTF8 encoded null terminated source string
+	 * @param	[out]	uint32_t*	dst			UTF32 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF32 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF32 destination string used memory size with null character
 	 */
 	uint32_t utf8_toutf32(const char* src, uint32_t* dst, uint32_t dstsize);
+
+	/**
+	 * Get string length
+	 * @param			uint16_t*	src			UTF16 encoded null terminated source string
+	 * @param	[out]	uint32_t*	strsize		source string memory size with null character
+	 * @return			uint32_t				source string length without null character
+	 */
 	uint32_t utf16_strlen(const uint16_t* src, uint32_t* strsize);
+
+	/**
+	 * Calculate memory size required for string encoding from UTF16 to UTF8
+	 * @param			uint16_t*	src			UTF16 encoded null terminated source string
+	 * @return			uint32_t				UTF8 encoded string memory size with null character
+	 */
 	uint32_t utf16_toutf8_size(const uint16_t* src);
+
+	/**
+	 * Convert string
+	 * @param			uint16_t*	src			UTF16 encoded null terminated source string
+	 * @param	[out]	char*		dst			UTF8 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF8 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF8 destination string used memory size with null character
+	 */
 	uint32_t utf16_toutf8(const uint16_t* src, char* dst, uint32_t dstsize);
+
+	/**
+	 * Convert string
+	 * @param			uint16_t*	src			UTF16 encoded null terminated source string
+	 * @param	[out]	uint32_t*	dst			UTF32 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF32 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF32 destination string used memory size with null character
+	 */
 	uint32_t utf16_toutf32(const uint16_t* src, uint32_t* dst, uint32_t dstsize);
+
+	/**
+	 * Get string length
+	 * @param			uint32_t*	src			UTF32 encoded null terminated source string
+	 * @param	[out]	uint32_t*	strsize		source string memory size with null character
+	 * @return			uint32_t				source string length without null character
+	 */
 	uint32_t utf32_strlen(const uint32_t* src, uint32_t* strsize);
+
+	/**
+	 * Calculate memory size required for string encoding from UTF32 to UTF8
+	 * @param			uint32_t*	src			UTF32 encoded null terminated source string
+	 * @return			uint32_t				UTF8 encoded string memory size with null character
+	 */
 	uint32_t utf32_toutf8_size(const uint32_t* src);
+
+	/**
+	 * Convert string
+	 * @param			uint32_t*	src			UTF32 encoded null terminated source string
+	 * @param	[out]	char*		dst			UTF8 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF8 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF8 destination string used memory size with null character
+	 */
 	uint32_t utf32_toutf8(const uint32_t* src, char* dst, uint32_t dstsize);
+
+	/**
+	 * Calculate memory size required for string encoding from UTF32 to UTF16
+	 * @param			uint32_t*	src			UTF32 encoded null terminated source string
+	 * @return			uint32_t				UTF16 encoded string memory size with null character
+	 */
 	uint32_t utf32_toutf16_size(const uint32_t* src);
+
+	/**
+	 * Convert string
+	 * @param			uint32_t*	src			UTF32 encoded null terminated source string
+	 * @param	[out]	uint16_t*	dst			UTF16 encoded null terminated destination string
+	 * @param			uint32_t	dstsize		UTF16 destination string buffer memory size with null character
+	 * @return			uint32_t				UTF16 destination string used memory size with null character
+	 */
 	uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize);
 
 	#if __WCHAR_MAX__ > 0x10000
+		/**
+		 * Get string length
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @param	[out]	uint32_t*	strsize		source string memory size with null character
+		 * @return			uint32_t				source string length without null character
+		 */
 		#define wcs_strlen(src, sizeptr)	utf32_strlen((uint32_t*)(src), (sizeptr))
+
+		/**
+		 * Calculate memory size required for string encoding from Unicode to UTF8
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @return			uint32_t				UTF8 encoded string memory size with null character
+		 */
 		#define wcs_toutf8_size(src)		utf32_toutf8_size((uint32_t*)(src))
+
+		/**
+		 * Convert string
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @param	[out]	uint8_t*	dst			UTF8 encoded null terminated destination string
+		 * @param			uint32_t	dstsize		UTF8 destination string buffer memory size with null character
+		 * @return			uint32_t				UTF8 destination string used memory size with null character
+		 */
 		#define wcs_toutf8(src, dst, size)	utf32_toutf8((uint32_t*)(src), (dst), (size))
+
+		/**
+		 * Calculate memory size required for string encoding from UTF8 to Unicode
+		 * @param			char*		src			UTF8 encoded null terminated source string
+		 * @return			uint32_t				Unicode string memory size with null character
+		 */
 		#define utf8_towcs_size(src)		(utf8_strlen((src), 0) * 4)
+
+		/**
+		 * Convert string
+		 * @param			char*		src			UTF8 encoded null terminated source string
+		 * @param	[out]	wchar_t*	dst			Unicode null terminated destination string
+		 * @param			uint32_t	dstsize		destination string buffer memory size with null character
+		 * @return			uint32_t				destination string used memory size with null character
+		 */
 		#define utf8_towcs(src, dst, size)	utf8_toutf32((src), (uint32_t*)(dst), (size))
 	#else
+		/**
+		 * Get string length
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @param	[out]	uint32_t*	strsize		source string memory size with null character
+		 * @return			uint32_t				source string length without null character
+		 */
 		#define wcs_strlen(src, sizeptr)	utf16_strlen((uint16_t*)(src), (sizeptr))
+
+		/**
+		 * Calculate memory size required for string encoding from Unicode to UTF8
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @return			uint32_t				UTF8 encoded string memory size with null character
+		 */
 		#define wcs_toutf8_size(src)		utf16_toutf8_size((uint16_t*)(src))
+
+		/**
+		 * Convert string
+		 * @param			wchar_t*	src			Unicode null terminated source string
+		 * @param	[out]	uint8_t*	dst			UTF8 encoded null terminated destination string
+		 * @param			uint32_t	dstsize		UTF8 destination string buffer memory size with null character
+		 * @return			uint32_t				UTF8 destination string used memory size with null character
+		 */
 		#define wcs_toutf8(src, dst, size)	utf16_toutf8((uint16_t*)(src), (dst), (size))
+
+		/**
+		 * Calculate memory size required for string encoding from UTF8 to Unicode
+		 * @param			char*		src			UTF8 encoded null terminated source string
+		 * @return			uint32_t				Unicode string memory size with null character
+		 */
 		#define utf8_towcs_size(src)		utf8_toutf16_size((src))
+
+		/**
+		 * Convert string
+		 * @param			char*		src			UTF8 encoded null terminated source string
+		 * @param	[out]	wchar_t*	dst			Unicode null terminated destination string
+		 * @param			uint32_t	dstsize		destination string buffer memory size with null character
+		 * @return			uint32_t				destination string used memory size with null character
+		 */
 		#define utf8_towcs(src, dst, size)	utf8_toutf16((src), (uint16_t*)(dst), (size))
 	#endif
 
@@ -85,7 +224,21 @@ extern "C" {
 
 	#ifndef wcslwr
 		#define STRING_WCSLWR
+
+		/**
+		 * Convert string to lower case
+		 * @param			wchar_t*	s			Unicode null terminated string
+		 * @return			wchar_t*				source string pointer
+		 * @see {@link setlocale(int, char*) setlocale}
+		 * @see {@link #setlocale(int, char*) setlocale} setlocale(C_CTYPE, "en_EN.UTF-8")
+		 */
 		wchar_t* wcslwr(wchar_t* s);
+
+		/**
+		 * Convert string to upper case
+		 * @param			wchar_t*	s			Unicode null terminated string
+		 * @return			wchar_t*				source string pointer
+		 */
 		wchar_t* wcsupr(wchar_t* s);
 	#endif
 

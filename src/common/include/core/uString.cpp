@@ -789,7 +789,7 @@ void String::operator delete[](void *p) {
 
 #define STRING_BLOCK_SIZE	32
 
-uint32_t String::setSize(uint32_t size) throw(const char*) {
+void String::setSize(uint32_t size) throw(const char*) {
 	uint32_t newSize = size;
 	uint32_t newLength = (newSize / sizeof(wchar_t)) - 1;
 
@@ -801,7 +801,7 @@ uint32_t String::setSize(uint32_t size) throw(const char*) {
 		this->m_length = 0;
 		this->m_size = 0;
 		this->m_memorySize = 0;
-		return 0;
+		return;
 	}
 
     uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
@@ -809,11 +809,7 @@ uint32_t String::setSize(uint32_t size) throw(const char*) {
         wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
         if (newString) {
             this->m_data = newString;
-            this->m_data[newLength] = 0;
-            this->m_length = newLength;
-            this->m_size = newSize;
             this->m_memorySize = newMemSize;
-            return newSize;
         } else {
 			throw eOutOfMemory;
         }
@@ -822,21 +818,16 @@ uint32_t String::setSize(uint32_t size) throw(const char*) {
 	this->m_data[newLength] = 0;
 	this->m_length = newLength;
 	this->m_size = newSize;
-	return newSize;
 }
 
-uint32_t String::setLength(uint32_t length) throw(const char*) {
+void String::setLength(uint32_t length) throw(const char*) {
     uint32_t newSize = (length + 1) * sizeof(wchar_t);
     uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
     if (this->m_memorySize != newMemSize) {
         wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
         if (newString) {
             this->m_data = newString;
-            this->m_data[length] = 0;
-            this->m_length = length;
-            this->m_size = newSize;
             this->m_memorySize = newMemSize;
-            return length;
         } else {
 			throw eOutOfMemory;
         }
@@ -845,7 +836,6 @@ uint32_t String::setLength(uint32_t length) throw(const char*) {
 	this->m_data[length] = 0;
 	this->m_length = length;
 	this->m_size = newSize;
-	return length;
 }
 
 String::String() {

@@ -126,20 +126,21 @@ extern "C" {
 
 		/**
 		 * Set string memory size with null character
-		 * @throws eOutOfMemory
+		 * @exception eOutOfMemory
 		 */
-		inline uint32_t setSize(uint32_t size) throw(const char*);
+		inline void setSize(uint32_t size) throw(const char*);
 
 		/**
 		 * Get string length
+		 * @return length
 		 */
 		inline uint32_t getLength() { return m_length; }
 
 		/**
 		 * Set string length without null character
-		 * @throws eOutOfMemory
+		 * @exception eOutOfMemory
 		 */
-		inline uint32_t setLength(uint32_t length) throw(const char*);
+		inline void setLength(uint32_t length) throw(const char*);
 
 		static inline int swprintf(wchar_t* target, int8_t value);
 		static inline int swprintf(wchar_t* target, uint8_t value);

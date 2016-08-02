@@ -7,8 +7,8 @@ model {
 
         defaultConfig {
             applicationId "com.jappsy"
-            minSdkVersion.apiLevel 13
-            targetSdkVersion.apiLevel 13
+            minSdkVersion.apiLevel 16
+            targetSdkVersion.apiLevel 16
             versionCode 1
             versionName "1.0"
         }
@@ -73,7 +73,14 @@ model {
     }
 }
 
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
 dependencies {
+    compile(name:'AndroidJSCore-2.1-release', ext:'aar')
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.2.1'

@@ -688,10 +688,7 @@ Java_com_jappsy_io_image_PNG_getPixels(JNIEnv *env, jclass type, jobject memoryF
         char* error;
         void* pixels = png_getPixels(memory, (uint32_t)memorySize, (uint32_t)outWidth, (uint32_t)outHeight, x1, y1, x2, y2, &error);
         if (pixels != NULL) {
-            jobject directBuffer = (*env)->NewDirectByteBuffer(env, pixels, (uint32_t)(outWidth * outHeight * sizeof(uint32_t)));
-            jobject memoryRef = (*env)->NewGlobalRef(env, directBuffer);
-
-            return memoryRef;
+            return (*env)->NewDirectByteBuffer(env, pixels, (uint32_t)(outWidth * outHeight * sizeof(uint32_t)));
         }
         jniThrow(env, error, NULL);
     } else {

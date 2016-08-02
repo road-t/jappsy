@@ -48,10 +48,7 @@ Java_com_jappsy_io_FileIO_readFile(JNIEnv *env, jclass type, jobject fd) {
     uint32_t size;
     void* pixels = fio_readFile(fileDescriptor, &size, &error);
     if (pixels != NULL) {
-        jobject directBuffer = (*env)->NewDirectByteBuffer(env, pixels, size);
-        jobject memoryRef = (*env)->NewGlobalRef(env, directBuffer);
-
-        return memoryRef;
+        return (*env)->NewDirectByteBuffer(env, pixels, size);
     }
     jniThrow(env, error, NULL);
 

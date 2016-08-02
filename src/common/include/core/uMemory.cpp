@@ -1042,9 +1042,7 @@ Java_com_jappsy_core_Memory_alloc(JNIEnv *env, jclass type, jint size) {
         return NULL;
     }
 
-    jobject directBuffer = env->NewDirectByteBuffer(jniMemory, size);
-    jobject memory = env->NewGlobalRef(directBuffer);
-    return memory;
+    return env->NewDirectByteBuffer(jniMemory, size);
 }
 
 JNIEXPORT void JNICALL
@@ -1056,7 +1054,6 @@ Java_com_jappsy_core_Memory_free(JNIEnv *env, jclass type, jobject memory) {
 
     void* jniMemory = env->GetDirectBufferAddress(memory);
     memFree(jniMemory);
-    env->DeleteGlobalRef(memory);
 }
 
 JNIEXPORT jintArray JNICALL

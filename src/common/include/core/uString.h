@@ -23,10 +23,39 @@
 extern "C" {
 #endif
 
+	/**
+	 * Get string length
+	 * @param char* src - UTF8 encoded null terminated string
+	 * @param [out] uint32_t* strsize - source string memory size with null character
+	 */
 	uint32_t utf8_strlen(const char* src, uint32_t* strsize);
+
+	/**
+	 * Get string length
+	 * @param char* src - UTF8 encoded null terminated string
+	 * @param uint32_t srcsize - source string memory size
+	 * @param [out] uint32_t* strsize - source string memory size without null character
+	 */
 	uint32_t utf8_strlen_nzt(const char* src, uint32_t srcsize, uint32_t* strsize);
+
+	/**
+	 * Calculate memory size required for string encoding from UTF8 to UTF16
+	 * @param char* src - UTF8 encoded null terminated string
+	 */
 	uint32_t utf8_toutf16_size(const char* src);
+
+	/**
+	 * Convert string
+	 * @param char* src - UTF8 encoded null terminated source string
+	 * @param uint16_t* dst - UTF16 encoded null terminated destination string
+	 * @param uint32_t dstsize - destination string memory size with null character
+	 */
 	uint32_t utf8_toutf16(const char* src, uint16_t* dst, uint32_t dstsize);
+
+	/**
+	 * Convert string
+	 * @param char* src
+	 */
 	uint32_t utf8_toutf32(const char* src, uint32_t* dst, uint32_t dstsize);
 	uint32_t utf16_strlen(const uint16_t* src, uint32_t* strsize);
 	uint32_t utf16_toutf8_size(const uint16_t* src);
@@ -78,22 +107,39 @@ extern "C" {
 		#endif
 	#endif
 
+	/**
+	 * Java like string class for C++
+	 */
 	class String {
 	private:
 		inline void create();
 		inline void release();
 
+		// UTF16 encoded null terminated string pointer
 		wchar_t* m_data = NULL;
+		// String characters count without null character
 		uint32_t m_length = 0;
+		// String memory size with null character
 		uint32_t m_size = 0;
+		// Aligned string buffer memory size
 		uint32_t m_memorySize = 0;
 
 		/**
+		 * Set string memory size with null character
 		 * @throws eOutOfMemory
 		 */
-		inline uint32_t setSize(uint32_t size) throw(const char*); // eOutOfMemory
+		inline uint32_t setSize(uint32_t size) throw(const char*);
+
+		/**
+		 * Get string length
+		 */
 		inline uint32_t getLength() { return m_length; }
-		inline uint32_t setLength(uint32_t length) throw(const char*); // eOutOfMemory
+
+		/**
+		 * Set string length without null character
+		 * @throws eOutOfMemory
+		 */
+		inline uint32_t setLength(uint32_t length) throw(const char*);
 
 		static inline int swprintf(wchar_t* target, int8_t value);
 		static inline int swprintf(wchar_t* target, uint8_t value);
@@ -110,8 +156,18 @@ extern "C" {
 		inline static int64_t wtoll(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*); // eConvert
 		inline static long double wtod(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*); // eConvert
 	public:
-		void* operator new(size_t) throw(const char*); // eOutOfMemory
-		void* operator new[](size_t) throw(const char*); // eOutOfMemory
+		/**
+		 * new String()
+		 * @throws eOutOfMemory
+ 		 */
+		void* operator new(size_t) throw(const char*);
+
+		/**
+		 * new String[]()
+		 * @throws eOutOfMemory
+ 		 */
+		void* operator new[](size_t) throw(const char*);
+
 		void operator delete(void*);
 		void operator delete[](void*);
 
@@ -123,9 +179,24 @@ extern "C" {
 
 		Property<String, uint32_t> length;
 
+		/**
+		 * Create NULL string
+		 */
 		String();
-		explicit String(const void* string) throw(const char*); // eOutOfMemory
-		String(const String& string) throw(const char*); // eOutOfMemory
+
+		/**
+		 * Create NULL string
+		 * @param string  must be NULL
+		 * @throws eInvalidPointer
+		 */
+		explicit String(const void* string) throw(const char*);
+
+		/**
+		 * Create copy of string
+		 * @param string  source string
+		 * @throws eOutOfMemory
+		 */
+		String(const String& string) throw(const char*);
 		#if defined(__IOS__)
 			String(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif

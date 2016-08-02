@@ -758,6 +758,13 @@ void String::create() {
 }
 
 void String::release() {
+    if (this->m_data != NULL) {
+        memFree(this->m_data);
+        this->m_data = NULL;
+    }
+    this->m_length = 0;
+    this->m_size = 0;
+    this->m_memorySize = 0;
 }
 
 void* String::operator new(size_t size) throw(const char*) {

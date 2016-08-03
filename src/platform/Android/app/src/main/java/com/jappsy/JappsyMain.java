@@ -302,6 +302,7 @@ public class JappsyMain extends Activity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
+        /*
         m_view = new GLSurfaceView(this);
 
         // Check if the system supports OpenGL ES 2.0.
@@ -320,6 +321,8 @@ public class JappsyMain extends Activity {
             // renderer if you wanted to support both ES 1 and ES 2.
             return;
         }
+        */
+        m_view = JappsyView.create(this);
 
         setContentView(m_view);
     }
@@ -350,8 +353,8 @@ public class JappsyMain extends Activity {
         Log.debug("Main > onPause");
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        super.onPause();
         m_view.onPause();
+        super.onPause();
     }
 
     private void hideSoftKeyboard() {

@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/libjpeg" />
             <option value="$PROJECT_DIR$/libpng" />
             <option value="$PROJECT_DIR$/libz" />
+            <option value="$PROJECT_DIR$/modEngine" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

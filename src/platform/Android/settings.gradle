@@ -1,1 +1,1 @@
-include ':app', ':libpng', ':libjpeg', ':libz'
+include ':app', ':libpng', ':libjpeg', ':libz', ':modEngine'

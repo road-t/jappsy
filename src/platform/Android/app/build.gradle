@@ -59,6 +59,12 @@ model {
     }
     android.sources {
         main {
+            java {
+                dependencies {
+                    //project ":modEngine"
+                }
+            }
+
             jni {
                 source {
                     includes += "../libpng/src/main/jni/libpng/png.h"
@@ -87,4 +93,5 @@ dependencies {
     compile project(':libz')
     compile project(':libpng')
     compile project(':libjpeg')
+    compile project(':modEngine')
 }

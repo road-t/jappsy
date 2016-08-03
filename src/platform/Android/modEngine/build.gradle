@@ -1,0 +1,62 @@
+apply plugin: 'com.android.model.library'
+
+model {
+	android {
+		compileSdkVersion 23
+		buildToolsVersion "23.0.3"
+
+		defaultConfig {
+			minSdkVersion.apiLevel 13
+			targetSdkVersion.apiLevel 23
+			versionCode 1
+			versionName "1.0"
+		}
+		buildTypes {
+			release {
+				minifyEnabled false
+				proguardFiles.add(file('proguard-rules.pro'))
+
+				ndk.with {
+					debuggable = false;
+				}
+			}
+			debug {
+				ndk.with {
+					debuggable = true;
+				}
+			}
+		}
+		ndk {
+			moduleName "modEngine-jni"
+			ldLibs.addAll(["android", "log", "GLESv2"])
+			cppFlags.addAll(["-fexceptions"])
+			stl = "stlport_static"
+
+			cppFlags.addAll(["-I" + file("src/main/jni/include").absolutePath])
+			CFlags.addAll(["-I" + file("src/main/jni/include").absolutePath])
+			cppFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+			CFlags.addAll(["-I" + file("../libz/src/main/jni/zlib").absolutePath])
+		}
+	}
+	android.sources {
+		main {
+			jni {
+				dependencies {
+					project ":libz" linkage "static"
+				}
+			}
+		}
+	}
+}
+
+repositories {
+	flatDir {
+		dirs 'libs'
+	}
+}
+
+dependencies {
+	compile fileTree(dir: 'libs', include: ['*.jar'])
+	compile 'com.android.support:appcompat-v7:23.2.1'
+	compile project(':libz')
+}

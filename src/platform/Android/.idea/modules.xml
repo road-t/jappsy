@@ -7,6 +7,8 @@
       <module fileurl="file://$PROJECT_DIR$/libjpeg/libjpeg.iml" filepath="$PROJECT_DIR$/libjpeg/libjpeg.iml" />
       <module fileurl="file://$PROJECT_DIR$/libpng/libpng.iml" filepath="$PROJECT_DIR$/libpng/libpng.iml" />
       <module fileurl="file://$PROJECT_DIR$/libz/libz.iml" filepath="$PROJECT_DIR$/libz/libz.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modEngine/modEngine.iml" filepath="$PROJECT_DIR$/modEngine/modEngine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modEngine/modEngine.iml" filepath="$PROJECT_DIR$/modEngine/modEngine.iml" />
     </modules>
   </component>
 </project>

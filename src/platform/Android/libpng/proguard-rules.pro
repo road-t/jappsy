@@ -15,3 +15,9 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+# setup Proguard to strip out Log.d() and Log.v()
+-assumenosideeffects class android.util.Log {
+    public static int v(...);
+    public static int d(...);
+}

@@ -1,18 +1,18 @@
 //
-//  modCoreTests.m
-//  modCoreTests
+//  libJappsyEngineTests.m
+//  libJappsyEngineTests
 //
-//  Created by VipDev on 02.08.16.
-//  Copyright © 2016 Jappsy. All rights reserved.
+//  Created by VipDev on 03.08.16.
+//  Copyright © 2016 jappsy.com. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-@interface modCoreTests : XCTestCase
+@interface libJappsyEngineTests : XCTestCase
 
 @end
 
-@implementation modCoreTests
+@implementation libJappsyEngineTests
 
 - (void)setUp {
     [super setUp];

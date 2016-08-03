@@ -7,180 +7,180 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C35165071D50D0D5002612B8 /* modCore.h in Headers */ = {isa = PBXBuildFile; fileRef = C35165061D50D0D5002612B8 /* modCore.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C351650E1D50D0D5002612B8 /* modCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35165031D50D0D5002612B8 /* modCore.framework */; };
-		C35165131D50D0D5002612B8 /* modCoreTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C35165121D50D0D5002612B8 /* modCoreTests.mm */; };
+		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
+		C3506D681D5256FD005BC914 /* libJappsyEngineTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C351650F1D50D0D5002612B8 /* PBXContainerItemProxy */ = {
+		C3506D641D5256FD005BC914 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = C35164FA1D50D0D5002612B8 /* Project object */;
+			containerPortal = C3506D4F1D5256FD005BC914 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = C35165021D50D0D5002612B8;
-			remoteInfo = modCore;
+			remoteGlobalIDString = C3506D571D5256FD005BC914;
+			remoteInfo = libJappsyEngine;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		C35165031D50D0D5002612B8 /* modCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = modCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		C35165061D50D0D5002612B8 /* modCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = modCore.h; sourceTree = "<group>"; };
-		C35165081D50D0D5002612B8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C351650D1D50D0D5002612B8 /* modCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = modCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C35165121D50D0D5002612B8 /* modCoreTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = modCoreTests.mm; sourceTree = "<group>"; };
-		C35165141D50D0D5002612B8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
+		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libJappsyEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3506D671D5256FD005BC914 /* libJappsyEngineTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = libJappsyEngineTests.m; sourceTree = "<group>"; };
+		C3506D691D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		C35164FF1D50D0D5002612B8 /* Frameworks */ = {
+		C3506D541D5256FD005BC914 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C351650A1D50D0D5002612B8 /* Frameworks */ = {
+		C3506D5F1D5256FD005BC914 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C351650E1D50D0D5002612B8 /* modCore.framework in Frameworks */,
+				C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		C35164F91D50D0D5002612B8 = {
+		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
-				C35165051D50D0D5002612B8 /* modCore */,
-				C35165111D50D0D5002612B8 /* modCoreTests */,
-				C35165041D50D0D5002612B8 /* Products */,
+				C3506D5A1D5256FD005BC914 /* libJappsyEngine */,
+				C3506D661D5256FD005BC914 /* libJappsyEngineTests */,
+				C3506D591D5256FD005BC914 /* Products */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
 		};
-		C35165041D50D0D5002612B8 /* Products */ = {
+		C3506D591D5256FD005BC914 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				C35165031D50D0D5002612B8 /* modCore.framework */,
-				C351650D1D50D0D5002612B8 /* modCoreTests.xctest */,
+				C3506D581D5256FD005BC914 /* libJappsyEngine.framework */,
+				C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		C35165051D50D0D5002612B8 /* modCore */ = {
+		C3506D5A1D5256FD005BC914 /* libJappsyEngine */ = {
 			isa = PBXGroup;
 			children = (
-				C35165061D50D0D5002612B8 /* modCore.h */,
-				C35165081D50D0D5002612B8 /* Info.plist */,
+				C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */,
+				C3506D5D1D5256FD005BC914 /* Info.plist */,
 			);
-			path = modCore;
+			path = libJappsyEngine;
 			sourceTree = "<group>";
 		};
-		C35165111D50D0D5002612B8 /* modCoreTests */ = {
+		C3506D661D5256FD005BC914 /* libJappsyEngineTests */ = {
 			isa = PBXGroup;
 			children = (
-				C35165121D50D0D5002612B8 /* modCoreTests.mm */,
-				C35165141D50D0D5002612B8 /* Info.plist */,
+				C3506D671D5256FD005BC914 /* libJappsyEngineTests.m */,
+				C3506D691D5256FD005BC914 /* Info.plist */,
 			);
-			path = modCoreTests;
+			path = libJappsyEngineTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		C35165001D50D0D5002612B8 /* Headers */ = {
+		C3506D551D5256FD005BC914 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C35165071D50D0D5002612B8 /* modCore.h in Headers */,
+				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		C35165021D50D0D5002612B8 /* modCore */ = {
+		C3506D571D5256FD005BC914 /* libJappsyEngine */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C35165171D50D0D5002612B8 /* Build configuration list for PBXNativeTarget "modCore" */;
+			buildConfigurationList = C3506D6C1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngine" */;
 			buildPhases = (
-				C35164FE1D50D0D5002612B8 /* Sources */,
-				C35164FF1D50D0D5002612B8 /* Frameworks */,
-				C35165001D50D0D5002612B8 /* Headers */,
-				C35165011D50D0D5002612B8 /* Resources */,
+				C3506D531D5256FD005BC914 /* Sources */,
+				C3506D541D5256FD005BC914 /* Frameworks */,
+				C3506D551D5256FD005BC914 /* Headers */,
+				C3506D561D5256FD005BC914 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = modCore;
-			productName = modCore;
-			productReference = C35165031D50D0D5002612B8 /* modCore.framework */;
+			name = libJappsyEngine;
+			productName = libJappsyEngine;
+			productReference = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		C351650C1D50D0D5002612B8 /* modCoreTests */ = {
+		C3506D611D5256FD005BC914 /* libJappsyEngineTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = C351651A1D50D0D5002612B8 /* Build configuration list for PBXNativeTarget "modCoreTests" */;
+			buildConfigurationList = C3506D6F1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngineTests" */;
 			buildPhases = (
-				C35165091D50D0D5002612B8 /* Sources */,
-				C351650A1D50D0D5002612B8 /* Frameworks */,
-				C351650B1D50D0D5002612B8 /* Resources */,
+				C3506D5E1D5256FD005BC914 /* Sources */,
+				C3506D5F1D5256FD005BC914 /* Frameworks */,
+				C3506D601D5256FD005BC914 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				C35165101D50D0D5002612B8 /* PBXTargetDependency */,
+				C3506D651D5256FD005BC914 /* PBXTargetDependency */,
 			);
-			name = modCoreTests;
-			productName = modCoreTests;
-			productReference = C351650D1D50D0D5002612B8 /* modCoreTests.xctest */;
+			name = libJappsyEngineTests;
+			productName = libJappsyEngineTests;
+			productReference = C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		C35164FA1D50D0D5002612B8 /* Project object */ = {
+		C3506D4F1D5256FD005BC914 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0730;
-				ORGANIZATIONNAME = Jappsy;
+				ORGANIZATIONNAME = jappsy.com;
 				TargetAttributes = {
-					C35165021D50D0D5002612B8 = {
+					C3506D571D5256FD005BC914 = {
 						CreatedOnToolsVersion = 7.3;
 					};
-					C351650C1D50D0D5002612B8 = {
+					C3506D611D5256FD005BC914 = {
 						CreatedOnToolsVersion = 7.3;
 					};
 				};
 			};
-			buildConfigurationList = C35164FD1D50D0D5002612B8 /* Build configuration list for PBXProject "modCore" */;
+			buildConfigurationList = C3506D521D5256FD005BC914 /* Build configuration list for PBXProject "libJappsyEngine" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 			);
-			mainGroup = C35164F91D50D0D5002612B8;
-			productRefGroup = C35165041D50D0D5002612B8 /* Products */;
+			mainGroup = C3506D4E1D5256FD005BC914;
+			productRefGroup = C3506D591D5256FD005BC914 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				C35165021D50D0D5002612B8 /* modCore */,
-				C351650C1D50D0D5002612B8 /* modCoreTests */,
+				C3506D571D5256FD005BC914 /* libJappsyEngine */,
+				C3506D611D5256FD005BC914 /* libJappsyEngineTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		C35165011D50D0D5002612B8 /* Resources */ = {
+		C3506D561D5256FD005BC914 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C351650B1D50D0D5002612B8 /* Resources */ = {
+		C3506D601D5256FD005BC914 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -190,33 +190,33 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		C35164FE1D50D0D5002612B8 /* Sources */ = {
+		C3506D531D5256FD005BC914 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C35165091D50D0D5002612B8 /* Sources */ = {
+		C3506D5E1D5256FD005BC914 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C35165131D50D0D5002612B8 /* modCoreTests.mm in Sources */,
+				C3506D681D5256FD005BC914 /* libJappsyEngineTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		C35165101D50D0D5002612B8 /* PBXTargetDependency */ = {
+		C3506D651D5256FD005BC914 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = C35165021D50D0D5002612B8 /* modCore */;
-			targetProxy = C351650F1D50D0D5002612B8 /* PBXContainerItemProxy */;
+			target = C3506D571D5256FD005BC914 /* libJappsyEngine */;
+			targetProxy = C3506D641D5256FD005BC914 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		C35165151D50D0D5002612B8 /* Debug */ = {
+		C3506D6A1D5256FD005BC914 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -254,7 +254,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -264,7 +264,7 @@
 			};
 			name = Debug;
 		};
-		C35165161D50D0D5002612B8 /* Release */ = {
+		C3506D6B1D5256FD005BC914 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -296,7 +296,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -306,58 +306,56 @@
 			};
 			name = Release;
 		};
-		C35165181D50D0D5002612B8 /* Debug */ = {
+		C3506D6D1D5256FD005BC914 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = modCore/Info.plist;
+				INFOPLIST_FILE = libJappsyEngine/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.modCore;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
-		C35165191D50D0D5002612B8 /* Release */ = {
+		C3506D6E1D5256FD005BC914 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = NO;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				INFOPLIST_FILE = modCore/Info.plist;
+				INFOPLIST_FILE = libJappsyEngine/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.modCore;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
-		C351651B1D50D0D5002612B8 /* Debug */ = {
+		C3506D701D5256FD005BC914 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = modCoreTests/Info.plist;
+				INFOPLIST_FILE = libJappsyEngineTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.modCoreTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngineTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		C351651C1D50D0D5002612B8 /* Release */ = {
+		C3506D711D5256FD005BC914 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				INFOPLIST_FILE = modCoreTests/Info.plist;
+				INFOPLIST_FILE = libJappsyEngineTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.modCoreTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngineTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -365,34 +363,34 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		C35164FD1D50D0D5002612B8 /* Build configuration list for PBXProject "modCore" */ = {
+		C3506D521D5256FD005BC914 /* Build configuration list for PBXProject "libJappsyEngine" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C35165151D50D0D5002612B8 /* Debug */,
-				C35165161D50D0D5002612B8 /* Release */,
+				C3506D6A1D5256FD005BC914 /* Debug */,
+				C3506D6B1D5256FD005BC914 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		C35165171D50D0D5002612B8 /* Build configuration list for PBXNativeTarget "modCore" */ = {
+		C3506D6C1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngine" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C35165181D50D0D5002612B8 /* Debug */,
-				C35165191D50D0D5002612B8 /* Release */,
+				C3506D6D1D5256FD005BC914 /* Debug */,
+				C3506D6E1D5256FD005BC914 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		C351651A1D50D0D5002612B8 /* Build configuration list for PBXNativeTarget "modCoreTests" */ = {
+		C3506D6F1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngineTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				C351651B1D50D0D5002612B8 /* Debug */,
-				C351651C1D50D0D5002612B8 /* Release */,
+				C3506D701D5256FD005BC914 /* Debug */,
+				C3506D711D5256FD005BC914 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = C35164FA1D50D0D5002612B8 /* Project object */;
+	rootObject = C3506D4F1D5256FD005BC914 /* Project object */;
 }

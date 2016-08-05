@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef UATOMIC_H
-#define UATOMIC_H
+#ifndef JAPPSY_UATOMIC_H
+#define JAPPSY_UATOMIC_H
 
 #include <platform.h>
 
@@ -461,4 +461,4 @@
     }
 #endif
 
-#endif //ANDROID_UATOMIC_H
+#endif //JAPPSY_UATOMIC_H

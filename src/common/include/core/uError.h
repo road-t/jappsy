@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UERROR_H
-#define ANDROID_UERROR_H
+#ifndef JAPPSY_UERROR_H
+#define JAPPSY_UERROR_H
 
 #include <platform.h>
 
@@ -51,4 +51,4 @@ bool is_errorPtr(const char* ptr);
 }
 #endif
 
-#endif //ANDROID_UERROR_H
+#endif //JAPPSY_UERROR_H

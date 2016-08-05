@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UPNG_H
-#define ANDROID_UPNG_H
+#ifndef JAPPSY_UPNG_H
+#define JAPPSY_UPNG_H
 
 #include <platform.h>
 
@@ -34,4 +34,4 @@ bool png_create(const void* pixels, uint32_t inWidth, uint32_t inHeight, bool al
 }
 #endif
 
-#endif //ANDROID_UPNG_H
+#endif //JAPPSY_UPNG_H

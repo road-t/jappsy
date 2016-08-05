@@ -14,3 +14,20 @@
  * limitations under the License.
  */
 
+#import <QuartzCore/QuartzCore.h>
+
+#import <OpenGLES/EAGL.h>
+#import <OpenGLES/EAGLDrawable.h>
+
+#include <opengl/uOpenGL.h>
+
+@interface JappsyViewRenderer : NSObject
+
+@property (nonatomic) GLuint defaultFBOName;
+
+- (instancetype) initWithContext:(EAGLContext*)context AndDrawable:(id<EAGLDrawable>)drawable;
+- (BOOL) resizeFromLayer:(CAEAGLLayer*)layer;
+- (void) render;
+- (void) dealloc;
+
+@end

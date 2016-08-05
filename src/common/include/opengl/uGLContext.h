@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UGLCONTEXT_H
-#define ANDROID_UGLCONTEXT_H
+#ifndef JAPPSY_UGLCONTEXT_H
+#define JAPPSY_UGLCONTEXT_H
 
 #include <platform.h>
 #include <opengl/opengl.h>
@@ -34,4 +34,4 @@ private:
 }
 #endif
 
-#endif //ANDROID_UGLCONTEXT_H
+#endif //JAPPSY_UGLCONTEXT_H

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UJAPPSYIMAGE_H
-#define ANDROID_UJAPPSYIMAGE_H
+#ifndef JAPPSY_UJAPPSYIMAGE_H
+#define JAPPSY_UJAPPSYIMAGE_H
 
 #include <platform.h>
 
@@ -31,4 +31,4 @@ void* jappsyImage_getPixels(const void* ptr, uint32_t insize, uint32_t outWidth,
 }
 #endif
 
-#endif //ANDROID_UJAPPSYIMAGE_H
+#endif //JAPPSY_UJAPPSYIMAGE_H

@@ -47,6 +47,8 @@
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
 		C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */; };
+		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
+		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +96,8 @@
 		C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libJappsyEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = libJappsyEngineTests.mm; sourceTree = "<group>"; };
 		C3506D691D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C35272071D551BBE00F41198 /* uOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uOpenGL.h; sourceTree = "<group>"; };
+		C35272091D551E9F00F41198 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +108,7 @@
 				C3057A6A1D54E0B700171EFC /* libz.framework in Frameworks */,
 				C30578281D54BBA000171EFC /* Foundation.framework in Frameworks */,
 				C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */,
+				C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */,
 				C305782A1D54BBAB00171EFC /* OpenGLES.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -142,6 +147,7 @@
 		C30577BE1D54BA9C00171EFC /* include */ = {
 			isa = PBXGroup;
 			children = (
+				C35271FC1D551B8400F41198 /* opengl */,
 				C30577BF1D54BA9C00171EFC /* cipher */,
 				C30577C91D54BA9C00171EFC /* core */,
 				C30577E11D54BA9C00171EFC /* jappsy.c */,
@@ -196,6 +202,7 @@
 		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
+				C35272091D551E9F00F41198 /* QuartzCore.framework */,
 				C3057A6B1D54E17500171EFC /* libz.framework */,
 				C30578261D54BB7D00171EFC /* libs */,
 				C30577BE1D54BA9C00171EFC /* include */,
@@ -234,6 +241,14 @@
 			path = libJappsyEngineTests;
 			sourceTree = "<group>";
 		};
+		C35271FC1D551B8400F41198 /* opengl */ = {
+			isa = PBXGroup;
+			children = (
+				C35272071D551BBE00F41198 /* uOpenGL.h */,
+			);
+			path = opengl;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -242,6 +257,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
+				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C30578061D54BA9C00171EFC /* uString.h in Headers */,
 				C30577BA1D54BA7300171EFC /* JappsyView.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,

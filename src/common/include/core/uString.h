@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef USTRING_H
-#define USTRING_H
+#ifndef JAPPSY_USTRING_H
+#define JAPPSY_USTRING_H
 
 #include <platform.h>
 
@@ -592,4 +592,4 @@ extern "C" {
 }
 #endif
 
-#endif //ANDROID_USTRING_H
+#endif //JAPPSY_USTRING_H

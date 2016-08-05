@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UJPEG_H
-#define ANDROID_UJPEG_H
+#ifndef JAPPSY_UJPEG_H
+#define JAPPSY_UJPEG_H
 
 #include <platform.h>
 
@@ -36,4 +36,4 @@ bool jpeg_create(const void* pixels, uint32_t inWidth, uint32_t inHeight, int qu
 }
 #endif
 
-#endif //ANDROID_UJPEG_H
+#endif //JAPPSY_UJPEG_H

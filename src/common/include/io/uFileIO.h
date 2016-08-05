@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UFILEIO_H
-#define ANDROID_UFILEIO_H
+#ifndef JAPPSY_UFILEIO_H
+#define JAPPSY_UFILEIO_H
 
 #include <platform.h>
 
@@ -43,4 +43,4 @@ void* fio_readFile(const int fd, uint32_t* size, char** error);
 }
 #endif
 
-#endif //ANDROID_UFILEIO_H
+#endif //JAPPSY_UFILEIO_H

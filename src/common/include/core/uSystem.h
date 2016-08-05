@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef USYSTEM_H
-#define USYSTEM_H
+#ifndef JAPPSY_USYSTEM_H
+#define JAPPSY_USYSTEM_H
 
 #include <platform.h>
 
@@ -123,4 +123,4 @@ void uSystemQuit();
 }
 #endif
 
-#endif //USYSTEM_H
+#endif //JAPPSY_USYSTEM_H

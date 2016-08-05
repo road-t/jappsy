@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_UGLFRAMEBUFFER_H
-#define ANDROID_UGLFRAMEBUFFER_H
+#ifndef JAPPSY_UGLFRAMEBUFFER_H
+#define JAPPSY_UGLFRAMEBUFFER_H
 
 #include "../platform.h"
 
@@ -29,4 +29,4 @@ extern "C" {
 }
 #endif
 
-#endif //ANDROID_UGLFRAMEBUFFER_H
+#endif //JAPPSY_UGLFRAMEBUFFER_H

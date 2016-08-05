@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C34FEDD11D5495700003E0A0 /* src in Resources */ = {isa = PBXBuildFile; fileRef = C34FEDD01D5495700003E0A0 /* src */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
 		C3506D681D5256FD005BC914 /* libJappsyEngineTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.m */; };
@@ -23,6 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C34FEDD01D5495700003E0A0 /* src */ = {isa = PBXFileReference; lastKnownFileType = folder; path = src; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -53,6 +55,7 @@
 		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
+				C34FEDD01D5495700003E0A0 /* src */,
 				C3506D5A1D5256FD005BC914 /* libJappsyEngine */,
 				C3506D661D5256FD005BC914 /* libJappsyEngineTests */,
 				C3506D591D5256FD005BC914 /* Products */,
@@ -177,6 +180,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C34FEDD11D5495700003E0A0 /* src in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -15,3 +15,16 @@
  */
 
 #import <UIKit/UIKit.h>
+
+/*
+@interface JappsyView : UIView
+
+@property (readonly, nonatomic, getter=isRunning) BOOL running;
+@property (nonatomic) NSInteger interval;
+
+- (void) onResume();
+- (void) onPause();
+- (void) drawView:(id)sender;
+
+@end
+*/

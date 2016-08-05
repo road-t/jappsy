@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,20 +14,3 @@
  * limitations under the License.
  */
 
-#include "jappsy.h"
-#include <core/uMemory.h>
-#include <core/uSystem.h>
-
-void jappsyInit() {
-    mmInit();
-    uSystemInit();
-}
-
-void jappsyQuit() {
-#ifdef DEBUG
-    memLogStats(NULL, NULL, NULL, NULL);
-#endif
-
-    uSystemQuit();
-    mmQuit();
-}

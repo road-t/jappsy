@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_USYSTEM_H
-#define ANDROID_USYSTEM_H
+#ifndef USYSTEM_H
+#define USYSTEM_H
 
 #include <platform.h>
 
@@ -36,10 +36,20 @@ void uSystemQuit();
 #if !defined(nanoTime)
     #define nanoTime nanoTime_Inline
 
+	#if defined(__IOS__)
+		#ifndef __OBJC__
+			uint64_t CNSDateNano();
+		#endif
+	#endif
+	
     static inline uint64_t nanoTime_Inline() {
     #if defined(__IOS__)
-        return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000000000);
-    #elif defined(__WINNT__)
+		#ifdef __OBJC__
+			return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000000000);
+		#else
+			return CNSDateNano();
+		#endif
+	#elif defined(__WINNT__)
         LARGE_INTEGER Counter;
         QueryPerformanceCounter(&Counter);
         return (Counter.QuadPart - uSystem_CounterShift.QuadPart) * 1000000000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftNS;
@@ -57,10 +67,20 @@ void uSystemQuit();
 #if !defined(currentTimeMillis)
     #define currentTimeMillis currentTimeMillis_Inline
 
+	#if defined(__IOS__)
+		#ifndef __OBJC__
+			uint64_t CNSDateMillis();
+		#endif
+	#endif
+
     static inline uint64_t currentTimeMillis_Inline() {
     #if defined(__IOS__)
-        return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000);
-    #elif defined(__WINNT__)
+		#ifdef __OBJC__
+			return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000);
+		#else
+			return CNSDateMillis();
+		#endif
+	#elif defined(__WINNT__)
         LARGE_INTEGER Counter;
         QueryPerformanceCounter(&Counter);
         return (Counter.QuadPart - uSystem_CounterShift.QuadPart) * 1000LL / uSystem_Frequency.QuadPart + uSystem_SystemTimeShiftMS;
@@ -78,9 +98,19 @@ void uSystemQuit();
 #if !defined(systemSleep)
     #define systemSleep systemSleep_Inline
 
+	#if defined(__IOS__)
+		#ifndef __OBJC__
+			void CNSThreadSleep(int ms);
+		#endif
+	#endif
+	
     static inline void systemSleep_Inline(int ms) {
     #if defined(__IOS__)
-        [NSThread sleepForTimeInterval:(double)ms / 1000.0];
+		#ifdef __OBJC__
+			[NSThread sleepForTimeInterval:(double)ms / 1000.0];
+		#else
+			CNSThreadSleep(ms);
+		#endif
     #elif defined(__WINNT__)
         Sleep(ms);
     #else
@@ -93,4 +123,4 @@ void uSystemQuit();
 }
 #endif
 
-#endif //ANDROID_USYSTEM_H
+#endif //USYSTEM_H

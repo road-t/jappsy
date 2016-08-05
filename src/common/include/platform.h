@@ -17,7 +17,10 @@
 #ifndef JAPPSY_PLATFORM_H
 #define JAPPSY_PLATFORM_H
 
-#define DEBUG
+#ifndef DEBUG
+	// TODO: Remove Always Debug Mode
+	#define DEBUG
+#endif
 #define JAPPSY_IO_RESTORE_FILE_POINTER
 
 #if defined(_AIX)
@@ -146,7 +149,33 @@
 /* INCLUDES */
 
 #if defined(__IOS__)
-    #import <Foundation/Foundation.h>
+	#ifdef __OBJC__
+		#import <Foundation/Foundation.h>
+	#else
+		#include <stdint.h>
+		#include <unistd.h>
+		#include <string.h>
+		#include <stdlib.h>
+		#include <stdio.h>
+		#include <time.h>
+	#endif
+
+	#ifndef __cplusplus
+		#ifndef bool
+			#define bool int8_t
+			#define false 0
+			#define true 1
+		#endif
+	#endif
+
+	#include <core/uError.h>
+
+	#ifndef MAX_PATH
+        #ifndef PATH_MAX
+            #define PATH_MAX 4096
+        #endif
+        #define MAX_PATH PATH_MAX
+    #endif
 #elif defined(__WINNT__)
     #include <stdint.h>
     #include <windows.h>
@@ -157,8 +186,6 @@
     #include <time.h>
     #include <errno.h>
 
-    #include <core/uError.h>
-
     #ifndef __cplusplus
         #ifndef bool
             #define bool int8_t
@@ -166,6 +193,8 @@
             #define true 1
         #endif
     #endif
+
+	#include <core/uError.h>
 
     #ifndef NULL
 		#define NULL ((void*)0)
@@ -204,7 +233,15 @@
 #ifndef LOG
     #ifdef DEBUG
         #if defined(__IOS__)
-            #define LOG(f, ...) NSLog(@ ## f, ##__VA_ARGS__);
+			#ifdef __cplusplus
+				extern "C" {
+			#endif
+					void CNSLog(const char* format, ...);
+			#ifdef __cplusplus
+				}
+			#endif
+
+			#define LOG(f, ...) CNSLog(f, ##__VA_ARGS__);
         #elif defined(__WINNT__)
             #define LOG(f, ...) printf(f, ##__VA_ARGS__);
         #elif defined(__JNI__)

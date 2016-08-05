@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_JAPPSY_H
-#define ANDROID_JAPPSY_H
+#ifndef JAPPSY_H
+#define JAPPSY_H
 
 #include <platform.h>
 
@@ -33,4 +33,4 @@ void jappsyQuit();
 }
 #endif
 
-#endif //ANDROID_JAPPSY_H
+#endif //JAPPSY_H

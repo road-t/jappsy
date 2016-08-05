@@ -1504,7 +1504,11 @@ z_streamp strm;
 {
     struct inflate_state FAR *state;
 
+#if defined(__APPLE__) && defined(__MACH__)
+    if (strm == Z_NULL || strm->state == Z_NULL) return ULONG_MAX << 16;
+#else
     if (strm == Z_NULL || strm->state == Z_NULL) return -1L << 16;
+#endif
     state = (struct inflate_state FAR *)strm->state;
     return ((long)(state->back) << 16) +
         (state->mode == COPY ? state->length :

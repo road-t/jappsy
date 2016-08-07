@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C30578671D54D9E100171EFC /* libz.h in Headers */ = {isa = PBXBuildFile; fileRef = C30578661D54D9E100171EFC /* libz.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C30578671D54D9E100171EFC /* libz.h in Headers */ = {isa = PBXBuildFile; fileRef = C30578661D54D9E100171EFC /* libz.h */; };
 		C305797F1D54DA0F00171EFC /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = C305786F1D54DA0F00171EFC /* adler32.c */; };
 		C30579881D54DA0F00171EFC /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = C305787A1D54DA0F00171EFC /* compress.c */; };
 		C3057A171D54DA0F00171EFC /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = C30579221D54DA0F00171EFC /* crc32.c */; };

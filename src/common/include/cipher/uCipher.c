@@ -15,7 +15,11 @@
  */
 
 #include "uCipher.h"
-#include <zlib.h>
+#if defined(__IOS__)
+	#include <libz/zlib.h>
+#else
+	#include <zlib.h>
+#endif
 #include "../core/uMemory.h"
 #include "../core/uString.h"
 

@@ -16,13 +16,12 @@
 
 #import <UIKit/UIKit.h>
 
-@interface JappsyView : UIView
+//! Project version number for libz.
+FOUNDATION_EXPORT double libzVersionNumber;
 
-@property (readonly, nonatomic, getter=isRunning) BOOL running;
-@property (nonatomic) NSInteger interval;
+//! Project version string for libz.
+FOUNDATION_EXPORT const unsigned char libzVersionString[];
 
-- (void) onResume;
-- (void) onPause;
-- (void) drawView:(id)sender;
-
-@end
+// In this header, you should import all the public headers of your framework using statements like #import <libz/PublicHeader.h>
+#import <libz/zlib.h>
+#import <libz/zconf.h>

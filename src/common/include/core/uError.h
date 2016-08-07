@@ -36,6 +36,7 @@ extern const char* eIOReadLimit;
 extern const char* eInvalidPointer;
 extern const char* eConvert;
 extern const char* eOutOfRange;
+extern const char* eOpenGL;
 
 extern const char* eUnknown;
 

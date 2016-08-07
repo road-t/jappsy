@@ -24,4 +24,5 @@ FOUNDATION_EXPORT const unsigned char libJappsyEngineVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <libJappsyEngine/PublicHeader.h>
 
+#import <libJappsyEngine/JappsyView.h>
 

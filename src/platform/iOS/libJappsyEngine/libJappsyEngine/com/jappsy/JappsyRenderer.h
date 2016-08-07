@@ -14,20 +14,29 @@
  * limitations under the License.
  */
 
-#import <QuartzCore/QuartzCore.h>
+#ifndef JAPPSYRENDERER_H
+#define JAPPSYRENDERER_H
 
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/EAGLDrawable.h>
-
+#import <UIKit/UIKit.h>
 #include <opengl/uOpenGL.h>
 
-@interface JappsyViewRenderer : NSObject
+class GLContext {
+private:
+	EAGLContext* context;
+	
+	GLuint frameBuffer = 0;
+	GLuint colorRenderBuffer = 0;
+	GLuint depthRenderBuffer = 0;
+	
+	void release();
+public:
+	GLint width;
+	GLint height;
+	
+	GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*);
+	~GLContext();
+	void update(CAEAGLLayer* layer) throw(const char*);
+	void render();
+};
 
-@property (nonatomic) GLuint defaultFBOName;
-
-- (instancetype) initWithContext:(EAGLContext*)context AndDrawable:(id<EAGLDrawable>)drawable;
-- (BOOL) resizeFromLayer:(CAEAGLLayer*)layer;
-- (void) render;
-- (void) dealloc;
-
-@end
+#endif

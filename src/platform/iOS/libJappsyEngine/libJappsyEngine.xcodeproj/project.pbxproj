@@ -7,10 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C30577BA1D54BA7300171EFC /* JappsyView.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577B61D54BA7300171EFC /* JappsyView.h */; };
+		C30577BA1D54BA7300171EFC /* JappsyView.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577B61D54BA7300171EFC /* JappsyView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C30577BB1D54BA7300171EFC /* JappsyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C30577B71D54BA7300171EFC /* JappsyView.mm */; };
-		C30577BC1D54BA7300171EFC /* JappsyViewRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577B81D54BA7300171EFC /* JappsyViewRenderer.h */; };
-		C30577BD1D54BA7300171EFC /* JappsyViewRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C30577B91D54BA7300171EFC /* JappsyViewRenderer.mm */; };
 		C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C01D54BA9C00171EFC /* uCipher.c */; };
 		C30577EB1D54BA9C00171EFC /* uCipher.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C01D54BA9C00171EFC /* uCipher.c */; };
 		C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577C11D54BA9C00171EFC /* uCipher.h */; };
@@ -42,8 +40,9 @@
 		C305783B1D54CADE00171EFC /* uSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578391D54CADE00171EFC /* uSystem.m */; };
 		C30578401D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
 		C30578411D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
-		C3057A6A1D54E0B700171EFC /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3057A691D54E0B700171EFC /* libz.framework */; };
-		C3057A6C1D54E17500171EFC /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3057A6B1D54E17500171EFC /* libz.framework */; };
+		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
+		C341B2AC1D56B5C000D2D70F /* JappsyRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AA1D56B5C000D2D70F /* JappsyRenderer.mm */; };
+		C341B2AD1D56B5C000D2D70F /* JappsyRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = C341B2AB1D56B5C000D2D70F /* JappsyRenderer.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
 		C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */; };
@@ -64,8 +63,6 @@
 /* Begin PBXFileReference section */
 		C30577B61D54BA7300171EFC /* JappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JappsyView.h; sourceTree = "<group>"; };
 		C30577B71D54BA7300171EFC /* JappsyView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyView.mm; sourceTree = "<group>"; };
-		C30577B81D54BA7300171EFC /* JappsyViewRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JappsyViewRenderer.h; sourceTree = "<group>"; };
-		C30577B91D54BA7300171EFC /* JappsyViewRenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyViewRenderer.mm; sourceTree = "<group>"; };
 		C30577C01D54BA9C00171EFC /* uCipher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uCipher.c; sourceTree = "<group>"; };
 		C30577C11D54BA9C00171EFC /* uCipher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uCipher.h; sourceTree = "<group>"; };
 		C30577C31D54BA9C00171EFC /* uCrc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uCrc.c; sourceTree = "<group>"; };
@@ -88,8 +85,9 @@
 		C30578361D54C73B00171EFC /* platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = platform.m; sourceTree = "<group>"; };
 		C30578391D54CADE00171EFC /* uSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uSystem.m; sourceTree = "<group>"; };
 		C305783F1D54CBAB00171EFC /* uMemory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uMemory.mm; sourceTree = "<group>"; };
-		C3057A691D54E0B700171EFC /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../libz/build/Debug-iphoneos/libz.framework"; sourceTree = "<group>"; };
-		C3057A6B1D54E17500171EFC /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../libz/build/Debug-iphoneos/libz.framework"; sourceTree = "<group>"; };
+		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
+		C341B2AA1D56B5C000D2D70F /* JappsyRenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyRenderer.mm; sourceTree = "<group>"; };
+		C341B2AB1D56B5C000D2D70F /* JappsyRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JappsyRenderer.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -105,7 +103,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3057A6A1D54E0B700171EFC /* libz.framework in Frameworks */,
+				C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */,
 				C30578281D54BBA000171EFC /* Foundation.framework in Frameworks */,
 				C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */,
 				C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */,
@@ -117,7 +115,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3057A6C1D54E17500171EFC /* libz.framework in Frameworks */,
 				C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -136,10 +133,10 @@
 		C30577B51D54BA7300171EFC /* jappsy */ = {
 			isa = PBXGroup;
 			children = (
+				C341B2AA1D56B5C000D2D70F /* JappsyRenderer.mm */,
+				C341B2AB1D56B5C000D2D70F /* JappsyRenderer.h */,
 				C30577B61D54BA7300171EFC /* JappsyView.h */,
 				C30577B71D54BA7300171EFC /* JappsyView.mm */,
-				C30577B81D54BA7300171EFC /* JappsyViewRenderer.h */,
-				C30577B91D54BA7300171EFC /* JappsyViewRenderer.mm */,
 			);
 			path = jappsy;
 			sourceTree = "<group>";
@@ -191,7 +188,8 @@
 		C30578261D54BB7D00171EFC /* libs */ = {
 			isa = PBXGroup;
 			children = (
-				C3057A691D54E0B700171EFC /* libz.framework */,
+				C341B29F1D569A8C00D2D70F /* libz.framework */,
+				C35272091D551E9F00F41198 /* QuartzCore.framework */,
 				C30578271D54BBA000171EFC /* Foundation.framework */,
 				C305782B1D54BBBB00171EFC /* UIKit.framework */,
 				C30578291D54BBAB00171EFC /* OpenGLES.framework */,
@@ -202,8 +200,6 @@
 		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
-				C35272091D551E9F00F41198 /* QuartzCore.framework */,
-				C3057A6B1D54E17500171EFC /* libz.framework */,
 				C30578261D54BB7D00171EFC /* libs */,
 				C30577BE1D54BA9C00171EFC /* include */,
 				C3506D5A1D5256FD005BC914 /* libJappsyEngine */,
@@ -257,17 +253,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
+				C30577BA1D54BA7300171EFC /* JappsyView.h in Headers */,
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C30578061D54BA9C00171EFC /* uString.h in Headers */,
-				C30577BA1D54BA7300171EFC /* JappsyView.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
+				C341B2AD1D56B5C000D2D70F /* JappsyRenderer.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,
 				C30578011D54BA9C00171EFC /* uMemory.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
-				C30577BC1D54BA7300171EFC /* JappsyViewRenderer.h in Headers */,
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
 				C305780B1D54BA9C00171EFC /* uSystem.h in Headers */,
 			);
@@ -370,8 +366,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */,
+				C341B2AC1D56B5C000D2D70F /* JappsyRenderer.mm in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
-				C30577BD1D54BA7300171EFC /* JappsyViewRenderer.mm in Sources */,
 				C305782E1D54C13500171EFC /* uString.mm in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,

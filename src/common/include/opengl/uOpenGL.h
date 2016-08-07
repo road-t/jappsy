@@ -112,4 +112,38 @@ static inline const char* GetGLErrorString(GLenum error) {
     }													\
 }
 
+static inline const char* GetGLFramebufferStatus(GLenum status) {
+	const char *str;
+	switch (status) {
+		case GL_FRAMEBUFFER_COMPLETE:
+			str = "GL_FRAMEBUFFER_COMPLETE";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+			str = "GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
+			str = "GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS";
+			break;
+		case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+			str = "GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT";
+			break;
+		case GL_FRAMEBUFFER_UNSUPPORTED:
+			str = "GL_FRAMEBUFFER_UNSUPPORTED";
+			break;
+		default:
+			str = "(ERROR: Unknown Framebuffer Status)";
+			break;
+	}
+	return str;
+}
+
+#define GetGLFramebufferStatus()									\
+{																	\
+	GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);		\
+	if (status != GL_FRAMEBUFFER_COMPLETE) {						\
+		NSLog(@"GLFramebufferStatus %s set in File:%s Line:%d\n",   \
+			GetGLFramebufferStatus(status), __FILE__, __LINE__);	\
+	}																\
+}
+
 #endif

@@ -7,31 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C341B2A91D56B0F400D2D70F /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */; };
+		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
+		C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */; };
 		C3506D801D52575C005BC914 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D7F1D52575C005BC914 /* main.m */; };
-		C3506D831D52575C005BC914 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D821D52575C005BC914 /* AppDelegate.m */; };
-		C3506D851D52575C005BC914 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = C3506D841D52575C005BC914 /* Shader.fsh */; };
-		C3506D871D52575C005BC914 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C3506D861D52575C005BC914 /* Shader.vsh */; };
-		C3506D8A1D52575C005BC914 /* GameViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D891D52575C005BC914 /* GameViewController.m */; };
+		C3506D831D52575C005BC914 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D821D52575C005BC914 /* AppDelegate.mm */; };
 		C3506D8D1D52575C005BC914 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3506D8B1D52575C005BC914 /* Main.storyboard */; };
 		C3506D8F1D52575C005BC914 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C3506D8E1D52575C005BC914 /* Assets.xcassets */; };
 		C3506D921D52575C005BC914 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3506D901D52575C005BC914 /* LaunchScreen.storyboard */; };
-		C3506D9A1D5257F3005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D991D5257F3005BC914 /* libJappsyEngine.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
+		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
+		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
+		C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleJappsyView.h; sourceTree = "<group>"; };
+		C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleJappsyView.m; sourceTree = "<group>"; };
 		C3506D7B1D52575C005BC914 /* JappsyExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JappsyExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D7F1D52575C005BC914 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C3506D811D52575C005BC914 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
-		C3506D821D52575C005BC914 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		C3506D841D52575C005BC914 /* Shader.fsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
-		C3506D861D52575C005BC914 /* Shader.vsh */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
-		C3506D881D52575C005BC914 /* GameViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GameViewController.h; sourceTree = "<group>"; };
-		C3506D891D52575C005BC914 /* GameViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = GameViewController.m; sourceTree = "<group>"; };
+		C3506D821D52575C005BC914 /* AppDelegate.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = AppDelegate.mm; sourceTree = "<group>"; };
 		C3506D8C1D52575C005BC914 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C3506D8E1D52575C005BC914 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C3506D911D52575C005BC914 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C3506D931D52575C005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C3506D991D5257F3005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../libJappsyEngine/build/Debug-iphoneos/libJappsyEngine.framework"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,7 +38,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3506D9A1D5257F3005BC914 /* libJappsyEngine.framework in Frameworks */,
+				C341B2A91D56B0F400D2D70F /* libJappsyEngine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,7 +48,7 @@
 		C3506D721D52575C005BC914 = {
 			isa = PBXGroup;
 			children = (
-				C3506D991D5257F3005BC914 /* libJappsyEngine.framework */,
+				C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */,
 				C3506D7D1D52575C005BC914 /* JappsyExample */,
 				C3506D7C1D52575C005BC914 /* Products */,
 			);
@@ -68,11 +67,11 @@
 			isa = PBXGroup;
 			children = (
 				C3506D811D52575C005BC914 /* AppDelegate.h */,
-				C3506D821D52575C005BC914 /* AppDelegate.m */,
-				C3506D841D52575C005BC914 /* Shader.fsh */,
-				C3506D861D52575C005BC914 /* Shader.vsh */,
-				C3506D881D52575C005BC914 /* GameViewController.h */,
-				C3506D891D52575C005BC914 /* GameViewController.m */,
+				C3506D821D52575C005BC914 /* AppDelegate.mm */,
+				C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */,
+				C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */,
+				C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */,
+				C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */,
 				C3506D8B1D52575C005BC914 /* Main.storyboard */,
 				C3506D8E1D52575C005BC914 /* Assets.xcassets */,
 				C3506D901D52575C005BC914 /* LaunchScreen.storyboard */,
@@ -148,10 +147,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3506D8D1D52575C005BC914 /* Main.storyboard in Resources */,
-				C3506D871D52575C005BC914 /* Shader.vsh in Resources */,
 				C3506D8F1D52575C005BC914 /* Assets.xcassets in Resources */,
 				C3506D921D52575C005BC914 /* LaunchScreen.storyboard in Resources */,
-				C3506D851D52575C005BC914 /* Shader.fsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,8 +159,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3506D831D52575C005BC914 /* AppDelegate.m in Sources */,
-				C3506D8A1D52575C005BC914 /* GameViewController.m in Sources */,
+				C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */,
+				C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */,
+				C3506D831D52575C005BC914 /* AppDelegate.mm in Sources */,
 				C3506D801D52575C005BC914 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

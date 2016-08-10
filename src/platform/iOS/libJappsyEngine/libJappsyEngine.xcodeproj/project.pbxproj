@@ -43,6 +43,9 @@
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
 		C341B2AC1D56B5C000D2D70F /* JappsyRenderer.mm in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AA1D56B5C000D2D70F /* JappsyRenderer.mm */; };
 		C341B2AD1D56B5C000D2D70F /* JappsyRenderer.h in Headers */ = {isa = PBXBuildFile; fileRef = C341B2AB1D56B5C000D2D70F /* JappsyRenderer.h */; };
+		C34FD9451D5B21DB0022FF71 /* uVector.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9431D5B21DB0022FF71 /* uVector.h */; };
+		C34FD9461D5B21DB0022FF71 /* uVector.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9441D5B21DB0022FF71 /* uVector.mm */; };
+		C34FD9471D5B21DB0022FF71 /* uVector.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9441D5B21DB0022FF71 /* uVector.mm */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
 		C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */; };
@@ -88,6 +91,8 @@
 		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C341B2AA1D56B5C000D2D70F /* JappsyRenderer.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyRenderer.mm; sourceTree = "<group>"; };
 		C341B2AB1D56B5C000D2D70F /* JappsyRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JappsyRenderer.h; sourceTree = "<group>"; };
+		C34FD9431D5B21DB0022FF71 /* uVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uVector.h; sourceTree = "<group>"; };
+		C34FD9441D5B21DB0022FF71 /* uVector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uVector.mm; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -172,6 +177,8 @@
 		C30577C91D54BA9C00171EFC /* core */ = {
 			isa = PBXGroup;
 			children = (
+				C34FD9431D5B21DB0022FF71 /* uVector.h */,
+				C34FD9441D5B21DB0022FF71 /* uVector.mm */,
 				C30577CA1D54BA9C00171EFC /* uAtomic.h */,
 				C30577CB1D54BA9C00171EFC /* uError.cpp */,
 				C30577CC1D54BA9C00171EFC /* uError.h */,
@@ -261,6 +268,7 @@
 				C341B2AD1D56B5C000D2D70F /* JappsyRenderer.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,
+				C34FD9451D5B21DB0022FF71 /* uVector.h in Headers */,
 				C30578011D54BA9C00171EFC /* uMemory.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
@@ -371,6 +379,7 @@
 				C305782E1D54C13500171EFC /* uString.mm in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,
+				C34FD9461D5B21DB0022FF71 /* uVector.mm in Sources */,
 				C305781A1D54BA9C00171EFC /* jappsy.c in Sources */,
 				C30578401D54CBAB00171EFC /* uMemory.mm in Sources */,
 				C30577F41D54BA9C00171EFC /* uMD5.c in Sources */,
@@ -386,6 +395,7 @@
 				C30578411D54CBAB00171EFC /* uMemory.mm in Sources */,
 				C30577F01D54BA9C00171EFC /* uCrc.c in Sources */,
 				C30577FB1D54BA9C00171EFC /* uError.cpp in Sources */,
+				C34FD9471D5B21DB0022FF71 /* uVector.mm in Sources */,
 				C30577F51D54BA9C00171EFC /* uMD5.c in Sources */,
 				C305781B1D54BA9C00171EFC /* jappsy.c in Sources */,
 				C30577EB1D54BA9C00171EFC /* uCipher.c in Sources */,

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#import <libJappsyEngine/libJappsyEngine.h>
 
-@interface ExampleJappsyView : OMView
+@interface OMView : JappsyView
+
+- (instancetype)init;
+- (instancetype)initWithFrame:(CGRect)frame;
+- (id)initWithCoder:(NSCoder *)decoder;
 
 @end

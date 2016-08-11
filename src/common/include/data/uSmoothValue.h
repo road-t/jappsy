@@ -14,8 +14,22 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#ifndef JAPPSY_SMOOTHVALUE_H
+#define JAPPSY_SMOOTHVALUE_H
 
-@interface ExampleJappsyView : OMView
+#include "../platform.h"
 
-@end
+class SmoothValue {
+private:
+	float* m_items;
+	uint32_t m_count;
+	uint32_t m_size;
+public:
+	SmoothValue(uint32_t count) throw(const char*);
+	~SmoothValue();
+	
+	void put(float v);
+	float value();
+};
+
+#endif //JAPPSY_SMOOTHVALUE_H

@@ -16,7 +16,7 @@
 
 #include <JappsyRenderer.h>
 
-GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*) {
+GLRenderContext::GLRenderContext(GLEngine* engine, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch, EAGLContext* context, CAEAGLLayer* layer) throw(const char*) : GLRender(engine, onframe, ontouch) {
 	this->context = context;
 	
 	glGenFramebuffers(1, &frameBuffer);
@@ -71,7 +71,7 @@ GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*
 	GetGLError();
 }
 
-void GLContext::release() {
+void GLRenderContext::release() {
 	if (frameBuffer) {
 		glDeleteFramebuffers(1, &frameBuffer); frameBuffer = 0;
 	}
@@ -87,11 +87,11 @@ void GLContext::release() {
 	context = NULL;
 }
 
-GLContext::~GLContext() {
+GLRenderContext::~GLRenderContext() {
 	release();
 }
 
-void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
+void GLRenderContext::update(CAEAGLLayer* layer) throw(const char*) {
 	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 	[context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
@@ -132,7 +132,7 @@ void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
 
 static int color = 0;
 
-void GLContext::render() {
+void GLRenderContext::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	
 	float c = (float)color / 255.0f;

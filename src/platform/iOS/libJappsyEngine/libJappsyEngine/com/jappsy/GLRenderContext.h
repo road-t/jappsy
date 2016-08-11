@@ -14,8 +14,30 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#ifndef JAPPSYRENDERER_H
+#define JAPPSYRENDERER_H
 
-@interface ExampleJappsyView : OMView
+#import <UIKit/UIKit.h>
+#include <opengl/uOpenGL.h>
+#include <opengl/uGLRender.h>
 
-@end
+class GLRenderContext : GLRender {
+private:
+	EAGLContext* context;
+	
+	GLuint frameBuffer = 0;
+	GLuint colorRenderBuffer = 0;
+	GLuint depthRenderBuffer = 0;
+	
+	void release();
+public:
+	GLint width;
+	GLint height;
+	
+	GLRenderContext(GLEngine* engine, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch, EAGLContext* context, CAEAGLLayer* layer) throw(const char*);
+	~GLRenderContext();
+	void update(CAEAGLLayer* layer) throw(const char*);
+	void render();
+};
+
+#endif

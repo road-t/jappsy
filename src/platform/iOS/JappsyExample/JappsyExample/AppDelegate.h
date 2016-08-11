@@ -15,11 +15,13 @@
  */
 
 #import <UIKit/UIKit.h>
+#import <libGameOM/OMView.h>
+
+extern OMView *omView;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
-
 
 @end
 

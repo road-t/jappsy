@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSYRENDERER_H
-#define JAPPSYRENDERER_H
+#ifndef OMENGINE_H
+#define OMENGINE_H
 
-#import <UIKit/UIKit.h>
-#include <opengl/uOpenGL.h>
+#include <opengl/uGLEngine.h>
+#include <event/uMotionEvent.h>
 
-class GLContext {
-private:
-	EAGLContext* context;
-	
-	GLuint frameBuffer = 0;
-	GLuint colorRenderBuffer = 0;
-	GLuint depthRenderBuffer = 0;
-	
-	void release();
+class OMEngine : public GLEngine {
 public:
-	GLint width;
-	GLint height;
-	
-	GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*);
-	~GLContext();
-	void update(CAEAGLLayer* layer) throw(const char*);
-	void render();
+    OMEngine();
+    ~OMEngine();
 };
 
-#endif
+#endif //OMENGINE_H

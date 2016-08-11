@@ -14,8 +14,37 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#import "OMView.h"
 
-@interface ExampleJappsyView : OMView
+#include "OMEngine.h"
+
+@implementation OMView
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        OMEngine* omEngine = new OMEngine();
+        [self engine:omEngine];
+    }
+    return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+    self = [super initWithFrame:frame];
+    if (self) {
+        OMEngine* omEngine = new OMEngine();
+        [self engine:omEngine];
+    }
+    return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+    self = [super initWithCoder:decoder];
+    if (self) {
+        OMEngine* omEngine = new OMEngine();
+        [self engine:omEngine];
+    }
+    return self;
+}
 
 @end

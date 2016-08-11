@@ -21,6 +21,7 @@
 
 /** Functions
     void AtomicLock(volatile int32_t* ptr);
+	bool AtomicLockTry(volatile int32_t* ptr);
     void AtomicFastLock(volatile int32_t* ptr);
     void AtomicUnlock(volatile int32_t* ptr);
 
@@ -86,6 +87,14 @@
                 sleep(0);
             #endif
     }
+#endif
+
+#if !defined(AtomicLockTry)
+	#define AtomicLockTry AtomicLockTry_Inline
+
+	static inline bool AtomicLockTry_Inline(volatile int32_t* ptr) {
+		return __sync_lock_test_and_set(ptr, 1) == 0;
+	}
 #endif
 
 #if !defined(AtomicUnlock)

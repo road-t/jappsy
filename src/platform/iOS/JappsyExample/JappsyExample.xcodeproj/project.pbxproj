@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C341B2A91D56B0F400D2D70F /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */; };
 		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
 		C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */; };
+		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
+		C34FD9D01D5BC7FB0022FF71 /* libGameOM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */; };
 		C3506D801D52575C005BC914 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D7F1D52575C005BC914 /* main.m */; };
 		C3506D831D52575C005BC914 /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D821D52575C005BC914 /* AppDelegate.mm */; };
 		C3506D8D1D52575C005BC914 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C3506D8B1D52575C005BC914 /* Main.storyboard */; };
@@ -18,11 +19,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
 		C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleJappsyView.h; sourceTree = "<group>"; };
 		C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleJappsyView.m; sourceTree = "<group>"; };
+		C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
+		C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libGameOM.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libGameOM.framework"; sourceTree = "<group>"; };
 		C3506D7B1D52575C005BC914 /* JappsyExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JappsyExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D7F1D52575C005BC914 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C3506D811D52575C005BC914 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -38,7 +40,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C341B2A91D56B0F400D2D70F /* libJappsyEngine.framework in Frameworks */,
+				C34FD9D01D5BC7FB0022FF71 /* libGameOM.framework in Frameworks */,
+				C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -48,7 +51,8 @@
 		C3506D721D52575C005BC914 = {
 			isa = PBXGroup;
 			children = (
-				C341B2A81D56B0F400D2D70F /* libJappsyEngine.framework */,
+				C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */,
+				C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */,
 				C3506D7D1D52575C005BC914 /* JappsyExample */,
 				C3506D7C1D52575C005BC914 /* Products */,
 			);

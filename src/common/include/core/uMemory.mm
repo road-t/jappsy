@@ -472,8 +472,10 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 void mmfree(void* mem) {
     if (mem != 0) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
-		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
 			free(mem);
+			return;
+		}
         uint32_t pageSize = (uint32_t)AtomicCompareExchange(&mmPageSize, 0, 0);
         uint8_t* page = (uint8_t*)mem;
         #ifdef MM_CHECK_LEFT
@@ -485,8 +487,10 @@ void mmfree(void* mem) {
             mmerror();
         }
 #elif MM_VIRTUAL != 0
-		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
 			free(mem);
+			return;
+		}
         uint32_t* ptr = (uint32_t*)mem; ptr-=2;
         uint32_t prevSize = *ptr;
         uint32_t crc = mmcrc32(0xFFFFFFFF, ptr, 4);
@@ -510,8 +514,10 @@ void mmfree(void* mem) {
             mmVirtualFree(ptr);
         }
 #elif defined(__WINNT__)
-		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
+		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
 			free(mem);
+			return;
+		}
         HANDLE hHeap = HANDLE(AtomicCompareExchange(&mmHeap, 0, 0));
         if (hHeap != 0)
             HeapFree(hHeap, 0, mem);

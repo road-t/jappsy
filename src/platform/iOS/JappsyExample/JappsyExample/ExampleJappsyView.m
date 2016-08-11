@@ -15,6 +15,7 @@
  */
 
 #import "ExampleJappsyView.h"
+#import "AppDelegate.h"
 
 @implementation ExampleJappsyView
 
@@ -25,5 +26,29 @@
     // Drawing code
 }
 */
+
+- (instancetype)init {
+	self = [super init];
+	if (self) {
+		omView = (OMView*)self;
+	}
+	return self;
+}
+
+- (instancetype)initWithFrame:(CGRect)frame {
+	self = [super initWithFrame:frame];
+	if (self) {
+		omView = (OMView*)self;
+	}
+	return self;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder {
+	self = [super initWithCoder:decoder];
+	if (self) {
+		omView = (OMView*)self;
+	}
+	return self;
+}
 
 @end

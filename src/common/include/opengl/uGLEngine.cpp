@@ -14,8 +14,31 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#include "uGLEngine.h"
 
-@interface ExampleJappsyView : OMView
+void GLEngine::onRender() {
+	this->context->frame->loop();
+}
 
-@end
+void GLEngine::onUpdate(int width, int height) {
+	this->context->frame->width = width;
+	this->context->frame->height = height;
+}
+
+void GLEngine::onTouch(MotionEvent* event) {
+	switch (event->actionEvent) {
+		case MotionEvent::ACTION_DOWN:
+			this->context->touchScreen->onTouchStart(event);
+			break;
+			
+		case MotionEvent::ACTION_MOVE:
+			this->context->touchScreen->onTouchMove(event);
+			break;
+			
+		case MotionEvent::ACTION_UP:
+			this->context->touchScreen->onTouchEnd(event);
+			break;
+		
+		default:;
+	}
+}

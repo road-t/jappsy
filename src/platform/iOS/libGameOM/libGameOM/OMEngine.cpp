@@ -14,8 +14,30 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#include "OMEngine.h"
 
-@interface ExampleJappsyView : OMView
+#include <opengl/uOpenGL.h>
+#include <opengl/uGLRender.h>
 
-@end
+static int color = 0;
+
+void onFrame(GLRender* context) {
+    float c = (float)color / 255.0f;
+    glClearColor(0.0f, c, 0.0f, 1.0f);
+    glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    
+    color++;
+    if (color >= 256) color = 0;
+}
+
+void onTouch(const wchar_t* event) {
+    
+}
+
+OMEngine::OMEngine() {
+    context = new GLRender(this, 1920, 1080, ::onFrame, ::onTouch);
+}
+
+OMEngine::~OMEngine() {
+    delete context;
+}

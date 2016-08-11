@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-#import <libGameOM/libGameOM.h>
+#ifndef JAPPSY_UGLENGINE_H
+#define JAPPSY_UGLENGINE_H
 
-@interface ExampleJappsyView : OMView
+#include <opengl/uGLRender.h>
+#include <event/uMotionEvent.h>
 
-@end
+class GLEngine {
+protected:
+	GLRender* context;
+	
+public:
+	inline GLEngine() {}
+	virtual inline ~GLEngine() {}
+	
+	void onRender();
+	void onUpdate(int width, int height);
+	void onTouch(MotionEvent* event);
+};
+
+#endif //JAPPSY_UGLENGINE_H

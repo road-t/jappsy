@@ -21,7 +21,6 @@
 	#include <zlib.h>
 #endif
 #include "../core/uMemory.h"
-#include "../core/uString.h"
 
 #define GZIP_MAGIC 0x8b1f
 

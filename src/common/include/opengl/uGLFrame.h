@@ -14,15 +14,37 @@
  * limitations under the License.
  */
 
-#import <UIKit/UIKit.h>
+#ifndef JAPPSY_UGLFRAME_H
+#define JAPPSY_UGLFRAME_H
 
-@interface JappsyView : UIView
+#include "../platform.h"
+#include "../data/uSmoothValue.h"
+#include "uOpenGL.h"
 
-@property (readonly, nonatomic, getter=isRunning) BOOL running;
-@property (nonatomic) NSInteger interval;
+class GLEngine;
+class GLRender;
 
-- (void) onResume;
-- (void) onPause;
-- (void) drawView:(id)sender;
+class GLFrame {
+public:
+	typedef void (*onFrameCallback)(GLRender* context);
+	
+	GLEngine* engine;
+	GLRender* context;
+	
+	GLint width;
+	GLint height;
+	
+	uint64_t currentTime;
+	uint64_t lastFrame;
+	SmoothValue* frames;
+	uint32_t fps;
+	
+	onFrameCallback onFrame;
+	
+	GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback);
+	~GLFrame();
+	
+	void loop();
+};
 
-@end
+#endif //JAPPSY_UGLFRAME_H

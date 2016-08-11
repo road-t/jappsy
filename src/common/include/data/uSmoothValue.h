@@ -17,7 +17,7 @@
 #ifndef JAPPSY_SMOOTHVALUE_H
 #define JAPPSY_SMOOTHVALUE_H
 
-#include "../platform.h"
+#include <platform.h>
 
 class SmoothValue {
 private:

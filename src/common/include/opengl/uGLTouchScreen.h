@@ -17,8 +17,8 @@
 #ifndef JAPPSY_UGLTOUCHSCREEN_H
 #define JAPPSY_UGLTOUCHSCREEN_H
 
-#include "../platform.h"
-#include "uOpenGL.h"
+#include <platform.h>
+#include <opengl/uOpenGL.h>
 #include <core/uHandler.h>
 #include <event/uMotionEvent.h>
 

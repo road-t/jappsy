@@ -17,7 +17,7 @@
 #ifndef JAPPSY_UMOTIONEVENT_H
 #define JAPPSY_UMOTIONEVENT_H
 
-#include "../platform.h"
+#include <platform.h>
 
 struct MotionPointer {
 	float x;

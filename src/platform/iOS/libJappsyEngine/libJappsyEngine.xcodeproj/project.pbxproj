@@ -67,6 +67,12 @@
 		C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */; };
 		C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */; };
 		C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA401D5C01FC0022FF71 /* uGLCamera.h */; };
+		C34FDA441D5C82240022FF71 /* uGLNamedContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */; };
+		C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */; };
+		C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */; };
+		C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */; };
+		C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */; };
+		C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
 		C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */; };
@@ -130,6 +136,12 @@
 		C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uHandler.mm; sourceTree = "<group>"; };
 		C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLCamera.cpp; sourceTree = "<group>"; };
 		C34FDA401D5C01FC0022FF71 /* uGLCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLCamera.h; sourceTree = "<group>"; };
+		C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLNamedContainer.h; sourceTree = "<group>"; };
+		C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignX.h; sourceTree = "<group>"; };
+		C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignY.h; sourceTree = "<group>"; };
+		C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLTypeface.h; sourceTree = "<group>"; };
+		C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLPaint.cpp; sourceTree = "<group>"; };
+		C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLPaint.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -290,6 +302,12 @@
 		C35271FC1D551B8400F41198 /* opengl */ = {
 			isa = PBXGroup;
 			children = (
+				C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */,
+				C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */,
+				C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */,
+				C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */,
+				C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */,
+				C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */,
 				C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */,
 				C34FDA401D5C01FC0022FF71 /* uGLCamera.h */,
 				C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */,
@@ -313,6 +331,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
+				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
+				C34FDA441D5C82240022FF71 /* uGLNamedContainer.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
 				C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */,
@@ -322,6 +342,7 @@
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
+				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
 				C34FD9661D5B67900022FF71 /* uGLTouchScreen.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,
@@ -331,10 +352,12 @@
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
 				C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */,
 				C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */,
+				C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
 				C305780B1D54BA9C00171EFC /* uSystem.h in Headers */,
 				C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */,
+				C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -434,6 +457,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */,
 				C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */,
 				C34FD9841D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */,
 				C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */,

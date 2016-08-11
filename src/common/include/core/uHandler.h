@@ -17,7 +17,7 @@
 #ifndef JAPPSY_HANDLER_H
 #define JAPPSY_HANDLER_H
 
-#include "../platform.h"
+#include <platform.h>
 
 class HandlerRunner {
 public:

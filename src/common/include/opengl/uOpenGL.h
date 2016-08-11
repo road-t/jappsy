@@ -17,7 +17,7 @@
 #ifndef JAPPSY_UOPENGL_H
 #define JAPPSY_UOPENGL_H
 
-#include "../platform.h"
+#include <platform.h>
 
 #if defined(__IOS__)
 	#import <OpenGLES/ES2/gl.h>
@@ -36,6 +36,8 @@
 #elif defined(__WINNT__)
 	#include <opengl/opengl.h>
 #endif
+
+#define clamp(v, min, max)	((v < min) ? min : ((v > max) ? max : v))
 
 #if defined(__IOS__)
 	#define glBindVertexArray glBindVertexArrayOES

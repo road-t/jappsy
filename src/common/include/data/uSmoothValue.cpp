@@ -15,7 +15,7 @@
  */
 
 #include "uSmoothValue.h"
-#include "uMemory.h"
+#include <core/uMemory.h>
 
 SmoothValue::SmoothValue(uint32_t count) throw(const char*) {
 	m_items = NULL;

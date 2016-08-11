@@ -19,15 +19,11 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
+#include <opengl/uGLNamedContainer.h>
 
 class GLRender;
 
 class GLCamera {
-private:
-	constexpr static GLfloat defaultPosition[3] = { 0, 0, -1 };
-	constexpr static GLfloat defaultTarget[3] = { 0, 0, 0 };
-	constexpr static GLfloat defaultHead[3] = { 0, 1, 0 };
-	
 public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
@@ -69,10 +65,16 @@ public:
 class GLCameras {
 private:
 	GLRender* context;
-	
+	GLNamedContainer<GLCamera>* list;
 	
 public:
+	GLCamera* gui;
 	
+	GLCameras(GLRender* context) throw(const char*);
+	~GLCameras();
+	
+	GLCamera* get(const wchar_t* key);
+	GLCamera* createCamera(const wchar_t* key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLCAMERA_H

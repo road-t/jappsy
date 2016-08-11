@@ -15,7 +15,7 @@
  */
 
 #include "uMotionEvent.h"
-#include "../core/uMemory.h"
+#include <core/uMemory.h>
 
 MotionEvent::MotionEvent() {
 	indexes = NULL;
@@ -29,6 +29,8 @@ MotionEvent::~MotionEvent() {
 		indexes = NULL;
 		mmfree(pointers);
 		pointers = NULL;
+		
+		count = 0;
 	}
 }
 

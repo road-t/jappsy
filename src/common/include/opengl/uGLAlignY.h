@@ -14,37 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UGLFRAME_H
-#define JAPPSY_UGLFRAME_H
+#ifndef JAPPSY_UGLALIGNY_H
+#define JAPPSY_UGLALIGNY_H
 
-#include <platform.h>
-#include <data/uSmoothValue.h>
-#include <opengl/uOpenGL.h>
-
-class GLEngine;
-class GLRender;
-
-class GLFrame {
-public:
-	typedef void (*onFrameCallback)(GLRender* context);
-	
-	GLEngine* engine;
-	GLRender* context;
-	
-	GLint width;
-	GLint height;
-	
-	uint64_t currentTime;
-	uint64_t lastFrame;
-	SmoothValue* frames;
-	uint32_t fps;
-	
-	onFrameCallback onFrame;
-	
-	GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback);
-	~GLFrame();
-	
-	void loop();
+enum GLAlignY {
+	TOP = -3,
+	TOPAUTO = -2,
+	CAPHEIGHT = -1,
+	MIDDLE = 0,
+	BASELINE = 1,
+	BOTTOMAUTO = 2,
+	BOTTOM = 3
 };
 
-#endif //JAPPSY_UGLFRAME_H
+#endif //JAPPSY_UGLALIGNY_H

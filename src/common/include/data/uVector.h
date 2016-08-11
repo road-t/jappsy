@@ -17,7 +17,7 @@
 #ifndef JAPPSY_UVECTOR_H
 #define JAPPSY_UVECTOR_H
 
-#include "../opengl/uOpenGL.h"
+#include <opengl/uOpenGL.h>
 
 #ifdef __cplusplus
 extern "C" {

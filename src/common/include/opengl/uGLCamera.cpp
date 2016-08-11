@@ -17,6 +17,9 @@
 #include "uGLCamera.h"
 #include <opengl/uGLRender.h>
 
+static GLfloat defaultPosition[3] = { 0, 0, -1 };
+static GLfloat defaultTarget[3] = { 0, 0, 0 };
+static GLfloat defaultHead[3] = { 0, 1, 0 };
 
 GLCamera::GLCamera(GLRender* context, const wchar_t* key) {
 	this->context = context;
@@ -129,4 +132,29 @@ bool GLCamera::update() {
 	}
 	
 	return false;
+}
+
+GLCameras::GLCameras(GLRender* context) throw(const char*) {
+	this->context = context;
+	list = new GLNamedContainer<GLCamera>();
+	gui = NULL;
+}
+
+GLCameras::~GLCameras() {
+	context = NULL;
+	delete list;
+	gui = NULL;
+}
+
+GLCamera* GLCameras::get(const wchar_t* key) {
+	return list->get(key);
+}
+
+GLCamera* GLCameras::createCamera(const wchar_t* key) throw(const char*) {
+	GLCamera* cam = list->get(key);
+	if (cam == NULL) {
+		cam = new GLCamera(context, key);
+		list->insert(key, cam);
+	}
+	return cam;
 }

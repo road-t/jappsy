@@ -250,6 +250,9 @@ extern "C" {
 	#include <cipher/uCrc.h>
 
 	class String;
+#if !defined(__OBJC__)
+	class NSString;
+#endif
 
 	#ifndef Char
 		#if defined(__JNI__)

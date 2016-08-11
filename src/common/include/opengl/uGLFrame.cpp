@@ -15,14 +15,14 @@
  */
 
 #include "uGLFrame.h"
-#include "../core/uSystem.h"
-#include "../core/uMemory.h"
-#include "../data/uSmoothValue.h"
-#include "uOpenGL.h"
+#include <core/uSystem.h>
+#include <core/uMemory.h>
+#include <data/uSmoothValue.h>
+#include <opengl/uOpenGL.h>
 #include <math.h>
 
-#include "uGLEngine.h"
-#include "uGLRender.h"
+#include <opengl/uGLEngine.h>
+#include <opengl/uGLRender.h>
 
 void defaultOnFrame(GLRender* context) {
 }

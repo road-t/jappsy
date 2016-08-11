@@ -17,15 +17,16 @@
 #ifndef JAPPSY_UGLRENDER_H
 #define JAPPSY_UGLRENDER_H
 
-#include "../platform.h"
+#include <platform.h>
 //TODO: #include "uLoader.h"
-#include "uOpenGL.h"
-#include "../data/uVector.h"
+#include <opengl/uOpenGL.h>
+#include <data/uVector.h>
 
 class GLEngine;
 
-#include "uGLFrame.h"
-#include "uGLTouchScreen.h"
+#include <opengl/uGLFrame.h>
+#include <opengl/uGLTouchScreen.h>
+#include <opengl/uGLPaint.h>
 
 class GLTextures;
 class GLShaders;
@@ -38,6 +39,10 @@ class GLParticles;
 class GLDrawings;
 
 class GLRender {
+private:
+	static const char* extensions;
+	static bool isExtensionSupported(const char *extension);
+	
 public:
 	GLEngine* engine;
 	
@@ -70,7 +75,7 @@ public:
 	GLShader* shaderSquareStroke;
 	GLShader* shaderSquareTexture;
 	
-	uint32_t maxTextureSize;
+	GLint maxTextureSize;
 	bool isNPOTSupported;
 	
 	GLuint m_squareBuffer;
@@ -82,6 +87,25 @@ public:
 	
 	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch);
 	~GLRender();
+	
+	void resetBlend();
+	void activeTexture(GLint index);
+	void cleanup(GLint index);
+	
+	GLfloat* makeRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
+	GLfloat* makeLine(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
+	GLfloat* makeColor(uint32_t* color, uint32_t count);
+	
+	void fill(uint32_t color);
+	void fillAlpha(uint8_t alpha);
+	void fillDepth();
+	
+	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint);
+	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key);
+	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime);
+	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime);
+	
+	
 };
 
 #endif //JAPPSY_UGLRENDER_H

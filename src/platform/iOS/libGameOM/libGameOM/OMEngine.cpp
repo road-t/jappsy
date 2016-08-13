@@ -41,6 +41,14 @@ void onTouch(const wchar_t* event) {
 #include <data/uIterator.h>
 #include <data/uListIterator.h>
 #include <data/uCollection.h>
+#include <data/uList.h>
+#include <data/uSet.h>
+#include <data/uHashSet.h>
+#include <data/uLinkedHashSet.h>
+#include <data/uMap.h>
+#include <data/uHashMap.h>
+#include <data/uLinkedHashMap.h>
+#include <data/uSparseArray.h>
 
 OMEngine::OMEngine() {
     context = memNew(context, GLRender(this, 1920, 1080, ::onFrame, ::onTouch));
@@ -55,6 +63,11 @@ OMEngine::OMEngine() {
     ListIterator<Object>::_test();
     Collection<Object>::_test();
     SynchronizedCollection<Object>::_test();
+    List<Object>::_test();
+    SynchronizedList<Object>::_test();
+    Set<Object>::_test();
+    SynchronizedSet<Object>::_test();
+    HashSet<Object>::_test();
     
     //URI* uri = new URI(L"http://user:password@host:12345/path/path2/path3/file.ext?query=query#anchor");
     URI* uri = new URI(L"path/path2/path3/file.ext?query=query#anchor");

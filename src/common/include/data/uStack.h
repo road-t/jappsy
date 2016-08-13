@@ -112,17 +112,17 @@ public:
 				m_stack[m_count - 1] = NULL;
 				throw;
 			}
-		}
-		
-		resize(m_count + 1);
-		try {
-			Type* newObject = memNew(newObject, Type(object));
-			if (newObject == NULL) throw eOutOfMemory;
-			m_stack[m_count++] = newObject;
-			return *newObject;
-		} catch (...) {
-			m_stack[m_count++] = NULL;
-			throw;
+		} else {
+			resize(m_count + 1);
+			try {
+				Type* newObject = memNew(newObject, Type(object));
+				if (newObject == NULL) throw eOutOfMemory;
+				m_stack[m_count++] = newObject;
+				return *newObject;
+			} catch (...) {
+				m_stack[m_count++] = NULL;
+				throw;
+			}
 		}
 	}
 	
@@ -141,19 +141,19 @@ public:
 				m_stack[0] = NULL;
 				throw;
 			}
-		}
-		
-		resize(m_count + 1);
-		memmove(m_stack + 1, m_stack, m_count * sizeof(Type*));
-		m_count++;
-		try {
-			Type* newObject = memNew(newObject, Type(object));
-			if (newObject == NULL) throw eOutOfMemory;
-			m_stack[0] = newObject;
-			return *newObject;
-		} catch (...) {
-			m_stack[0] = NULL;
-			throw;
+		} else {
+			resize(m_count + 1);
+			memmove(m_stack + 1, m_stack, m_count * sizeof(Type*));
+			m_count++;
+			try {
+				Type* newObject = memNew(newObject, Type(object));
+				if (newObject == NULL) throw eOutOfMemory;
+				m_stack[0] = newObject;
+				return *newObject;
+			} catch (...) {
+				m_stack[0] = NULL;
+				throw;
+			}
 		}
 	}
 	

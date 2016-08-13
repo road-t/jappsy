@@ -30,7 +30,7 @@ public:
 		this->TYPE = TypeListIterator;
 	}
 	
-	virtual inline void add(const Type& value) throw(const char*) {
+	virtual inline bool add(const Type& value) throw(const char*) {
 		int32_t index = this->m_next;
 		if ((index >= 0) && (index <= this->m_count)) {
 			if ((this->m_count > 0) && (this->m_initialCapacity > 0) && (this->m_count >= this->m_initialCapacity)) {
@@ -60,24 +60,26 @@ public:
 						throw;
 					}
 				}
-			}
+			} else {
+				this->resize(this->m_count + 1);
+				if (index < this->m_count)
+					memmove(this->m_stack + index + 1, this->m_stack + index, (this->m_count - index) * sizeof(Type*));
 			
-			this->resize(this->m_count + 1);
-			if (index < this->m_count)
-				memmove(this->m_stack + index + 1, this->m_stack + index, (this->m_count - index) * sizeof(Type*));
-			
-			this->m_count++;
-			this->m_next++;
-			try {
-				Type* item = memNew(item, Type(value));
-				if (item == NULL) throw eOutOfMemory;
-				this->m_stack[index] = item;
-			} catch (...) {
-				this->m_stack[index] = NULL;
-				throw;
+					this->m_count++;
+				this->m_next++;
+				try {
+					Type* item = memNew(item, Type(value));
+					if (item == NULL) throw eOutOfMemory;
+					this->m_stack[index] = item;
+				} catch (...) {
+					this->m_stack[index] = NULL;
+					throw;
+				}
 			}
 		} else
 			throw eOutOfRange;
+		
+		return true;
 	}
 	
 	virtual inline bool hasPrevious() const {
@@ -140,7 +142,7 @@ public:
 		this->setRef(o);
 	}
 	
-	virtual inline void add(const Type& value) throw(const char*) { CHECKTHIS; THIS->add(value); }
+	virtual inline bool add(const Type& value) throw(const char*) { CHECKTHIS; return THIS->add(value); }
 	virtual inline bool hasNext() const throw(const char*) { CHECKTHIS; return THIS->RefIterator<Type>::hasNext(); }
 	virtual inline bool hasPrevious() const throw(const char*) { CHECKTHIS; return THIS->hasPrevious(); }
 	virtual inline const Type& next() const throw(const char*) { CHECKTHIS; return THIS->RefIterator<Type>::next(); }

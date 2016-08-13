@@ -179,6 +179,10 @@ extern const wchar_t TypeStack[];
 extern const wchar_t TypeIterator[];
 extern const wchar_t TypeListIterator[];
 extern const wchar_t TypeCollection[];
+extern const wchar_t TypeList[];
+extern const wchar_t TypeSet[];
+extern const wchar_t TypeHashSet[];
+extern const wchar_t TypeLinkedHashSet[];
 
 class RefObject {
 protected:

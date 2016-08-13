@@ -31,15 +31,17 @@ public:
 		this->TYPE = TypeCollection;
 	}
 	
-	virtual inline void add(const Type& object) throw(const char*) {
+	virtual inline bool add(const Type& object) throw(const char*) {
 		RefStack<Type>::push(object);
+		return true;
 	}
 	
-	virtual inline void addAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
 		Iterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
 			RefStack<Type>::push(it->next());
 		}
+		return true;
 	}
 	
 	virtual inline bool containsAll(Collection<Type>& collection) {
@@ -118,8 +120,8 @@ public:
 		this->setRef(o);
 	}
 	
-	virtual inline void add(const Type& object) throw(const char*) { CHECKTHIS; THIS->add(object); }
-	virtual inline void addAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; THIS->addAll(collection); }
+	virtual inline bool add(const Type& object) throw(const char*) { CHECKTHIS; return THIS->add(object); }
+	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->addAll(collection); }
 	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->RefStack<Type>::clear(); }
 	virtual inline bool contains(const Type& value) const throw(const char*) { CHECKTHIS; return THIS->RefStack<Type>::contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->containsAll(collection); }
@@ -158,7 +160,7 @@ class SynchronizedCollection : public Collection<Type> {
 public:
 	RefClass(SynchronizedCollection, Collection<Type>)
 	
-	virtual inline void add(const Type& object) throw(const char*) {
+	virtual inline bool add(const Type& object) throw(const char*) {
 		synchronized(this) {
 			try {
 				THIS->add(object);
@@ -168,9 +170,10 @@ public:
 			}
 			this->notifyAll();
 		}
+		return true;
 	}
 	
-	virtual inline void addAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
 		synchronized(this) {
 			try {
 				THIS->addAll(collection);
@@ -180,6 +183,7 @@ public:
 			}
 			this->notifyAll();
 		}
+		return true;
 	}
 	
 	virtual inline void clear() throw(const char*) {

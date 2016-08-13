@@ -25,6 +25,10 @@ const wchar_t TypeStack[] = L"Stack::";
 const wchar_t TypeIterator[] = L"Iterator::";
 const wchar_t TypeListIterator[] = L"ListIterator::";
 const wchar_t TypeCollection[] = L"Collection::";
+const wchar_t TypeList[] = L"List::";
+const wchar_t TypeSet[] = L"Set::";
+const wchar_t TypeHashSet[] = L"HashSet::";
+const wchar_t TypeLinkedHashSet[] = L"LinkedHashSet::";
 
 void RefObject::_threadLock() const {
 #if defined(__IOS__)

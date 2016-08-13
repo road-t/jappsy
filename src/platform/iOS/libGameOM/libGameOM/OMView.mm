@@ -20,31 +20,16 @@
 
 @implementation OMView
 
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        OMEngine* omEngine = new OMEngine();
+- (BOOL) onStart
+{
+    if ([super onStart]) {
+        OMEngine* omEngine = memNew(omEngine, OMEngine());
         [self engine:omEngine];
+        
+        return YES;
     }
-    return self;
-}
-
-- (instancetype)initWithFrame:(CGRect)frame {
-    self = [super initWithFrame:frame];
-    if (self) {
-        OMEngine* omEngine = new OMEngine();
-        [self engine:omEngine];
-    }
-    return self;
-}
-
-- (id)initWithCoder:(NSCoder *)decoder {
-    self = [super initWithCoder:decoder];
-    if (self) {
-        OMEngine* omEngine = new OMEngine();
-        [self engine:omEngine];
-    }
-    return self;
+    
+    return NO;
 }
 
 @end

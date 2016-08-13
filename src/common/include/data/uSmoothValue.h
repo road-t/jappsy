@@ -18,8 +18,9 @@
 #define JAPPSY_SMOOTHVALUE_H
 
 #include <platform.h>
+#include <data/uObject.h>
 
-class SmoothValue {
+class SmoothValue : public Object {
 private:
 	float* m_items;
 	uint32_t m_count;

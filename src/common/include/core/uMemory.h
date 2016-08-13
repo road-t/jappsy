@@ -54,7 +54,7 @@ void mmQuit();
     #define MM_T(x)        MM_T_(x)
 #endif
 
-#ifndef T_
+#ifndef MM_T_
     #define MM_T_(x)       #x
 #endif
 

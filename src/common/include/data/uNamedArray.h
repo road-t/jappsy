@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UGLNAMEDCONTAINER_H
-#define JAPPSY_UGLNAMEDCONTAINER_H
+#ifndef JAPPSY_UNAMEDARRAY_H
+#define JAPPSY_UNAMEDARRAY_H
 
 #include <platform.h>
 #include <core/uMemory.h>
+#include <data/uObject.h>
 #include <data/uString.h>
 
 template <typename Type>
-class GLNamedContainer {
+class NamedArray : public Object {
 private:
 	const wchar_t** m_keys;
 	Type** m_values;
@@ -40,22 +41,21 @@ private:
 	}
 	
 public:
-	
-	GLNamedContainer() {
+	NamedArray() {
 		m_keys = NULL;
 		m_values = NULL;
 		m_count = 0;
 	}
 	
-	~GLNamedContainer() {
+	~NamedArray() {
 		if (m_count > 0) {
 			for (uint32_t i = 0; i < m_count; i++) {
-				delete m_values[i];
+				memDelete(m_values[i]);
 			}
 			
-			mmfree(m_keys);
+			memFree(m_keys);
 			m_keys = NULL;
-			mmfree(m_values);
+			memFree(m_values);
 			m_values = NULL;
 			
 			m_count = 0;
@@ -72,7 +72,7 @@ public:
 	void remove(const wchar_t* key) {
 		int32_t index = find(key);
 		if (index >= 0) {
-			delete m_values[index];
+			memDelete(m_values[index]);
 			
 			if (index < m_count - 1) {
 				memmove(&m_keys[index], &m_keys[index+1], (m_count-index-1) * sizeof(const wchar_t*));
@@ -81,9 +81,9 @@ public:
 			m_count--;
 			
 			if (m_count == 0) {
-				mmfree(m_keys);
+				memFree(m_keys);
 				m_keys = NULL;
-				mmfree(m_values);
+				memFree(m_values);
 				m_values = NULL;
 			}
 		}
@@ -93,13 +93,13 @@ public:
 	void insert(const wchar_t* key, Type* value) throw(const char*) {
 		int32_t index = find(key);
 		if (index >= 0) {
-			delete m_values[index];
+			memDelete(m_values[index]);
 			m_values[index] = value;
 			return;
 		}
 		
-		const wchar_t** newKeys = (const wchar_t**)mmrealloc(m_keys, (m_count+1) * sizeof(const wchar_t*));
-		Type** newValues = (Type**)mmrealloc(m_values, (m_count+1) * sizeof(Type*));
+		const wchar_t** newKeys = memRealloc(const wchar_t*, newKeys, m_keys, (m_count+1) * sizeof(const wchar_t*));
+		Type** newValues = memRealloc(Type*, newValues, m_values, (m_count+1) * sizeof(Type*));
 		
 		if (newKeys != NULL)
 			m_keys = newKeys;
@@ -116,4 +116,4 @@ public:
 	}
 };
 
-#endif //JAPPSY_UGLNAMEDCONTAINER_H
+#endif //JAPPSY_UNAMEDARRAY_H

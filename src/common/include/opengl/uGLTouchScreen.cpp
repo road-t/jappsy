@@ -20,7 +20,7 @@
 #include <core/uSystem.h>
 
 GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
-	handler = new Handler();
+	handler = memNew(handler, Handler());
 	
 	this->context = context;
 	onTouch = callback;
@@ -49,7 +49,7 @@ GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
 GLTouchScreen::~GLTouchScreen() {
 	// TODO: cleanup
 	
-	delete handler;
+	memDelete(handler);
 }
 
 void GLTouchScreen::update() {

@@ -25,9 +25,9 @@ MotionEvent::MotionEvent() {
 
 MotionEvent::~MotionEvent() {
 	if (count > 0) {
-		mmfree(indexes);
+		memFree(indexes);
 		indexes = NULL;
-		mmfree(pointers);
+		memFree(pointers);
 		pointers = NULL;
 		
 		count = 0;
@@ -68,17 +68,17 @@ void MotionEvent::remove(int32_t pointerIndex) {
 		count--;
 		
 		if (count == 0) {
-			mmfree(indexes);
+			memFree(indexes);
 			indexes = NULL;
-			mmfree(pointers);
+			memFree(pointers);
 			pointers = NULL;
 		}
 	}
 }
 
 MotionPointer* MotionEvent::insert(int32_t id) throw(const char*) {
-	int32_t* newIndexes = (int32_t*)mmrealloc(indexes, (count+1) * sizeof(int32_t));
-	MotionPointer* newPointers = (MotionPointer*)mmrealloc(pointers, (count+1) * sizeof(MotionPointer));
+	int32_t* newIndexes = memRealloc(int32_t, newIndexes, indexes, (count+1) * sizeof(int32_t));
+	MotionPointer* newPointers = memRealloc(MotionPointer, newPointers, pointers, (count+1) * sizeof(MotionPointer));
 	
 	if (newIndexes != NULL)
 		indexes = newIndexes;

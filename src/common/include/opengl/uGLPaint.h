@@ -18,13 +18,14 @@
 #define JAPPSY_UGLPAINT_H
 
 #include <platform.h>
+#include <data/uObject.h>
 #include <opengl/uOpenGL.h>
 #include <opengl/uGLTypeface.h>
 #include <opengl/uGLAlignX.h>
 #include <opengl/uGLAlignY.h>
 #include <data/uVector.h>
 
-class GLPaint {
+class GLPaint : public Object {
 public:
 	GLfloat m_scale;
 	bool m_antialias;

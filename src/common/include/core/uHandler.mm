@@ -110,11 +110,11 @@ void Handler::_remove(HandlerRunner* runner) {
 }
 
 HandlerRunner* Handler::postDelayed(HandlerRunner::Callback callback, int delay, void* userData) {
-	HandlerRunner* runner = new HandlerRunner(callback, delay, userData);
+	HandlerRunner* runner = memNew(runner, HandlerRunner(callback, delay, userData));
 	AtomicLock(&m_lock);
 	if (AtomicCompareExchange(&m_retain, -1, -1) == -1) {
 		AtomicUnlock(&m_lock);
-		delete runner;
+		memDelete(runner);
 	}
 	AtomicIncrement(&m_retain);
 	push(runner);
@@ -125,11 +125,11 @@ HandlerRunner* Handler::postDelayed(HandlerRunner::Callback callback, int delay,
 }
 
 HandlerRunner* Handler::post(HandlerRunner::Callback callback, void* userData) {
-	HandlerRunner* runner = new HandlerRunner(callback, 0, userData);
+	HandlerRunner* runner = memNew(runner, HandlerRunner(callback, 0, userData));
 	AtomicLock(&m_lock);
 	if (AtomicCompareExchange(&m_retain, -1, -1) == -1) {
 		AtomicUnlock(&m_lock);
-		delete runner;
+		memDelete(runner);
 	}
 	AtomicIncrement(&m_retain);
 	push(runner);
@@ -177,7 +177,7 @@ void Handler::run(HandlerRunner* runner) {
 	}
 	_remove(runner);
 	AtomicUnlock(&(runner->m_lock));
-	delete runner;
+	memDelete(runner);
 	AtomicDecrement(&m_retain);
 	AtomicUnlock(&m_lock);
 }

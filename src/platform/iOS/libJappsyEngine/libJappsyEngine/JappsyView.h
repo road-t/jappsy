@@ -21,6 +21,8 @@
 @property (readonly, nonatomic, getter=isRunning) BOOL running;
 @property (nonatomic) NSInteger interval;
 
+- (BOOL) onStart;
+- (BOOL) onStop;
 - (void) onResume;
 - (void) onPause;
 - (void) drawView:(id)sender;

@@ -86,7 +86,7 @@ void GLContext::release() {
 	}
 	
 	if (engine != NULL) {
-		delete engine;
+		memDelete(engine);
 	}
 	engine = NULL;
 	context = NULL;

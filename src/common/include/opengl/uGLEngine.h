@@ -17,10 +17,11 @@
 #ifndef JAPPSY_UGLENGINE_H
 #define JAPPSY_UGLENGINE_H
 
+#include <data/uObject.h>
 #include <opengl/uGLRender.h>
 #include <event/uMotionEvent.h>
 
-class GLEngine {
+class GLEngine : public Object {
 protected:
 	GLRender* context;
 	

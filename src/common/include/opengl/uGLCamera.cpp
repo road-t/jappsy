@@ -136,13 +136,13 @@ bool GLCamera::update() {
 
 GLCameras::GLCameras(GLRender* context) throw(const char*) {
 	this->context = context;
-	list = new GLNamedContainer<GLCamera>();
+	list = memNew(list, NamedArray<GLCamera>());
 	gui = NULL;
 }
 
 GLCameras::~GLCameras() {
 	context = NULL;
-	delete list;
+	memDelete(list);
 	gui = NULL;
 }
 
@@ -153,7 +153,7 @@ GLCamera* GLCameras::get(const wchar_t* key) {
 GLCamera* GLCameras::createCamera(const wchar_t* key) throw(const char*) {
 	GLCamera* cam = list->get(key);
 	if (cam == NULL) {
-		cam = new GLCamera(context, key);
+		cam = memNew(cam, GLCamera(context, key));
 		list->insert(key, cam);
 	}
 	return cam;

@@ -17,13 +17,14 @@
 #ifndef JAPPSY_UGLCAMERA_H
 #define JAPPSY_UGLCAMERA_H
 
+#include <data/uObject.h>
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
-#include <opengl/uGLNamedContainer.h>
+#include <data/uNamedArray.h>
 
 class GLRender;
 
-class GLCamera {
+class GLCamera : public Object {
 public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
@@ -65,7 +66,7 @@ public:
 class GLCameras {
 private:
 	GLRender* context;
-	GLNamedContainer<GLCamera>* list;
+	NamedArray<GLCamera>* list;
 	
 public:
 	GLCamera* gui;

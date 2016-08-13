@@ -19,730 +19,734 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-uint32_t utf8_strlen(const char* src, uint32_t* strsize) {
-    uint8_t* ptr = (uint8_t*)src;
-    uint32_t len = 0;
-    uint32_t size = 0;
-    uint8_t ch;
-    while ((ch = *ptr) != 0) {
-        ptr++; size++;
-        if (ch & 0x80) { // found UTF8
-            int cnt;
-            if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
-                cnt = 1;
-            }
-            else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
-                cnt = 2;
-            }
-            else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
-                cnt = 3;
-            }
-            else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
-                cnt = 4;
-            }
-            else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
-                cnt = 5;
-            }
-            else { // Not UTF8
-                len++; continue;
-            }
-            int skip = 0;
-            while (((ch = *ptr) != 0) && (cnt > 0)) {
-                ptr++; skip++;
-                if ((ch & 0xC0) != 0x80) // Not UTF8
-                    break;
-                cnt--;
-            }
-            if (cnt > 0) { // Not UTF8
-                ptr -= skip;
-            }
-            else {
-                size += skip;
-            }
-        }
-        len++;
-    }
-    if (strsize != 0) (*strsize) = size+1;
-    return len;
-}
-
-uint32_t utf8_strlen_nzt(const char* src, uint32_t srcsize, uint32_t* strsize) {
-    uint8_t* ptr = (uint8_t*)src;
-    uint32_t len = 0;
-    uint32_t size = 0;
-    uint8_t ch;
-    while ((srcsize > 0) && ((ch = *ptr) != 0)) {
-        ptr++; size++; srcsize--;
-        if (ch & 0x80) { // found UTF8
-            int cnt;
-            if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
-                cnt = 1;
-            }
-            else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
-                cnt = 2;
-            }
-            else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
-                cnt = 3;
-            }
-            else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
-                cnt = 4;
-            }
-            else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
-                cnt = 5;
-            }
-            else { // Not UTF8
-                len++; continue;
-            }
-            uint32_t skip = 0;
-            while ((skip < srcsize) && ((ch = *ptr) != 0) && (cnt > 0)) {
-                ptr++; skip++;
-                if ((ch & 0xC0) != 0x80) // Not UTF8
-                    break;
-                cnt--;
-            }
-            if (cnt > 0) { // Not UTF8
-                ptr -= skip;
-            }
-            else {
-                size += skip;
-                srcsize--;
-            }
-        }
-        len++;
-    }
-    if (strsize != 0) (*strsize) = size+1;
-    return len;
-}
-
-uint32_t utf8_toutf16_size(const char* src) {
-    char* ptr = (char*)src;
-    uint32_t ressize = 2;
-    uint8_t ch;
-    while ((ch = *((uint8_t*)ptr)) != 0) {
-        ptr++;
-        if (ch & 0x80) { // found UTF8
-            int cnt;
-            if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
-                cnt = 1;
-            }
-            else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
-                cnt = 2;
-            }
-            else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
-                cnt = 3;
-            }
-            else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
-                cnt = 4;
-            }
-            else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
-                cnt = 5;
-            }
-            else { // Not UTF8
-                ressize += 2;
-                continue;
-            }
-            int skip = 0;
-            uint32_t utf8 = (uint32_t)(ch);
-            while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
-                ptr++; skip++;
-                if ((ch & 0xC0) != 0x80) // Not UTF8
-                    break;
-                cnt--;
-            }
-            if (cnt > 0) { // Not UTF8
-                ptr -= skip;
-                ressize += 2;
-            }
-            else {
-                int shift = (6 * skip);
-                utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
-                ptr -= skip;
-                while (skip > 0) {
-                    shift -= 6;
-                    utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
-                    ptr++;
-                    skip--;
-                }
-
-                if (utf8 <= 0xFFFF) { // 2 byte UTF16
-                    ressize += 2;
-                }
-                else if (utf8 <= 0xFFFFF) { // 4 byte UTF16
-                    ressize += 4;
-                }
-                else {
-                    return (uint32_t)-1;
-                }
-            }
-        }
-        else {
-            ressize += 2;
-        }
-    }
-    return ressize;
-}
-
-uint32_t utf8_toutf16(const char* src, uint16_t* dst, uint32_t dstsize) {
-    dstsize &= 0xFFFFFFFE;
-    if (dstsize < 2)
-        return 0;
-    if (dstsize == 2) {
-        *dst = 0;
-        return 0;
-    }
-    char* ptr = (char*)src;
-    uint32_t ressize = dstsize;
-    uint32_t size = 0;
-    uint8_t ch;
-    while ((ch = *((uint8_t*)ptr)) != 0) {
-        ptr++; size++;
-        if (ch & 0x80) { // found UTF8
-            int cnt;
-            if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
-                cnt = 1;
-            }
-            else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
-                cnt = 2;
-            }
-            else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
-                cnt = 3;
-            }
-            else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
-                cnt = 4;
-            }
-            else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
-                cnt = 5;
-            }
-            else { // Not UTF8
-                *dst = ' ';
-                dst++;
-                dstsize -= 2;
-                if (dstsize == 2) {
-                    break;
-                }
-                continue;
-            }
-            int skip = 0;
-            uint32_t utf8 = (uint32_t)(ch);
-            while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
-                ptr++; skip++;
-                if ((ch & 0xC0) != 0x80) // Not UTF8
-                    break;
-                cnt--;
-            }
-            if (cnt > 0) { // Not UTF8
-                ptr -= skip;
-                *dst = ' ';
-                dst++;
-                dstsize -= 2;
-                if (dstsize == 2) {
-                    break;
-                }
-            }
-            else {
-                int shift = (6 * skip);
-                utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
-                ptr -= skip;
-                while (skip > 0) {
-                    shift -= 6;
-                    utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
-                    ptr++;
-                    size++;
-                    skip--;
-                }
-
-                if (utf8 <= 0xFFFF) { // 2 byte UTF16
-                    if (dstsize <= 2) break;
-                    *dst = (uint16_t)utf8; dst++;
-                    dstsize -= 2;
-                }
-                else if (utf8 <= 0xFFFFF) { // 4 byte UTF16
-                    if (dstsize <= 4) break;
-                    *dst = (uint16_t)((utf8 >> 10) + 0xD7C0); dst++;
-                    *dst = (uint16_t)((utf8 & 0x3FF) + 0xDC00); dst++;
-                    dstsize -= 4;
-                }
-                else {
-                    return (uint16_t)-1;
-                }
-
-                if (dstsize == 2) {
-                    break;
-                }
-            }
-        }
-        else {
-            *dst = (uint16_t)(ch);
-            dst++;
-            dstsize -= 2;
-            if (dstsize == 2) {
-                break;
-            }
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-uint32_t utf8_toutf32(const char* src, uint32_t* dst, uint32_t dstsize) {
-    dstsize &= 0xFFFFFFFC;
-    if (dstsize == 0)
-        return 0;
-    if (dstsize == 4) {
-        *dst = 0;
-        return 0;
-    }
-    char* ptr = (char*)src;
-    uint32_t ressize = dstsize;
-    uint32_t size = 0;
-    uint8_t ch;
-    while ((ch = *((uint8_t*)ptr)) != 0) {
-        ptr++; size++;
-        if (ch & 0x80) { // found UTF8
-            int cnt;
-            if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
-                cnt = 1;
-            }
-            else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
-                cnt = 2;
-            }
-            else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
-                cnt = 3;
-            }
-            else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
-                cnt = 4;
-            }
-            else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
-                cnt = 5;
-            }
-            else { // Not UTF8
-                *dst = L' ';
-                dst++;
-                dstsize -= 4;
-                if (dstsize == 4) {
-                    break;
-                }
-                continue;
-            }
-            int skip = 0;
-            uint32_t utf8 = (uint32_t)(ch);
-            while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
-                ptr++; skip++;
-                if ((ch & 0xC0) != 0x80) // Not UTF8
-                    break;
-                cnt--;
-            }
-            if (cnt > 0) { // Not UTF8
-                ptr -= skip;
-                *dst = L' ';
-                dst++;
-                dstsize -= 4;
-                if (dstsize == 4) {
-                    break;
-                }
-            }
-            else {
-                int shift = (6 * skip);
-                utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
-                ptr -= skip;
-                while (skip > 0) {
-                    shift -= 6;
-                    utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
-                    ptr++;
-                    size++;
-                    skip--;
-                }
-                *dst = utf8;
-                dst++;
-                dstsize -= 4;
-                if (dstsize == 4) {
-                    break;
-                }
-            }
-        }
-        else {
-            *dst = (uint32_t)(ch);
-            dst++;
-            dstsize -= 4;
-            if (dstsize == 4) {
-                break;
-            }
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-uint32_t utf16_strlen(const uint16_t* src, uint32_t* strsize) {
-    uint16_t* ptr = (uint16_t*)src;
-    uint32_t len = 0;
-    uint32_t size = 0;
-    uint16_t ch;
-    while ((ch = *ptr) != 0) {
-        ptr++; size += 2;
-
-        if ((ch & 0xFC00) == 0xD800) { // found UTF16
-            ch = *ptr;
-            if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
-                ptr++;
-                size += 2;
-            }
-            else { // Not UTF16
-            }
-        }
-        len++;
-    }
-    if (strsize != NULL) (*strsize) = size+2;
-    return len;
-}
-
-uint32_t utf16_toutf8_size(const uint16_t* src) {
-    uint16_t* ptr = (uint16_t*)src;
-    uint32_t ressize = 1;
-    uint16_t ch;
-    while ((ch = *ptr) != 0) {
-        uint32_t utf16 = (uint32_t)(ch);
-        ptr++;
-        if ((ch & 0xFC00) == 0xD800) { // found UTF16
-            ch = *ptr;
-            if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
-                ptr++;
-                utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
-            }
-            else { // Not UTF16
-                utf16 = L' ';
-            }
-        }
-
-        if (utf16 <= 0x7F) { // 1 byte UTF8
-            ressize++;
-        }
-        else if (utf16 <= 0x7FF) { // 2 byte UTF8
-            ressize += 2;
-        }
-        else if (utf16 <= 0xFFFF) { // 3 byte UTF8
-            ressize += 3;
-        }
-        else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
-            ressize += 4;
-        }
-        else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
-            ressize += 5;
-        }
-        else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
-            ressize += 6;
-        }
-        else {
-            return (uint32_t)-1;
-        }
-    }
-    return ressize;
-}
-
-uint32_t utf16_toutf8(const uint16_t* src, char* dst, uint32_t dstsize) {
-    if (dstsize == 0)
-        return 0;
-    if (dstsize == 1) {
-        *dst = 0;
-        return 0;
-    }
-    uint16_t* ptr = (uint16_t*)src;
-    uint32_t ressize = dstsize;
-    uint32_t size = 0;
-    uint16_t ch;
-    while ((ch = *ptr) != 0) {
-        uint32_t utf16 = (uint32_t)(ch);
-        ptr++; size++;
-        if ((ch & 0xFC00) == 0xD800) { // found UTF16
-            ch = *ptr;
-            if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
-                ptr++;
-                utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
-            }
-            else { // Not UTF16
-                utf16 = L' ';
-            }
-        }
-
-        if (utf16 <= 0x7F) { // 1 byte UTF8
-            if (dstsize <= 1) break;
-            *(uint8_t*)dst = (uint8_t)utf16; dst++;
-            dstsize--;
-        }
-        else if (utf16 <= 0x7FF) { // 2 byte UTF8
-            if (dstsize <= 2) break;
-            *(uint8_t*)dst = (uint8_t)(0xC0 | (utf16 >> 6)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
-            dstsize -= 2;
-        }
-        else if (utf16 <= 0xFFFF) { // 3 byte UTF8
-            if (dstsize <= 3) break;
-            *(uint8_t*)dst = (uint8_t)(0xE0 | (utf16 >> 12)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
-            dstsize -= 3;
-        }
-        else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
-            if (dstsize <= 4) break;
-            *(uint8_t*)dst = (uint8_t)(0xF0 | (utf16 >> 18)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
-            dstsize -= 4;
-        }
-        else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
-            if (dstsize <= 5) break;
-            *(uint8_t*)dst = (uint8_t)(0xF8 | (utf16 >> 24)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 18) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
-            dstsize -= 5;
-        }
-        else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
-            if (dstsize <= 6) break;
-            *(uint8_t*)dst = (uint8_t)(0xFC | (utf16 >> 30)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 24) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 18) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
-            dstsize -= 6;
-        }
-        else {
-            return (uint32_t)-1;
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-uint32_t utf16_toutf32(const uint16_t* src, uint32_t* dst, uint32_t dstsize) {
-    dstsize &= 0xFFFFFFFC;
-    if (dstsize == 0)
-        return 0;
-    if (dstsize == 4) {
-        *dst = 0;
-        return 0;
-    }
-    uint16_t* ptr = (uint16_t*)src;
-    uint32_t ressize = dstsize;
-    uint32_t size = 0;
-    uint16_t ch;
-    while ((ch = *ptr) != 0) {
-        ptr++; size++;
-        if ((ch & 0xFC00) == 0xD800) { // found UTF16
-            uint32_t utf16 = (uint32_t)(ch);
-            ch = *ptr;
-            if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
-                ptr++;
-                utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
-                *dst = utf16;
-            }
-            else { // Not UTF16
-                *dst = L' ';
-            }
-            dst++;
-            dstsize -= 4;
-            if (dstsize == 4) {
-                break;
-            }
-        }
-        else {
-            *dst = (uint32_t)(ch);
-            dst++;
-            dstsize -= 4;
-            if (dstsize == 4) {
-                break;
-            }
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-uint32_t utf32_strlen(const uint32_t* src, uint32_t* strsize) {
-    uint32_t* ptr = (uint32_t*)src;
-    uint32_t len = 0;
-    uint32_t size = 0;
-    uint32_t ch;
-    while ((ch = *ptr) != 0) {
-        ptr++; size += 4;
-        len++;
-    }
-    if (strsize != NULL) (*strsize) = size + 4;
-    return len;
-}
-
-uint32_t utf32_toutf8_size(const uint32_t* src) {
-    uint32_t* ptr = (uint32_t*)src;
-    uint32_t ch;
-    uint32_t ressize = 1;
-    while ((ch = (uint32_t)(*ptr)) != 0) {
-        ptr++;
-        if (ch <= 0x7F) { // 1 byte UTF8
-            ressize++;
-        }
-        else if (ch <= 0x7FF) { // 2 byte UTF8
-            ressize += 2;
-        }
-        else if (ch <= 0xFFFF) { // 3 byte UTF8
-            ressize += 3;
-        }
-        else if (ch <= 0x1FFFFF) { // 4 byte UTF8
-            ressize += 4;
-        }
-        else if (ch <= 0x3FFFFFF) { // 5 byte UTF8
-            ressize += 5;
-        }
-        else if (ch <= 0x7FFFFFFF) { // 6 byte UTF8
-            ressize += 6;
-        }
-        else {
-            return (uint32_t)-1;
-        }
-    }
-    return ressize;
-}
-
-uint32_t utf32_toutf8(const uint32_t* src, char* dst, uint32_t dstsize) {
-    if (dstsize == 0)
-        return 0;
-    if (dstsize == 1) {
-        *dst = 0;
-        return 0;
-    }
-    uint32_t* ptr = (uint32_t*)src;
-    uint32_t ch;
-    uint32_t ressize = dstsize;
-    while ((ch = (uint32_t)(*ptr)) != 0) {
-        ptr++;
-        if (ch <= 0x7F) { // 1 byte UTF8
-            if (dstsize <= 1) break;
-            *(uint8_t*)dst = (uint8_t)ch; dst++;
-            dstsize--;
-        }
-        else if (ch <= 0x7FF) { // 2 byte UTF8
-            if (dstsize <= 2) break;
-            *(uint8_t*)dst = (uint8_t)(0xC0 | (ch >> 6)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
-            dstsize -= 2;
-        }
-        else if (ch <= 0xFFFF) { // 3 byte UTF8
-            if (dstsize <= 3) break;
-            *(uint8_t*)dst = (uint8_t)(0xE0 | (ch >> 12)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
-            dstsize -= 3;
-        }
-        else if (ch <= 0x1FFFFF) { // 4 byte UTF8
-            if (dstsize <= 4) break;
-            *(uint8_t*)dst = (uint8_t)(0xF0 | (ch >> 18)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
-            dstsize -= 4;
-        }
-        else if (ch <= 0x3FFFFFF) { // 5 byte UTF8
-            if (dstsize <= 5) break;
-            *(uint8_t*)dst = (uint8_t)(0xF8 | (ch >> 24)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 18) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
-            dstsize -= 5;
-        }
-        else if (ch <= 0x7FFFFFFF) { // 6 byte UTF8
-            if (dstsize <= 6) break;
-            *(uint8_t*)dst = (uint8_t)(0xFC | (ch >> 30)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 24) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 18) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
-            *(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
-            dstsize -= 6;
-        }
-        else {
-            return (uint8_t)-1;
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-uint32_t utf32_toutf16_size(const uint32_t* src) {
-    uint32_t* ptr = (uint32_t*)src;
-    uint32_t ch;
-    uint32_t ressize = 2;
-    while ((ch = (uint32_t)(*ptr)) != 0) {
-        ptr++;
-        if (ch <= 0xFFFF) { // 2 byte UTF16
-            ressize += 2;
-        }
-        else if (ch <= 0xFFFFF) { // 4 byte UTF16
-            ressize += 4;
-        }
-        else {
-            return (uint32_t)-1;
-        }
-    }
-    return ressize;
-}
-
-uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
-    dstsize &= 0xFFFFFFFE;
-    if (dstsize == 0)
-        return 0;
-    if (dstsize == 2) {
-        *dst = 0;
-        return 0;
-    }
-    uint32_t* ptr = (uint32_t*)src;
-    uint32_t ch;
-    uint32_t ressize = dstsize;
-    while ((ch = (uint32_t)(*ptr)) != 0) {
-        ptr++;
-        if (ch <= 0xFFFF) { // 2 byte UTF16
-            if (dstsize <= 2) break;
-            *dst = (uint16_t)ch; dst++;
-            dstsize -= 2;
-        }
-        else if (ch <= 0xFFFFF) { // 4 byte UTF16
-            if (dstsize <= 4) break;
-            *dst = (uint16_t)((ch >> 10) + 0xD7C0); dst++;
-            *dst = (uint16_t)((ch & 0x3FF) + 0xDC00); dst++;
-            dstsize -= 4;
-        }
-        else {
-            return (uint32_t)-1;
-        }
-    }
-    *dst = 0;
-    return ressize - dstsize;
-}
-
-//==============================================================
-
+	
+	uint32_t utf8_strlen(const char* src, uint32_t* strsize) {
+		uint8_t* ptr = (uint8_t*)src;
+		uint32_t len = 0;
+		uint32_t size = 0;
+		uint8_t ch;
+		while ((ch = *ptr) != 0) {
+			ptr++; size++;
+			if (ch & 0x80) { // found UTF8
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				}
+				else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				}
+				else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				}
+				else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				}
+				else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				}
+				else { // Not UTF8
+					len++; continue;
+				}
+				int skip = 0;
+				while (((ch = *ptr) != 0) && (cnt > 0)) {
+					ptr++; skip++;
+					if ((ch & 0xC0) != 0x80) // Not UTF8
+						break;
+					cnt--;
+				}
+				if (cnt > 0) { // Not UTF8
+					ptr -= skip;
+				}
+				else {
+					size += skip;
+				}
+			}
+			len++;
+		}
+		if (strsize != 0) (*strsize) = size+1;
+		return len;
+	}
+	
+	uint32_t utf8_strlen_nzt(const char* src, uint32_t srcsize, uint32_t* strsize) {
+		uint8_t* ptr = (uint8_t*)src;
+		uint32_t len = 0;
+		uint32_t size = 0;
+		uint8_t ch;
+		while ((srcsize > 0) && ((ch = *ptr) != 0)) {
+			ptr++; size++; srcsize--;
+			if (ch & 0x80) { // found UTF8
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				}
+				else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				}
+				else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				}
+				else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				}
+				else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				}
+				else { // Not UTF8
+					len++; continue;
+				}
+				uint32_t skip = 0;
+				while ((skip < srcsize) && ((ch = *ptr) != 0) && (cnt > 0)) {
+					ptr++; skip++;
+					if ((ch & 0xC0) != 0x80) // Not UTF8
+						break;
+					cnt--;
+				}
+				if (cnt > 0) { // Not UTF8
+					ptr -= skip;
+				}
+				else {
+					size += skip;
+					srcsize--;
+				}
+			}
+			len++;
+		}
+		if (strsize != 0) (*strsize) = size+1;
+		return len;
+	}
+	
+	uint32_t utf8_toutf16_size(const char* src) {
+		char* ptr = (char*)src;
+		uint32_t ressize = 2;
+		uint8_t ch;
+		while ((ch = *((uint8_t*)ptr)) != 0) {
+			ptr++;
+			if (ch & 0x80) { // found UTF8
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				}
+				else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				}
+				else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				}
+				else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				}
+				else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				}
+				else { // Not UTF8
+					ressize += 2;
+					continue;
+				}
+				int skip = 0;
+				uint32_t utf8 = (uint32_t)(ch);
+				while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
+					ptr++; skip++;
+					if ((ch & 0xC0) != 0x80) // Not UTF8
+						break;
+					cnt--;
+				}
+				if (cnt > 0) { // Not UTF8
+					ptr -= skip;
+					ressize += 2;
+				}
+				else {
+					int shift = (6 * skip);
+					utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
+					ptr -= skip;
+					while (skip > 0) {
+						shift -= 6;
+						utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
+						ptr++;
+						skip--;
+					}
+					
+					if (utf8 <= 0xFFFF) { // 2 byte UTF16
+						ressize += 2;
+					}
+					else if (utf8 <= 0xFFFFF) { // 4 byte UTF16
+						ressize += 4;
+					}
+					else {
+						return (uint32_t)-1;
+					}
+				}
+			}
+			else {
+				ressize += 2;
+			}
+		}
+		return ressize;
+	}
+	
+	uint32_t utf8_toutf16(const char* src, uint16_t* dst, uint32_t dstsize) {
+		dstsize &= 0xFFFFFFFE;
+		if (dstsize < 2)
+			return 0;
+		if (dstsize == 2) {
+			*dst = 0;
+			return 0;
+		}
+		char* ptr = (char*)src;
+		uint32_t ressize = dstsize;
+		uint32_t size = 0;
+		uint8_t ch;
+		while ((ch = *((uint8_t*)ptr)) != 0) {
+			ptr++; size++;
+			if (ch & 0x80) { // found UTF8
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				}
+				else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				}
+				else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				}
+				else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				}
+				else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				}
+				else { // Not UTF8
+					*dst = ' ';
+					dst++;
+					dstsize -= 2;
+					if (dstsize == 2) {
+						break;
+					}
+					continue;
+				}
+				int skip = 0;
+				uint32_t utf8 = (uint32_t)(ch);
+				while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
+					ptr++; skip++;
+					if ((ch & 0xC0) != 0x80) // Not UTF8
+						break;
+					cnt--;
+				}
+				if (cnt > 0) { // Not UTF8
+					ptr -= skip;
+					*dst = ' ';
+					dst++;
+					dstsize -= 2;
+					if (dstsize == 2) {
+						break;
+					}
+				}
+				else {
+					int shift = (6 * skip);
+					utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
+					ptr -= skip;
+					while (skip > 0) {
+						shift -= 6;
+						utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
+						ptr++;
+						size++;
+						skip--;
+					}
+					
+					if (utf8 <= 0xFFFF) { // 2 byte UTF16
+						if (dstsize <= 2) break;
+						*dst = (uint16_t)utf8; dst++;
+						dstsize -= 2;
+					}
+					else if (utf8 <= 0xFFFFF) { // 4 byte UTF16
+						if (dstsize <= 4) break;
+						*dst = (uint16_t)((utf8 >> 10) + 0xD7C0); dst++;
+						*dst = (uint16_t)((utf8 & 0x3FF) + 0xDC00); dst++;
+						dstsize -= 4;
+					}
+					else {
+						return (uint16_t)-1;
+					}
+					
+					if (dstsize == 2) {
+						break;
+					}
+				}
+			}
+			else {
+				*dst = (uint16_t)(ch);
+				dst++;
+				dstsize -= 2;
+				if (dstsize == 2) {
+					break;
+				}
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	uint32_t utf8_toutf32(const char* src, uint32_t* dst, uint32_t dstsize) {
+		dstsize &= 0xFFFFFFFC;
+		if (dstsize == 0)
+			return 0;
+		if (dstsize == 4) {
+			*dst = 0;
+			return 0;
+		}
+		char* ptr = (char*)src;
+		uint32_t ressize = dstsize;
+		uint32_t size = 0;
+		uint8_t ch;
+		while ((ch = *((uint8_t*)ptr)) != 0) {
+			ptr++; size++;
+			if (ch & 0x80) { // found UTF8
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				}
+				else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				}
+				else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				}
+				else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				}
+				else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				}
+				else { // Not UTF8
+					*dst = L' ';
+					dst++;
+					dstsize -= 4;
+					if (dstsize == 4) {
+						break;
+					}
+					continue;
+				}
+				int skip = 0;
+				uint32_t utf8 = (uint32_t)(ch);
+				while (((ch = *((uint8_t*)ptr)) != 0) && (cnt > 0)) {
+					ptr++; skip++;
+					if ((ch & 0xC0) != 0x80) // Not UTF8
+						break;
+					cnt--;
+				}
+				if (cnt > 0) { // Not UTF8
+					ptr -= skip;
+					*dst = L' ';
+					dst++;
+					dstsize -= 4;
+					if (dstsize == 4) {
+						break;
+					}
+				}
+				else {
+					int shift = (6 * skip);
+					utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
+					ptr -= skip;
+					while (skip > 0) {
+						shift -= 6;
+						utf8 |= (((uint32_t)(*((uint8_t*)ptr))) & 0x3F) << shift;
+						ptr++;
+						size++;
+						skip--;
+					}
+					*dst = utf8;
+					dst++;
+					dstsize -= 4;
+					if (dstsize == 4) {
+						break;
+					}
+				}
+			}
+			else {
+				*dst = (uint32_t)(ch);
+				dst++;
+				dstsize -= 4;
+				if (dstsize == 4) {
+					break;
+				}
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	uint32_t utf16_strlen(const uint16_t* src, uint32_t* strsize) {
+		uint16_t* ptr = (uint16_t*)src;
+		uint32_t len = 0;
+		uint32_t size = 0;
+		uint16_t ch;
+		while ((ch = *ptr) != 0) {
+			ptr++; size += 2;
+			
+			if ((ch & 0xFC00) == 0xD800) { // found UTF16
+				ch = *ptr;
+				if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+					ptr++;
+					size += 2;
+				}
+				else { // Not UTF16
+				}
+			}
+			len++;
+		}
+		if (strsize != NULL) (*strsize) = size+2;
+		return len;
+	}
+	
+	uint32_t utf16_toutf8_size(const uint16_t* src) {
+		uint16_t* ptr = (uint16_t*)src;
+		uint32_t ressize = 1;
+		uint16_t ch;
+		while ((ch = *ptr) != 0) {
+			uint32_t utf16 = (uint32_t)(ch);
+			ptr++;
+			if ((ch & 0xFC00) == 0xD800) { // found UTF16
+				ch = *ptr;
+				if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+					ptr++;
+					utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
+				}
+				else { // Not UTF16
+					utf16 = L' ';
+				}
+			}
+			
+			if (utf16 <= 0x7F) { // 1 byte UTF8
+				ressize++;
+			}
+			else if (utf16 <= 0x7FF) { // 2 byte UTF8
+				ressize += 2;
+			}
+			else if (utf16 <= 0xFFFF) { // 3 byte UTF8
+				ressize += 3;
+			}
+			else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
+				ressize += 4;
+			}
+			else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
+				ressize += 5;
+			}
+			else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
+				ressize += 6;
+			}
+			else {
+				return (uint32_t)-1;
+			}
+		}
+		return ressize;
+	}
+	
+	uint32_t utf16_toutf8(const uint16_t* src, char* dst, uint32_t dstsize) {
+		if (dstsize == 0)
+			return 0;
+		if (dstsize == 1) {
+			*dst = 0;
+			return 0;
+		}
+		uint16_t* ptr = (uint16_t*)src;
+		uint32_t ressize = dstsize;
+		uint32_t size = 0;
+		uint16_t ch;
+		while ((ch = *ptr) != 0) {
+			uint32_t utf16 = (uint32_t)(ch);
+			ptr++; size++;
+			if ((ch & 0xFC00) == 0xD800) { // found UTF16
+				ch = *ptr;
+				if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+					ptr++;
+					utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
+				}
+				else { // Not UTF16
+					utf16 = L' ';
+				}
+			}
+			
+			if (utf16 <= 0x7F) { // 1 byte UTF8
+				if (dstsize <= 1) break;
+				*(uint8_t*)dst = (uint8_t)utf16; dst++;
+				dstsize--;
+			}
+			else if (utf16 <= 0x7FF) { // 2 byte UTF8
+				if (dstsize <= 2) break;
+				*(uint8_t*)dst = (uint8_t)(0xC0 | (utf16 >> 6)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
+				dstsize -= 2;
+			}
+			else if (utf16 <= 0xFFFF) { // 3 byte UTF8
+				if (dstsize <= 3) break;
+				*(uint8_t*)dst = (uint8_t)(0xE0 | (utf16 >> 12)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
+				dstsize -= 3;
+			}
+			else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
+				if (dstsize <= 4) break;
+				*(uint8_t*)dst = (uint8_t)(0xF0 | (utf16 >> 18)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
+				dstsize -= 4;
+			}
+			else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
+				if (dstsize <= 5) break;
+				*(uint8_t*)dst = (uint8_t)(0xF8 | (utf16 >> 24)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 18) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
+				dstsize -= 5;
+			}
+			else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
+				if (dstsize <= 6) break;
+				*(uint8_t*)dst = (uint8_t)(0xFC | (utf16 >> 30)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 24) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 18) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((utf16 >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (utf16 & 0x3F)); dst++;
+				dstsize -= 6;
+			}
+			else {
+				return (uint32_t)-1;
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	uint32_t utf16_toutf32(const uint16_t* src, uint32_t* dst, uint32_t dstsize) {
+		dstsize &= 0xFFFFFFFC;
+		if (dstsize == 0)
+			return 0;
+		if (dstsize == 4) {
+			*dst = 0;
+			return 0;
+		}
+		uint16_t* ptr = (uint16_t*)src;
+		uint32_t ressize = dstsize;
+		uint32_t size = 0;
+		uint16_t ch;
+		while ((ch = *ptr) != 0) {
+			ptr++; size++;
+			if ((ch & 0xFC00) == 0xD800) { // found UTF16
+				uint32_t utf16 = (uint32_t)(ch);
+				ch = *ptr;
+				if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+					ptr++;
+					utf16 = (utf16 << 10) + (uint32_t)ch - 0x35FDC00;
+					*dst = utf16;
+				}
+				else { // Not UTF16
+					*dst = L' ';
+				}
+				dst++;
+				dstsize -= 4;
+				if (dstsize == 4) {
+					break;
+				}
+			}
+			else {
+				*dst = (uint32_t)(ch);
+				dst++;
+				dstsize -= 4;
+				if (dstsize == 4) {
+					break;
+				}
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	uint32_t utf32_strlen(const uint32_t* src, uint32_t* strsize) {
+		uint32_t* ptr = (uint32_t*)src;
+		uint32_t len = 0;
+		uint32_t size = 0;
+		uint32_t ch;
+		while ((ch = *ptr) != 0) {
+			ptr++; size += 4;
+			len++;
+		}
+		if (strsize != NULL) (*strsize) = size + 4;
+		return len;
+	}
+	
+	uint32_t utf32_toutf8_size(const uint32_t* src) {
+		uint32_t* ptr = (uint32_t*)src;
+		uint32_t ch;
+		uint32_t ressize = 1;
+		while ((ch = (uint32_t)(*ptr)) != 0) {
+			ptr++;
+			if (ch <= 0x7F) { // 1 byte UTF8
+				ressize++;
+			}
+			else if (ch <= 0x7FF) { // 2 byte UTF8
+				ressize += 2;
+			}
+			else if (ch <= 0xFFFF) { // 3 byte UTF8
+				ressize += 3;
+			}
+			else if (ch <= 0x1FFFFF) { // 4 byte UTF8
+				ressize += 4;
+			}
+			else if (ch <= 0x3FFFFFF) { // 5 byte UTF8
+				ressize += 5;
+			}
+			else if (ch <= 0x7FFFFFFF) { // 6 byte UTF8
+				ressize += 6;
+			}
+			else {
+				return (uint32_t)-1;
+			}
+		}
+		return ressize;
+	}
+	
+	uint32_t utf32_toutf8(const uint32_t* src, char* dst, uint32_t dstsize) {
+		if (dstsize == 0)
+			return 0;
+		if (dstsize == 1) {
+			*dst = 0;
+			return 0;
+		}
+		uint32_t* ptr = (uint32_t*)src;
+		uint32_t ch;
+		uint32_t ressize = dstsize;
+		while ((ch = (uint32_t)(*ptr)) != 0) {
+			ptr++;
+			if (ch <= 0x7F) { // 1 byte UTF8
+				if (dstsize <= 1) break;
+				*(uint8_t*)dst = (uint8_t)ch; dst++;
+				dstsize--;
+			}
+			else if (ch <= 0x7FF) { // 2 byte UTF8
+				if (dstsize <= 2) break;
+				*(uint8_t*)dst = (uint8_t)(0xC0 | (ch >> 6)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
+				dstsize -= 2;
+			}
+			else if (ch <= 0xFFFF) { // 3 byte UTF8
+				if (dstsize <= 3) break;
+				*(uint8_t*)dst = (uint8_t)(0xE0 | (ch >> 12)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
+				dstsize -= 3;
+			}
+			else if (ch <= 0x1FFFFF) { // 4 byte UTF8
+				if (dstsize <= 4) break;
+				*(uint8_t*)dst = (uint8_t)(0xF0 | (ch >> 18)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
+				dstsize -= 4;
+			}
+			else if (ch <= 0x3FFFFFF) { // 5 byte UTF8
+				if (dstsize <= 5) break;
+				*(uint8_t*)dst = (uint8_t)(0xF8 | (ch >> 24)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 18) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
+				dstsize -= 5;
+			}
+			else if (ch <= 0x7FFFFFFF) { // 6 byte UTF8
+				if (dstsize <= 6) break;
+				*(uint8_t*)dst = (uint8_t)(0xFC | (ch >> 30)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 24) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 18) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 12) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | ((ch >> 6) & 0x3F)); dst++;
+				*(uint8_t*)dst = (uint8_t)(0x80 | (ch & 0x3F)); dst++;
+				dstsize -= 6;
+			}
+			else {
+				return (uint8_t)-1;
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	uint32_t utf32_toutf16_size(const uint32_t* src) {
+		uint32_t* ptr = (uint32_t*)src;
+		uint32_t ch;
+		uint32_t ressize = 2;
+		while ((ch = (uint32_t)(*ptr)) != 0) {
+			ptr++;
+			if (ch <= 0xFFFF) { // 2 byte UTF16
+				ressize += 2;
+			}
+			else if (ch <= 0xFFFFF) { // 4 byte UTF16
+				ressize += 4;
+			}
+			else {
+				return (uint32_t)-1;
+			}
+		}
+		return ressize;
+	}
+	
+	uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
+		dstsize &= 0xFFFFFFFE;
+		if (dstsize == 0)
+			return 0;
+		if (dstsize == 2) {
+			*dst = 0;
+			return 0;
+		}
+		uint32_t* ptr = (uint32_t*)src;
+		uint32_t ch;
+		uint32_t ressize = dstsize;
+		while ((ch = (uint32_t)(*ptr)) != 0) {
+			ptr++;
+			if (ch <= 0xFFFF) { // 2 byte UTF16
+				if (dstsize <= 2) break;
+				*dst = (uint16_t)ch; dst++;
+				dstsize -= 2;
+			}
+			else if (ch <= 0xFFFFF) { // 4 byte UTF16
+				if (dstsize <= 4) break;
+				*dst = (uint16_t)((ch >> 10) + 0xD7C0); dst++;
+				*dst = (uint16_t)((ch & 0x3FF) + 0xDC00); dst++;
+				dstsize -= 4;
+			}
+			else {
+				return (uint32_t)-1;
+			}
+		}
+		*dst = 0;
+		return ressize - dstsize;
+	}
+	
+	//==============================================================
+	
 #ifdef STRING_WCSLWR
 	wchar_t* wcslwr(wchar_t* s) {
 		wchar_t* p = s;
 		while ((*p = towlower(*p)) != 0) p++;
 		return s;
 	}
-
+	
 	wchar_t* wcsupr(wchar_t* s) {
 		wchar_t* p = s;
 		while ((*p = towupper(*p)) != 0) p++;
 		return s;
 	}
 #endif
+	
+#ifdef __cplusplus
+}
+#endif
 
 //==============================================================
 
 #include <core/uMemory.h>
 #include <core/uError.h>
-
+	
 #define StringTrue L"true"
 #define StringFalse L"false"
 #define StringNan L"NaN"
@@ -752,56 +756,56 @@ uint32_t utf32_toutf16(const uint32_t* src, uint16_t* dst, uint32_t dstsize) {
 #define StringNil NULL
 #define StringNull L"null"
 #define StringUndefined L"undefined"
-
+	
+const wchar_t TypeString[] = L"String::";
+	
 static uint32_t getStringLength(const String& self) {
-    return self.m_length;
+	if (self._object == NULL)
+		return 0;
+	return self->m_length;
 }
 
 static uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
-    self.setLength(length);
-	return self.m_size;
+	if (self._object == NULL) {
+		StringRef* newString = memNew(newString, StringRef());
+		if (newString == NULL)
+			throw eOutOfMemory;
+		self.setRef(newString);
+	}
+	self->setLength(length);
+	return self->m_length;
 }
 
-void String::create() {
+uint32_t getStringRefLength(const StringRef& self) {
+	return self.m_length;
+}
+
+uint32_t setStringRefLength(StringRef& self, uint32_t length) throw(const char*) {
+	self.setLength(length);
+	return self.m_length;
+}
+
+void StringRef::initialize() {
+	TYPE = TypeString;
+	this->length.initialize(this, &getStringRefLength, &setStringRefLength);
+}
+
+void String::initialize() {
 	this->length.initialize(this, &getStringLength, &setStringLength);
 }
 
 void String::release() {
-    if (this->m_data != NULL) {
-        memFree(this->m_data);
-        this->m_data = NULL;
-    }
-    this->m_length = 0;
-    this->m_size = 0;
-    this->m_memorySize = 0;
-}
-
-void* String::operator new(size_t size) throw(const char*) {
-    void *p = memAlloc(void, p, size);
-    if (!p) throw eOutOfMemory;
-    return p;
-}
-
-void* String::operator new[](size_t size) throw(const char*) {
-    void *p = memAlloc(void, p, size);
-    if (!p) throw eOutOfMemory;
-    return p;
-}
-
-void String::operator delete(void *p) {
-    memFree(p);
-}
-
-void String::operator delete[](void *p) {
-    memFree(p);
+	if (_object != NULL) {
+		setRef(NULL);
+	}
 }
 
 #define STRING_BLOCK_SIZE	32
 
-void String::setSize(uint32_t size) throw(const char*) {
+void StringRef::setSize(uint32_t size) throw(const char*) {
 	uint32_t newSize = size;
 	uint32_t newLength = (newSize / sizeof(wchar_t)) - 1;
-
+	
 	if (newSize < sizeof(wchar_t)) {
 		if (this->m_data != NULL) {
 			memFree(this->m_data);
@@ -812,53 +816,66 @@ void String::setSize(uint32_t size) throw(const char*) {
 		this->m_memorySize = 0;
 		return;
 	}
-
-    uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-    if (this->m_memorySize != newMemSize) {
-        wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
-        if (newString) {
-            this->m_data = newString;
-            this->m_memorySize = newMemSize;
-        } else {
+	
+	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
+	if (this->m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+		if (newString) {
+			this->m_data = newString;
+			this->m_memorySize = newMemSize;
+		} else {
 			throw eOutOfMemory;
-        }
-    }
-
+		}
+	}
+	
 	this->m_data[newLength] = 0;
 	this->m_length = newLength;
 	this->m_size = newSize;
 }
 
-void String::setLength(uint32_t length) throw(const char*) {
-    uint32_t newSize = (length + 1) * sizeof(wchar_t);
-    uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-    if (this->m_memorySize != newMemSize) {
-        wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
-        if (newString) {
-            this->m_data = newString;
-            this->m_memorySize = newMemSize;
-        } else {
+void StringRef::setLength(uint32_t length) throw(const char*) {
+	uint32_t newSize = (length + 1) * sizeof(wchar_t);
+	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
+	if (this->m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+		if (newString) {
+			this->m_data = newString;
+			this->m_memorySize = newMemSize;
+		} else {
 			throw eOutOfMemory;
-        }
-    }
-
+		}
+	}
+	
 	this->m_data[length] = 0;
 	this->m_length = length;
 	this->m_size = newSize;
 }
 
-String::String() {
-	this->create();
-}
+//==============================================================
 
-String::String(const void* string) throw(const char*) {
-	this->create();
-	if (string != NULL) {
-		throw eInvalidPointer;
+void StringRef::release() {
+	if (this->m_data != NULL) {
+		memFree(this->m_data);
+		this->m_data = NULL;
 	}
+	this->m_length = 0;
+	this->m_size = 0;
+	this->m_memorySize = 0;
 }
 
-String& String::operator =(const void* string) throw(const char*) {
+StringRef::~StringRef() {
+	this->release();
+}
+
+//==============================================================
+
+StringRef::StringRef(const void* string) throw(const char*) {
+	initialize();
+	if (string != NULL)
+		throw eInvalidPointer;
+}
+
+StringRef& StringRef::operator =(const void* string) throw(const char*) {
 	if (string != NULL) {
 		throw eInvalidPointer;
 	}
@@ -866,78 +883,144 @@ String& String::operator =(const void* string) throw(const char*) {
 	return *this;
 }
 
-String::String(const String& string) throw(const char*) {
-	this->create();
+StringRef::StringRef(const StringRef& string) throw(const char*) {
+	initialize();
 	if (string.m_size > 0) {
 		this->setSize(string.m_size);
 		memcpy(this->m_data, string.m_data, this->m_size);
 	}
 }
 
-String& String::operator =(const String& string) throw(const char*) {
+StringRef& StringRef::operator =(const StringRef& string) throw(const char*) {
 	this->setSize(string.m_size);
 	if (string.m_size > 0)
 		memcpy(this->m_data, string.m_data, this->m_size);
 	return *this;
 }
 
-String& String::concat(const String& string) throw(const char*) {
+StringRef& StringRef::concat(const StringRef& string) throw(const char*) {
 	uint32_t length = string.m_length;
 	if (length != 0) {
 		uint32_t prevLength = this->m_length;
 		setLength(prevLength + length);
 		memcpy(this->m_data + prevLength, string.m_data, string.m_size);
 	}
-    return *this;
+	return *this;
+}
+
+String::String(const String& string) throw(const char*) : Object() {
+	if (string._object != NULL) {
+		StringRef* newString = memNew(newString, StringRef(*(StringRef*)(string._object)));
+		setRef(newString);
+	}
+}
+
+String& String::operator =(const String& string) throw(const char*) {
+	if (string._object != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(*(StringRef*)(string._object)));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->operator =(*(StringRef*)(string._object));
+		}
+	} else {
+		setRef(NULL);
+	}
+	return *this;
+}
+
+String& String::concat(const String& string) throw(const char*) {
+	if (string._object != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(*(StringRef*)(string._object)));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->concat(*(StringRef*)(string._object));
+		}
+	}
+	return *this;
 }
 
 #if defined(__IOS__)
-	String::String(const NSString* string) throw(const char*) {
-		this->create();
-		if (string != nil) {
-			uint32_t length = (uint32_t)string.length;
-			if (length > 0) {
-				this->setLength(length);
-				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-				this->setSize(newSize);
-			} else {
-				this->setLength(0);
-			}
-		}
-	}
-
-	String& String::operator =(const NSString* string) throw(const char*) {
-		if (string != nil) {
-			uint32_t length = (uint32_t)string.length;
-			if (length > 0) {
-				this->setLength(length);
-				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-				this->setSize(newSize);
-			} else {
-				this->setLength(0);
-			}
+StringRef::StringRef(const NSString* string) throw(const char*) {
+	initialize();
+	if (string != NULL) {
+		uint32_t length = (uint32_t)string.length;
+		if (length > 0) {
+			this->setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+			this->setSize(newSize);
 		} else {
-			this->setSize(0);
+			this->setLength(0);
 		}
-		return *this;
 	}
+}
 
-	String& String::concat(const NSString* string) throw(const char*) {
-		if (string != nil) {
-			uint32_t prevLength = this->m_length;
-			uint32_t length = (uint32_t)string.length;
-			if (length > 0) {
-				this->setLength(prevLength + length);
-				uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
-				this->setSize(newSize);
-			}
+StringRef& StringRef::operator =(const NSString* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t length = (uint32_t)string.length;
+		if (length > 0) {
+			this->setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+			this->setSize(newSize);
+		} else {
+			this->setLength(0);
 		}
-		return *this;
+	} else {
+		this->setSize(0);
 	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const NSString* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t prevLength = this->m_length;
+		uint32_t length = (uint32_t)string.length;
+		if (length > 0) {
+			this->setLength(prevLength + length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
+			this->setSize(newSize);
+		}
+	}
+	return *this;
+}
+
+String::String(const NSString* string) throw(const char*) : Object() {
+	if (string != NULL) {
+		StringRef* newString = memNew(newString, StringRef(string));
+		setRef(newString);
+	}
+}
+
+String& String::operator =(const NSString* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->operator =(string);
+		}
+	} else {
+		setRef(NULL);
+	}
+	return *this;
+}
+
+String& String::concat(const NSString* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->concat(string);
+		}
+	}
+	return *this;
+}
 #endif
 
-String::String(const char* string) throw(const char*) {
-	this->create();
+StringRef::StringRef(const char* string) throw(const char*) {
+	initialize();
 	if (string != NULL) {
 		uint32_t newSize = 0;
 		uint32_t length = utf8_strlen(string, &newSize);
@@ -950,7 +1033,7 @@ String::String(const char* string) throw(const char*) {
 	}
 }
 
-String& String::operator =(const char* string) throw(const char*) {
+StringRef& StringRef::operator =(const char* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t newSize = 0;
 		uint32_t length = utf8_strlen(string, &newSize);
@@ -966,21 +1049,54 @@ String& String::operator =(const char* string) throw(const char*) {
 	return *this;
 }
 
-String& String::concat(const char* string) throw(const char*) {
-    if (string != NULL) {
-        uint32_t prevLength = this->m_length;
-        uint32_t strSize;
-        uint32_t length = utf8_strlen(string, &strSize);
-        if (length > 0) {
+StringRef& StringRef::concat(const char* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t prevLength = this->m_length;
+		uint32_t strSize;
+		uint32_t length = utf8_strlen(string, &strSize);
+		if (length > 0) {
 			this->setLength(prevLength + length);
-            utf8_towcs(string, this->m_data + prevLength, strSize);
-        }
-    }
-    return *this;
+			utf8_towcs(string, this->m_data + prevLength, strSize);
+		}
+	}
+	return *this;
 }
 
-String::String(const char* string, uint32_t length) throw(const char*) {
-	this->create();
+String::String(const char* string) throw(const char*) : Object() {
+	if (string != NULL) {
+		StringRef* newString = memNew(newString, StringRef(string));
+		setRef(newString);
+	}
+}
+
+String& String::operator =(const char* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->operator =(string);
+		}
+	} else {
+		setRef(NULL);
+	}
+	return *this;
+}
+
+String& String::concat(const char* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->concat(string);
+		}
+	}
+	return *this;
+}
+
+StringRef::StringRef(const char* string, uint32_t length) throw(const char*) {
+	initialize();
 	if (string != NULL) {
 		this->setLength(length);
 		if (length > 0) {
@@ -994,8 +1110,15 @@ String::String(const char* string, uint32_t length) throw(const char*) {
 	}
 }
 
-String::String(const wchar_t* string) throw(const char*) {
-	this->create();
+String::String(const char* string, uint32_t length) throw(const char*) : Object() {
+	if (string != NULL) {
+		StringRef* newString = memNew(newString, StringRef(string, length));
+		setRef(newString);
+	}
+}
+
+StringRef::StringRef(const wchar_t* string) throw(const char*) {
+	initialize();
 	if (string != NULL) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
@@ -1008,7 +1131,7 @@ String::String(const wchar_t* string) throw(const char*) {
 	}
 }
 
-String& String::operator =(const wchar_t* string) throw(const char*) {
+StringRef& StringRef::operator =(const wchar_t* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
@@ -1024,21 +1147,54 @@ String& String::operator =(const wchar_t* string) throw(const char*) {
 	return *this;
 }
 
-String& String::concat(const wchar_t* string) throw(const char*) {
-    if (string != NULL) {
-        uint32_t prevLength = this->m_length;
-        uint32_t strSize;
-        uint32_t length = wcs_strlen(string, &strSize);
-        if (length > 0) {
+StringRef& StringRef::concat(const wchar_t* string) throw(const char*) {
+	if (string != NULL) {
+		uint32_t prevLength = this->m_length;
+		uint32_t strSize;
+		uint32_t length = wcs_strlen(string, &strSize);
+		if (length > 0) {
 			this->setLength(this->m_length + length);
 			memcpy(this->m_data + prevLength, string, strSize);
-        }
-    }
-    return *this;
+		}
+	}
+	return *this;
 }
 
-String::String(const wchar_t* string, uint32_t length) throw(const char*) {
-	this->create();
+String::String(const wchar_t* string) throw(const char*) : Object() {
+	if (string != NULL) {
+		StringRef* newString = memNew(newString, StringRef(string));
+		setRef(newString);
+	}
+}
+
+String& String::operator =(const wchar_t* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->operator =(string);
+		}
+	} else {
+		setRef(NULL);
+	}
+	return *this;
+}
+
+String& String::concat(const wchar_t* string) throw(const char*) {
+	if (string != NULL) {
+		if (_object == NULL) {
+			StringRef* newString = memNew(newString, StringRef(string));
+			setRef(newString);
+		} else {
+			((StringRef*)_object)->concat(string);
+		}
+	}
+	return *this;
+}
+
+StringRef::StringRef(const wchar_t* string, uint32_t length) throw(const char*) {
+	initialize();
 	if (string != NULL) {
 		this->setLength(length);
 		if (length > 0)
@@ -1046,324 +1202,606 @@ String::String(const wchar_t* string, uint32_t length) throw(const char*) {
 	}
 }
 
-String::String(const char character) throw(const char*) {
-	this->create();
+String::String(const wchar_t* string, uint32_t length) throw(const char*) : Object() {
+	if (string != NULL) {
+		StringRef* newString = memNew(newString, StringRef(string, length));
+		setRef(newString);
+	}
+}
+
+StringRef::StringRef(const char character) throw(const char*) {
+	initialize();
 	this->setLength(1);
 	this->m_data[0] = (wchar_t)character;
 }
 
-String& String::operator =(const char character) throw(const char*) {
+StringRef& StringRef::operator =(const char character) throw(const char*) {
 	this->setLength(1);
 	this->m_data[0] = (wchar_t)character;
+	return *this;
+}
+
+StringRef& StringRef::concat(const char character) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 1);
+	this->m_data[prevLength] = (wchar_t)character;
+	return *this;
+}
+
+String::String(const char character) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(character));
+	setRef(newString);
+}
+
+String& String::operator =(const char character) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(character));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(character);
+	}
 	return *this;
 }
 
 String& String::concat(const char character) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 1);
-	this->m_data[prevLength] = (wchar_t)character;
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(character));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(character);
+	}
+	return *this;
 }
 
-String::String(const wchar_t character) throw(const char*) {
-	this->create();
+StringRef::StringRef(const wchar_t character) throw(const char*) {
+	initialize();
 	this->setLength(1);
 	this->m_data[0] = character;
 }
 
-String& String::operator =(const wchar_t character) throw(const char*) {
+StringRef& StringRef::operator =(const wchar_t character) throw(const char*) {
 	this->setLength(1);
 	this->m_data[0] = character;
 	return *this;
 }
 
-String& String::concat(const wchar_t character) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 1);
+StringRef& StringRef::concat(const wchar_t character) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 1);
 	this->m_data[prevLength] = character;
-    return *this;
+	return *this;
 }
 
-String::String(bool value) throw(const char*) {
-	this->create();
+String::String(const wchar_t character) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(character));
+	setRef(newString);
+}
+
+String& String::operator =(const wchar_t character) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(character));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(character);
+	}
+	return *this;
+}
+
+String& String::concat(const wchar_t character) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(character));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(character);
+	}
+	return *this;
+}
+
+StringRef::StringRef(bool value) throw(const char*) {
+	initialize();
 	this->operator =(value);
 }
 
-String& String::operator =(bool value) throw(const char*) {
+StringRef& StringRef::operator =(bool value) throw(const char*) {
 	if (value)
 		return this->operator =(StringTrue);
 	else
 		return this->operator =(StringFalse);
 }
 
-String& String::concat(const bool value) throw(const char*) {
-    if (value)
-        return this->concat(StringTrue);
-    else
-        return this->concat(StringFalse);
+StringRef& StringRef::concat(const bool value) throw(const char*) {
+	if (value)
+		return this->concat(StringTrue);
+	else
+		return this->concat(StringFalse);
 }
 
-int String::swprintf(wchar_t* target, int8_t value) {
+String::String(const bool value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const bool value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
+}
+
+String& String::concat(const bool value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
+}
+
+int StringRef::swprintf(wchar_t* target, int8_t value) {
 	return ::swprintf(target, 4, L"%hhd", value);
 }
 
-String::String(int8_t value) throw(const char*) {
-	this->create();
-    this->setLength(4);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(int8_t value) throw(const char*) {
+	initialize();
+	this->setLength(4);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 4) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(int8_t value) throw(const char*) {
-    this->setLength(4);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(int8_t value) throw(const char*) {
+	this->setLength(4);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 4) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const int8_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 4);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 4) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const int8_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const int8_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const int8_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 4);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 4) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, uint8_t value) {
+int StringRef::swprintf(wchar_t* target, uint8_t value) {
 	return ::swprintf(target, 3, L"%hhu", value);
 }
 
-String::String(uint8_t value) throw(const char*) {
-	this->create();
-    this->setLength(3);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(uint8_t value) throw(const char*) {
+	initialize();
+	this->setLength(3);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 3) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(uint8_t value) throw(const char*) {
-    this->setLength(3);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(uint8_t value) throw(const char*) {
+	this->setLength(3);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 3) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const uint8_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 3);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 3) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const uint8_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const uint8_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const uint8_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 3);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 3) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, int16_t value) {
+int StringRef::swprintf(wchar_t* target, int16_t value) {
 	return ::swprintf(target, 6, L"%hd", value);
 }
 
-String::String(int16_t value) throw(const char*) {
-	this->create();
-    this->setLength(6);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(int16_t value) throw(const char*) {
+	initialize();
+	this->setLength(6);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 6) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(int16_t value) throw(const char*) {
-    this->setLength(6);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(int16_t value) throw(const char*) {
+	this->setLength(6);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 6) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const int16_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 6);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 6) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const int16_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const int16_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const int16_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 6);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 6) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, uint16_t value) {
+int StringRef::swprintf(wchar_t* target, uint16_t value) {
 	return ::swprintf(target, 5, L"%hu", value);
 }
 
-String::String(uint16_t value) throw(const char*) {
-	this->create();
-    this->setLength(5);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(uint16_t value) throw(const char*) {
+	initialize();
+	this->setLength(5);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 5) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(uint16_t value) throw(const char*) {
-    this->setLength(5);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(uint16_t value) throw(const char*) {
+	this->setLength(5);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 5) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const uint16_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 5);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 5) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const uint16_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const uint16_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const uint16_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 5);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 5) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, int32_t value) {
+int StringRef::swprintf(wchar_t* target, int32_t value) {
 	return ::swprintf(target, 11, L"%ld", value);
 }
 
-String::String(int32_t value) throw(const char*) {
-	this->create();
-    this->setLength(11);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(int32_t value) throw(const char*) {
+	initialize();
+	this->setLength(11);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 11) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(int32_t value) throw(const char*) {
-    this->setLength(11);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(int32_t value) throw(const char*) {
+	this->setLength(11);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 11) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const int32_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 11);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 11) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const int32_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const int32_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const int32_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 11);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 11) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, uint32_t value) {
+int StringRef::swprintf(wchar_t* target, uint32_t value) {
 	return ::swprintf(target, 10, L"%lu", value);
 }
 
-String::String(uint32_t value) throw(const char*) {
-	this->create();
-    this->setLength(10);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(uint32_t value) throw(const char*) {
+	initialize();
+	this->setLength(10);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 10) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(uint32_t value) throw(const char*) {
-    this->setLength(10);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(uint32_t value) throw(const char*) {
+	this->setLength(10);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 10) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const uint32_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 10);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 10) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const uint32_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const uint32_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const uint32_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 10);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 10) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, int64_t value) {
+int StringRef::swprintf(wchar_t* target, int64_t value) {
 	return ::swprintf(target, 21, L"%lld", value);
 }
 
-String::String(int64_t value) throw(const char*) {
-	this->create();
-    this->setLength(21);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(int64_t value) throw(const char*) {
+	initialize();
+	this->setLength(21);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 21) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(int64_t value) throw(const char*) {
-    this->setLength(21);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(int64_t value) throw(const char*) {
+	this->setLength(21);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 21) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const int64_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 21);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 21) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const int64_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const int64_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const int64_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 21);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 21) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, uint64_t value) {
+int StringRef::swprintf(wchar_t* target, uint64_t value) {
 	return ::swprintf(target, 20, L"%llu", value);
 }
 
-String::String(uint64_t value) throw(const char*) {
-	this->create();
-    this->setLength(20);
-	int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(uint64_t value) throw(const char*) {
+	initialize();
+	this->setLength(20);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 20) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(uint64_t value) throw(const char*) {
-    this->setLength(20);
-	int length = String::swprintf(this->m_data, value);
+StringRef& StringRef::operator =(uint64_t value) throw(const char*) {
+	this->setLength(20);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length != 20) {
 		this->setLength(static_cast<uint32_t>(length));
-    }
-    return *this;
+	}
+	return *this;
+}
+
+StringRef& StringRef::concat(const uint64_t value) throw(const char*) {
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 20);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
+	if (length != 20) {
+		this->setLength(prevLength + static_cast<uint32_t>(length));
+	}
+	return *this;
+}
+
+String::String(const uint64_t value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const uint64_t value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
 }
 
 String& String::concat(const uint64_t value) throw(const char*) {
-    uint32_t prevLength = this->m_length;
-    this->setLength(prevLength + 20);
-    int length = String::swprintf(this->m_data + prevLength, value);
-	if (length != 20) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
-    }
-    return *this;
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
 #ifndef __IOS__
-	#include <math.h>
+#include <math.h>
 #endif
 
-int String::swprintf(wchar_t* target, float value) {
+int StringRef::swprintf(wchar_t* target, float value) {
 	int length = ::swprintf(target, 23, L"%.7f", value);
 	if (length == EOF)
 		return ::swprintf(target, 23, L"%.7e", value);
@@ -1386,70 +1824,95 @@ int String::swprintf(wchar_t* target, float value) {
 	return length;
 }
 
-String::String(float value) throw(const char*) {
-	this->create();
-    if (isnan(value)) {
-        this->operator=(StringNan);
-    } else if (isinf(value)) {
-        if (signbit(value)) {
-            this->operator=(StringNegInfinite);
-        } else {
-            this->operator=(StringInfinite);
-        }
-    } else {
-    	this->setLength(23);
-        int length = String::swprintf(this->m_data, value);
-        if (length == EOF) {
+StringRef::StringRef(float value) throw(const char*) {
+	initialize();
+	if (isnan(value)) {
+		this->operator=(StringNan);
+	} else if (isinf(value)) {
+		if (signbit(value)) {
+			this->operator=(StringNegInfinite);
+		} else {
+			this->operator=(StringInfinite);
+		}
+	} else {
+		this->setLength(23);
+		int length = StringRef::swprintf(this->m_data, value);
+		if (length == EOF) {
 			this->setSize(0);
 			throw eConvert;
-        } else if (length != 23)
+		} else if (length != 23)
 			this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(float value) throw(const char*) {
-    if (isnan(value))
-        return this->operator=(StringNan);
-    else if (isinf(value)) {
-        if (signbit(value))
-            return this->operator=(StringNegInfinite);
-        else
-            return this->operator=(StringInfinite);
-    }
-
+StringRef& StringRef::operator =(float value) throw(const char*) {
+	if (isnan(value))
+		return this->operator=(StringNan);
+	else if (isinf(value)) {
+		if (signbit(value))
+			return this->operator=(StringNegInfinite);
+		else
+			return this->operator=(StringInfinite);
+	}
+	
 	this->setLength(23);
-	int length = String::swprintf(this->m_data, value);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length == EOF) {
 		this->setSize(0);
 		throw eConvert;
 	} else if (length != 23)
 		this->setLength(static_cast<uint32_t>(length));
-    return *this;
+	return *this;
 }
 
-String& String::concat(const float value) throw(const char*) {
-    if (isnan(value))
-        return this->concat(StringNan);
-    else if (isinf(value)) {
-        if (signbit(value))
-            return this->concat(StringNegInfinite);
-        else
-            return this->concat(StringInfinite);
-    }
-
+StringRef& StringRef::concat(const float value) throw(const char*) {
+	if (isnan(value))
+		return this->concat(StringNan);
+	else if (isinf(value)) {
+		if (signbit(value))
+			return this->concat(StringNegInfinite);
+		else
+			return this->concat(StringInfinite);
+	}
+	
 	uint32_t prevSize = this->m_size;
 	uint32_t prevLength = this->m_length;
 	this->setLength(prevLength + 23);
-	int length = String::swprintf(this->m_data + prevLength, value);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
 	if (length == EOF) {
 		this->setSize(prevSize);
-		throw "Error: swprintf ( String::concat(float) )";
+		throw eConvert;
 	} else if (length != 23)
 		this->setLength(prevLength + static_cast<uint32_t>(length));
-    return *this;
+	return *this;
 }
 
-int String::swprintf(wchar_t* target, double value) {
+String::String(const float value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const float value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
+}
+
+String& String::concat(const float value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
+}
+
+int StringRef::swprintf(wchar_t* target, double value) {
 	int length = ::swprintf(target, 31, L"%.15f", value);
 	if (length == EOF)
 		return ::swprintf(target, 31, L"%.15e", value);
@@ -1472,132 +1935,160 @@ int String::swprintf(wchar_t* target, double value) {
 	return length;
 }
 
-String::String(double value) throw(const char*) {
-	this->create();
-    if (isnan(value)) {
-        this->operator=(StringNan);
-    } else if (isinf(value)) {
-        if (signbit(value)) {
-            this->operator=(StringNegInfinite);
-        } else {
-            this->operator=(StringInfinite);
-        }
-    } else {
-    	this->setLength(31);
-        int length = String::swprintf(this->m_data, value);
+StringRef::StringRef(double value) throw(const char*) {
+	initialize();
+	if (isnan(value)) {
+		this->operator=(StringNan);
+	} else if (isinf(value)) {
+		if (signbit(value)) {
+			this->operator=(StringNegInfinite);
+		} else {
+			this->operator=(StringInfinite);
+		}
+	} else {
+		this->setLength(31);
+		int length = StringRef::swprintf(this->m_data, value);
 		if (length == EOF) {
 			this->setSize(0);
-			throw "Error: swprintf ( String::String(double) )";
+			throw eConvert;
 		} else if (length != 31)
 			this->setLength(static_cast<uint32_t>(length));
-    }
+	}
 }
 
-String& String::operator =(double value) throw(const char*) {
-    if (isnan(value))
-        return this->operator=(StringNan);
-    else if (isinf(value)) {
-        if (signbit(value))
-            return this->operator=(StringNegInfinite);
-        else
-            return this->operator=(StringInfinite);
-    }
-
+StringRef& StringRef::operator =(double value) throw(const char*) {
+	if (isnan(value))
+		return this->operator=(StringNan);
+	else if (isinf(value)) {
+		if (signbit(value))
+			return this->operator=(StringNegInfinite);
+		else
+			return this->operator=(StringInfinite);
+	}
+	
 	this->setLength(31);
-	int length = String::swprintf(this->m_data, value);
+	int length = StringRef::swprintf(this->m_data, value);
 	if (length == EOF) {
 		this->setSize(0);
-		throw "Error: swprintf ( String::operator =(double) )";
+		throw eConvert;
 	} else if (length != 31)
 		this->setLength(static_cast<uint32_t>(length));
-    return *this;
+	return *this;
 }
 
-String& String::concat(const double value) throw(const char*) {
-    if (isnan(value))
-        return this->concat(StringNan);
-    else if (isinf(value)) {
-        if (signbit(value))
-            return this->concat(StringNegInfinite);
-        else
-            return this->concat(StringInfinite);
-    }
-
+StringRef& StringRef::concat(const double value) throw(const char*) {
+	if (isnan(value))
+		return this->concat(StringNan);
+	else if (isinf(value)) {
+		if (signbit(value))
+			return this->concat(StringNegInfinite);
+		else
+			return this->concat(StringInfinite);
+	}
+	
 	uint32_t prevSize = this->m_size;
 	uint32_t prevLength = this->m_length;
 	this->setLength(prevLength + 31);
-	int length = String::swprintf(this->m_data + prevLength, value);
+	int length = StringRef::swprintf(this->m_data + prevLength, value);
 	if (length == EOF) {
 		this->setSize(prevSize);
-		throw "Error: swprintf ( String::concat(double) )";
+		throw eConvert;
 	} else if (length != 31)
 		this->setLength(prevLength + static_cast<uint32_t>(length));
-    return *this;
+	return *this;
 }
 
-String::~String() {
-	this->release();
+String::String(const double value) throw(const char*) : Object() {
+	StringRef* newString = memNew(newString, StringRef(value));
+	setRef(newString);
+}
+
+String& String::operator =(const double value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->operator =(value);
+	}
+	return *this;
+}
+
+String& String::concat(const double value) throw(const char*) {
+	if (_object == NULL) {
+		StringRef* newString = memNew(newString, StringRef(value));
+		setRef(newString);
+	} else {
+		((StringRef*)_object)->concat(value);
+	}
+	return *this;
 }
 
 #ifdef __IOS__
-	String::operator NSString*() const {
-		NSString* result = nil;
-		if (this->m_data != NULL) {
-			#if __WCHAR_MAX__ > 0x10000
-				result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
-			#else
-				result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
-			#endif
-		}
-		return result;
+StringRef::operator NSString*() const {
+	NSString* result = NULL;
+	if (this->m_data != NULL) {
+#if __WCHAR_MAX__ > 0x10000
+		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
+#else
+		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
+#endif
 	}
+	return result;
+}
+
+String::operator NSString*() const {
+	if (_object != NULL) {
+		return ((StringRef*)_object)->operator NSString*();
+	}
+	return NULL;
+}
 #endif
 
 //==============================================================
 
 enum StringNumberFormat { snfNone, snfUndefined, snfNil, snfNull, snfBoolTrue, snfBoolFalse, snfHex, snfOct, snfBit, snfFloat, snfFloatEx, snfFloatNan, snfFloatInfPos, snfFloatInfNeg, snfInt, snfUInt };
 
-int String::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
-    if (srcLen > 0) {
-        wchar_t* lpStr = src;
-        wchar_t ch = lpStr[0];
-        bool isHex = false;
-        bool isOct = false;
-        bool isBit = false;
-        bool isNeg = false;
-
-        if (pos) *pos = 0;
-        if (len) *len = 0;
-        if ((ch == L'T') || (ch == L't')) { // возможно bool
-            if ((wcscmp(src, L"true") == 0) || (wcscmp(src, L"TRUE") == 0)) {
-                if (len) *len = 4;
-                return snfBoolTrue;
-            }
-            return snfNone;
-        } else if (ch == L'b') { // возможно bit number или hex
-            isBit = true; isHex = true;
-        } else if ((ch == L'F') || (ch == L'f')) { // возможно bool
-            if ((wcscmp(src, L"false") == 0) || (wcscmp(src, L"FALSE") == 0)) {
-                if (len) *len = 5;
-                return snfBoolFalse;
-            }
-            isHex = true;
-        } else if (ch == L'u') { // возможно undefined
-        	if (wcscmp(src, L"undefined") == 0) {
-        		if (len) *len = 9;
+int StringRef::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
+	if (srcLen > 0) {
+		wchar_t* lpStr = src;
+		wchar_t ch = lpStr[0];
+		bool isHex = false;
+		bool isOct = false;
+		bool isBit = false;
+		bool isNeg = false;
+		
+		if (pos) *pos = 0;
+		if (len) *len = 0;
+		if ((ch == L'T') || (ch == L't')) { // возможно bool
+			if ((wcscmp(src, L"true") == 0) || (wcscmp(src, L"TRUE") == 0)) {
+				if (len) *len = 4;
+				return snfBoolTrue;
+			}
+			return snfNone;
+		} else if (ch == L'b') { // возможно bit number или hex
+			isBit = true; isHex = true;
+		} else if ((ch == L'F') || (ch == L'f')) { // возможно bool
+			if ((wcscmp(src, L"false") == 0) || (wcscmp(src, L"FALSE") == 0)) {
+				if (len) *len = 5;
+				return snfBoolFalse;
+			}
+			isHex = true;
+		} else if (ch == L'u') { // возможно undefined
+			if (wcscmp(src, L"undefined") == 0) {
+				if (len) *len = 9;
 				return snfUndefined;
-        	}
-        	return snfNone;
-        } else if (ch == L'N') { // возможно NaN NULL
-        	if (wcscmp(src, L"NaN") == 0) {
+			}
+			return snfNone;
+		} else if (ch == L'N') { // возможно NaN NULL
+			if (wcscmp(src, L"NaN") == 0) {
 				if (len) *len = 3;
 				return snfFloatNan;
-        	} else if (wcscmp(src, L"NULL") == 0) {
-        		if (len) *len = 4;
-        		return snfNull;
-        	}
-        	return snfNone;
-        } else if (ch == L'n') { // возможно nil null
+			} else if (wcscmp(src, L"NULL") == 0) {
+				if (len) *len = 4;
+				return snfNull;
+			}
+			return snfNone;
+		} else if (ch == L'n') { // возможно nil null
 			if (wcscmp(src, L"nil") == 0) {
 				if (len) *len = 3;
 				return snfNil;
@@ -1606,241 +2097,120 @@ int String::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, 
 				return snfNull;
 			}
 			return snfNone;
-        } else if (ch == L'I') { // Возможно INF Inf Infinity
-        	if ((wcscmp(src, L"INF") == 0) || (wcscmp(src, L"Inf") == 0)) {
+		} else if (ch == L'I') { // Возможно INF Inf Infinity
+			if ((wcscmp(src, L"INF") == 0) || (wcscmp(src, L"Inf") == 0)) {
 				if (len) *len = 3;
 				return snfFloatInfPos;
-        	} else if (wcscmp(src, L"Infinity") == 0) {
-        		if (len) *len = 8;
-        		return snfFloatInfPos;
-        	}
-        	return snfNone;
-        } else if (ch == L'0') { // возможно oct number или hex
-            if (lpStr[1] == L'x') {
-                if (pos) *pos = 2;
-                isHex = true;
-                lpStr++;
-            } else {
-                isOct = true;
-                while (*lpStr == L'0') {
-                    lpStr++;
-                    if (pos) (*pos)++;
-                }
-                lpStr--;
-            }
-        } else if (ch == L'$') {
-            if (pos) *pos = 1;
-            isHex = true;
-        } else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) {
-            isHex = true;
-        } else if (ch == L'-') {
-        	if ((wcscmp(src, L"-INF") == 0) || (wcscmp(src, L"-Inf") == 0)) {
+			} else if (wcscmp(src, L"Infinity") == 0) {
+				if (len) *len = 8;
+				return snfFloatInfPos;
+			}
+			return snfNone;
+		} else if (ch == L'0') { // возможно oct number или hex
+			if (lpStr[1] == L'x') {
+				if (pos) *pos = 2;
+				isHex = true;
+				lpStr++;
+			} else {
+				isOct = true;
+				while (*lpStr == L'0') {
+					lpStr++;
+					if (pos) (*pos)++;
+				}
+				lpStr--;
+			}
+		} else if (ch == L'$') {
+			if (pos) *pos = 1;
+			isHex = true;
+		} else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) {
+			isHex = true;
+		} else if (ch == L'-') {
+			if ((wcscmp(src, L"-INF") == 0) || (wcscmp(src, L"-Inf") == 0)) {
 				if (len) *len = 4;
 				return snfFloatInfNeg;
-        	} else if (wcscmp(src, L"-Infinity") == 0) {
-        		if (len) *len = 9;
-        		return snfFloatInfNeg;
-        	}
-            isNeg = true;
-        } else if ((ch == '.') || (ch == ',')) {
-            lpStr--;
-        } else if (!((ch >= L'0') && (ch <= L'9'))) { // начальный символ не соответствует числовому значению
-            return snfNone;
-        }
-
-        bool isFloat = false;
-        bool isFloatExponent = false;
-        lpStr++;
-        while ((ch = *lpStr) != 0) {
-            if ((ch == L'.') || (ch == L',')) { // float?
-                if ((!isHex) && (!isBit)) {
-                    if (!isFloat)
+			} else if (wcscmp(src, L"-Infinity") == 0) {
+				if (len) *len = 9;
+				return snfFloatInfNeg;
+			}
+			isNeg = true;
+		} else if ((ch == '.') || (ch == ',')) {
+			lpStr--;
+		} else if (!((ch >= L'0') && (ch <= L'9'))) { // начальный символ не соответствует числовому значению
+			return snfNone;
+		}
+		
+		bool isFloat = false;
+		bool isFloatExponent = false;
+		lpStr++;
+		while ((ch = *lpStr) != 0) {
+			if ((ch == L'.') || (ch == L',')) { // float?
+				if ((!isHex) && (!isBit)) {
+					if (!isFloat)
 						isFloat = true;
-                    else // не может быть 2 раза точка в числе
-                        return snfNone;
-                } else // не может быть hex или bit с точкой
-                    return snfNone;
-            } else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) { // hex?
-                if (!isFloat) {
-                    if (!isNeg) {
-                        if (isBit) isBit = false;
-                        if (isOct) isOct = false;
-                        if (!isHex) isHex = true;
-                    } else // не может быть hex со знаком минус
-                        return snfNone;
-                } else if (((ch == L'e') || (ch == L'E')) && (!isFloatExponent)) {
-                	lpStr++;
-                	if ((ch = *lpStr) == 0) // непредвиденный конец
+					else // не может быть 2 раза точка в числе
+						return snfNone;
+				} else // не может быть hex или bit с точкой
+					return snfNone;
+			} else if ( ((ch >= L'A') && (ch <= L'F')) || ((ch >= L'a') && (ch <= L'f')) ) { // hex?
+				if (!isFloat) {
+					if (!isNeg) {
+						if (isBit) isBit = false;
+						if (isOct) isOct = false;
+						if (!isHex) isHex = true;
+					} else // не может быть hex со знаком минус
+						return snfNone;
+				} else if (((ch == L'e') || (ch == L'E')) && (!isFloatExponent)) {
+					lpStr++;
+					if ((ch = *lpStr) == 0) // непредвиденный конец
 						return snfNone;
 					if ((ch != L'+') && (ch != L'-')) // экспонета должна начинатся со знака + или -
 						return snfNone;
 					lpStr++;
-                	if ((ch = *lpStr) == 0) // непредвиденный конец
+					if ((ch = *lpStr) == 0) // непредвиденный конец
 						return snfNone;
 					if ((ch < L'0') || (ch > L'9')) // после знака должна быть цифра
 						return snfNone;
 					isFloatExponent = true;
-                } else // не может быть float с буквами
-                    return snfNone;
-            } else if ((ch >= L'2') && (ch <= L'9')) {
-                if (isBit) isBit = false;
-                if ((ch >= L'8') && (ch <= L'9')) {
-                    if (isOct) isOct = false;
-                }
-            } else if (ch == L'h') {
-                if (len) (*len)--;
-                if ((!isHex) || (*(lpStr+1) != 0)) // только hex может заканчиваться на h
-                    return snfNone;
-            } else if (!((ch >= L'0') && (ch <= L'9'))) { // не может число содержать недопустимые символы
-                return snfNone;
-            }
-            lpStr++;
-        }
-        if (srcLen == 1) {
-            if (isOct) isOct = false;
-        }
-        if (isBit) {
-            if (pos) (*pos)++;
-        }
-        if ((len) && (pos)) *len = srcLen-(*pos)+(*len);
-        if (isBit) return snfBit;
-        if (isHex) return snfHex;
-        if (isFloat) {
-            wchar_t* point = wcsstr(src,L",");
-            if (point) *point = L'.';
-            if (isFloatExponent)
+				} else // не может быть float с буквами
+					return snfNone;
+			} else if ((ch >= L'2') && (ch <= L'9')) {
+				if (isBit) isBit = false;
+				if ((ch >= L'8') && (ch <= L'9')) {
+					if (isOct) isOct = false;
+				}
+			} else if (ch == L'h') {
+				if (len) (*len)--;
+				if ((!isHex) || (*(lpStr+1) != 0)) // только hex может заканчиваться на h
+					return snfNone;
+			} else if (!((ch >= L'0') && (ch <= L'9'))) { // не может число содержать недопустимые символы
+				return snfNone;
+			}
+			lpStr++;
+		}
+		if (srcLen == 1) {
+			if (isOct) isOct = false;
+		}
+		if (isBit) {
+			if (pos) (*pos)++;
+		}
+		if ((len) && (pos)) *len = srcLen-(*pos)+(*len);
+		if (isBit) return snfBit;
+		if (isHex) return snfHex;
+		if (isFloat) {
+			wchar_t* point = wcsstr(src,L",");
+			if (point) *point = L'.';
+			if (isFloatExponent)
 				return snfFloatEx;
 			else
 				return snfFloat;
-        }
-        if (isOct) return snfOct;
-        return (isNeg ? snfInt : snfUInt);
-    }
-    return snfNone;
-}
-
-int64_t String::wtoll(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*) {
-    switch (type) {
-		case snfNone:
-		case snfUndefined:
-		case snfNil:
-		case snfNull:
-		case snfBoolFalse:
-		case snfFloatNan:
-			return 0;
-
-		case snfBoolTrue:
-			return -1;
-
-		case snfFloatInfPos:
-		case snfFloatInfNeg:
-			throw "Error: Out of range value";
-			break;
-
-        case snfHex:
-            return (int64_t)(wcstoull(data, NULL, 16));
-
-        case snfOct:
-            return (int64_t)(wcstoull(data, NULL, 8));
-
-        case snfBit:
-            return (int64_t)(wcstoull(data, NULL, 2));
-
-        case snfFloat:
-		case snfFloatEx: {
-			long double value = wcstold(data, NULL);
-            return (int64_t)value;
 		}
-
-        case snfInt:
-            return (int64_t)(wcstoll(data, NULL, 10));
-
-        case snfUInt:
-            return (int64_t)(wcstoull(data, NULL, 10));
-    }
-    return 0;
+		if (isOct) return snfOct;
+		return (isNeg ? snfInt : snfUInt);
+	}
+	return snfNone;
 }
 
-long double String::wtod(const wchar_t* data, uint32_t len, uint32_t type) throw(const char*) {
-    switch (type) {
-		case snfNone:
-		case snfUndefined:
-		case snfNil:
-		case snfNull:
-		case snfBoolFalse:
-			return 0;
-
-		case snfBoolTrue:
-			return -1;
-
-		case snfFloatNan:
-			return NAN;
-
-		case snfFloatInfPos:
-			return INFINITY;
-
-		case snfFloatInfNeg:
-			return -INFINITY;
-
-        case snfHex:
-            return (long double)(wcstoull(data, NULL, 16));
-
-        case snfOct:
-            return (long double)(wcstoull(data, NULL, 8));
-
-        case snfBit:
-            return (long double)(wcstoull(data, NULL, 2));
-
-        case snfFloat:
-		case snfFloatEx:
-            return wcstold(data, NULL);
-
-        case snfInt:
-            return (long double)(wcstoll(data, NULL, 10));
-
-        case snfUInt:
-            return (long double)(wcstoull(data, NULL, 10));
-    }
-    return 0;
-}
-
-//==============================================================
-
-String::operator bool() const {
-    if (this->m_data == NULL)
-		return false;
-
-    uint32_t pos;
-    uint32_t len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    switch (type) {
-    	case snfNone:
-			return this->m_length != 0; // Не пустое?
-
-		case snfUndefined:
-		case snfNil:
-		case snfNull:
-		case snfBoolFalse:
-		case snfFloatNan:
-			return false;
-
-		case snfBoolTrue:
-		case snfFloatInfPos:
-		case snfFloatInfNeg:
-			return true;
-    }
-
-    return String::wtoll(this->m_data + pos, len, type) != 0;
-}
-
-String::operator int8_t() const throw(const char*) {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    wchar_t* data = this->m_data;
-
+uint64_t StringRef::wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
 	switch (type) {
 		case snfNone:
 		case snfUndefined:
@@ -1849,134 +2219,1999 @@ String::operator int8_t() const throw(const char*) {
 		case snfBoolFalse:
 		case snfFloatNan:
 			return 0;
-
+			
 		case snfBoolTrue:
 			return -1;
-
+			
 		case snfFloatInfPos:
 		case snfFloatInfNeg:
-			throw "Error: Out of range value";
-			break;
-
-        case snfHex:
-            return (int64_t)(wcstoull(data, NULL, 16));
-
-        case snfOct:
-            return (int64_t)(wcstoull(data, NULL, 8));
-
-        case snfBit:
-            return (int64_t)(wcstoull(data, NULL, 2));
-
-        case snfFloat:
+			return 0;
+			
+		case snfHex:
+			return wcstoull(data, NULL, 16);
+			
+		case snfOct:
+			return wcstoull(data, NULL, 8);
+			
+		case snfBit:
+			return wcstoull(data, NULL, 2);
+			
+		case snfFloat:
 		case snfFloatEx: {
 			long double value = wcstold(data, NULL);
-            return (int64_t)value;
+			return (uint64_t)((int64_t)value);
 		}
-
-        case snfInt:
-            return (int64_t)(wcstoll(data, NULL, 10));
-
-        case snfUInt:
-            return (int64_t)(wcstoull(data, NULL, 10));
-    }
-    return 0;
-
+			
+		case snfInt:
+			return (uint64_t)(wcstoll(data, NULL, 10));
+			
+		case snfUInt:
+			return wcstoull(data, NULL, 10);
+	}
+	
+	return 0;
 }
 
-String::operator uint8_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<uint8_t>(String::wtoll(this->m_data + pos, len, type));
+int64_t StringRef::wtoll(const wchar_t* data, uint32_t len, uint32_t type) {
+	switch (type) {
+		case snfNone:
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+		case snfFloatNan:
+			return 0;
+			
+		case snfBoolTrue:
+			return -1;
+			
+		case snfFloatInfPos:
+		case snfFloatInfNeg:
+			return 0;
+			
+		case snfHex:
+			return (int64_t)(wcstoull(data, NULL, 16));
+			
+		case snfOct:
+			return (int64_t)(wcstoull(data, NULL, 8));
+			
+		case snfBit:
+			return (int64_t)(wcstoull(data, NULL, 2));
+			
+		case snfFloat:
+		case snfFloatEx: {
+			long double value = wcstold(data, NULL);
+			return (int64_t)value;
+		}
+			
+		case snfInt:
+			return wcstoll(data, NULL, 10);
+			
+		case snfUInt:
+			return (int64_t)(wcstoull(data, NULL, 10));
+	}
+	
+	return 0;
 }
 
-String::operator int16_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<int16_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator uint16_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<uint16_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator int32_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<int32_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator uint32_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<uint32_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator int64_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<int64_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator uint64_t() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return static_cast<uint32_t>(String::wtoll(this->m_data + pos, len, type));
-}
-
-String::operator float() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return (float)(String::wtod(this->m_data + pos, len, type));
-}
-
-String::operator double() const {
-	if (this->m_data == NULL)
-		return 0;
-
-    uint32_t pos, len;
-    int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-    return (double)(String::wtod(this->m_data + pos, len, type));
+long double StringRef::wtod(const wchar_t* data, uint32_t len, uint32_t type) {
+	switch (type) {
+		case snfNone:
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+			return 0;
+			
+		case snfBoolTrue:
+			return -1;
+			
+		case snfFloatNan:
+			return NAN;
+			
+		case snfFloatInfPos:
+			return INFINITY;
+			
+		case snfFloatInfNeg:
+			return -INFINITY;
+			
+		case snfHex:
+			return (long double)(wcstoull(data, NULL, 16));
+			
+		case snfOct:
+			return (long double)(wcstoull(data, NULL, 8));
+			
+		case snfBit:
+			return (long double)(wcstoull(data, NULL, 2));
+			
+		case snfFloat:
+		case snfFloatEx:
+			return wcstold(data, NULL);
+			
+		case snfInt:
+			return (long double)(wcstoll(data, NULL, 10));
+			
+		case snfUInt:
+			return (long double)(wcstoull(data, NULL, 10));
+	}
+	
+	return 0;
 }
 
 //==============================================================
 
+String::operator wchar_t*() const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->operator wchar_t*();
+}
+
+StringRef::operator bool() const {
+	if (this->m_data == NULL)
+		return false;
+	
+	uint32_t pos;
+	uint32_t len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	switch (type) {
+		case snfNone:
+			return this->m_length != 0; // Не пустое?
+			
+		case snfUndefined:
+		case snfNil:
+		case snfNull:
+		case snfBoolFalse:
+		case snfFloatNan:
+			return false;
+			
+		case snfBoolTrue:
+		case snfFloatInfPos:
+		case snfFloatInfNeg:
+			return true;
+	}
+	
+	return StringRef::wtoll(this->m_data + pos, len, type) != 0;
+}
+
+String::operator bool() const {
+	if (_object == NULL)
+		return false;
+	
+	return THIS->operator bool();
+}
+
+StringRef::operator int8_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint8_t>(StringRef::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int8_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator int8_t();
+}
+
+StringRef::operator uint8_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint8_t>(StringRef::wtoull(this->m_data + pos, len, type));
+}
+
+String::operator uint8_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator uint8_t();
+}
+
+StringRef::operator int16_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<int16_t>(StringRef::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int16_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator int16_t();
+}
+
+StringRef::operator uint16_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint16_t>(StringRef::wtoull(this->m_data + pos, len, type));
+}
+
+String::operator uint16_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator uint16_t();
+}
+
+StringRef::operator int32_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<int32_t>(StringRef::wtoll(this->m_data + pos, len, type));
+}
+
+String::operator int32_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator int32_t();
+}
+
+StringRef::operator uint32_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint32_t>(StringRef::wtoull(this->m_data + pos, len, type));
+}
+
+String::operator uint32_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator uint32_t();
+}
+
+StringRef::operator int64_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return StringRef::wtoll(this->m_data + pos, len, type);
+}
+
+String::operator int64_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator int64_t();
+}
+
+StringRef::operator uint64_t() const {
+	if (this->m_data == NULL)
+		return 0;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return StringRef::wtoull(this->m_data + pos, len, type);
+}
+
+String::operator uint64_t() const {
+	if (_object == NULL)
+		return 0;
+	
+	return THIS->operator uint64_t();
+}
+
+StringRef::operator float() const {
+	if (this->m_data == NULL)
+		return NAN;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return (float)(StringRef::wtod(this->m_data + pos, len, type));
+}
+
+String::operator float() const {
+	if (_object == NULL)
+		return NAN;
+	
+	return THIS->operator float();
+}
+
+StringRef::operator double() const {
+	if (this->m_data == NULL)
+		return NAN;
+	
+	uint32_t pos, len;
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return (double)(StringRef::wtod(this->m_data + pos, len, type));
+}
+
+String::operator double() const {
+	if (_object == NULL)
+		return NAN;
+	
+	return THIS->operator double();
+}
+
+//==============================================================
+
+bool StringRef::equals(const String& string) const {
+	if (string._object == NULL)
+		return m_length == 0;
+
+	return equals((*(StringRef*)(string._object)));
+}
+
+bool String::equals(const String& string) const {
+	if (_object == NULL)
+		return (string._object == NULL);
+	else if (string._object == NULL)
+		return false;
+	else
+		return THIS->equals(*((StringRef*)_object));
+}
+
+bool StringRef::equals(const StringRef& string) const {
+	if (m_length == string.m_length) {
+		if (m_length == 0)
+			return true;
+		else
+			return memcmp(m_data, string.m_data, m_size) == 0;
+	}
+	return false;
+}
+
+bool String::equals(const StringRef& string) const {
+	return string.equals(*this);
+}
+
+bool StringRef::equals(const wchar_t* string) const {
+	if (string == NULL)
+		return (m_length == 0);
+	else if (m_length == wcs_strlen(string, NULL))
+		return memcmp(m_data, string, m_size) == 0;
+		
+	return false;
+}
+
+bool String::equals(const wchar_t* string) const {
+	if (_object == NULL)
+		return string == NULL;
+	else
+		return THIS->equals(string);
+}
+
+bool StringRef::equals(const char* string) const {
+	if (string == NULL)
+		return (m_length == 0);
+	else if (m_length != 0)
+		return StringRef(string).equals(*this);
+	
+	return false;
+}
+
+
+bool String::equals(const char* string) const {
+	if (_object == NULL)
+		return string == NULL;
+	else if (string != NULL)
+		return String(string).equals(*this);
+	
+	return false;
+}
+
+int StringRef::compareTo(const StringRef& string) const {
+	if (m_length == 0)
+		return (string.m_length == 0) ? 0 : -1;
+	else if (string.m_length == 0)
+		return 1;
+	else
+		return wcscmp(m_data, string.m_data);
+}
+
+int String::compareTo(const StringRef& string) const {
+	if (_object == NULL)
+		return -1;
+	else
+		return THIS->compareTo(string);
+}
+
+int StringRef::compareTo(const String& string) const {
+	if (string._object == NULL)
+		return (m_length == 0) ? 0 : 1;
+	else
+		return compareTo(*((StringRef*)(string._object)));
+}
+
+int String::compareTo(const String& string) const {
+	if (_object == NULL)
+		return (string._object == NULL) ? 0 : -1;
+	else if (string._object == NULL)
+		return 1;
+	else
+		return THIS->compareTo(*((StringRef*)(string._object)));
+}
+
+int StringRef::compareTo(const wchar_t* string) const {
+	if (string == NULL)
+		return (m_length == 0) ? 0 : 1;
+	else if (m_length == 0)
+		return *string == 0 ? 0 : -1;
+	else if (*string == 0)
+		return 1;
+	else
+		return wcscmp(m_data, string);
+}
+
+int String::compareTo(const wchar_t* string) const {
+	if (_object == NULL)
+		return (string == NULL) ? 0 : 1;
+	else
+		return THIS->compareTo(string);
+}
+
+//==============================================================
+
+StringRef& StringRef::toLowerCase() {
+	if (m_length != 0)
+		wcslwr(m_data);
+	return *this;
+}
+
+StringRef& StringRef::toUpperCase() {
+	if (m_length != 0)
+		wcsupr(m_data);
+	return *this;
+}
+
+String& String::toLowerCase() {
+	if (_object != NULL)
+		THIS->toLowerCase();
+	return *this;
+}
+
+String& String::toUpperCase() {
+	if (_object != NULL)
+		THIS->toUpperCase();
+	return *this;
+}
+
+//==============================================================
+
+bool StringRef::equalsIgnoreCase(const StringRef& string) const {
+	if (m_length == string.m_length) {
+		if (m_length == 0)
+			return true;
+		
+		wchar_t* ptr1 = m_data;
+		wchar_t* ptr2 = string.m_data;
+		uint32_t len = m_length;
+		while (len-- > 0) {
+			wchar_t v1 = towlower(*ptr1); ptr1++;
+			wchar_t v2 = towlower(*ptr2); ptr2++;
+			if (v1 != v2) return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool String::equalsIgnoreCase(const StringRef& string) const {
+	if (_object == NULL)
+		return false;
+	else
+		return THIS->equalsIgnoreCase(string);
+}
+
+bool StringRef::equalsIgnoreCase(const String& string) const {
+	if (string._object == NULL)
+		return (m_length == 0);
+	
+	if (m_length == ((StringRef*)(string._object))->m_length) {
+		if (m_length == 0)
+			return true;
+		else {
+			wchar_t* ptr1 = m_data;
+			wchar_t* ptr2 = ((StringRef*)(string._object))->m_data;
+			uint32_t len = m_length;
+			while (len-- > 0) {
+				wchar_t v1 = towlower(*ptr1); ptr1++;
+				wchar_t v2 = towlower(*ptr2); ptr2++;
+				if (v1 != v2) return false;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+bool String::equalsIgnoreCase(const String& string) const {
+	if (_object == NULL)
+		return (string._object == NULL);
+	else
+		return THIS->equalsIgnoreCase(string);
+}
+
+bool StringRef::equalsIgnoreCase(const wchar_t* string) const {
+	if (string == NULL)
+		return (m_length == 0);
+	
+	if (m_length == wcs_strlen(string, NULL)) {
+		if (m_length == 0)
+			return true;
+		else {
+			wchar_t* ptr1 = m_data;
+			wchar_t* ptr2 = (wchar_t*)string;
+			uint32_t len = m_length;
+			while (len > 0) {
+				wchar_t v1 = towlower(*ptr1);
+				wchar_t v2 = towlower(*ptr2);
+				if (v1 != v2) return false;
+				ptr1++; ptr2++; len--;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
+bool String::equalsIgnoreCase(const wchar_t* string) const {
+	if (_object == NULL)
+		return (string == NULL);
+	else
+		return THIS->equalsIgnoreCase(string);
+}
+
+int StringRef::compareToIgnoreCase(const StringRef& string) const {
+	uint32_t len1 = m_length;
+	uint32_t len2 = string.m_length;
+	uint32_t len = (len1 < len2) ? len1 : len2;
+	if (len1 == 0)
+		return (len2 == 0) ? 0 : -1;
+	else if (len2 == 0)
+		return 1;
+	
+	wchar_t* ptr1 = m_data;
+	wchar_t* ptr2 = string.m_data;
+	while (len-- > 0) {
+		wchar_t v1 = towlower(*ptr1); ptr1++;
+		wchar_t v2 = towlower(*ptr2); ptr2++;
+		if (v1 != v2) return (v1 < v2) ? -1 : 1;
+	}
+	if (len1 == len2)
+		return 0;
+	else
+		return (len1 < len2) ? -1 : 1;
+}
+
+int String::compareToIgnoreCase(const StringRef& string) const {
+	if (_object == NULL)
+		return -1;
+	else
+		return THIS->compareToIgnoreCase(string);
+}
+
+int StringRef::compareToIgnoreCase(const String& string) const {
+	if (string._object == NULL)
+		return (m_length == 0) ? 0 : 1;
+	
+	uint32_t len1 = m_length;
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	uint32_t len = (len1 < len2) ? len1 : len2;
+	if (len1 == 0)
+		return (len2 == 0) ? 0 : -1;
+	else if (len2 == 0)
+		return 1;
+
+	wchar_t* ptr1 = m_data;
+	wchar_t* ptr2 = ((StringRef*)(string._object))->m_data;
+	while (len-- > 0) {
+		wchar_t v1 = towlower(*ptr1); ptr1++;
+		wchar_t v2 = towlower(*ptr2); ptr2++;
+		if (v1 != v2) return (v1 < v2) ? -1 : 1;
+	}
+	if (len1 == len2)
+		return 0;
+	else
+		return (len1 < len2) ? -1 : 1;
+}
+
+int String::compareToIgnoreCase(const String& string) const {
+	if (_object == NULL)
+		return (string._object == NULL) ? 0 : -1;
+	else
+		return THIS->compareToIgnoreCase(string);
+}
+
+int StringRef::compareToIgnoreCase(const wchar_t* string) const {
+	if (string == NULL)
+		return (m_length == 0) ? 0 : 1;
+	
+	uint32_t len1 = m_length;
+	uint32_t len2 = (uint32_t)wcs_strlen(string, NULL);
+	uint32_t len = (len1 < len2) ? len1 : len2;
+	if (len1 == 0)
+		return (len2 == 0) ? 0 : -1;
+	else if (len2 == 0)
+		return 1;
+	
+	wchar_t* ptr1 = m_data;
+	wchar_t* ptr2 = (wchar_t*)string;
+	while (len-- > 0) {
+		wchar_t v1 = towlower(*ptr1); ptr1++;
+		wchar_t v2 = towlower(*ptr2); ptr2++;
+		if (v1 != v2) return (v1 < v2) ? -1 : 1;
+	}
+	if (len1 == len2)
+		return 0;
+	else
+		return (len1 < len2) ? -1 : 1;
+}
+
+int String::compareToIgnoreCase(const wchar_t* string) const {
+	if (_object == NULL)
+		return (string == NULL) ? 0 : -1;
+	else
+		return THIS->compareToIgnoreCase(string);
+}
+
+//==============================================================
+
+bool StringRef::startsWith(const StringRef& string, uint32_t start) const {
+	uint32_t len2 = string.m_length;
+	if (len2 == 0)
+		return true;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+	
+	uint32_t end = start + len2;
+	if (len1 < end)
+		return false;
+	
+	return memcmp(m_data + start, string.m_data, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::startsWith(const StringRef& string, uint32_t start) const {
+	if (_object == NULL)
+		return false;
+	else
+		return THIS->startsWith(string, start);
+}
+
+bool StringRef::startsWith(const String& string, uint32_t start) const {
+	if (string._object == NULL)
+		return true;
+	
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if (len2 == 0)
+		return true;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+	
+	uint32_t end = start + len2;
+	if (len1 < end)
+		return false;
+	
+	return memcmp(m_data + start, ((StringRef*)(string._object))->m_data, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::startsWith(const String& string, uint32_t start) const {
+	if (_object == NULL)
+		return string._object == NULL;
+	else
+		return THIS->startsWith(string, start);
+}
+
+bool StringRef::startsWith(const wchar_t* string, uint32_t start) const {
+	if (string == NULL)
+		return true;
+	
+	uint32_t len2 = (uint32_t)wcs_strlen(string, NULL);
+	if (len2 == 0)
+		return true;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+	
+	uint32_t end = start + len2;
+	if (len1 < end)
+		return false;
+	
+	return memcmp(m_data + start, string, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::startsWith(const wchar_t* string, uint32_t start) const {
+	if (_object == NULL)
+		return string == NULL;
+	else
+		return THIS->startsWith(string, start);
+}
+
+bool StringRef::endsWith(const StringRef& string) const {
+	uint32_t len2 = string.m_length;
+	if (len2 == 0)
+		return true;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+	
+	if (len1 < len2)
+		return false;
+
+	return memcmp(m_data + len1 - len2, string.m_data, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::endsWith(const StringRef& string) const {
+	if (_object == NULL)
+		return false;
+	else
+		return THIS->endsWith(string);
+}
+
+bool StringRef::endsWith(const String& string) const {
+	if (string._object == NULL)
+		return true;
+	
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if (len2 == 0)
+		return true;
+
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+
+	if (len1 < len2)
+		return false;
+
+	return memcmp(m_data + len1 - len2, ((StringRef*)(string._object))->m_data, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::endsWith(const String& string) const {
+	if (_object == NULL)
+		return string._object == NULL;
+	else
+		return THIS->endsWith(string);
+}
+
+bool StringRef::endsWith(const wchar_t* string) const {
+	if (string == NULL)
+		return true;
+	
+	uint32_t len2 = (uint32_t)wcs_strlen(string, NULL);
+	if (len2 == 0)
+		return true;
+
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return false;
+
+	if (len1 < len2)
+		return false;
+	
+	return memcmp(m_data + len1 - len2, string, len2 * sizeof(wchar_t)) == 0;
+}
+
+bool String::endsWith(const wchar_t* string) const {
+	if (_object == NULL)
+		return string == NULL;
+	else
+		return THIS->endsWith(string);
+}
+
+//==============================================================
+
+int StringRef::indexOf(wchar_t character) const {
+	if (m_length == 0)
+		return -1;
+	
+	wchar_t* ptr = m_data;
+	uint32_t len = m_length;
+	uint32_t idx = 0;
+	while (idx < len) {
+		if (*ptr == character)
+			return idx;
+		idx++; ptr++;
+	}
+	return -1;
+}
+
+int String::indexOf(wchar_t character) const {
+	if (_object == NULL)
+		return -1;
+	
+	return THIS->indexOf(character);
+}
+
+int StringRef::indexOf(const StringRef& string) const {
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+	
+	uint32_t len2 = string.m_length;
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+
+	if (len1 == len2)
+		return memcmp(m_data, string.m_data, len1 * sizeof(wchar_t)) == 0;
+	
+	wchar_t* ptr = wcsstr(m_data, string.m_data);
+	if (ptr == NULL)
+		return -1;
+	
+	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
+}
+
+int String::indexOf(const StringRef& string) const {
+	if (_object == NULL)
+		return -1;
+	
+	return THIS->indexOf(string);
+}
+
+int StringRef::indexOf(const String& string) const {
+	if (string._object == NULL)
+		return -1;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+
+	if (len1 == len2)
+		return memcmp(m_data, ((StringRef*)(string._object))->m_data, len1 * sizeof(wchar_t)) == 0;
+
+	wchar_t* ptr = wcsstr(m_data, ((StringRef*)(string._object))->m_data);
+	if (ptr == NULL)
+		return -1;
+
+	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
+}
+
+int String::indexOf(const String& string) const {
+	if (_object == NULL)
+		return string._object == NULL ? 0 : -1;
+	
+	return THIS->indexOf(string);
+}
+
+int StringRef::indexOf(const wchar_t* string) const {
+	if (string == NULL)
+		return -1;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+
+	uint32_t len2 = (uint32_t)wcslen(string);
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+
+	if (len1 == len2)
+		return memcmp(m_data, string, len1 * sizeof(wchar_t)) == 0;
+
+	wchar_t* ptr = wcsstr(m_data, string);
+	if (ptr == NULL)
+		return -1;
+
+	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
+}
+
+int String::indexOf(const wchar_t* string) const {
+	if (_object == NULL)
+		return string == NULL ? 0 : -1;
+	
+	return THIS->indexOf(string);
+}
+
+int StringRef::lastIndexOf(wchar_t character) const {
+	if (m_length == 0)
+		return -1;
+	
+	uint32_t len = m_length - 1;
+	wchar_t* ptr = m_data + len;
+	while (len > 0) {
+		ptr--; len--;
+		if (*ptr == character) return len;
+	}
+	return -1;
+}
+
+int String::lastIndexOf(wchar_t character) const {
+	if (_object == NULL)
+		return -1;
+	
+	return THIS->lastIndexOf(character);
+}
+
+int StringRef::lastIndexOf(const StringRef& string) const {
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+	
+	uint32_t len2 = string.m_length;
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+	
+	if (len1 == len2)
+		return memcmp(m_data, string.m_data, len1 * sizeof(wchar_t)) == 0;
+	
+	wchar_t* ptr2 = string.m_data;
+	wchar_t ch2 = *ptr2;
+	int32_t len = len1 - len2;
+	wchar_t* ptr1 = m_data + len;
+	while (len >= 0) {
+		if (*ptr1 == ch2) {
+			if (memcmp(ptr1, ptr2, len2 * sizeof(wchar_t)) == 0)
+				return len;
+		}
+		ptr1--; len--;
+	}
+	return -1;
+}
+
+int String::lastIndexOf(const StringRef& string) const {
+	if (_object == NULL)
+		return -1;
+	
+	return THIS->lastIndexOf(string);
+}
+
+int StringRef::lastIndexOf(const String& string) const {
+	if (string._object == NULL)
+		return -1;
+	
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+
+	if (len1 == len2)
+		return memcmp(m_data, ((StringRef*)(string._object))->m_data, len1 * sizeof(wchar_t)) == 0;
+
+	wchar_t* ptr2 = ((StringRef*)(string._object))->m_data;
+	wchar_t ch2 = *ptr2;
+	int32_t len = len1 - len2;
+	wchar_t* ptr1 = m_data + len;
+	while (len >= 0) {
+		if (*ptr1 == ch2) {
+			if (memcmp(ptr1, ptr2, len2 * sizeof(wchar_t)) == 0)
+				return len;
+		}
+		ptr1--; len--;
+	}
+	return -1;
+}
+
+int String::lastIndexOf(const String& string) const {
+	if (_object == NULL)
+		return (string._object == NULL) ? 0 : -1;
+	
+	return THIS->lastIndexOf(string);
+}
+
+int StringRef::lastIndexOf(const wchar_t* string) const {
+	if (string == NULL)
+		return -1;
+
+	uint32_t len1 = m_length;
+	if (len1 == 0)
+		return -1;
+
+	uint32_t len2 = (uint32_t)wcslen(string);
+	if ((len2 == 0) || (len2 > len1))
+		return -1;
+
+	if (len1 == len2)
+		return memcmp(m_data, string, len1 * sizeof(wchar_t)) == 0;
+
+	wchar_t ch2 = *string;
+	int32_t len = len1 - len2;
+	wchar_t* ptr1 = m_data + len;
+	while (len >= 0) {
+		if (*ptr1 == ch2) {
+			if (memcmp(ptr1, string, len2 * sizeof(wchar_t)) == 0)
+				return len;
+		}
+		ptr1--; len--;
+	}
+	return -1;
+}
+
+int String::lastIndexOf(const wchar_t* string) const {
+	if (_object == NULL)
+		return (string == NULL) ? 0 : -1;
+	
+	return THIS->lastIndexOf(string);
+}
+
+//==============================================================
+
+StringRef StringRef::substring(int start, int end) const {
+	int32_t len = m_length;
+	int32_t pos;
+	if (start < 0) {
+		pos = len + start;
+		if (pos < 0) pos = 0;
+		len -= pos;
+	} else {
+		pos = start;
+		if (pos >= len)
+			return StringNil;
+		
+		if ((end < 0) || (end > len)) {
+			len -= pos;
+		} else {
+			len = (end - pos);
+		}
+	}
+	if (len == 0)
+		return StringEmpty;
+	
+	return StringRef(m_data + pos, len);
+}
+
+String getSubString(String& self, int start, int end) {
+	if (self._object == NULL)
+		return StringNil;
+	
+	int32_t len = getStringLength(self);
+	int32_t pos;
+	if (start < 0) {
+		pos = len + start;
+		if (pos < 0) pos = 0;
+		len -= pos;
+	} else {
+		pos = start;
+		if (pos >= len)
+			return StringNil;
+		
+		if ((end < 0) || (end > len)) {
+			len -= pos;
+		} else {
+			len = (end - pos);
+		}
+	}
+	if (len == 0)
+		return StringEmpty;
+	
+	return StringRef(self->m_data + pos, len);
+}
+
+StringRef StringRef::replace(const StringRef& target, const StringRef& replacement) const {
+	int pos = indexOf(target);
+	if (pos < 0)
+		return *this;
+	
+	int len = target.m_length;
+	if (pos > 0) {
+		if (m_length > (pos + len))
+			return substring(0, pos).concat(replacement).concat(substring(pos + len));
+		else
+			return substring(0, pos).concat(replacement);
+	} else
+		return StringRef(replacement).concat(substring(pos + len));
+}
+
+String String::replace(const StringRef& target, const StringRef& replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replace(target, replacement);
+}
+
+StringRef StringRef::replace(const String& target, const String& replacement) const {
+	int pos = indexOf(target);
+	if (pos < 0)
+		return *this;
+	
+	int len = ((StringRef*)(target._object))->m_length;
+	if (pos > 0) {
+		if (m_length > (pos + len)) {
+			if (replacement._object == NULL)
+				return substring(0, pos).concat(substring(pos + len));
+			else
+				return substring(0, pos).concat(*((StringRef*)(replacement._object))).concat(substring(pos + len));
+		} else {
+			if (replacement._object == NULL)
+				return substring(0, pos);
+			else
+				return substring(0, pos).concat(*((StringRef*)(replacement._object)));
+		}
+	} else
+		return String(replacement)->concat(substring(pos + len));
+}
+
+String String::replace(const String& target, const String& replacement) const {
+	int pos = indexOf(target);
+	if (pos < 0)
+		return *this;
+	
+	int len = getStringLength(target);
+	if (pos > 0) {
+		if (getStringLength(*this) > (pos + len))
+			return substring(0, pos).concat(replacement).concat(substring(pos + len));
+		else
+			return substring(0, pos).concat(replacement);
+	} else
+		return String(replacement).concat(substring(pos + len));
+}
+
+StringRef StringRef::replace(const wchar_t* target, const wchar_t* replacement) const {
+	int pos = indexOf(target);
+	if (pos < 0)
+		return *this;
+	
+	int len = (uint32_t)wcs_strlen(target, NULL);
+	if (pos > 0) {
+		if (m_length > (pos + len))
+			return substring(0, pos).concat(replacement).concat(substring(pos + len));
+		else
+			return substring(0, pos).concat(replacement);
+	} else
+		return StringRef(replacement).concat(substring(pos + len));
+}
+
+String String::replace(const wchar_t* target, const wchar_t* replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replace(target, replacement);
+}
+
+//==============================================================
+
+wchar_t& StringRef::operator [](int index) const throw(const char*) {
+	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+		throw eOutOfRange;
+	return m_data[index];
+}
+
+wchar_t& String::operator [](int index) const throw(const char*) {
+	if (_object == NULL)
+		throw eOutOfRange;
+	
+	return ((StringRef*)_object)->operator [](index);
+}
+
+wchar_t StringRef::charAt(int index) const throw(const char*) {
+	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+		throw eOutOfRange;
+	return m_data[index];
+}
+
+wchar_t String::charAt(int index) const throw(const char*) {
+	if (_object == NULL)
+		throw eOutOfRange;
+	
+	return ((StringRef*)_object)->charAt(index);
+}
+
+//==============================================================
+
+String StringRef::toString() const {
+	return StringRef(*this);
+}
+
+//==============================================================
+
+#if defined(__IOS__)
+bool StringRef::matches(const StringRef& regularExpression) const {
+	if (regularExpression.m_length == 0) {
+		return m_length == 0;
+	}
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return false;
+	
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionCaseInsensitive error:&error];
+	int start = 0;
+	int end = m_length;
+	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
+	return (find != NULL);
+}
+
+bool String::matches(const StringRef& regularExpression) const {
+	if (_object == NULL)
+		return false;
+	
+	return THIS->matches(regularExpression);
+}
+
+bool StringRef::matches(const String& regularExpression) const {
+	if (regularExpression._object == NULL) {
+		return false;
+	} else if (((StringRef*)(regularExpression._object))->m_length == 0) {
+		return m_length == 0;
+	}
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return false;
+	
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionCaseInsensitive error:&error];
+	int start = 0;
+	int end = m_length;
+	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
+	return (find != NULL);
+}
+
+bool String::matches(const String& regularExpression) const {
+	if (_object == NULL)
+		return regularExpression._object == NULL;
+	
+	return THIS->matches(regularExpression);
+}
+
+bool StringRef::regionMatches(bool ignoreCase, int thisStart, const StringRef& string, int start, int length) const {
+	if (!ignoreCase)
+		return regionMatches(thisStart, string, start, length);
+	
+	if ((thisStart < 0) || (length < 0))
+		return false;
+
+	uint32_t len1 = m_length;
+	if (thisStart > len1)
+		return false;
+		
+	uint32_t len2 = string.m_length;
+	if (thisStart == len1)
+		return len2 == 0;
+
+	if (start >= len2)
+		return false;
+
+	if ((start + length) > len2)
+		length = len2 - start;
+
+	if ((thisStart + length) > len1)
+		length = len1 - thisStart;
+
+	wchar_t* ptr1 = m_data + thisStart;
+	wchar_t* ptr2 = string.m_data + start;
+	while (length-- > 0) {
+		wchar_t v1 = towlower(*ptr1); ptr1++;
+		wchar_t v2 = towlower(*ptr2); ptr2++;
+		if (v1 != v2) return false;
+	}
+	return true;
+}
+
+bool String::regionMatches(bool ignoreCase, int thisStart, const StringRef& string, int start, int length) const {
+	if (_object == NULL)
+		return false;
+	
+	return THIS->regionMatches(ignoreCase, thisStart, string, start, length);
+}
+
+bool StringRef::regionMatches(bool ignoreCase, int thisStart, const String& string, int start, int length) const {
+	if (!ignoreCase)
+		return regionMatches(thisStart, string, start, length);
+	
+	if ((thisStart < 0) || (length < 0))
+		return false;
+	else if (string._object == NULL)
+		return false;
+	
+	uint32_t len1 = m_length;
+	if (thisStart > len1)
+		return false;
+
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if (thisStart == len1)
+		return len2 == 0;
+
+	if (start >= len2)
+		return false;
+
+	if ((start + length) > len2)
+		length = len2 - start;
+
+	if ((thisStart + length) > len1)
+		length = len1 - thisStart;
+
+	wchar_t* ptr1 = m_data + thisStart;
+	wchar_t* ptr2 = ((StringRef*)(string._object))->m_data + start;
+	while (length-- > 0) {
+		wchar_t v1 = towlower(*ptr1); ptr1++;
+		wchar_t v2 = towlower(*ptr2); ptr2++;
+		if (v1 != v2) return false;
+	}
+	return true;
+}
+
+bool String::regionMatches(bool ignoreCase, int thisStart, const String& string, int start, int length) const {
+	if (_object == NULL)
+		return string._object == NULL && start == 0 && length == 0;
+
+	return THIS->regionMatches(ignoreCase, thisStart, string, start, length);
+}
+
+bool StringRef::regionMatches(int thisStart, const StringRef& string, int start, int length) const {
+	if ((thisStart < 0) || (length < 0))
+		return false;
+	
+	uint32_t len1 = m_length;
+	if (thisStart > len1)
+		return false;
+
+	uint32_t len2 = string.m_length;
+	if (thisStart == len1)
+		return len2 == 0;
+
+	if (start >= len2)
+		return false;
+
+	if ((start + length) > len2)
+		length = len2 - start;
+
+	if ((thisStart + length) > len1)
+		length = len1 - thisStart;
+
+	return memcmp(m_data + thisStart, string.m_data + start, length * sizeof(wchar_t)) == 0;
+}
+
+bool String::regionMatches(int thisStart, const StringRef& string, int start, int length) const {
+	if (_object == NULL)
+		return false;
+	
+	return THIS->regionMatches(thisStart, string, start, length);
+}
+
+bool StringRef::regionMatches(int thisStart, const String& string, int start, int length) const {
+	if ((thisStart < 0) || (length < 0))
+		return false;
+	else if (string._object == NULL)
+		return false;
+
+	uint32_t len1 = m_length;
+	if (thisStart > len1)
+		return false;
+
+	uint32_t len2 = ((StringRef*)(string._object))->m_length;
+	if (thisStart == len1)
+		return len2 == 0;
+
+	if (start >= len2)
+		return false;
+
+	if ((start + length) > len2)
+		length = len2 - start;
+
+	if ((thisStart + length) > len1)
+		length = len1 - thisStart;
+
+	return memcmp(m_data + thisStart, ((StringRef*)(string._object))->m_data + start, length * sizeof(wchar_t)) == 0;
+}
+
+bool String::regionMatches(int thisStart, const String& string, int start, int length) const {
+	if (_object == NULL)
+		return string._object == NULL && start == 0 && length == 0;
+	
+	return THIS->regionMatches(thisStart, string, start, length);
+}
+
+String StringRef::replaceAll(const StringRef& regularExpression, const StringRef& replacement) const {
+	if (regularExpression.m_length == 0)
+		return *this;
+
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return *this;
+	
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
+	int start = 0;
+	int end = m_length;
+	String result = StringEmpty;
+	NSArray* matches = [regex matchesInString:string options:0 range:NSMakeRange(start, end - start)];
+	if ((matches == NULL) || (matches.count == 0))
+		return *this;
+	
+	for (NSTextCheckingResult* find in matches) {
+		if (find.range.location == start)
+			result->concat(replacement);
+		else
+			result->concat(substring(start, (int32_t)find.range.location)).concat(replacement);
+
+		start = (int32_t)find.range.location + (int32_t)find.range.length;
+	}
+	if (start < end)
+		result->concat(substring(start));
+
+	return result;
+}
+
+String String::replaceAll(const StringRef& regularExpression, const StringRef& replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replaceAll(regularExpression, replacement);
+}
+
+String StringRef::replaceAll(const String& regularExpression, const String& replacement) const {
+	if (regularExpression._object == NULL)
+		return *this;
+	else if (((StringRef*)(regularExpression._object))->m_length == 0)
+		return *this;
+
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return *this;
+	
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
+	int start = 0;
+	int end = m_length;
+	String result = StringEmpty;
+	NSArray* matches = [regex matchesInString:string options:0 range:NSMakeRange(start, end - start)];
+	if ((matches == nil) || (matches.count == 0))
+		return *this;
+	
+	for (NSTextCheckingResult* find in matches) {
+		if (find.range.location == start)
+			result->concat(replacement);
+		else
+			result->concat(substring(start, (int32_t)find.range.location)).concat(replacement);
+
+		start = (int32_t)find.range.location + (int32_t)find.range.length;
+	}
+	if (start < end)
+		result->concat(substring(start));
+
+	return result;
+}
+
+String String::replaceAll(const String& regularExpression, const String& replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replaceAll(regularExpression, replacement);
+}
+
+String StringRef::replaceFirst(const StringRef& regularExpression, const StringRef& replacement) const {
+	if (regularExpression.m_length == 0)
+		return *this;
+
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return *this;
+
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
+	int start = 0;
+	int end = m_length;
+	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
+	if (find == NULL)
+		return *this;
+
+	if (find.range.location == 0)
+		return String(replacement)->concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+	else if ((find.range.location + find.range.length) >= m_length)
+		return substring(0, (int32_t)find.range.location).concat(replacement);
+	else
+		return substring(0, (int32_t)find.range.location).concat(replacement).concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+}
+
+String String::replaceFirst(const StringRef& regularExpression, const StringRef& replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replaceFirst(regularExpression, replacement);
+}
+
+String StringRef::replaceFirst(const String& regularExpression, const String& replacement) const {
+	if (regularExpression._object == NULL)
+		return *this;
+	else if (((StringRef*)(regularExpression._object))->m_length == 0)
+		return *this;
+
+	NSString* expression = regularExpression;
+	NSString* string = this->operator NSString*();
+	if ((expression == NULL) || (string == NULL))
+		return *this;
+
+	NSError *error = NULL;
+	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
+	int start = 0;
+	int end = m_length;
+	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
+	if (find == NULL)
+		return *this;
+
+	if (find.range.location == 0)
+		return String(replacement)->concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+	else if ((find.range.location + find.range.length) >= m_length)
+		return substring(0, (int32_t)find.range.location).concat(replacement);
+	else
+		return substring(0, (int32_t)find.range.location).concat(replacement).concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+}
+
+String String::replaceFirst(const String& regularExpression, const String& replacement) const {
+	if (_object == NULL)
+		return NULL;
+	
+	return THIS->replaceFirst(regularExpression, replacement);
+}
+
+/*
+List<String> StringRef::split(const String& regularExpression, uint32_t limit = 0) const {
+ List<String> list = new ArrayList<String>();
+ if ((regularExpression._object == nil) || (((CString*)regularExpression._object)->strLength == 0)) {
+ list.add(*this);
+ return list;
+ }
+ NSString* expression = regularExpression;
+ NSString* string = toNSString();
+ if ((expression == nil) || (string == nil)) {
+ list.add(*this);
+ return list;
+ }
+ NSError *error = nil;
+ NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
+ int start = 0;
+ int end = strLength;
+ NSArray* matches = [regex matchesInString:string options:0 range:NSMakeRange(start, end - start)];
+ if ((matches == nil) || (matches.count == 0)) {
+ list.add(*this);
+ return list;
+ }
+ int count = 0;
+ for (NSTextCheckingResult* find in matches) {
+ if (find.range.location != start) {
+ list.add(substring(start, (int32_t)find.range.location));
+ count++;
+ if ((limit != 0) && (count >= limit)) break;
+ }
+ start = (int32_t)find.range.location + (int32_t)find.range.length;
+ }
+ if (start < end) {
+ if ((limit == 0) || (count < limit)) {
+ list.add(substring(start));
+ }
+ }
+ return list;
+}
+ */
+
+#endif
+
+//==============================================================
+
+StringRef& StringRef::trim() {
+	if (m_length == 0)
+		return *this;
+	
+	wchar_t* src = m_data;
+	wchar_t* srcEnd = src + m_length - 1;
+	while ((*src == L'\n') || (*src == L'\r') || (*src == L'\t') || (*src == L' ')) {
+		src++;
+	}
+
+	if (srcEnd != src) {
+		while ((*srcEnd == L'\n') || (*srcEnd == L'\r') || (*srcEnd == L'\t') || (*srcEnd == L' ')) {
+			srcEnd--;
+			if (srcEnd < src) break;
+		}
+	}
+	srcEnd++;
+	uint32_t len = (uint32_t)((intptr_t)srcEnd - (intptr_t)src);
+	if (len > 0)
+		memcpy(m_data, src, len);
+	
+	setLength(len / sizeof(wchar_t));
+	return *this;
+}
+
+String& String::trim() {
+	if (_object != NULL)
+		THIS->trim();
+	
+	return *this;
+}
+
+//==============================================================
+
+#define va_format(type) \
+	int fmtLen = (int)((intptr_t)(++ptr) - (intptr_t)fmt) / sizeof(wchar_t); \
+	memcpy(format, fmt, fmtLen * sizeof(wchar_t)); \
+	format[fmtLen] = 0; \
+	type val = va_arg(arglist, type); \
+	int resLen = ::swprintf(buffer, 64, format, val); \
+	if (resLen != EOF) { \
+		int ofs = m_length; \
+		setLength(ofs + resLen); \
+		memcpy(m_data + ofs, buffer, (resLen + 1) * sizeof(wchar_t)); \
+	}
+
+#define va_store(type) \
+	++ptr; \
+	type* val = va_arg(arglist, type*); \
+	*val = m_length;
+
+#define va_concat(type) \
+	++ptr; \
+	type val = va_arg(arglist, type); \
+	this->concat(val);
+
+int StringRef::vswprintf(const wchar_t* string, va_list arglist) {
+	setLength(0);
+	
+	bool error = false;
+	
+	wchar_t format[32];
+	wchar_t buffer[64];
+	
+	wchar_t *src = (wchar_t*)string;
+	wchar_t *ptr = src;
+	wchar_t ch;
+	while ((ch = *ptr) != 0) {
+		// %([-\+\ #0])?([0123456789]+|\*)?(\.([0123456789]+)|(\*))?(hh|h|l|ll|j|z|t|L)?(d|i|u|o|x|X|f|F|e|E|g|G|a|A|c|s|p|n|%)
+		if (ch == L'%') {
+			if (src != ptr) {
+				uint32_t resLen = (uint32_t)((intptr_t)ptr - (intptr_t)src) / sizeof(wchar_t);
+				int ofs = m_length;
+				setLength(ofs + resLen);
+				memcpy(m_data + ofs, src, resLen * sizeof(wchar_t));
+			}
+			
+			wchar_t *fmt = ptr;
+			ch = *(++ptr);
+			if (ch == L'%') {
+				src = ptr;
+				ptr++;
+			} else {
+				while (ch != 0) {
+					if ((ch != L'-') && (ch != L'+') && (ch != L' ') && (ch != L'#') && (ch != L'0')) break;
+					ch = *(++ptr);
+				}
+				while (ch != 0) {
+					if (ch == L'*') { ++ptr; break; }
+					else if ((ch < L'0') || (ch > L'9')) break;
+					ch = *(++ptr);
+				}
+				if (ch == L'.') {
+					ch = *(++ptr);
+					while (ch != 0) {
+						if (ch == L'*') { ++ptr; break; }
+						else if ((ch < L'0') || (ch > L'9')) break;
+						ch = *(++ptr);
+					}
+				}
+				if (ch == L'h') {
+					ch = *(++ptr);
+					if (ch == L'h') {
+						ch = *(++ptr);
+						if ((ch == L'd') || (ch == L'i')) {
+							va_format(int8_t);
+						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+							va_format(uint8_t);
+						} else if (ch == L'n') {
+							va_store(int8_t);
+						} else {
+							error = true;
+							break;
+						}
+					} else {
+						if ((ch == L'd') || (ch == L'i')) {
+							va_format(int16_t);
+						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+							va_format(uint16_t);
+						} else if (ch == L'n') {
+							va_store(int16_t);
+						} else {
+							error = true;
+							break;
+						}
+					}
+				} else if (ch == L'l') {
+					ch = *(++ptr);
+					if (ch == L'l') {
+						ch = *(++ptr);
+						if ((ch == L'd') || (ch == L'i')) {
+							va_format(int64_t);
+						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+							va_format(uint64_t);
+						} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
+							int fmtLen = (int)((intptr_t)ptr - (intptr_t)fmt);
+							memcpy(format, fmt, fmtLen * sizeof(wchar_t));
+							format[fmtLen - 3] = L'L';
+							format[fmtLen - 2] = ch;
+							format[fmtLen - 1] = 0;
+							long double val = va_arg(arglist, long double);
+							int resLen = ::swprintf(buffer, 64, format, val);
+							if (resLen != EOF) {
+								int ofs = m_length;
+								setLength(ofs + resLen);
+								memcpy(m_data + ofs, buffer, (resLen + 1) * sizeof(wchar_t));
+							}
+						} else if (ch == L'n') {
+							va_store(int64_t);
+						} else {
+							error = true;
+							break;
+						}
+					} else {
+						if ((ch == L'd') || (ch == L'i')) {
+							va_format(int32_t);
+						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+							va_format(uint32_t);
+						} else if (ch == L'c') {
+							va_concat(wchar_t);
+						} else if (ch == L's') {
+							va_concat(wchar_t*);
+						} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
+							int fmtLen = (int)((intptr_t)ptr - (intptr_t)fmt);
+							memcpy(format, fmt, fmtLen * sizeof(wchar_t));
+							format[fmtLen - 3] = ch;
+							format[fmtLen - 2] = 0;
+							double val = va_arg(arglist, double);
+							int resLen = ::swprintf(buffer, 64, format, val);
+							if (resLen != EOF) {
+								int ofs = m_length;
+								setLength(ofs + resLen);
+								memcpy(m_data + ofs, buffer, (resLen + 1) * sizeof(wchar_t));
+							}
+						} else if (ch == L'n') {
+							va_store(int32_t);
+						} else {
+							error = true;
+							break;
+						}
+					}
+				} else if (ch == L'j') {
+					ch = *(++ptr);
+					if ((ch == L'd') || (ch == L'i')) {
+						va_format(intmax_t);
+					} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+						va_format(uintmax_t);
+					} else if (ch == L'n') {
+						va_store(intmax_t);
+					} else {
+						error = true;
+						break;
+					}
+				} else if (ch == L'z') {
+					ch = *(++ptr);
+					if ((ch == L'd') || (ch == L'i') || (ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+						va_format(size_t);
+					} else if (ch == L'n') {
+						va_store(size_t);
+					} else {
+						error = true;
+						break;
+					}
+				} else if (ch == L't') {
+					ch = *(++ptr);
+					if ((ch == L'd') || (ch == L'i') || (ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+						va_format(ptrdiff_t);
+					} else if (ch == L'n') {
+						va_store(ptrdiff_t);
+					} else {
+						error = true;
+						break;
+					}
+				} else if (ch == L'L') {
+					ch = *(++ptr);
+					if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
+						va_format(long double);
+					} else {
+						error = true;
+						break;
+					}
+				} else {
+					if ((ch == L'd') || (ch == L'i')) {
+						va_format(int32_t);
+					} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
+						va_format(uint32_t);
+					} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
+						va_format(double);
+					} else if (ch == L'c') {
+						va_concat(char);
+					} else if (ch == L's') {
+						va_concat(char*);
+					} else if (ch == L'p') {
+						va_format(void*);
+					} else if (ch == L'n') {
+						va_store(int32_t);
+					} else if (ch == L'@') {
+						va_concat(NSString*);
+					} else {
+						error = true;
+						break;
+					}
+				}
+				src = ptr;
+			}
+		} else {
+			ptr++;
+		}
+	}
+	
+	if (error) {
+		return -1;
+	}
+	
+	if (src != ptr) {
+		uint32_t resLen = (uint32_t)((intptr_t)ptr - (intptr_t)src) / sizeof(wchar_t);
+		int ofs = m_length;
+		setLength(ofs + resLen);
+		memcpy(m_data + ofs, src, resLen * sizeof(wchar_t));
+	}
+	
+	return m_length;
+}
+
+StringRef StringRef::format(const StringRef& string, ...) {
+	if (string.m_length == 0)
+		return StringEmpty;
+
+	va_list arglist;
+	va_start(arglist, string);
+
+	StringRef result;
+	if (result.vswprintf(string.m_data, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+
+	va_end(arglist);
+	return result;
+}
+
+String String::format(const StringRef& string, ...) {
+	if (getStringRefLength(string) == 0)
+		return StringEmpty;
+	
+	va_list arglist;
+	va_start(arglist, string);
+	
+	StringRef result;
+	if (result.vswprintf((wchar_t*)string, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+	
+	va_end(arglist);
+	return result;
+}
+
+StringRef StringRef::format(const String& string, ...) {
+	if (string._object == nil)
+		return StringNil;
+	else if (((StringRef*)(string._object))->m_length == 0)
+		return StringEmpty;
+
+	va_list arglist;
+	va_start(arglist, string);
+	StringRef result;
+	if (result.vswprintf(((StringRef*)(string._object))->m_data, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+	va_end(arglist);
+	return result;
+}
+
+String String::format(const String& string, ...) {
+	if (string._object == NULL)
+		return StringNil;
+	
+	if (getStringLength(string) == 0)
+		return StringEmpty;
+	
+	va_list arglist;
+	va_start(arglist, string);
+	
+	StringRef result;
+	if (result.vswprintf((wchar_t*)string, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+	
+	va_end(arglist);
+	return result;
+}
+
+StringRef StringRef::format(const wchar_t* string, ...) {
+	if (string == NULL)
+		return StringNil;
+
+	uint32_t lenf = (uint32_t)wcs_strlen(string, NULL);
+	if (lenf == 0)
+		return StringEmpty;
+	
+	va_list arglist;
+	va_start(arglist, string);
+	StringRef result;
+	if (result.vswprintf(string, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+	va_end(arglist);
+	return result;
+}
+
+String String::format(const wchar_t* string, ...) {
+	if (string == NULL)
+		return StringNil;
+	
+	uint32_t lenf = (uint32_t)wcs_strlen(string, NULL);
+	if (lenf == 0)
+		return StringEmpty;
+	
+	va_list arglist;
+	va_start(arglist, string);
+	StringRef result;
+	if (result.vswprintf(string, arglist) == EOF) {
+		va_end(arglist);
+		return StringNil;
+	}
+	va_end(arglist);
+	return result;
+}
+
+//==============================================================
+
+#include <cipher/uMD5.h>
+
+StringRef StringRef::md5() const throw(const char*) {
+	uint32_t size = wcs_toutf8_size(m_data);
+	char* utf8 = memAlloc(char, utf8, size);
+	if (utf8 == NULL)
+		throw eOutOfMemory;
+		
+	struct tMD5 m;
+	md5_init(&m);
+	md5_update(&m, (uint8_t*)utf8, size);
+	md5_final(&m);
+	memFree(utf8);
+	
+	uint8_t* result = (uint8_t*)(m.state);
+	
+	return StringRef::format(L"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+							 result[0], result[1], result[2], result[3],
+							 result[4], result[5], result[6], result[7],
+							 result[8], result[9], result[10], result[11],
+							 result[12], result[13], result[14], result[15]
+							 );
+}
+
+String String::md5() const throw(const char*) {
+	return THIS->md5();
+}
 
 //==============================================================
 
 void uStringInit() {
-
+	
 }
 
 void uStringQuit() {
-
+	
 }
-
-#ifdef __cplusplus
-}
-#endif

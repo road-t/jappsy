@@ -54,15 +54,15 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	this->width = width;
 	this->height = height;
 	
-	frame = new GLFrame(engine, this, onframe);
-	touchScreen = new GLTouchScreen(this, ontouch);
+	frame = memNew(frame, GLFrame(engine, this, onframe));
+	touchScreen = memNew(touchScreen, GLTouchScreen(this, ontouch));
 	// TODO: loader =
 	
 	//textures = new GLTextures(this);
 	//shaders = new GLShaders(this);
 	//sprites = new GLSprites(this);
 	//scenes = new GLScenes(this);
-	cameras = new GLCameras(this);
+	cameras = memNew(cameras, GLCameras(this));
 	//models = new GLModels(this);
 	//particles = new GLParticles(this);
 	//drawings = new GLDrawings(this);
@@ -99,14 +99,14 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 GLRender::~GLRender() {
 	// TODO: loader.release()
 	if (touchScreen != NULL) {
-		delete touchScreen;
+		memDelete(touchScreen);
 		touchScreen = NULL;
 	}
 	if (frame != NULL) {
-		delete frame;
+		memDelete(frame);
 		frame = NULL;
 	}
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 1, NULL, GL_STATIC_DRAW);
 	glDeleteBuffers(1, &m_squareBuffer);
@@ -137,7 +137,7 @@ GLRender::~GLRender() {
 	//delete drawings;
 	//delete particles;
 	//delete models;
-	delete cameras;
+	memDelete(cameras);
 	//delete scenes;
 	//delete sprites;
 	//delete shaders;

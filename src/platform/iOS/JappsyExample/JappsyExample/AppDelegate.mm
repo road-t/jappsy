@@ -30,7 +30,7 @@ OMView *omView = NULL;
 	[self.window makeKeyAndVisible];
 	
 	jappsyInit();
-	[omView onResume];
+	[omView onStart];
 	
     return YES;
 }
@@ -64,7 +64,7 @@ OMView *omView = NULL;
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
-	[omView onPause];
+	[omView onStop];
 	jappsyQuit();
 }
 
@@ -75,6 +75,8 @@ OMView *omView = NULL;
 	/*
 	 Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
 	 */
+	[omView onStop];
+	jappsyQuit();
 }
 
 @end

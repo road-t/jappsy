@@ -8,55 +8,40 @@
 
 /* Begin PBXBuildFile section */
 		C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C01D54BA9C00171EFC /* uCipher.c */; };
-		C30577EB1D54BA9C00171EFC /* uCipher.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C01D54BA9C00171EFC /* uCipher.c */; };
 		C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577C11D54BA9C00171EFC /* uCipher.h */; };
 		C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C31D54BA9C00171EFC /* uCrc.c */; };
-		C30577F01D54BA9C00171EFC /* uCrc.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C31D54BA9C00171EFC /* uCrc.c */; };
 		C30577F11D54BA9C00171EFC /* uCrc.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577C41D54BA9C00171EFC /* uCrc.h */; };
 		C30577F41D54BA9C00171EFC /* uMD5.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C61D54BA9C00171EFC /* uMD5.c */; };
-		C30577F51D54BA9C00171EFC /* uMD5.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577C61D54BA9C00171EFC /* uMD5.c */; };
 		C30577F61D54BA9C00171EFC /* uMD5.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577C71D54BA9C00171EFC /* uMD5.h */; };
 		C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577CA1D54BA9C00171EFC /* uAtomic.h */; };
 		C30577FA1D54BA9C00171EFC /* uError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C30577CB1D54BA9C00171EFC /* uError.cpp */; };
-		C30577FB1D54BA9C00171EFC /* uError.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C30577CB1D54BA9C00171EFC /* uError.cpp */; };
 		C30577FC1D54BA9C00171EFC /* uError.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577CC1D54BA9C00171EFC /* uError.h */; };
 		C30578011D54BA9C00171EFC /* uMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577CF1D54BA9C00171EFC /* uMemory.h */; };
 		C305780B1D54BA9C00171EFC /* uSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577D51D54BA9C00171EFC /* uSystem.h */; };
 		C305781A1D54BA9C00171EFC /* jappsy.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577E11D54BA9C00171EFC /* jappsy.c */; };
-		C305781B1D54BA9C00171EFC /* jappsy.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577E11D54BA9C00171EFC /* jappsy.c */; };
 		C305781C1D54BA9C00171EFC /* jappsy.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577E21D54BA9C00171EFC /* jappsy.h */; };
 		C30578251D54BA9C00171EFC /* platform.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577E91D54BA9C00171EFC /* platform.h */; };
 		C30578281D54BBA000171EFC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578271D54BBA000171EFC /* Foundation.framework */; };
 		C305782A1D54BBAB00171EFC /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578291D54BBAB00171EFC /* OpenGLES.framework */; };
 		C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C305782B1D54BBBB00171EFC /* UIKit.framework */; };
 		C30578371D54C73B00171EFC /* platform.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.m */; };
-		C30578381D54C73B00171EFC /* platform.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.m */; };
 		C305783A1D54CADE00171EFC /* uSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578391D54CADE00171EFC /* uSystem.m */; };
-		C305783B1D54CADE00171EFC /* uSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578391D54CADE00171EFC /* uSystem.m */; };
 		C30578401D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
-		C30578411D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
 		C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
-		C34FD9581D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
 		C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9541D5B54EB0022FF71 /* uGLFrame.h */; };
 		C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9551D5B54EB0022FF71 /* uGLRender.cpp */; };
-		C34FD95B1D5B54EB0022FF71 /* uGLRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9551D5B54EB0022FF71 /* uGLRender.cpp */; };
 		C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9561D5B54EB0022FF71 /* uGLRender.h */; };
 		C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD95E1D5B55540022FF71 /* uGLEngine.h */; };
 		C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */; };
-		C34FD9651D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */; };
 		C34FD9661D5B67900022FF71 /* uGLTouchScreen.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9631D5B67900022FF71 /* uGLTouchScreen.h */; };
 		C34FD9841D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */; };
-		C34FD9851D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */; };
 		C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD97E1D5B8E0A0022FF71 /* uSmoothValue.h */; };
 		C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD97F1D5B8E0A0022FF71 /* uString.h */; };
 		C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9801D5B8E0A0022FF71 /* uString.mm */; };
-		C34FD9891D5B8E0A0022FF71 /* uString.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9801D5B8E0A0022FF71 /* uString.mm */; };
 		C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9811D5B8E0A0022FF71 /* uVector.h */; };
 		C34FD98B1D5B8E0A0022FF71 /* uVector.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9821D5B8E0A0022FF71 /* uVector.mm */; };
-		C34FD98C1D5B8E0A0022FF71 /* uVector.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9821D5B8E0A0022FF71 /* uVector.mm */; };
 		C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9901D5B926A0022FF71 /* uMotionEvent.cpp */; };
-		C34FD9931D5B926A0022FF71 /* uMotionEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9901D5B926A0022FF71 /* uMotionEvent.cpp */; };
 		C34FD9941D5B926A0022FF71 /* uMotionEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9911D5B926A0022FF71 /* uMotionEvent.h */; };
 		C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9B11D5BBBB70022FF71 /* GLContext.h */; };
 		C34FD9B71D5BBBB70022FF71 /* GLContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9B21D5BBBB70022FF71 /* GLContext.mm */; };
@@ -67,28 +52,57 @@
 		C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */; };
 		C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */; };
 		C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA401D5C01FC0022FF71 /* uGLCamera.h */; };
-		C34FDA441D5C82240022FF71 /* uGLNamedContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */; };
 		C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */; };
 		C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */; };
 		C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */; };
 		C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */; };
 		C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */; };
+		C34FDA551D5CABD30022FF71 /* uURLRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA511D5CABD30022FF71 /* uURLRequest.h */; };
+		C34FDA561D5CABD30022FF71 /* uURLRequest.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA521D5CABD30022FF71 /* uURLRequest.mm */; };
+		C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA581D5CADCB0022FF71 /* uStream.cpp */; };
+		C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA591D5CADCB0022FF71 /* uStream.h */; };
+		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
+		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
+		C34FDA631D5CB7D80022FF71 /* uNamedArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA621D5CB7D80022FF71 /* uNamedArray.h */; };
+		C34FDA651D5CB8160022FF71 /* uArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA641D5CB8160022FF71 /* uArray.h */; };
+		C34FDA671D5DD0150022FF71 /* uNamedStrings.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA661D5DD0150022FF71 /* uNamedStrings.h */; };
+		C34FDA691D5DD0520022FF71 /* uNamedStrings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */; };
+		C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */; };
+		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */; };
-		C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
 		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
+		C3A4B4B31D5EA5F20039DD09 /* uAtomicObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4B11D5EA5F20039DD09 /* uAtomicObject.cpp */; };
+		C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */; };
+		C3A4B4B71D5EB5D60039DD09 /* uStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4B51D5EB5D60039DD09 /* uStack.cpp */; };
+		C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B61D5EB5D60039DD09 /* uStack.h */; };
+		C3A4B4BB1D5EB5DF0039DD09 /* uIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4B91D5EB5DF0039DD09 /* uIterator.cpp */; };
+		C3A4B4BC1D5EB5DF0039DD09 /* uIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */; };
+		C3A4B4BF1D5EB5E70039DD09 /* uListIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4BD1D5EB5E70039DD09 /* uListIterator.cpp */; };
+		C3A4B4C01D5EB5E70039DD09 /* uListIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */; };
+		C3A4B4C31D5EB5EF0039DD09 /* uCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4C11D5EB5EF0039DD09 /* uCollection.cpp */; };
+		C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */; };
+		C3A4B4C71D5EB5F80039DD09 /* uList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4C51D5EB5F80039DD09 /* uList.cpp */; };
+		C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4C61D5EB5F80039DD09 /* uList.h */; };
+		C3A4B4CB1D5EB5FF0039DD09 /* uSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4C91D5EB5FF0039DD09 /* uSet.cpp */; };
+		C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */; };
+		C3A4B4CF1D5EB6070039DD09 /* uHashSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4CD1D5EB6070039DD09 /* uHashSet.cpp */; };
+		C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */; };
+		C3A4B4D31D5EB6100039DD09 /* uLinkedHashSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4D11D5EB6100039DD09 /* uLinkedHashSet.cpp */; };
+		C3A4B4D41D5EB6100039DD09 /* uLinkedHashSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */; };
+		C3A4B4D71D5EB61E0039DD09 /* uMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4D51D5EB61E0039DD09 /* uMap.cpp */; };
+		C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4D61D5EB61E0039DD09 /* uMap.h */; };
+		C3A4B4DB1D5EB6240039DD09 /* uHashMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4D91D5EB6240039DD09 /* uHashMap.cpp */; };
+		C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */; };
+		C3A4B4DF1D5EB62A0039DD09 /* uLinkedHashMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4DD1D5EB62A0039DD09 /* uLinkedHashMap.cpp */; };
+		C3A4B4E01D5EB62A0039DD09 /* uLinkedHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */; };
+		C3A4B4E31D5EB6310039DD09 /* uSparseArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E11D5EB6310039DD09 /* uSparseArray.cpp */; };
+		C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */; };
+		C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */; };
+		C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E61D5EB63C0039DD09 /* uNumber.h */; };
+		C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3ACF92F1D5DED6D0065A832 /* uURI.cpp */; };
+		C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */ = {isa = PBXBuildFile; fileRef = C3ACF9301D5DED6D0065A832 /* uURI.h */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		C3506D641D5256FD005BC914 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C3506D4F1D5256FD005BC914 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = C3506D571D5256FD005BC914;
-			remoteInfo = libJappsyEngine;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		C30577C01D54BA9C00171EFC /* uCipher.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = uCipher.c; sourceTree = "<group>"; };
@@ -136,20 +150,58 @@
 		C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uHandler.mm; sourceTree = "<group>"; };
 		C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLCamera.cpp; sourceTree = "<group>"; };
 		C34FDA401D5C01FC0022FF71 /* uGLCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLCamera.h; sourceTree = "<group>"; };
-		C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLNamedContainer.h; sourceTree = "<group>"; };
 		C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignX.h; sourceTree = "<group>"; };
 		C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignY.h; sourceTree = "<group>"; };
 		C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLTypeface.h; sourceTree = "<group>"; };
 		C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLPaint.cpp; sourceTree = "<group>"; };
 		C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLPaint.h; sourceTree = "<group>"; };
+		C34FDA511D5CABD30022FF71 /* uURLRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURLRequest.h; sourceTree = "<group>"; };
+		C34FDA521D5CABD30022FF71 /* uURLRequest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uURLRequest.mm; sourceTree = "<group>"; };
+		C34FDA581D5CADCB0022FF71 /* uStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uStream.cpp; sourceTree = "<group>"; };
+		C34FDA591D5CADCB0022FF71 /* uStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStream.h; sourceTree = "<group>"; };
+		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
+		C34FDA5E1D5CB7350022FF71 /* uLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLoader.h; sourceTree = "<group>"; };
+		C34FDA621D5CB7D80022FF71 /* uNamedArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNamedArray.h; sourceTree = "<group>"; };
+		C34FDA641D5CB8160022FF71 /* uArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uArray.h; sourceTree = "<group>"; };
+		C34FDA661D5DD0150022FF71 /* uNamedStrings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNamedStrings.h; sourceTree = "<group>"; };
+		C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uNamedStrings.cpp; sourceTree = "<group>"; };
+		C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uObject.mm; sourceTree = "<group>"; };
+		C34FDA6C1D5DDD0B0022FF71 /* uObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uObject.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = libJappsyEngineTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = libJappsyEngineTests.mm; sourceTree = "<group>"; };
-		C3506D691D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C35272071D551BBE00F41198 /* uOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uOpenGL.h; sourceTree = "<group>"; };
 		C35272091D551E9F00F41198 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		C3A4B4B11D5EA5F20039DD09 /* uAtomicObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uAtomicObject.cpp; sourceTree = "<group>"; };
+		C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uAtomicObject.h; sourceTree = "<group>"; };
+		C3A4B4B51D5EB5D60039DD09 /* uStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uStack.cpp; sourceTree = "<group>"; };
+		C3A4B4B61D5EB5D60039DD09 /* uStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStack.h; sourceTree = "<group>"; };
+		C3A4B4B91D5EB5DF0039DD09 /* uIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uIterator.cpp; sourceTree = "<group>"; };
+		C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uIterator.h; sourceTree = "<group>"; };
+		C3A4B4BD1D5EB5E70039DD09 /* uListIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uListIterator.cpp; sourceTree = "<group>"; };
+		C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uListIterator.h; sourceTree = "<group>"; };
+		C3A4B4C11D5EB5EF0039DD09 /* uCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uCollection.cpp; sourceTree = "<group>"; };
+		C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uCollection.h; sourceTree = "<group>"; };
+		C3A4B4C51D5EB5F80039DD09 /* uList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uList.cpp; sourceTree = "<group>"; };
+		C3A4B4C61D5EB5F80039DD09 /* uList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uList.h; sourceTree = "<group>"; };
+		C3A4B4C91D5EB5FF0039DD09 /* uSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uSet.cpp; sourceTree = "<group>"; };
+		C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSet.h; sourceTree = "<group>"; };
+		C3A4B4CD1D5EB6070039DD09 /* uHashSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uHashSet.cpp; sourceTree = "<group>"; };
+		C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHashSet.h; sourceTree = "<group>"; };
+		C3A4B4D11D5EB6100039DD09 /* uLinkedHashSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLinkedHashSet.cpp; sourceTree = "<group>"; };
+		C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLinkedHashSet.h; sourceTree = "<group>"; };
+		C3A4B4D51D5EB61E0039DD09 /* uMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uMap.cpp; sourceTree = "<group>"; };
+		C3A4B4D61D5EB61E0039DD09 /* uMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMap.h; sourceTree = "<group>"; };
+		C3A4B4D91D5EB6240039DD09 /* uHashMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uHashMap.cpp; sourceTree = "<group>"; };
+		C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHashMap.h; sourceTree = "<group>"; };
+		C3A4B4DD1D5EB62A0039DD09 /* uLinkedHashMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLinkedHashMap.cpp; sourceTree = "<group>"; };
+		C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLinkedHashMap.h; sourceTree = "<group>"; };
+		C3A4B4E11D5EB6310039DD09 /* uSparseArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uSparseArray.cpp; sourceTree = "<group>"; };
+		C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSparseArray.h; sourceTree = "<group>"; };
+		C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uNumber.cpp; sourceTree = "<group>"; };
+		C3A4B4E61D5EB63C0039DD09 /* uNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNumber.h; sourceTree = "<group>"; };
+		C3ACF92F1D5DED6D0065A832 /* uURI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uURI.cpp; sourceTree = "<group>"; };
+		C3ACF9301D5DED6D0065A832 /* uURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURI.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -165,14 +217,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C3506D5F1D5256FD005BC914 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C3506D631D5256FD005BC914 /* libJappsyEngine.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -181,6 +225,7 @@
 			children = (
 				C34FD98F1D5B926A0022FF71 /* event */,
 				C34FD9711D5B7C490022FF71 /* data */,
+				C34FDA4F1D5CABD30022FF71 /* net */,
 				C35271FC1D551B8400F41198 /* opengl */,
 				C30577BF1D54BA9C00171EFC /* cipher */,
 				C30577C91D54BA9C00171EFC /* core */,
@@ -237,10 +282,46 @@
 		C34FD9711D5B7C490022FF71 /* data */ = {
 			isa = PBXGroup;
 			children = (
+				C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */,
+				C34FDA6C1D5DDD0B0022FF71 /* uObject.h */,
+				C34FD9801D5B8E0A0022FF71 /* uString.mm */,
+				C34FD97F1D5B8E0A0022FF71 /* uString.h */,
+				C3A4B4B11D5EA5F20039DD09 /* uAtomicObject.cpp */,
+				C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */,
+				C3A4B4B51D5EB5D60039DD09 /* uStack.cpp */,
+				C3A4B4B61D5EB5D60039DD09 /* uStack.h */,
+				C3A4B4B91D5EB5DF0039DD09 /* uIterator.cpp */,
+				C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */,
+				C3A4B4BD1D5EB5E70039DD09 /* uListIterator.cpp */,
+				C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */,
+				C3A4B4C11D5EB5EF0039DD09 /* uCollection.cpp */,
+				C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */,
+				C3A4B4C51D5EB5F80039DD09 /* uList.cpp */,
+				C3A4B4C61D5EB5F80039DD09 /* uList.h */,
+				C3A4B4C91D5EB5FF0039DD09 /* uSet.cpp */,
+				C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */,
+				C3A4B4CD1D5EB6070039DD09 /* uHashSet.cpp */,
+				C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */,
+				C3A4B4D11D5EB6100039DD09 /* uLinkedHashSet.cpp */,
+				C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */,
+				C3A4B4D51D5EB61E0039DD09 /* uMap.cpp */,
+				C3A4B4D61D5EB61E0039DD09 /* uMap.h */,
+				C3A4B4D91D5EB6240039DD09 /* uHashMap.cpp */,
+				C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */,
+				C3A4B4DD1D5EB62A0039DD09 /* uLinkedHashMap.cpp */,
+				C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */,
+				C3A4B4E11D5EB6310039DD09 /* uSparseArray.cpp */,
+				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
+				C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */,
+				C3A4B4E61D5EB63C0039DD09 /* uNumber.h */,
+				C34FDA641D5CB8160022FF71 /* uArray.h */,
+				C34FDA621D5CB7D80022FF71 /* uNamedArray.h */,
+				C34FDA661D5DD0150022FF71 /* uNamedStrings.h */,
+				C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */,
+				C34FDA581D5CADCB0022FF71 /* uStream.cpp */,
+				C34FDA591D5CADCB0022FF71 /* uStream.h */,
 				C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */,
 				C34FD97E1D5B8E0A0022FF71 /* uSmoothValue.h */,
-				C34FD97F1D5B8E0A0022FF71 /* uString.h */,
-				C34FD9801D5B8E0A0022FF71 /* uString.mm */,
 				C34FD9811D5B8E0A0022FF71 /* uVector.h */,
 				C34FD9821D5B8E0A0022FF71 /* uVector.mm */,
 			);
@@ -256,13 +337,25 @@
 			path = event;
 			sourceTree = "<group>";
 		};
+		C34FDA4F1D5CABD30022FF71 /* net */ = {
+			isa = PBXGroup;
+			children = (
+				C3ACF92F1D5DED6D0065A832 /* uURI.cpp */,
+				C3ACF9301D5DED6D0065A832 /* uURI.h */,
+				C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */,
+				C34FDA5E1D5CB7350022FF71 /* uLoader.h */,
+				C34FDA511D5CABD30022FF71 /* uURLRequest.h */,
+				C34FDA521D5CABD30022FF71 /* uURLRequest.mm */,
+			);
+			path = net;
+			sourceTree = "<group>";
+		};
 		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
 				C30578261D54BB7D00171EFC /* libs */,
 				C30577BE1D54BA9C00171EFC /* include */,
 				C3506D5A1D5256FD005BC914 /* libJappsyEngine */,
-				C3506D661D5256FD005BC914 /* libJappsyEngineTests */,
 				C3506D591D5256FD005BC914 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -272,7 +365,6 @@
 			isa = PBXGroup;
 			children = (
 				C3506D581D5256FD005BC914 /* libJappsyEngine.framework */,
-				C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -290,15 +382,6 @@
 			path = libJappsyEngine;
 			sourceTree = "<group>";
 		};
-		C3506D661D5256FD005BC914 /* libJappsyEngineTests */ = {
-			isa = PBXGroup;
-			children = (
-				C3506D671D5256FD005BC914 /* libJappsyEngineTests.mm */,
-				C3506D691D5256FD005BC914 /* Info.plist */,
-			);
-			path = libJappsyEngineTests;
-			sourceTree = "<group>";
-		};
 		C35271FC1D551B8400F41198 /* opengl */ = {
 			isa = PBXGroup;
 			children = (
@@ -307,7 +390,6 @@
 				C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */,
 				C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */,
 				C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */,
-				C34FDA431D5C82240022FF71 /* uGLNamedContainer.h */,
 				C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */,
 				C34FDA401D5C01FC0022FF71 /* uGLCamera.h */,
 				C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */,
@@ -332,28 +414,49 @@
 			files = (
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
-				C34FDA441D5C82240022FF71 /* uGLNamedContainer.h in Headers */,
+				C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
+				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
+				C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */,
+				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
+				C34FDA671D5DD0150022FF71 /* uNamedStrings.h in Headers */,
+				C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */,
 				C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
+				C34FDA551D5CABD30022FF71 /* uURLRequest.h in Headers */,
+				C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */,
+				C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */,
+				C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
+				C34FDA631D5CB7D80022FF71 /* uNamedArray.h in Headers */,
 				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
+				C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */,
+				C3A4B4E01D5EB62A0039DD09 /* uLinkedHashMap.h in Headers */,
 				C34FD9661D5B67900022FF71 /* uGLTouchScreen.h in Headers */,
+				C3A4B4D41D5EB6100039DD09 /* uLinkedHashSet.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,
 				C34FD9941D5B926A0022FF71 /* uMotionEvent.h in Headers */,
 				C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */,
 				C30578011D54BA9C00171EFC /* uMemory.h in Headers */,
+				C3A4B4BC1D5EB5DF0039DD09 /* uIterator.h in Headers */,
+				C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */,
+				C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
 				C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */,
+				C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */,
+				C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */,
 				C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */,
+				C3A4B4C01D5EB5E70039DD09 /* uListIterator.h in Headers */,
 				C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */,
+				C34FDA651D5CB8160022FF71 /* uArray.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
+				C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */,
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
 				C305780B1D54BA9C00171EFC /* uSystem.h in Headers */,
 				C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */,
@@ -382,24 +485,6 @@
 			productReference = C3506D581D5256FD005BC914 /* libJappsyEngine.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		C3506D611D5256FD005BC914 /* libJappsyEngineTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C3506D6F1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngineTests" */;
-			buildPhases = (
-				C3506D5E1D5256FD005BC914 /* Sources */,
-				C3506D5F1D5256FD005BC914 /* Frameworks */,
-				C3506D601D5256FD005BC914 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				C3506D651D5256FD005BC914 /* PBXTargetDependency */,
-			);
-			name = libJappsyEngineTests;
-			productName = libJappsyEngineTests;
-			productReference = C3506D621D5256FD005BC914 /* libJappsyEngineTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -410,9 +495,6 @@
 				ORGANIZATIONNAME = jappsy.com;
 				TargetAttributes = {
 					C3506D571D5256FD005BC914 = {
-						CreatedOnToolsVersion = 7.3;
-					};
-					C3506D611D5256FD005BC914 = {
 						CreatedOnToolsVersion = 7.3;
 					};
 				};
@@ -430,20 +512,12 @@
 			projectRoot = "";
 			targets = (
 				C3506D571D5256FD005BC914 /* libJappsyEngine */,
-				C3506D611D5256FD005BC914 /* libJappsyEngineTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		C3506D561D5256FD005BC914 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		C3506D601D5256FD005BC914 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -457,62 +531,51 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3A4B4B71D5EB5D60039DD09 /* uStack.cpp in Sources */,
+				C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */,
+				C3A4B4C31D5EB5EF0039DD09 /* uCollection.cpp in Sources */,
+				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
+				C3A4B4D31D5EB6100039DD09 /* uLinkedHashSet.cpp in Sources */,
+				C3A4B4DB1D5EB6240039DD09 /* uHashMap.cpp in Sources */,
+				C34FDA561D5CABD30022FF71 /* uURLRequest.mm in Sources */,
+				C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */,
 				C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */,
 				C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */,
 				C34FD9841D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */,
+				C3A4B4CF1D5EB6070039DD09 /* uHashSet.cpp in Sources */,
+				C3A4B4D71D5EB61E0039DD09 /* uMap.cpp in Sources */,
 				C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */,
 				C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */,
 				C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */,
 				C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */,
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
+				C3A4B4C71D5EB5F80039DD09 /* uList.cpp in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,
+				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
+				C34FDA691D5DD0520022FF71 /* uNamedStrings.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
+				C3A4B4BF1D5EB5E70039DD09 /* uListIterator.cpp in Sources */,
+				C3A4B4BB1D5EB5DF0039DD09 /* uIterator.cpp in Sources */,
+				C3A4B4E31D5EB6310039DD09 /* uSparseArray.cpp in Sources */,
+				C3A4B4B31D5EA5F20039DD09 /* uAtomicObject.cpp in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
+				C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */,
 				C34FD98B1D5B8E0A0022FF71 /* uVector.mm in Sources */,
 				C305781A1D54BA9C00171EFC /* jappsy.c in Sources */,
 				C30578401D54CBAB00171EFC /* uMemory.mm in Sources */,
+				C3A4B4DF1D5EB62A0039DD09 /* uLinkedHashMap.cpp in Sources */,
 				C30577F41D54BA9C00171EFC /* uMD5.c in Sources */,
 				C34FD9B71D5BBBB70022FF71 /* GLContext.mm in Sources */,
 				C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
+				C3A4B4CB1D5EB5FF0039DD09 /* uSet.cpp in Sources */,
 				C30577FA1D54BA9C00171EFC /* uError.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		C3506D5E1D5256FD005BC914 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				C30578411D54CBAB00171EFC /* uMemory.mm in Sources */,
-				C34FD95B1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
-				C30577F01D54BA9C00171EFC /* uCrc.c in Sources */,
-				C30577FB1D54BA9C00171EFC /* uError.cpp in Sources */,
-				C34FD9931D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
-				C34FD9851D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */,
-				C30577F51D54BA9C00171EFC /* uMD5.c in Sources */,
-				C305781B1D54BA9C00171EFC /* jappsy.c in Sources */,
-				C30577EB1D54BA9C00171EFC /* uCipher.c in Sources */,
-				C30578381D54C73B00171EFC /* platform.m in Sources */,
-				C34FD9891D5B8E0A0022FF71 /* uString.mm in Sources */,
-				C34FD98C1D5B8E0A0022FF71 /* uVector.mm in Sources */,
-				C305783B1D54CADE00171EFC /* uSystem.m in Sources */,
-				C3506D681D5256FD005BC914 /* libJappsyEngineTests.mm in Sources */,
-				C34FD9651D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
-				C34FD9581D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		C3506D651D5256FD005BC914 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = C3506D571D5256FD005BC914 /* libJappsyEngine */;
-			targetProxy = C3506D641D5256FD005BC914 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		C3506D6A1D5256FD005BC914 /* Debug */ = {
@@ -643,28 +706,6 @@
 			};
 			name = Release;
 		};
-		C3506D701D5256FD005BC914 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
-				INFOPLIST_FILE = libJappsyEngineTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngineTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Debug;
-		};
-		C3506D711D5256FD005BC914 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
-				INFOPLIST_FILE = libJappsyEngineTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libJappsyEngineTests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -682,15 +723,6 @@
 			buildConfigurations = (
 				C3506D6D1D5256FD005BC914 /* Debug */,
 				C3506D6E1D5256FD005BC914 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		C3506D6F1D5256FD005BC914 /* Build configuration list for PBXNativeTarget "libJappsyEngineTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C3506D701D5256FD005BC914 /* Debug */,
-				C3506D711D5256FD005BC914 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

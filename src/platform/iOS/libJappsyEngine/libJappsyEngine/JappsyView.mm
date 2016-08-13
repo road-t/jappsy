@@ -34,7 +34,9 @@
 @implementation JappsyView
 
 - (void) engine:(void*)engine {
-	_renderer->initialize((GLEngine*)engine);
+	if (_renderer != NULL) {
+		_renderer->initialize((GLEngine*)engine);
+	}
 }
 
 + (Class) layerClass {
@@ -52,17 +54,7 @@
 		
 		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
 		
-		if (!_context || ![EAGLContext setCurrentContext:_context])
-			return nil;
-		
-		try {
-			_renderer = new GLContext(_context, eaglLayer);
-			if (_renderer == NULL)
-				return nil;
-		} catch (const char* e) {
-			return nil;
-		}
-		
+		_renderer = NULL;
 		_running = FALSE;
 		_interval = 1;
 		_displayLink = nil;
@@ -78,14 +70,18 @@
 
 - (void) drawView:(id)sender
 {
-	[EAGLContext setCurrentContext:_context];
-	_renderer->render();
+	if (_renderer != NULL) {
+		[EAGLContext setCurrentContext:_context];
+		_renderer->render();
+	}
 }
 
 - (void) layoutSubviews
 {
-	_renderer->update((CAEAGLLayer*)self.layer);
-	[self drawView:nil];
+	if (_renderer != NULL) {
+		_renderer->update((CAEAGLLayer*)self.layer);
+		[self drawView:nil];
+	}
 }
 
 - (void) setAnimationFrameInterval:(NSInteger)frameInterval
@@ -98,6 +94,45 @@
 			[self onResume];
 		}
 	}
+}
+
+- (BOOL) onStart
+{
+	if (_renderer == NULL) {
+		if (_context && [EAGLContext setCurrentContext:_context]) {
+			try {
+				CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
+				_renderer = memNew(_renderer, GLContext(_context, eaglLayer));
+			} catch (const char* e) {
+			}
+		}
+	}
+	
+	if (_renderer != NULL) {
+		[self onResume];
+		return YES;
+	}
+	
+	return NO;
+}
+
+- (BOOL) onStop
+{
+	[self onPause];
+	
+	if (_renderer != NULL) {
+		if (_renderer != NULL) {
+			memDelete(_renderer);
+			_renderer = NULL;
+		}
+		
+		if ([EAGLContext currentContext] == _context)
+			[EAGLContext setCurrentContext:nil];
+		
+		return YES;
+	}
+	
+	return NO;
 }
 
 - (void) onResume
@@ -121,14 +156,16 @@
 
 - (void) dealloc
 {
-	if ([EAGLContext currentContext] == _context)
-		[EAGLContext setCurrentContext:nil];
+	[self onStop];
 }
 
 static MotionEvent motionEvent;
 static int32_t pointerId = 1;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (_renderer == NULL)
+		return;
+	
 	for (UITouch *touch in touches) {
 		MotionPointer* pointer = NULL;
 		
@@ -162,6 +199,9 @@ static int32_t pointerId = 1;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (_renderer == NULL)
+		return;
+	
 	for (UITouch *touch in touches) {
 		NSUInteger index = [_activeTouches indexOfObject:touch];
 		if (index != NSNotFound) {
@@ -186,6 +226,9 @@ static int32_t pointerId = 1;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	if (_renderer == NULL)
+		return;
+	
 	for (UITouch *touch in touches) {
 		NSUInteger index = [_activeTouches indexOfObject:touch];
 		if (index != NSNotFound) {

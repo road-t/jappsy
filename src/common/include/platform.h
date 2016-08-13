@@ -176,6 +176,9 @@
         #endif
         #define MAX_PATH PATH_MAX
     #endif
+
+	#define null ((const void*)0)
+
 #elif defined(__WINNT__)
     #include <stdint.h>
     #include <windows.h>

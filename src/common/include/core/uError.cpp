@@ -35,6 +35,7 @@ extern "C" {
 	static const char _eConvert[] = "Unable to Convert";
     static const char _eOutOfRange[] = "Out Of Range";
 	static const char _eOpenGL[] = "OpenGL";
+	static const char _eEmpty[] = "Empty";
 
     static const char _eUnknown[] = "Unknown";
 #else
@@ -52,6 +53,7 @@ extern "C" {
 	static const char _eConvert[] = "com/jappsy/exceptions/EConvert";
     static const char _eOutOfRange[] = "com/jappsy/exceptions/EOutOfRange";
 	static const char _eOpenGL[] = "com/jappsy/exceptions/EOpenGL"; // TODO
+	static const char _eEmpty[] = "com/jappsy/exceptions/EEmpty"; // TODO
 
     static const char _eUnknown[] = "java/lang/Error";
 #endif
@@ -70,6 +72,7 @@ const char* eInvalidPointer = _eInvalidPointer;
 const char* eConvert = _eConvert;
 const char* eOutOfRange = _eOutOfRange;
 const char* eOpenGL = _eOpenGL;
+const char* eEmpty = _eEmpty;
 
 const char *eUnknown = _eUnknown;
 
@@ -99,7 +102,8 @@ bool is_errorPtr(const char* ptr) {
         || (ptr == eInvalidPointer)
         || (ptr == eConvert)
         || (ptr == eOutOfRange)
-		|| (ptr == eOpenGL);
+		|| (ptr == eOpenGL)
+		|| (ptr == eEmpty);
 }
 
 #ifdef __cplusplus

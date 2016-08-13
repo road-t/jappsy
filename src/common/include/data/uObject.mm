@@ -18,9 +18,15 @@
 #include <core/uSystem.h>
 #include <data/uString.h>
 
+const wchar_t TypeNull[] = L"Undefined::";
 const wchar_t TypeObject[] = L"Object::";
+const wchar_t TypeAtomicObject[] = L"Atomic::";
+const wchar_t TypeStack[] = L"Stack::";
+const wchar_t TypeIterator[] = L"Iterator::";
+const wchar_t TypeListIterator[] = L"ListIterator::";
+const wchar_t TypeCollection[] = L"Collection::";
 
-void ObjectRef::_threadLock() const {
+void RefObject::_threadLock() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
 #endif
@@ -38,7 +44,7 @@ void ObjectRef::_threadLock() const {
 	} while (true);
 }
 
-bool ObjectRef::_threadLockTry() const {
+bool RefObject::_threadLockTry() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
 #endif
@@ -54,7 +60,7 @@ bool ObjectRef::_threadLockTry() const {
 	return false;
 }
 
-void ObjectRef::_threadUnlock() const {
+void RefObject::_threadUnlock() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
 #endif
@@ -66,23 +72,23 @@ void ObjectRef::_threadUnlock() const {
 	_spinUnlock();
 }
 
-bool ObjectRef::equals(const Object& object) const {
+bool RefObject::equals(const Object& object) const {
 	return (this == object._object);
 }
 
-bool ObjectRef::equals(const void* object) const {
+bool RefObject::equals(const void* object) const {
 	return (this == object);
 }
 
-String ObjectRef::toString() const {
+String RefObject::toString() const {
 	return String::format(L"0x%08X", (int)(uint64_t)this);
 }
 
-String ObjectRef::getClass() const {
+String RefObject::getClass() const {
 	return TYPE;
 }
 
-bool ObjectRef::wait(int milis, int nanos) const {
+bool RefObject::wait(int milis, int nanos) const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
 #else
@@ -110,7 +116,7 @@ bool ObjectRef::wait(int milis, int nanos) const {
 	} while (true);
 }
 
-bool ObjectRef::wait(int milis) const {
+bool RefObject::wait(int milis) const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
 #else
@@ -137,22 +143,38 @@ bool ObjectRef::wait(int milis) const {
 }
 
 String Object::getClass() const {
+	if (_object == NULL)
+		return TypeNull;
+
 	return THIS->getClass();
 }
 
 String Object::toString() const {
+	if (_object == NULL)
+		return NULL;
+	
 	return THIS->toString();
 }
 
-Object::Object(const void* object) {
+Object::Object(const void* object) throw(const char*) {
 	initialize();
 	Object* o = (Object*)object;
-	ObjectRef* newObject;
+	RefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (ObjectRef*)(o->_object);
+			newObject = (RefObject*)(o->_object);
 		} else {
-			newObject = new ObjectRef();
+			try {
+				newObject = memNew(newObject, RefObject());
+				if (newObject == NULL)
+					throw eOutOfMemory;
+			} catch (...) {
+				AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
+				if (o != NULL) {
+					memDelete(o);
+				}
+				throw;
+			}
 		}
 	} else {
 		newObject = NULL;
@@ -167,8 +189,8 @@ Object::Object(const void* object) {
 }
 
 void Object::setRef(const void* object) {
-	ObjectRef* newObject = (ObjectRef*)object;
-	ObjectRef* prevObject = (ObjectRef*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	RefObject* newObject = (RefObject*)object;
+	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -181,19 +203,28 @@ void Object::setRef(const void* object) {
 	}
 }
 
-Object& Object::operator =(const void* object) {
+Object& Object::operator =(const void* object) throw(const char*) {
 	Object* o = (Object*)object;
-	ObjectRef* newObject;
+	RefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (ObjectRef*)(o->_object);
+			newObject = (RefObject*)(o->_object);
 		} else {
-			newObject = memNew(newObject, ObjectRef());
+			try {
+				newObject = memNew(newObject, RefObject());
+				if (newObject == NULL)
+					throw eOutOfMemory;
+			} catch (...) {
+				if (o != NULL) {
+					memDelete(o);
+				}
+				throw;
+			}
 		}
 	} else {
 		newObject = NULL;
 	}
-	ObjectRef* prevObject = (ObjectRef*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -210,15 +241,25 @@ Object& Object::operator =(const void* object) {
 	return *this;
 }
 
-Object::Object(const Object* object) {
+Object::Object(const Object* object) throw(const char*) {
 	initialize();
 	Object* o = (Object*)object;
-	ObjectRef* newObject;
+	RefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (ObjectRef*)(o->_object);
+			newObject = (RefObject*)(o->_object);
 		} else {
-			newObject = memNew(newObject, ObjectRef());
+			try {
+				newObject = memNew(newObject, RefObject());
+				if (newObject == NULL)
+					throw eOutOfMemory;
+			} catch (...) {
+				AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
+				if (o != NULL) {
+					memDelete(o);
+				}
+				throw;
+			}
 		}
 	} else {
 		newObject = NULL;
@@ -232,19 +273,37 @@ Object::Object(const Object* object) {
 	}
 }
 
-Object& Object::operator =(const Object* object) {
+Object::Object(const Object& object) {
+	initialize();
+	RefObject* newObject = (RefObject*)(object._object);
+	AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	if (newObject != NULL) {
+		AtomicIncrement(&(newObject->_retainCount));
+	}
+}
+
+Object& Object::operator =(const Object* object) throw(const char*) {
 	Object* o = (Object*)object;
-	ObjectRef* newObject;
+	RefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (ObjectRef*)(o->_object);
+			newObject = (RefObject*)(o->_object);
 		} else {
-			newObject = memNew(newObject, ObjectRef());
+			try {
+				newObject = memNew(newObject, RefObject());
+				if (newObject == NULL)
+					throw eOutOfMemory;
+			} catch (...) {
+				if (o != NULL) {
+					memDelete(o);
+				}
+				throw;
+			}
 		}
 	} else {
 		newObject = NULL;
 	}
-	ObjectRef* prevObject = (ObjectRef*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -260,4 +319,31 @@ Object& Object::operator =(const Object* object) {
 		memDelete(o);
 	}
 	return *this;
+}
+
+Object& Object::operator =(const Object& object) {
+	RefObject* newObject = (RefObject*)(object._object);
+	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	if (prevObject != newObject) {
+		if (prevObject != NULL) {
+			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
+				prevObject->finalize();
+				memDelete(prevObject);
+			}
+		}
+		if (newObject != NULL) {
+			AtomicIncrement(&(newObject->_retainCount));
+		}
+	}
+	return *this;
+}
+
+Object::~Object() {
+	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
+	if (prevObject != NULL) {
+		if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
+			prevObject->finalize();
+			memDelete(prevObject);
+		}
+	}
 }

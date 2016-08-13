@@ -20,52 +20,70 @@
 #include <platform.h>
 #include <core/uMemory.h>
 #include <core/uAtomic.h>
+#include <core/uError.h>
 
 #define synchronized(var)   (var)->wait();
 
 #define THIS (*this)
+#define CHECKTHIS { if (this->_object == NULL) throw eNullPointer; }
 
-#define ClassRef(base, class, ...) \
-	virtual inline class ## Ref, ## __VA_ARGS__* newRef() const { return new class ## Ref, ## __VA_ARGS__(); } \
-	inline base(const void* object) { \
-		initialize(); \
+#define RefClass(Base, Class, ...) \
+	virtual inline Ref ## Class, ## __VA_ARGS__* newRef() const throw(const char*) { \
+		Ref ## Class, ## __VA_ARGS__* o = memNew(o, Ref ## Class, ## __VA_ARGS__()); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
+	} \
+	inline Base(const void* object) { \
+		this->initialize(); \
 		*((Object*)this) = object; \
 	} \
-	inline base(const Object& object) { \
-		initialize(); \
+	inline Base(const Object& object) { \
+		this->initialize(); \
 		*((Object*)this) = object; \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const void* object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const void* object) { \
 		*((Object*)this) = object; \
 		return *this; \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const Object& object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const Object& object) { \
 		*((Object*)this) = object; \
 		return *this; \
 	} \
-	inline base(const class ## Ref, ## __VA_ARGS__& object) { \
-		initialize(); \
+	inline Base(const Ref ## Class, ## __VA_ARGS__& object) { \
+		this->initialize(); \
 		this->setRef(&object); \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const class ## Ref, ## __VA_ARGS__& object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const Ref ## Class, ## __VA_ARGS__& object) { \
 		this->setRef(&object); \
 		return *this; \
 	} \
-	inline base(const class, ## __VA_ARGS__* object) { \
-		initialize(); \
+	inline Base(const Class, ## __VA_ARGS__* object) throw(const char*) { \
+		this->initialize(); \
 		if (object != NULL) { \
 			if (object->_object == NULL) { \
-				this->setRef(object->newRef()); \
+				try { \
+					this->setRef(object->newRef()); \
+				} catch (...) { \
+					this->setRef(NULL); \
+					memDelete(object); \
+					throw; \
+				} \
 			} else { \
 				this->setRef((void*)(object->_object)); \
 			} \
 			memDelete(object); \
 		} \
 	} \
-	inline class, ## __VA_ARGS__& operator =(const class, ## __VA_ARGS__* object) { \
+	inline Class, ## __VA_ARGS__& operator =(const Class, ## __VA_ARGS__* object) throw(const char*) { \
 		if (object != NULL) { \
 			if (object->_object == NULL) { \
-				this->setRef(object->newRef()); \
+				try { \
+					this->setRef(object->newRef()); \
+				} catch (...) { \
+					this->setRef(NULL); \
+					memDelete(object); \
+					throw; \
+				} \
 			} else { \
 				this->setRef((void*)(object->_object)); \
 			} \
@@ -73,55 +91,71 @@
 		} \
 		return *this; \
 	} \
-	inline base() { initialize(); } \
-	virtual inline class ## Ref, ## __VA_ARGS__* operator->() const { \
-		return (class ## Ref, ## __VA_ARGS__*)(this->_object); \
+	inline Base() { this->initialize(); } \
+	virtual inline Ref ## Class, ## __VA_ARGS__* operator->() const { \
+		return (Ref ## Class, ## __VA_ARGS__*)(this->_object); \
 	} \
-	virtual inline class ## Ref, ## __VA_ARGS__& reference() const { \
-		return *(class ## Ref, ## __VA_ARGS__*)(this->_object); \
+	virtual inline Ref ## Class, ## __VA_ARGS__& reference() const { \
+		return *(Ref ## Class, ## __VA_ARGS__*)(this->_object); \
 	}
 
-#define CallbackRef(base, class, ...) \
-	virtual inline class ## Ref, ## __VA_ARGS__* newRef() const { return new class ## Ref, ## __VA_ARGS__(); } \
-	inline base(const void* object) { \
-		initialize(); \
+#define RefCallback(Base, Class, ...) \
+	virtual inline Ref ## Class, ## __VA_ARGS__* newRef() const throw(const char*) { \
+		Ref ## Class, ## __VA_ARGS__* o = memNew(o, Ref ## Class, ## __VA_ARGS__()); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
+	} \
+	inline Base(const void* object) { \
+		this->initialize(); \
 		*((Object*)this) = object; \
 	} \
-	inline base(const Object& object) { \
-		initialize(); \
+	inline Base(const Object& object) { \
+		this->initialize(); \
 		*((Object*)this) = object; \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const void* object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const void* object) { \
 		*((Object*)this) = object; \
 		return *this; \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const Object& object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const Object& object) { \
 		*((Object*)this) = object; \
 		return *this; \
 	} \
-	inline base(const class ## Ref, ## __VA_ARGS__& object) { \
-		initialize(); \
+	inline Base(const Ref ## Class, ## __VA_ARGS__& object) { \
+		this->initialize(); \
 		this->setRef(&object); \
 	} \
-	virtual inline class, ## __VA_ARGS__& operator =(const class ## Ref, ## __VA_ARGS__& object) { \
+	virtual inline Class, ## __VA_ARGS__& operator =(const Ref ## Class, ## __VA_ARGS__& object) { \
 		this->setRef(&object); \
 		return *this; \
 	} \
-	inline base(const class, ## __VA_ARGS__* object) { \
-		initialize(); \
+	inline Base(const Class, ## __VA_ARGS__* object) throw(const char*) { \
+		this->initialize(); \
 		if (object != NULL) { \
 			if (object->_object == NULL) { \
-				this->setRef(object->newRef()); \
+				try { \
+					this->setRef(object->newRef()); \
+				} catch (...) { \
+					this->setRef(NULL); \
+					memDelete(object); \
+					throw; \
+				} \
 			} else { \
 				this->setRef((void*)(object->_object)); \
 			} \
 			memDelete(object); \
 		} \
 	} \
-	inline class, ## __VA_ARGS__& operator =(const class, ## __VA_ARGS__* object) { \
+	inline Class, ## __VA_ARGS__& operator =(const Class, ## __VA_ARGS__* object) throw(const char*) { \
 		if (object != NULL) { \
 			if (object->_object == NULL) { \
-				this->setRef(object->newRef()); \
+				try { \
+					this->setRef(object->newRef()); \
+				} catch (...) { \
+					this->setRef(NULL); \
+					memDelete(object); \
+					throw; \
+				} \
 			} else { \
 				this->setRef((void*)(object->_object)); \
 			} \
@@ -129,18 +163,24 @@
 		} \
 		return *this; \
 	} \
-	inline base() { initialize(); } \
-	virtual inline class ## Ref, ## __VA_ARGS__* operator->() const { \
-		return (class ## Ref, ## __VA_ARGS__*)(this->_object); \
+	inline Base() { this->initialize(); } \
+	virtual inline Ref ## Class, ## __VA_ARGS__* operator->() const { \
+		return (Ref ## Class, ## __VA_ARGS__*)(this->_object); \
 	} \
-	inline base(const class ## Ref, ## __VA_ARGS__* c) { initialize(); setRef(c); }
+	inline Base(const Ref ## Class, ## __VA_ARGS__* c) { this->initialize(); setRef(c); }
 
 class String;
 class Object;
 
+extern const wchar_t TypeNull[];
 extern const wchar_t TypeObject[];
+extern const wchar_t TypeAtomicObject[];
+extern const wchar_t TypeStack[];
+extern const wchar_t TypeIterator[];
+extern const wchar_t TypeListIterator[];
+extern const wchar_t TypeCollection[];
 
-class ObjectRef {
+class RefObject {
 protected:
 	const wchar_t* TYPE;
 	
@@ -159,9 +199,9 @@ protected:
 public:
 	volatile int32_t _retainCount = 0;
 	
-	inline ObjectRef() : TYPE(TypeObject) { }
+	inline RefObject() : TYPE(TypeObject) { }
 	
-	virtual inline ~ObjectRef() {}
+	virtual inline ~RefObject() {}
 	virtual inline void finalize() {}
 	
 	virtual bool equals(const Object& object) const;
@@ -204,80 +244,48 @@ protected:
 
 	virtual inline void initialize() {}
 public:
-	volatile ObjectRef* _object = NULL;
+	volatile RefObject* _object = NULL;
 	
 	inline void* operator new(size_t size) throw(const char*) { void *p = memAlloc(void, p, size); if (!p) throw eOutOfMemory; return p; }
 	inline void* operator new[](size_t size) throw(const char*) { void *p = memAlloc(void, p, size); if (!p) throw eOutOfMemory; return p; }
 	inline void operator delete(void* p) { memFree(p); }
 	inline void operator delete[](void* p) { memFree(p); }
 
-	virtual inline ~Object() {
-		ObjectRef* prevObject = (ObjectRef*)AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
-		if (prevObject != NULL) {
-			if (OSAtomicDecrement32((int32_t*)&(prevObject->_retainCount)) == 0) {
-				prevObject->finalize();
-				memDelete(prevObject);
-			}
-		}
-	}
-	
+	virtual ~Object();
 	inline Object() { initialize(); }
 	
-	inline Object(const Object& object) {
-		initialize();
-		ObjectRef* newObject = (ObjectRef*)(object._object);
-		AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
-		if (newObject != NULL) {
-			OSAtomicIncrement32((int32_t*)&(newObject->_retainCount));
-		}
-	}
-	
-	inline Object& operator =(const Object& object) {
-		ObjectRef* newObject = (ObjectRef*)(object._object);
-		ObjectRef* prevObject = (ObjectRef*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
-		if (prevObject != newObject) {
-			if (prevObject != NULL) {
-				if (OSAtomicDecrement32((int32_t*)&(prevObject->_retainCount)) == 0) {
-					prevObject->finalize();
-					memDelete(prevObject);
-				}
-			}
-			if (newObject != NULL) {
-				OSAtomicIncrement32((int32_t*)&(newObject->_retainCount));
-			}
-		}
-		return *this;
-	}
+	Object(const Object& object);
+	Object& operator =(const Object& object);
 	
 	inline bool operator ==(const Object& object) const { return (_object == object._object); }
 	inline bool operator !=(const Object& object) const { return (_object != object._object); }
 	
 	// support for 'null' value
-	Object(const void* object);
-	Object& operator =(const void* object);
+	Object(const void* object) throw(const char*);
+	Object& operator =(const void* object) throw(const char*);
 	inline bool operator ==(const void* object) const { return (_object == object); }
 	inline bool operator !=(const void* object) const { return (_object != object); }
 	
 	// support for 'new' value
-	Object(const Object* object);
-	Object& operator =(const Object* object);
+	Object(const Object* object) throw(const char*);
+	Object& operator =(const Object* object) throw(const char*);
 	
-	virtual inline ObjectRef* operator->() const { return (ObjectRef*)_object; }
+	virtual inline RefObject* operator->() const { return (RefObject*)_object; }
 	
 	void setRef(const void* object);
 	
 	// Android
 	
-	inline bool equals(const Object& object) const { return THIS->equals(object); }
-	inline bool equals(const void* object) const { return THIS->equals(object); }
+	inline bool equals(const Object& object) const throw(const char*) { CHECKTHIS; return THIS->equals(object); }
+	inline bool equals(const void* object) const throw(const char*) { CHECKTHIS; return THIS->equals(object); }
 	String getClass() const;
 	virtual inline uint32_t hashCode() const { if (_object == NULL) return 0; return THIS->hashCode(); }
-	inline void notify() const { THIS->notify(); }
-	inline void notifyAll() const { THIS->notifyAll(); }
+	inline void notify() const throw(const char*) { CHECKTHIS; THIS->notify(); }
+	inline void notifyAll() const throw(const char*) { CHECKTHIS; THIS->notifyAll(); }
 	String toString() const;
-	inline void wait() const { THIS->wait(); }
-	inline bool wait(int milis, int nanos) const { return THIS->wait(milis, nanos); }
-	inline bool wait(int milis) const { return THIS->wait(milis); }
+	inline void wait() const throw(const char*) { CHECKTHIS; THIS->wait(); }
+	inline bool wait(int milis, int nanos) const throw(const char*) { CHECKTHIS; return THIS->wait(milis, nanos); }
+	inline bool wait(int milis) const throw(const char*) { CHECKTHIS; return THIS->wait(milis); }
 
 };
 

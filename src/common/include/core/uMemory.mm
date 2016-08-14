@@ -21,7 +21,179 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+	
+	void atomic_bzero(void* dst, uint32_t size) {
+		if ((dst == NULL) || (size == 0))
+			return;
+		
+		uint8_t* buf = (uint8_t*)dst;
+#if defined(__X64__)
+		uint32_t aligned = size >> 3; size &= 7;
+		while (aligned-- > 0) {
+			__atomic_store_n((uint64_t*)buf, 0, __ATOMIC_RELEASE);
+			buf += 8;
+		}
+#else
+		uint32_t aligned = size >> 2; size &= 3;
+		while (aligned-- > 0) {
+			__atomic_store_n((uint32_t*)buf, 0, __ATOMIC_RELEASE);
+			buf += 4;
+		}
+#endif
+		while (size-- > 0) {
+			__atomic_store_n(buf, 0, __ATOMIC_RELEASE);
+			buf++;
+		}
+	}
+	
+	void atomic_memset(void* dst, uint8_t val, uint32_t size) {
+		if ((dst == NULL) || (size == 0))
+			return;
+		
+		uint8_t* buf = (uint8_t*)dst;
+#if defined(__X64__)
+		uint32_t aligned = size >> 3; size &= 7;
+		uint64_t value = ((uint32_t)val << 24) | ((uint32_t)val << 16) | ((uint32_t)val << 8) | (uint32_t)val; value |= (value << 32);
+		while (aligned-- > 0) {
+			__atomic_store_n((uint64_t*)buf, value, __ATOMIC_RELEASE);
+			buf += 8;
+		}
+#else
+		uint32_t aligned = size >> 2; size &= 3;
+		uint32_t value = ((uint32_t)val << 24) | ((uint32_t)val << 16) | ((uint32_t)val << 8) | (uint32_t)val;
+		while (aligned-- > 0) {
+			__atomic_store_n((uint32_t*)buf, value, __ATOMIC_RELEASE);
+			buf += 4;
+		}
+#endif
+		while (size-- > 0) {
+			__atomic_store_n(buf, val, __ATOMIC_RELEASE);
+			buf++;
+		}
+	}
+	
+	void atomic_memread(void* dst, const void* src, uint32_t size) {
+		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
+			return;
+		
+		uint8_t* target = (uint8_t*)dst;
+		uint8_t* source = (uint8_t*)src;
+#if defined(__X64__)
+		uint32_t aligned = size >> 3; size &= 7;
+		while (aligned-- > 0) {
+			__atomic_load((uint64_t*)source, (uint64_t*)target, __ATOMIC_ACQUIRE);
+			target += 8; source += 8;
+		}
+#else
+		uint32_t aligned = size >> 2; size &= 3;
+		while (aligned-- > 0) {
+			__atomic_load((uint32_t*)source, (uint32_t*)target, __ATOMIC_ACQUIRE);
+			target += 4; source += 4;
+		}
+#endif
+		while (size-- > 0) {
+			__atomic_load(source, target, __ATOMIC_ACQUIRE);
+			target++; source++;
+		}
+	}
+	
+	void atomic_memwrite(void* dst, const void* src, uint32_t size) {
+		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
+			return;
+		
+		uint8_t* target = (uint8_t*)dst;
+		uint8_t* source = (uint8_t*)src;
+#if defined(__X64__)
+		uint32_t aligned = size >> 3; size &= 7;
+		while (aligned-- > 0) {
+			__atomic_store((uint64_t*)target, (uint64_t*)source, __ATOMIC_RELEASE);
+			target += 8; source += 8;
+		}
+#else
+		uint32_t aligned = size >> 2; size &= 3;
+		while (aligned-- > 0) {
+			__atomic_store((uint32_t*)target, (uint32_t*)source, __ATOMIC_RELEASE);
+			target += 4; source += 4;
+		}
+#endif
+		while (size-- > 0) {
+			__atomic_store(target, source, __ATOMIC_RELEASE);
+			target++; source++;
+		}
+	}
+	
+	void atomic_memcpy(void* dst, const void* src, uint32_t size) {
+		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
+			return;
+		
+		uint8_t* target = (uint8_t*)dst;
+		uint8_t* source = (uint8_t*)src;
+#if defined(__X64__)
+		uint32_t aligned = size >> 3; size &= 7;
+		while (aligned-- > 0) {
+			__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			target += 8; source += 8;
+		}
+#else
+		uint32_t aligned = size >> 2; size &= 3;
+		while (aligned-- > 0) {
+			__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			target += 4; source += 4;
+		}
+#endif
+		while (size-- > 0) {
+			__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			target++; source++;
+		}
+	}
+	
+	void atomic_memmove(void* dst, const void* src, uint32_t size) {
+		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
+			return;
+		
+		uint8_t* target = (uint8_t*)dst;
+		uint8_t* source = (uint8_t*)src;
+		
+		if (((intptr_t)target < (intptr_t)source) || ((intptr_t)(source + size) <= (intptr_t)target)) {
+#if defined(__X64__)
+			uint32_t aligned = size >> 3; size &= 7;
+			while (aligned-- > 0) {
+				__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+				target += 8; source += 8;
+			}
+#else
+			uint32_t aligned = size >> 2; size &= 3;
+			while (aligned-- > 0) {
+				__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+				target += 4; source += 4;
+			}
+#endif
+			while (size-- > 0) {
+				__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+				target++; source++;
+			}
+		} else {
+			target += size; source += size;
+#if defined(__X64__)
+			uint32_t aligned = size >> 3; size &= 7;
+			while (aligned-- > 0) {
+				target -= 8; source -= 8;
+				__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			}
+#else
+			uint32_t aligned = size >> 2; size &= 3;
+			while (aligned-- > 0) {
+				target -= 4; source -= 4;
+				__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			}
+#endif
+			while (size-- > 0) {
+				target--; source--;
+				__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+			}
+		}
+	}
+	
 #if defined(__WINNT__)
 volatile int32_t mmHeapInit = 0;
 volatile int32_t mmHeap = 0;

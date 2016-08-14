@@ -31,6 +31,13 @@ void* mmalloc(uint32_t dwSize);
 void* mmrealloc(void* mem, uint32_t dwSize);
 void mmfree(void* mem);
 
+void atomic_bzero(void* dst, uint32_t size);
+void atomic_memset(void* dst, uint8_t val, uint32_t size);
+void atomic_memread(void* dst, const void* src, uint32_t size);
+void atomic_memwrite(void* dst, const void* src, uint32_t size);
+void atomic_memcpy(void* dst, const void* src, uint32_t size);
+void atomic_memmove(void* dst, const void* src, uint32_t size);
+
 uint64_t mmStats(uint32_t* stats, int count);
 void mmCleanup();
 

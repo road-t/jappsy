@@ -51,6 +51,46 @@ uint8_t mmcrc7(register uint8_t crc, void* data, register uint32_t len) {
     return (uint8_t)(crc ^ 0x01);
 }
 
+uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len) {
+	register uint8_t* buf = (uint8_t*)data;
+
+#if defined(__X64__)
+	uint32_t aligned = len >> 3; len &= 7;
+	
+	while (aligned-- > 0) {
+		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)];
+		buf += 8;
+	}
+#else
+	uint32_t aligned = len >> 2; len &= 3;
+	
+	while (aligned-- > 0) {
+		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
+		crc = crc7_lookup[crc ^ (val & 0xFF)];
+		buf += 4;
+	}
+#endif
+	
+	while (len-- > 0) {
+		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+		crc = crc7_lookup[crc ^ val];
+		buf++;
+	}
+	
+	return (uint8_t)(crc ^ 0x01);
+}
+
 /* CRC-TABLE CRCINIT=0x0000 POLY=0x1021 CCITT V.41 */
 static const uint16_t crc16_lookup[256] = {
         0x0000,0x1021,0x2042,0x3063,0x4084,0x50A5,0x60C6,0x70E7,
@@ -96,6 +136,46 @@ uint16_t mmcrc16(register uint16_t crc, void* data, register uint32_t len) {
     }
 
     return crc;
+}
+
+uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len) {
+	register uint8_t* buf = (uint8_t*)data;
+	
+#if defined(__X64__)
+	uint32_t aligned = len >> 3; len &= 7;
+	
+	while (aligned-- > 0) {
+		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)];
+		buf += 8;
+	}
+#else
+	uint32_t aligned = len >> 2; len &= 3;
+	
+	while (aligned-- > 0) {
+		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)];
+		buf += 4;
+	}
+#endif
+	
+	while (len-- > 0) {
+		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ val];
+		buf++;
+	}
+	
+	return crc;
 }
 
 /* CRC-TABLE CRCINIT=0xFFFFFFFF POLY=0xEDB88320 ANSI X3.66  */
@@ -154,6 +234,46 @@ uint32_t mmcrc32(register uint32_t crc, void* data, register uint32_t len) {
     }
 
     return crc;
+}
+
+uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len) {
+	register uint8_t* buf = (uint8_t*)data;
+	
+#if defined(__X64__)
+	uint32_t aligned = len >> 3; len &= 7;
+	
+	while (aligned-- > 0) {
+		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)];
+		buf += 8;
+	}
+#else
+	uint32_t aligned = len >> 2; len &= 3;
+	
+	while (aligned-- > 0) {
+		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)];
+		buf += 4;
+	}
+#endif
+	
+	while (len-- > 0) {
+		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ val];
+		buf++;
+	}
+	
+	return crc;
 }
 
 #if defined(__JNI__)

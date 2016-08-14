@@ -144,6 +144,14 @@
 	#endif
 #endif
 
+#if __x86_64__
+	#define	__X64__
+#elif defined(__LP64__)
+	#define	__X64__
+#else
+	#define __X32__
+#endif
+
 #endif //JAPPSY_PLATFORM_H
 
 /* INCLUDES */

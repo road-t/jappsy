@@ -26,6 +26,10 @@ extern "C" {
 uint8_t mmcrc7(register uint8_t crc, void *data, register uint32_t len);
 uint16_t mmcrc16(register uint16_t crc, void *data, register uint32_t len);
 uint32_t mmcrc32(register uint32_t crc, void *data, register uint32_t len);
+	
+uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len);
+uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len);
+uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len);
 
 #ifdef __cplusplus
 }

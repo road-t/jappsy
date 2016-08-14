@@ -23,7 +23,7 @@
 #include <core/uError.h>
 #include <cipher/uCrc.h>
 
-#define synchronized(var)   (var)->wait();
+#define synchronized(var)   (var)->wait(); __sync_synchronize();
 
 #define THIS (*this)
 #define CHECKTHIS { if (this->_object == NULL) throw eNullPointer; }

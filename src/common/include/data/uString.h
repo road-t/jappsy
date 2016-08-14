@@ -531,7 +531,7 @@ extern "C" {
 
 		//List<String> split(const String& regularExpression, uint32_t limit = 0) const;
 #else
-	#error Cross platform String not complete
+	#warning Cross platform String not complete
 #endif
 		
 		RefString& trim();

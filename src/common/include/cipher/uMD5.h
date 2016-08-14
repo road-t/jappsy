@@ -17,7 +17,7 @@
 #ifndef JAPPSY_UMD5_H
 #define JAPPSY_UMD5_H
 
-#include "../platform.h"
+#include <platform.h>
 
 #ifdef __cplusplus
 extern "C" {

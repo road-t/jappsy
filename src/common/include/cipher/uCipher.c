@@ -20,7 +20,8 @@
 #else
 	#include <zlib.h>
 #endif
-#include "../core/uMemory.h"
+#include <core/uMemory.h>
+#include <data/uString.h>
 
 #define GZIP_MAGIC 0x8b1f
 

@@ -330,8 +330,6 @@ public:
 	inline static bool isNull(const float value) { return value == 0.0f; }
 	inline static bool isNull(const double value) { return value == 0.0; }
 	
-	static
-	
 	inline static uint32_t hashCode(const RefObject& object) throw(const char*) { return object.hashCode(); }
 	inline static uint32_t hashCode(const Object& object) throw(const char*) { return object.hashCode(); }
 	inline static uint32_t hashCode(const RefObject* object) throw(const char*) { return object->hashCode(); }

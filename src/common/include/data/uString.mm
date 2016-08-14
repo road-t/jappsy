@@ -4107,7 +4107,7 @@ String String::format(const RefString& string, ...) {
 }
 
 RefString RefString::format(const String& string, ...) {
-	if (string._object == nil)
+	if (string._object == NULL)
 		return StringNil;
 	else if (((RefString*)(string._object))->m_length == 0)
 		return StringEmpty;

@@ -17,7 +17,7 @@
 #ifndef JAPPSY_UCIPHER_H
 #define JAPPSY_UCIPHER_H
 
-#include "../platform.h"
+#include <platform.h>
 
 #ifdef __cplusplus
 extern "C" {

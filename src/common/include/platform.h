@@ -214,6 +214,7 @@
     #include <stdlib.h>
     #include <stdio.h>
     #include <time.h>
+	#include <pthread.h>
 
     #include <core/uError.h>
 
@@ -230,7 +231,11 @@
             #define PATH_MAX 4096
         #endif
         #define MAX_PATH PATH_MAX
-    #endif
+	#endif
+
+	#ifndef nullptr
+		#define nullptr NULL
+	#endif
 #endif
 
 #ifndef LOG

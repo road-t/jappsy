@@ -40,6 +40,10 @@ const wchar_t TypeSparseArray[] = L"SparseArray::";
 void RefObject::_threadLock() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
+#elif defined(__JNI__)
+	void* thread = (void*)((intptr_t)(pthread_self()));
+#else
+	#error Crossplatform Object not finished
 #endif
 	
 	do {
@@ -58,6 +62,10 @@ void RefObject::_threadLock() const {
 bool RefObject::_threadLockTry() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
+#elif defined(__JNI__)
+	void* thread = (void*)((intptr_t)(pthread_self()));
+#else
+	#error Crossplatform Object not finished
 #endif
 	
 	_spinLock();
@@ -74,6 +82,10 @@ bool RefObject::_threadLockTry() const {
 void RefObject::_threadUnlock() const {
 #if defined(__IOS__)
 	void* thread = (__bridge void *)([NSThread currentThread]);
+#elif defined(__JNI__)
+	void* thread = (void*)((intptr_t)(pthread_self()));
+#else
+	#error Crossplatform Object not finished
 #endif
 	
 	_spinLock();
@@ -104,12 +116,6 @@ String RefObject::getClass() const {
 }
 
 bool RefObject::wait(int milis, int nanos) const {
-#if defined(__IOS__)
-	void* thread = (__bridge void *)([NSThread currentThread]);
-#else
-	#error Crossplatform Object not finished
-#endif
-	
 	int usec = 0;
 	int64_t start = 0;
 	
@@ -132,12 +138,6 @@ bool RefObject::wait(int milis, int nanos) const {
 }
 
 bool RefObject::wait(int milis) const {
-#if defined(__IOS__)
-	void* thread = (__bridge void *)([NSThread currentThread]);
-#else
-	#error Crossplatform Object not finished
-#endif
-	
 	int64_t start = 0;
 	
 	do {

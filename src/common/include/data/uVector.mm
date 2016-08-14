@@ -17,7 +17,9 @@
 #include "uVector.h"
 
 #include <math.h>
-#include <random>
+#if defined(__IOS__)
+	#include <random>
+#endif
 
 #ifdef __cplusplus
 extern "C" {

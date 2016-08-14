@@ -22,6 +22,8 @@ static GLfloat defaultTarget[3] = { 0, 0, 0 };
 static GLfloat defaultHead[3] = { 0, 1, 0 };
 
 RefGLCamera::RefGLCamera(GLRender* context, const wchar_t* key) {
+	TYPE = L"GLCamera::";
+
 	this->context = context;
 	this->key = key;
 	Vec3SetV(position.v, defaultPosition);

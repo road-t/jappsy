@@ -21,7 +21,7 @@ static GLfloat defaultPosition[3] = { 0, 0, -1 };
 static GLfloat defaultTarget[3] = { 0, 0, 0 };
 static GLfloat defaultHead[3] = { 0, 1, 0 };
 
-GLCamera::GLCamera(GLRender* context, const wchar_t* key) {
+RefGLCamera::RefGLCamera(GLRender* context, const wchar_t* key) {
 	this->context = context;
 	this->key = key;
 	Vec3SetV(position.v, defaultPosition);
@@ -37,24 +37,24 @@ GLCamera::GLCamera(GLRender* context, const wchar_t* key) {
 	scale = 0.01;
 }
 
-GLCamera::~GLCamera() {
+RefGLCamera::~RefGLCamera() {
 	this->context = NULL;
 	this->key = NULL;
 }
 
-GLCamera& GLCamera::invalidate() {
+RefGLCamera& RefGLCamera::invalidate() {
 	invalid = true;
 	return *this;
 }
 
-GLCamera& GLCamera::size(GLfloat width, GLfloat height) {
+RefGLCamera& RefGLCamera::size(GLfloat width, GLfloat height) {
 	this->width = width;
 	this->height = height;
 	invalid = true;
 	return *this;
 }
 
-GLCamera& GLCamera::perspective(GLfloat fov, GLfloat min, GLfloat max) {
+RefGLCamera& RefGLCamera::perspective(GLfloat fov, GLfloat min, GLfloat max) {
 	this->fov = fov;
 	this->min = min;
 	this->max = max;
@@ -63,7 +63,7 @@ GLCamera& GLCamera::perspective(GLfloat fov, GLfloat min, GLfloat max) {
 	return *this;
 }
 
-GLCamera& GLCamera::ortho(GLfloat min, GLfloat max) {
+RefGLCamera& RefGLCamera::ortho(GLfloat min, GLfloat max) {
 	this->min = min;
 	this->max = max;
 	style = ORTHOGRAPHIC;
@@ -71,7 +71,7 @@ GLCamera& GLCamera::ortho(GLfloat min, GLfloat max) {
 	return *this;
 }
 
-GLCamera& GLCamera::layer(GLfloat offsetX, GLfloat offsetY) {
+RefGLCamera& RefGLCamera::layer(GLfloat offsetX, GLfloat offsetY) {
 	target.x = offsetX;
 	target.y = offsetY;
 	style = LAYER;
@@ -79,7 +79,7 @@ GLCamera& GLCamera::layer(GLfloat offsetX, GLfloat offsetY) {
 	return *this;
 }
 
-GLCamera& GLCamera::lookAt(const Vec3& position, const Vec3& target, const Vec3& head) {
+RefGLCamera& RefGLCamera::lookAt(const Vec3& position, const Vec3& target, const Vec3& head) {
 	this->position.set(position);
 	this->target.set(target);
 	this->head.set(head);
@@ -87,7 +87,7 @@ GLCamera& GLCamera::lookAt(const Vec3& position, const Vec3& target, const Vec3&
 	return *this;
 }
 
-GLCamera& GLCamera::rotate(const Vec3& vec, GLfloat angle) {
+RefGLCamera& RefGLCamera::rotate(const Vec3& vec, GLfloat angle) {
 	Vec3 normal; normal.normalize(vec);
 	Mat4 rotate; rotate.rotate(normal, angle);
 	position.subtract(target).transform(rotate).add(target);
@@ -95,7 +95,7 @@ GLCamera& GLCamera::rotate(const Vec3& vec, GLfloat angle) {
 	return *this;
 }
 
-bool GLCamera::update() {
+bool RefGLCamera::update() {
 	if (invalid) {
 		if (style == LAYER) {
 			projection16fv.set(0);
@@ -136,25 +136,28 @@ bool GLCamera::update() {
 
 GLCameras::GLCameras(GLRender* context) throw(const char*) {
 	this->context = context;
-	list = memNew(list, NamedArray<GLCamera>());
-	gui = NULL;
+	list = new HashMap<String, GLCamera>();
+	gui = null;
 }
 
 GLCameras::~GLCameras() {
 	context = NULL;
-	memDelete(list);
-	gui = NULL;
+	list = null;
+	gui = null;
 }
 
-GLCamera* GLCameras::get(const wchar_t* key) {
-	return list->get(key);
+GLCamera& GLCameras::get(const wchar_t* key) throw(const char*) {
+	return (GLCamera&)list.get(key);
 }
 
-GLCamera* GLCameras::createCamera(const wchar_t* key) throw(const char*) {
-	GLCamera* cam = list->get(key);
-	if (cam == NULL) {
-		cam = memNew(cam, GLCamera(context, key));
-		list->insert(key, cam);
+GLCamera& GLCameras::createCamera(const wchar_t* key) throw(const char*) {
+	try {
+		return (GLCamera&)list.get(key);
+	} catch (...) {
+		GLCamera* cam = &(list.put(key, new RefGLCamera(context, key)));
+		if (wcscmp(key, L"gui") == 0) {
+			gui = *cam;
+		}
+		return *cam;
 	}
-	return cam;
 }

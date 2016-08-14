@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include <GLContext.h>
+#include "GLContext.h"
+#include <core/uMemory.h>
 
 GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*) {
 	this->context = context;

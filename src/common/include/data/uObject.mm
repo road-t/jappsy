@@ -17,9 +17,12 @@
 #include "uObject.h"
 #include <core/uSystem.h>
 #include <data/uString.h>
+#include <data/uJSON.h>
 
 const wchar_t TypeNull[] = L"Undefined::";
 const wchar_t TypeObject[] = L"Object::";
+const wchar_t TypeString[] = L"String::";
+const wchar_t TypeJSON[] = L"JSON::";
 const wchar_t TypeAtomicObject[] = L"Atomic::";
 const wchar_t TypeStack[] = L"Stack::";
 const wchar_t TypeIterator[] = L"Iterator::";
@@ -29,6 +32,10 @@ const wchar_t TypeList[] = L"List::";
 const wchar_t TypeSet[] = L"Set::";
 const wchar_t TypeHashSet[] = L"HashSet::";
 const wchar_t TypeLinkedHashSet[] = L"LinkedHashSet::";
+const wchar_t TypeMap[] = L"Map::";
+const wchar_t TypeHashMap[] = L"HashMap::";
+const wchar_t TypeLinkedHashMap[] = L"LinkedHashMap::";
+const wchar_t TypeSparseArray[] = L"SparseArray::";
 
 void RefObject::_threadLock() const {
 #if defined(__IOS__)
@@ -37,8 +44,8 @@ void RefObject::_threadLock() const {
 	
 	do {
 		_spinLock();
-		if ((AtomicCompareExchangePtr((void* volatile *)_thread, thread, NULL) == NULL) ||
-			(AtomicCompareExchangePtr((void* volatile *)_thread, thread, thread) == thread)) {
+		if ((AtomicCompareExchangePtr((void* volatile *)&_thread, thread, NULL) == NULL) ||
+			(AtomicCompareExchangePtr((void* volatile *)&_thread, thread, thread) == thread)) {
 			AtomicIncrement((volatile int32_t*)&_lockCount);
 			_spinUnlock();
 			break;
@@ -54,8 +61,8 @@ bool RefObject::_threadLockTry() const {
 #endif
 	
 	_spinLock();
-	if ((AtomicCompareExchangePtr((void* volatile *)_thread, thread, NULL) == NULL) ||
-		(AtomicCompareExchangePtr((void* volatile *)_thread, thread, thread) == thread)) {
+	if ((AtomicCompareExchangePtr((void* volatile *)&_thread, thread, NULL) == NULL) ||
+		(AtomicCompareExchangePtr((void* volatile *)&_thread, thread, thread) == thread)) {
 		AtomicIncrement((volatile int32_t*)&_lockCount);
 		_spinUnlock();
 		return true;
@@ -71,7 +78,7 @@ void RefObject::_threadUnlock() const {
 	
 	_spinLock();
 	if (AtomicDecrement((volatile int32_t*)&_lockCount) == 1) {
-		AtomicCompareExchangePtr((void* volatile *)_thread, NULL, thread);
+		AtomicCompareExchangePtr((void* volatile *)&_thread, NULL, thread);
 	}
 	_spinUnlock();
 }
@@ -86,6 +93,10 @@ bool RefObject::equals(const void* object) const {
 
 String RefObject::toString() const {
 	return String::format(L"0x%08X", (int)(uint64_t)this);
+}
+
+String RefObject::toJSON() const {
+	return L"{}";
 }
 
 String RefObject::getClass() const {
@@ -160,6 +171,14 @@ String Object::toString() const {
 	return THIS->toString();
 }
 
+String Object::toJSON() const {
+	if (_object == NULL)
+		return L"null";
+	
+	return THIS->toJSON();
+}
+
+
 Object::Object(const void* object) throw(const char*) {
 	initialize();
 	Object* o = (Object*)object;
@@ -169,13 +188,13 @@ Object::Object(const void* object) throw(const char*) {
 			newObject = (RefObject*)(o->_object);
 		} else {
 			try {
-				newObject = memNew(newObject, RefObject());
+				newObject = new RefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
 				AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
 				if (o != NULL) {
-					memDelete(o);
+					delete o;
 				}
 				throw;
 			}
@@ -188,7 +207,7 @@ Object::Object(const void* object) throw(const char*) {
 		AtomicIncrement(&(newObject->_retainCount));
 
 	if (o != NULL) {
-		memDelete(o);
+		delete o;
 	}
 }
 
@@ -199,7 +218,7 @@ void Object::setRef(const void* object) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 				prevObject->finalize();
-				memDelete(prevObject);
+				delete prevObject;
 			}
 		}
 		if (newObject != NULL)
@@ -215,12 +234,12 @@ Object& Object::operator =(const void* object) throw(const char*) {
 			newObject = (RefObject*)(o->_object);
 		} else {
 			try {
-				newObject = memNew(newObject, RefObject());
+				newObject = new RefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
 				if (o != NULL) {
-					memDelete(o);
+					delete o;
 				}
 				throw;
 			}
@@ -233,14 +252,14 @@ Object& Object::operator =(const void* object) throw(const char*) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 				prevObject->finalize();
-				memDelete(prevObject);
+				delete prevObject;
 			}
 		}
 		if (newObject != NULL)
 			AtomicIncrement(&(newObject->_retainCount));
 	}
 	if (o != NULL) {
-		memDelete(o);
+		delete o;
 	}
 	return *this;
 }
@@ -254,13 +273,13 @@ Object::Object(const Object* object) throw(const char*) {
 			newObject = (RefObject*)(o->_object);
 		} else {
 			try {
-				newObject = memNew(newObject, RefObject());
+				newObject = new RefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
 				AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
 				if (o != NULL) {
-					memDelete(o);
+					delete o;
 				}
 				throw;
 			}
@@ -273,7 +292,7 @@ Object::Object(const Object* object) throw(const char*) {
 		AtomicIncrement(&(newObject->_retainCount));
 
 	if (o != NULL) {
-		memDelete(o);
+		delete o;
 	}
 }
 
@@ -294,12 +313,12 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 			newObject = (RefObject*)(o->_object);
 		} else {
 			try {
-				newObject = memNew(newObject, RefObject());
+				newObject = new RefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
 				if (o != NULL) {
-					memDelete(o);
+					delete o;
 				}
 				throw;
 			}
@@ -312,7 +331,7 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 				prevObject->finalize();
-				memDelete(prevObject);
+				delete prevObject;
 			}
 		}
 		if (newObject != NULL) {
@@ -320,7 +339,7 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 		}
 	}
 	if (o != NULL) {
-		memDelete(o);
+		delete o;
 	}
 	return *this;
 }
@@ -332,7 +351,7 @@ Object& Object::operator =(const Object& object) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 				prevObject->finalize();
-				memDelete(prevObject);
+				delete prevObject;
 			}
 		}
 		if (newObject != NULL) {
@@ -347,7 +366,54 @@ Object::~Object() {
 	if (prevObject != NULL) {
 		if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 			prevObject->finalize();
-			memDelete(prevObject);
+			delete prevObject;
 		}
 	}
 }
+
+bool Object::isNull(const RefString& string) {
+	return (wchar_t*)string == NULL;
+}
+
+bool Object::isNull(const RefString* string) {
+	return (string == NULL) ? true : ((wchar_t*)(*string) == NULL);
+}
+
+uint32_t Object::hashCode(const wchar_t* string) throw(const char*) {
+	if (string == NULL)
+		return 0;
+	
+	uint32_t size = 0;
+	wcs_strlen(string, &size);
+	return mmcrc32(0xFFFFFFFF, (void*)string, size);
+}
+
+uint32_t Object::hashCode(const char* string) throw(const char*) {
+	if (string == NULL)
+		return 0;
+	
+	uint32_t size = strlen(string) + 1;
+	return mmcrc32(0xFFFFFFFF, (void*)string, size);
+}
+	
+void Object::log() const {
+	String json = JSON::stringify(*this);
+	wchar_t* wstr = (wchar_t*)json;
+	if (wstr == NULL)
+		return;
+	
+	uint32_t size = wcs_toutf8_size(wstr);
+	if (size == 0)
+		return;
+	
+	char* str = memAlloc(char, str, size);
+	if (str == NULL)
+		return;
+
+	wcs_toutf8(wstr, str, size);
+	
+	LOG("%s", str);
+	
+	memFree(str);
+}
+

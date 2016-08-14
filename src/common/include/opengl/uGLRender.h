@@ -18,7 +18,6 @@
 #define JAPPSY_UGLRENDER_H
 
 #include <platform.h>
-#include <data/uObject.h>
 //TODO: #include "uLoader.h"
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
@@ -39,7 +38,7 @@ class GLModels;
 class GLParticles;
 class GLDrawings;
 
-class GLRender : public Object {
+class GLRender {
 private:
 	static const char* extensions;
 	static bool isExtensionSupported(const char *extension);

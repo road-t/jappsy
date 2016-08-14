@@ -17,6 +17,7 @@
 #import "OMView.h"
 
 #include "OMEngine.h"
+#include <core/uMemory.h>
 
 @implementation OMView
 

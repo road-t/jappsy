@@ -115,7 +115,7 @@ public:
 	RefClass(Collection, Collection<Type>)
 	
 	inline Collection(uint32_t initialCapacity) throw(const char*) {
-		RefCollection<Type>* o = memNew(o, RefCollection<Type>(initialCapacity));
+		RefCollection<Type>* o = new RefCollection<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -137,6 +137,7 @@ public:
 		return SynchronizedCollection<Type>(newCollection);
 	}
 	
+#ifdef DEBUG
 	inline static void _test() {
 		Collection<Object> col = new Collection<Object>();
 		col.add(null);
@@ -153,6 +154,7 @@ public:
 		col.size();
 		col.toArray();
 	}
+#endif
 };
 
 template <typename Type>
@@ -304,6 +306,7 @@ public:
 		return result;
 	}
 
+#ifdef DEBUG
 	inline static void _test() {
 		SynchronizedCollection<Object> col = Collection<Object>::synchronizedCollection(new Collection<Object>());
 		col.add(null);
@@ -320,7 +323,7 @@ public:
 		col.size();
 		col.toArray();
 	}
-
+#endif
 };
 
 #endif //JAPPSY_UCOLLECTION_H

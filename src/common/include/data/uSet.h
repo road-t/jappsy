@@ -18,6 +18,7 @@
 #define JAPPSY_USET_H
 
 #include <data/uList.h>
+#include <data/uJSON.h>
 
 template <typename Type>
 class RefSet : public RefList<Type> {
@@ -41,6 +42,18 @@ public:
 		}
 		return result;
 	}
+
+	virtual inline String toJSON() const {
+		String json = L"[";
+		Iterator<Type> it = this->iterator();
+		bool first = true;
+		while (it.hasNext()) {
+			if (first) first = false; else json += L",";
+			json += JSON::stringify(it.next());
+		}
+		json += L"]";
+		return json;
+	}
 };
 
 template <typename Type>
@@ -52,7 +65,7 @@ public:
 	RefClass(Set, Set<Type>)
 	
 	inline Set(uint32_t initialCapacity) throw(const char*) {
-		RefSet<Type>* o = memNew(o, RefSet<Type>(initialCapacity));
+		RefSet<Type>* o = new RefSet<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -74,6 +87,7 @@ public:
 		return SynchronizedSet<Type>(newSet);
 	}
 	
+#ifdef DEBUG
 	inline static void _test() {
 		Set<Object> set = new Set<Object>();
 		Collection<Object> col = new Collection<Object>();
@@ -90,6 +104,7 @@ public:
 		set.size();
 		set.toArray();
 	}
+#endif
 };
 
 template <typename Type>
@@ -243,6 +258,7 @@ public:
 		return result;
 	}
 
+#ifdef DEBUG
 	inline static void _test() {
 		SynchronizedSet<Object> set = Set<Object>::synchronizedSet(new Set<Object>());
 		SynchronizedCollection<Object> col = Collection<Object>::synchronizedCollection(new Collection<Object>());
@@ -259,6 +275,7 @@ public:
 		set.size();
 		set.toArray();
 	}
+#endif
 };
 
 #endif //JAPPSY_USET_H

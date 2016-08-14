@@ -14,27 +14,9 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UNAMEDSTRINGS_H
-#define JAPPSY_UNAMEDSTRINGS_H
+#include "uJSON.h"
 
-#include <platform.h>
-#include <data/uObject.h>
-
-class NamedStrings : public Object {
-private:
-	const wchar_t** m_keys;
-	const wchar_t** m_values;
-	uint32_t m_count;
-	
-	int32_t find(const wchar_t* key);
-	
-public:
-	NamedStrings();
-	~NamedStrings();
-	
-	const wchar_t* get(const wchar_t* key);
-	void remove(const wchar_t* key);
-	void insert(const wchar_t* key, const wchar_t* value) throw(const char*);
-};
-
-#endif //JAPPSY_UNAMEDSTRINGS_H
+String JSON::encode(const String& value) throw(const char*) {
+	// TODO: encode JSON string
+	return value;
+}

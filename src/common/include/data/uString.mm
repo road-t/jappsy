@@ -757,8 +757,6 @@ extern "C" {
 #define StringNull L"null"
 #define StringUndefined L"undefined"
 	
-const wchar_t TypeString[] = L"String::";
-	
 static uint32_t getStringLength(const String& self) {
 	if (self._object == NULL)
 		return 0;
@@ -767,7 +765,7 @@ static uint32_t getStringLength(const String& self) {
 
 static uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
 	if (self._object == NULL) {
-		RefString* newString = memNew(newString, RefString());
+		RefString* newString = new RefString();
 		if (newString == NULL)
 			throw eOutOfMemory;
 		self.setRef(newString);
@@ -910,7 +908,7 @@ RefString& RefString::concat(const RefString& string) throw(const char*) {
 
 String::String(const String& string) throw(const char*) : Object() {
 	if (string._object != NULL) {
-		RefString* newString = memNew(newString, RefString(*(RefString*)(string._object)));
+		RefString* newString = new RefString(*(RefString*)(string._object));
 		setRef(newString);
 	}
 }
@@ -918,7 +916,7 @@ String::String(const String& string) throw(const char*) : Object() {
 String& String::operator =(const String& string) throw(const char*) {
 	if (string._object != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(*(RefString*)(string._object)));
+			RefString* newString = new RefString(*(RefString*)(string._object));
 			setRef(newString);
 		} else {
 			((RefString*)_object)->operator =(*(RefString*)(string._object));
@@ -932,7 +930,7 @@ String& String::operator =(const String& string) throw(const char*) {
 String& String::concat(const String& string) throw(const char*) {
 	if (string._object != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(*(RefString*)(string._object)));
+			RefString* newString = new RefString(*(RefString*)(string._object));
 			setRef(newString);
 		} else {
 			((RefString*)_object)->concat(*(RefString*)(string._object));
@@ -987,7 +985,7 @@ RefString& RefString::concat(const NSString* string) throw(const char*) {
 
 String::String(const NSString* string) throw(const char*) : Object() {
 	if (string != NULL) {
-		RefString* newString = memNew(newString, RefString(string));
+		RefString* newString = new RefString(string);
 		setRef(newString);
 	}
 }
@@ -995,7 +993,7 @@ String::String(const NSString* string) throw(const char*) : Object() {
 String& String::operator =(const NSString* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->operator =(string);
@@ -1009,7 +1007,7 @@ String& String::operator =(const NSString* string) throw(const char*) {
 String& String::concat(const NSString* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->concat(string);
@@ -1064,7 +1062,7 @@ RefString& RefString::concat(const char* string) throw(const char*) {
 
 String::String(const char* string) throw(const char*) : Object() {
 	if (string != NULL) {
-		RefString* newString = memNew(newString, RefString(string));
+		RefString* newString = new RefString(string);
 		setRef(newString);
 	}
 }
@@ -1072,7 +1070,7 @@ String::String(const char* string) throw(const char*) : Object() {
 String& String::operator =(const char* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->operator =(string);
@@ -1086,7 +1084,7 @@ String& String::operator =(const char* string) throw(const char*) {
 String& String::concat(const char* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->concat(string);
@@ -1112,7 +1110,7 @@ RefString::RefString(const char* string, uint32_t length) throw(const char*) {
 
 String::String(const char* string, uint32_t length) throw(const char*) : Object() {
 	if (string != NULL) {
-		RefString* newString = memNew(newString, RefString(string, length));
+		RefString* newString = new RefString(string, length);
 		setRef(newString);
 	}
 }
@@ -1162,7 +1160,7 @@ RefString& RefString::concat(const wchar_t* string) throw(const char*) {
 
 String::String(const wchar_t* string) throw(const char*) : Object() {
 	if (string != NULL) {
-		RefString* newString = memNew(newString, RefString(string));
+		RefString* newString = new RefString(string);
 		setRef(newString);
 	}
 }
@@ -1170,7 +1168,7 @@ String::String(const wchar_t* string) throw(const char*) : Object() {
 String& String::operator =(const wchar_t* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->operator =(string);
@@ -1184,7 +1182,7 @@ String& String::operator =(const wchar_t* string) throw(const char*) {
 String& String::concat(const wchar_t* string) throw(const char*) {
 	if (string != NULL) {
 		if (_object == NULL) {
-			RefString* newString = memNew(newString, RefString(string));
+			RefString* newString = new RefString(string);
 			setRef(newString);
 		} else {
 			((RefString*)_object)->concat(string);
@@ -1204,7 +1202,7 @@ RefString::RefString(const wchar_t* string, uint32_t length) throw(const char*) 
 
 String::String(const wchar_t* string, uint32_t length) throw(const char*) : Object() {
 	if (string != NULL) {
-		RefString* newString = memNew(newString, RefString(string, length));
+		RefString* newString = new RefString(string, length);
 		setRef(newString);
 	}
 }
@@ -1229,13 +1227,13 @@ RefString& RefString::concat(const char character) throw(const char*) {
 }
 
 String::String(const char character) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(character));
+	RefString* newString = new RefString(character);
 	setRef(newString);
 }
 
 String& String::operator =(const char character) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(character));
+		RefString* newString = new RefString(character);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(character);
@@ -1245,7 +1243,7 @@ String& String::operator =(const char character) throw(const char*) {
 
 String& String::concat(const char character) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(character));
+		RefString* newString = new RefString(character);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(character);
@@ -1273,13 +1271,13 @@ RefString& RefString::concat(const wchar_t character) throw(const char*) {
 }
 
 String::String(const wchar_t character) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(character));
+	RefString* newString = new RefString(character);
 	setRef(newString);
 }
 
 String& String::operator =(const wchar_t character) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(character));
+		RefString* newString = new RefString(character);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(character);
@@ -1289,7 +1287,7 @@ String& String::operator =(const wchar_t character) throw(const char*) {
 
 String& String::concat(const wchar_t character) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(character));
+		RefString* newString = new RefString(character);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(character);
@@ -1317,13 +1315,13 @@ RefString& RefString::concat(const bool value) throw(const char*) {
 }
 
 String::String(const bool value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const bool value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1333,7 +1331,7 @@ String& String::operator =(const bool value) throw(const char*) {
 
 String& String::concat(const bool value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1374,13 +1372,13 @@ RefString& RefString::concat(const int8_t value) throw(const char*) {
 }
 
 String::String(const int8_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const int8_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1390,7 +1388,7 @@ String& String::operator =(const int8_t value) throw(const char*) {
 
 String& String::concat(const int8_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1431,13 +1429,13 @@ RefString& RefString::concat(const uint8_t value) throw(const char*) {
 }
 
 String::String(const uint8_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const uint8_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1447,7 +1445,7 @@ String& String::operator =(const uint8_t value) throw(const char*) {
 
 String& String::concat(const uint8_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1488,13 +1486,13 @@ RefString& RefString::concat(const int16_t value) throw(const char*) {
 }
 
 String::String(const int16_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const int16_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1504,7 +1502,7 @@ String& String::operator =(const int16_t value) throw(const char*) {
 
 String& String::concat(const int16_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1545,13 +1543,13 @@ RefString& RefString::concat(const uint16_t value) throw(const char*) {
 }
 
 String::String(const uint16_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const uint16_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1561,7 +1559,7 @@ String& String::operator =(const uint16_t value) throw(const char*) {
 
 String& String::concat(const uint16_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1602,13 +1600,13 @@ RefString& RefString::concat(const int32_t value) throw(const char*) {
 }
 
 String::String(const int32_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const int32_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1618,7 +1616,7 @@ String& String::operator =(const int32_t value) throw(const char*) {
 
 String& String::concat(const int32_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1659,13 +1657,13 @@ RefString& RefString::concat(const uint32_t value) throw(const char*) {
 }
 
 String::String(const uint32_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const uint32_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1675,7 +1673,7 @@ String& String::operator =(const uint32_t value) throw(const char*) {
 
 String& String::concat(const uint32_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1716,13 +1714,13 @@ RefString& RefString::concat(const int64_t value) throw(const char*) {
 }
 
 String::String(const int64_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const int64_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1732,7 +1730,7 @@ String& String::operator =(const int64_t value) throw(const char*) {
 
 String& String::concat(const int64_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1773,13 +1771,13 @@ RefString& RefString::concat(const uint64_t value) throw(const char*) {
 }
 
 String::String(const uint64_t value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const uint64_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1789,7 +1787,7 @@ String& String::operator =(const uint64_t value) throw(const char*) {
 
 String& String::concat(const uint64_t value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1888,13 +1886,13 @@ RefString& RefString::concat(const float value) throw(const char*) {
 }
 
 String::String(const float value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const float value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -1904,7 +1902,7 @@ String& String::operator =(const float value) throw(const char*) {
 
 String& String::concat(const float value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -1999,13 +1997,13 @@ RefString& RefString::concat(const double value) throw(const char*) {
 }
 
 String::String(const double value) throw(const char*) : Object() {
-	RefString* newString = memNew(newString, RefString(value));
+	RefString* newString = new RefString(value);
 	setRef(newString);
 }
 
 String& String::operator =(const double value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->operator =(value);
@@ -2015,7 +2013,7 @@ String& String::operator =(const double value) throw(const char*) {
 
 String& String::concat(const double value) throw(const char*) {
 	if (_object == NULL) {
-		RefString* newString = memNew(newString, RefString(value));
+		RefString* newString = new RefString(value);
 		setRef(newString);
 	} else {
 		((RefString*)_object)->concat(value);
@@ -2556,7 +2554,7 @@ bool String::equals(const String& string) const {
 	else if (string._object == NULL)
 		return false;
 	else
-		return THIS->equals(*((RefString*)_object));
+		return THIS->equals(*((RefString*)(string._object)));
 }
 
 bool RefString::equals(const RefString& string) const {
@@ -3409,7 +3407,14 @@ wchar_t String::charAt(int index) const throw(const char*) {
 //==============================================================
 
 String RefString::toString() const {
-	return RefString(*this);
+	return m_data;
+}
+
+String RefString::toJSON() const {
+	if (m_data == NULL)
+		return L"null";
+	
+	return String(L"\"")->concat(*this).concat(L"\"");
 }
 
 //==============================================================

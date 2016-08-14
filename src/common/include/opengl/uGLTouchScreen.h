@@ -18,14 +18,13 @@
 #define JAPPSY_UGLTOUCHSCREEN_H
 
 #include <platform.h>
-#include <data/uObject.h>
 #include <opengl/uOpenGL.h>
 #include <core/uHandler.h>
 #include <event/uMotionEvent.h>
 
 class GLRender;
 
-class GLTouchEvent : public Object {
+class GLTouchEvent {
 public:
 	typedef bool (*Callback)(const wchar_t* event);
 
@@ -37,7 +36,7 @@ public:
 	Callback onEvent;
 };
 
-class GLTouchScreen : public Object {
+class GLTouchScreen {
 public:
 	typedef void (*onTouchCallback)(const wchar_t* event);
 

@@ -18,11 +18,10 @@
 #define JAPPSY_UURLREQUEST_H
 
 #include <platform.h>
-#include <data/uObject.h>
 
 enum URLRequestType { GET, POST };
 
-class URLRequest : public Object {
+class URLRequest {
 public:
 //	typedef void (*onReadyCallback)(
 	

@@ -55,25 +55,23 @@ OMEngine::OMEngine() {
     
     URI::basePath = L"https://localhost/";
     
+    /*
     AtomicInteger i = new AtomicInteger(0);
     i.set(10);
-
-    Stack<Object>::_test();
-    Iterator<Object>::_test();
-    ListIterator<Object>::_test();
-    Collection<Object>::_test();
-    SynchronizedCollection<Object>::_test();
-    List<Object>::_test();
-    SynchronizedList<Object>::_test();
-    Set<Object>::_test();
-    SynchronizedSet<Object>::_test();
-    HashSet<Object>::_test();
+    
+    Stack<String> test = new Stack<String>();
+    test.push(null);
+    String s1 = test->get(0);
+    
+    Map<Object, Object> mtest = memNewObject(mtest, Map<Object, Object>);
+     */
     
     //URI* uri = new URI(L"http://user:password@host:12345/path/path2/path3/file.ext?query=query#anchor");
     URI* uri = new URI(L"path/path2/path3/file.ext?query=query#anchor");
     String url = uri->uri();
     delete uri;
 
+    /*
     NamedArray<NamedStrings>* query = memNew(query, NamedArray<NamedStrings>());
     
     NamedStrings* shaders = memNew(shaders, NamedStrings());
@@ -139,6 +137,7 @@ OMEngine::OMEngine() {
     query->insert(L"models", models);
     
     memDelete(query);
+     */
 }
 
 OMEngine::~OMEngine() {

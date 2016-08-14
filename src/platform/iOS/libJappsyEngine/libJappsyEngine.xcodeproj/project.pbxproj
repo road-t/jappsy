@@ -63,10 +63,6 @@
 		C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA591D5CADCB0022FF71 /* uStream.h */; };
 		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
-		C34FDA631D5CB7D80022FF71 /* uNamedArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA621D5CB7D80022FF71 /* uNamedArray.h */; };
-		C34FDA651D5CB8160022FF71 /* uArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA641D5CB8160022FF71 /* uArray.h */; };
-		C34FDA671D5DD0150022FF71 /* uNamedStrings.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA661D5DD0150022FF71 /* uNamedStrings.h */; };
-		C34FDA691D5DD0520022FF71 /* uNamedStrings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */; };
 		C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -87,6 +83,8 @@
 		C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */; };
 		C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */; };
 		C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E61D5EB63C0039DD09 /* uNumber.h */; };
+		C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */; };
+		C3A4B4EC1D5FD41C0039DD09 /* uJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */; };
 		C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3ACF92F1D5DED6D0065A832 /* uURI.cpp */; };
 		C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */ = {isa = PBXBuildFile; fileRef = C3ACF9301D5DED6D0065A832 /* uURI.h */; };
 /* End PBXBuildFile section */
@@ -148,10 +146,6 @@
 		C34FDA591D5CADCB0022FF71 /* uStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStream.h; sourceTree = "<group>"; };
 		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
 		C34FDA5E1D5CB7350022FF71 /* uLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLoader.h; sourceTree = "<group>"; };
-		C34FDA621D5CB7D80022FF71 /* uNamedArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNamedArray.h; sourceTree = "<group>"; };
-		C34FDA641D5CB8160022FF71 /* uArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uArray.h; sourceTree = "<group>"; };
-		C34FDA661D5DD0150022FF71 /* uNamedStrings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNamedStrings.h; sourceTree = "<group>"; };
-		C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uNamedStrings.cpp; sourceTree = "<group>"; };
 		C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uObject.mm; sourceTree = "<group>"; };
 		C34FDA6C1D5DDD0B0022FF71 /* uObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uObject.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -174,6 +168,8 @@
 		C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSparseArray.h; sourceTree = "<group>"; };
 		C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uNumber.cpp; sourceTree = "<group>"; };
 		C3A4B4E61D5EB63C0039DD09 /* uNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNumber.h; sourceTree = "<group>"; };
+		C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uJSON.cpp; sourceTree = "<group>"; };
+		C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSON.h; sourceTree = "<group>"; };
 		C3ACF92F1D5DED6D0065A832 /* uURI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uURI.cpp; sourceTree = "<group>"; };
 		C3ACF9301D5DED6D0065A832 /* uURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURI.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -260,10 +256,13 @@
 				C34FDA6C1D5DDD0B0022FF71 /* uObject.h */,
 				C34FD9801D5B8E0A0022FF71 /* uString.mm */,
 				C34FD97F1D5B8E0A0022FF71 /* uString.h */,
+				C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */,
+				C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */,
 				C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */,
 				C3A4B4E61D5EB63C0039DD09 /* uNumber.h */,
 				C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */,
 				C3A4B4B61D5EB5D60039DD09 /* uStack.h */,
+				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
 				C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */,
 				C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */,
 				C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */,
@@ -274,11 +273,6 @@
 				C3A4B4D61D5EB61E0039DD09 /* uMap.h */,
 				C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */,
 				C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */,
-				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
-				C34FDA641D5CB8160022FF71 /* uArray.h */,
-				C34FDA621D5CB7D80022FF71 /* uNamedArray.h */,
-				C34FDA661D5DD0150022FF71 /* uNamedStrings.h */,
-				C34FDA681D5DD0520022FF71 /* uNamedStrings.cpp */,
 				C34FDA581D5CADCB0022FF71 /* uStream.cpp */,
 				C34FDA591D5CADCB0022FF71 /* uStream.h */,
 				C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */,
@@ -381,7 +375,6 @@
 				C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */,
 				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
-				C34FDA671D5DD0150022FF71 /* uNamedStrings.h in Headers */,
 				C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */,
 				C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,
@@ -394,7 +387,6 @@
 				C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
-				C34FDA631D5CB7D80022FF71 /* uNamedArray.h in Headers */,
 				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
 				C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */,
 				C3A4B4E01D5EB62A0039DD09 /* uLinkedHashMap.h in Headers */,
@@ -409,13 +401,13 @@
 				C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */,
 				C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
+				C3A4B4EC1D5FD41C0039DD09 /* uJSON.h in Headers */,
 				C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */,
 				C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */,
 				C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */,
 				C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */,
 				C3A4B4C01D5EB5E70039DD09 /* uListIterator.h in Headers */,
 				C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */,
-				C34FDA651D5CB8160022FF71 /* uArray.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
 				C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */,
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
@@ -509,8 +501,8 @@
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
-				C34FDA691D5DD0520022FF71 /* uNamedStrings.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
+				C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
 				C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */,
 				C34FD98B1D5B8E0A0022FF71 /* uVector.mm in Sources */,

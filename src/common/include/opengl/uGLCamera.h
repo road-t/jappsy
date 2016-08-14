@@ -17,14 +17,14 @@
 #ifndef JAPPSY_UGLCAMERA_H
 #define JAPPSY_UGLCAMERA_H
 
-#include <data/uObject.h>
 #include <opengl/uOpenGL.h>
+#include <data/uObject.h>
+#include <data/uHashMap.h>
 #include <data/uVector.h>
-#include <data/uNamedArray.h>
 
 class GLRender;
 
-class GLCamera : public Object {
+class RefGLCamera : public RefObject {
 public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
@@ -47,35 +47,41 @@ public:
 	Mat4 projection16fv;
 	Mat4 view16fv;
 	
-	GLCamera(GLRender* context, const wchar_t* key);
-	~GLCamera();
+	inline RefGLCamera() { throw eInvalidParams; }
+	RefGLCamera(GLRender* context, const wchar_t* key);
+	~RefGLCamera();
 	
-	GLCamera& invalidate();
-	GLCamera& size(GLfloat width, GLfloat height);
+	RefGLCamera& invalidate();
+	RefGLCamera& size(GLfloat width, GLfloat height);
 	
-	GLCamera& perspective(GLfloat fov, GLfloat min, GLfloat max);
-	GLCamera& ortho(GLfloat min, GLfloat max);
-	GLCamera& layer(GLfloat offsetX, GLfloat offsetY);
+	RefGLCamera& perspective(GLfloat fov, GLfloat min, GLfloat max);
+	RefGLCamera& ortho(GLfloat min, GLfloat max);
+	RefGLCamera& layer(GLfloat offsetX, GLfloat offsetY);
 	
-	GLCamera& lookAt(const Vec3& position, const Vec3& target, const Vec3& head);
-	GLCamera& rotate(const Vec3& vec, GLfloat angle);
+	RefGLCamera& lookAt(const Vec3& position, const Vec3& target, const Vec3& head);
+	RefGLCamera& rotate(const Vec3& vec, GLfloat angle);
 	
 	bool update();
+};
+
+class GLCamera : public Object {
+public:
+	RefClass(GLCamera, GLCamera);
 };
 
 class GLCameras {
 private:
 	GLRender* context;
-	NamedArray<GLCamera>* list;
+	HashMap<String, GLCamera> list;
 	
 public:
-	GLCamera* gui;
+	GLCamera gui;
 	
 	GLCameras(GLRender* context) throw(const char*);
 	~GLCameras();
 	
-	GLCamera* get(const wchar_t* key);
-	GLCamera* createCamera(const wchar_t* key) throw(const char*);
+	GLCamera& get(const wchar_t* key) throw(const char*);
+	GLCamera& createCamera(const wchar_t* key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLCAMERA_H

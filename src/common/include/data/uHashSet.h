@@ -21,43 +21,54 @@
 
 template <typename Type>
 class RefHashSet : public RefSet<Type> {
-public:
-	RefSet<Type>*** m_set = NULL;
+protected:
+	Set<Type>*** m_set = NULL;
 	
 	uint32_t m_count = 0;
 	
-	inline RefSet<Type>* createSet(const Type& object) throw(const char*) {
-		uint32_t hash = object.hashCode();
+	inline Set<Type>* createSet(const Type& object) throw(const char*) {
+		uint32_t hash = Object::hashCode(object);
 		if (m_set == NULL) {
-			m_set = memAlloc(RefSet<Type> **, m_set, 256 * sizeof(RefSet<Type> **));
+			m_set = memAlloc(Set<Type> **, m_set, 256 * sizeof(Set<Type> **));
 			if (m_set == NULL) throw eOutOfMemory;
 		}
 
-		RefSet<Type> **s1 = m_set[hash & 0xFF];
+		Set<Type> **s1 = m_set[hash & 0xFF];
 		if (s1 == NULL) {
-			s1 = memAlloc(RefSet<Type> *, s1, 256 * sizeof(RefSet<Type> *));
+			s1 = memAlloc(Set<Type> *, s1, 256 * sizeof(Set<Type> *));
 			if (s1 == NULL) throw eOutOfMemory;
 			m_set[hash & 0xFF] = s1;
 		}
 
 		hash >>= 8;
-		RefSet<Type> *s2 = s1[hash & 0xFF];
+		Set<Type> *s2 = s1[hash & 0xFF];
 		if (s2 == NULL) {
-			s2 = memNew(s2, RefSet<Type>());
-			if (s2 == NULL) throw eOutOfMemory;
+			RefSet<Type> *s3 = NULL;
+			try {
+				s2 = new Set<Type>();
+				if (s2 == NULL) throw eOutOfMemory;
+				s3 = new RefSet<Type>();
+				if (s3 == NULL) throw eOutOfMemory;
+			} catch (...) {
+				if (s2 != NULL) {
+					delete s2;
+				}
+				throw;
+			}
+			s2->setRef(s3);
 			s1[hash & 0xFF] = s2;
 		}
 
 		return s2;
 	}
 	
-	inline RefSet<Type>* findSet(const Type& object) const {
+	inline Set<Type>* findSet(const Type& object) const {
 		if (m_set != NULL) {
-			uint32_t hash = object.hashCode();
-			RefSet<Type> **s1 = m_set[hash & 0xFF];
+			uint32_t hash = Object::hashCode(object);
+			Set<Type> **s1 = m_set[hash & 0xFF];
 			if (s1 != NULL) {
 				hash >>= 8;
-				RefSet<Type> *s2 = s1[hash & 0xFF];
+				Set<Type> *s2 = s1[hash & 0xFF];
 				return s2;
 			}
 		}
@@ -79,13 +90,13 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					RefSet<Type> **s1 = m_set[i];
+					Set<Type> **s1 = m_set[i];
 					if (s1 != NULL) {
 						for (int j = 0; j < 256; j++) {
 							if (s1[j] != NULL) {
-								RefSet<Type> *s2 = s1[j];
+								Set<Type> *s2 = s1[j];
 								if (s2 != NULL) {
-									memDelete(s2);
+									delete s2;
 									s1[j] = NULL;
 								}
 							}
@@ -101,7 +112,7 @@ public:
 	}
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
-		RefSet<Type> *set = createSet(object);
+		Set<Type> *set = createSet(object);
 		if (set != NULL) {
 			if (!set->contains(object)) {
 				m_count++;
@@ -122,7 +133,7 @@ public:
 	}
 	
 	virtual inline bool contains(const Type& object) const {
-		RefSet<Type> *set = findSet(object);
+		Set<Type> *set = findSet(object);
 		if (set != NULL) {
 			return set->contains(object);
 		}
@@ -148,10 +159,10 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					RefSet<Type> **s1 = m_set[i];
+					Set<Type> **s1 = m_set[i];
 					for (int j = 0; j < 256; j++) {
 						if (s1[j] != NULL) {
-							RefSet<Type> *s2 = s1[j];
+							Set<Type> *s2 = s1[j];
 							if (s2 != NULL) {
 								Iterator<Type> s2it = s2->iterator();
 								while (s2it->hasNext()) {
@@ -168,7 +179,7 @@ public:
 	}
 	
 	virtual inline bool remove(const Type& object) throw(const char*) {
-		RefSet<Type> *set = findSet(object);
+		Set<Type> *set = findSet(object);
 		if (set != NULL) {
 			try {
 				if (set->remove(object)) {
@@ -200,10 +211,10 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					RefSet<Type> **s1 = m_set[i];
+					Set<Type> **s1 = m_set[i];
 					for (int j = 0; j < 256; j++) {
 						if (s1[j] != NULL) {
-							RefSet<Type> *s2 = s1[j];
+							Set<Type> *s2 = s1[j];
 							if (s2 != NULL) {
 								Iterator<Type> it = s2->iterator();
 								while (it->hasNext()) {
@@ -246,6 +257,7 @@ public:
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->retainAll(collection); }
 	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->size(); }
 	
+#ifdef DEBUG
 	inline static void _test() {
 		HashSet<Object> set = new HashSet<Object>();
 		Collection<Object> col = new Collection<Object>();
@@ -261,6 +273,7 @@ public:
 		set.retainAll(col);
 		set.size();
 	}
+#endif
 };
 
 #endif //JAPPSY_UHASHSET_H

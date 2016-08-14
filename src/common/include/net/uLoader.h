@@ -18,16 +18,13 @@
 #define JAPPSY_ULOADER_H
 
 #include <platform.h>
-#include <data/uObject.h>
-#include <data/uArray.h>
-#include <data/uNamedArray.h>
-#include <data/uNamedStrings.h>
 #include <data/uStream.h>
 #include <data/uString.h>
+#include <data/uJSON.h>
 
-class Loader : public Object {
+class Loader {
 private:
-	NamedArray<NamedStrings>* config;
+	JSON config;
 	
 public:
 	struct File {
@@ -45,13 +42,13 @@ public:
 	
 	typedef void (*onFileCallback)(const Info& info, const Stream& stream, void* userData);
 	typedef void (*onStatusCallback)(const Status& status, void* userData);
-	typedef void (*onReadyCallback)(const Array<Stream>& result, void* userData);
+	typedef void (*onReadyCallback)(const JSON& result, void* userData);
 	typedef void (*onErrorCallback)(const char* error, void* userData);
 	
 	Loader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, void* userData);
 	~Loader();
 	
-	void load(NamedArray<NamedStrings>* config);
+	void load(const JSON& config);
 };
 
 #endif //JAPPSY_ULOADER_H

@@ -19,6 +19,7 @@
 #include <event/uMotionEvent.h>
 #include <core/uSystem.h>
 #include <opengl/uGLEngine.h>
+#include <core/uMemory.h>
 
 @interface JappsyView () {
 	GLContext* _renderer;

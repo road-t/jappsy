@@ -35,12 +35,12 @@ public:
 		if ((index >= 0) && (index <= this->m_count)) {
 			if ((this->m_count > 0) && (this->m_initialCapacity > 0) && (this->m_count >= this->m_initialCapacity)) {
 				if (index > 0) {
-					memDelete(this->m_stack[0]);
+					delete this->m_stack[0];
 					if (index > 1)
 						memmove(this->m_stack, this->m_stack + 1, (index - 1) * sizeof(Type*));
 					index--;
 					try {
-						Type* item = memNew(item, Type(value));
+						Type* item = new Type(value);
 						if (item == NULL) throw eOutOfMemory;
 						this->m_stack[index] = item;
 					} catch (...) {
@@ -48,11 +48,11 @@ public:
 						throw;
 					}
 				} else {
-					memDelete(this->m_stack[this->m_count - 1]);
+					delete this->m_stack[this->m_count - 1];
 					if (this->m_count > 1)
 						memmove(this->m_stack + 1, this->m_stack, (this->m_count - 1) * sizeof(Type*));
 					try {
-						Type* item = memNew(item, Type(value));
+						Type* item = new Type(value);
 						if (item == NULL) throw eOutOfMemory;
 						this->m_stack[0] = item;
 					} catch (...) {
@@ -68,7 +68,7 @@ public:
 					this->m_count++;
 				this->m_next++;
 				try {
-					Type* item = memNew(item, Type(value));
+					Type* item = new Type(value);
 					if (item == NULL) throw eOutOfMemory;
 					this->m_stack[index] = item;
 				} catch (...) {
@@ -112,22 +112,24 @@ public:
 		return this->m_prev;
 	}
 	
-	virtual inline void set(const Type& value) throw(const char*) {
+	virtual inline Type& set(const Type& value) throw(const char*) {
 		int32_t index = this->m_last;
 		if ((index >= 0) && (index < this->m_count)) {
 			Type* item = this->m_stack[index];
 			if (item != NULL) {
-				memDelete(item);
+				delete item;
 			}
 			try {
-				item = memNew(item, Type(value));
+				item = new Type(value);
 				if (item == NULL) throw eOutOfMemory;
 				this->m_stack[index] = item;
+				return *item;
 			} catch (...) {
 				this->m_stack[index] = NULL;
 				throw;
 			}
-		}
+		} else
+			throw eOutOfRange;
 	}
 };
 
@@ -137,7 +139,7 @@ public:
 	RefClass(ListIterator, ListIterator<Type>)
 	
 	inline ListIterator(uint32_t initialCapacity) throw(const char*) {
-		RefListIterator<Type>* o = memNew(o, RefListIterator<Type>(initialCapacity));
+		RefListIterator<Type>* o = new RefListIterator<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -150,20 +152,23 @@ public:
 	virtual inline const Type& previous() const throw(const char*) { CHECKTHIS; return THIS->previous(); }
 	virtual inline int32_t previousIndex() const throw(const char*) { CHECKTHIS; return THIS->previousIndex(); }
 	virtual inline const Type remove() throw(const char*) { CHECKTHIS; return THIS->RefIterator<Type>::remove(); }
-	virtual inline void set(const Type& value) throw(const char*) { CHECKTHIS; return THIS->set(value); }
+	virtual inline Type& set(const Type& value) throw(const char*) { CHECKTHIS; return THIS->set(value); }
 	
+#ifdef DEBUG
 	inline static void _test() {
 		ListIterator<Object> lit = new ListIterator<Object>();
 		lit.add(null);
+		lit.reset();
 		lit.hasNext();
 		lit.hasPrevious();
 		lit.next();
 		lit.nextIndex();
 		lit.previous();
 		lit.previousIndex();
-		lit.remove();
 		lit.set(null);
+		lit.remove();
 	}
+#endif
 };
 
 #endif //JAPPSY_ULISTITERATOR_H

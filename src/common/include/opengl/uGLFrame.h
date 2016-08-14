@@ -18,14 +18,13 @@
 #define JAPPSY_UGLFRAME_H
 
 #include <platform.h>
-#include <data/uObject.h>
 #include <data/uSmoothValue.h>
 #include <opengl/uOpenGL.h>
 
 class GLEngine;
 class GLRender;
 
-class GLFrame : public Object {
+class GLFrame {
 public:
 	typedef void (*onFrameCallback)(GLRender* context);
 	

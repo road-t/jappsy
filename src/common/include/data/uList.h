@@ -35,13 +35,13 @@ public:
 		if ((index >= 0) && (index <= this->m_count)) {
 			if ((this->m_count > 0) && (this->m_initialCapacity > 0) && (this->m_count >= this->m_initialCapacity)) {
 				if (index > 0) {
-					memDelete(this->m_stack[0]);
+					delete this->m_stack[0];
 					if (index > 1)
 						memmove(this->m_stack, this->m_stack + 1, (index - 1) * sizeof(Type*));
 					
 					index--;
 					try {
-						Type* item = memNew(item, Type(object));
+						Type* item = new Type(object);
 						if (item == NULL) throw eOutOfMemory;
 						this->m_stack[index] = item;
 					} catch (...) {
@@ -49,12 +49,12 @@ public:
 						throw;
 					}
 				} else {
-					memDelete(this->m_stack[this->m_count - 1]);
+					delete this->m_stack[this->m_count - 1];
 					if (this->m_count > 1)
 						memmove(this->m_stack + 1, this->m_stack, (this->m_count - 1) * sizeof(Type*));
 					
 					try {
-						Type* item = memNew(item, Type(object));
+						Type* item = new Type(object);
 						if (item == NULL) throw eOutOfMemory;
 						this->m_stack[0] = item;
 					} catch (...) {
@@ -70,7 +70,7 @@ public:
 
 					this->m_count++;
 				try {
-					Type* item = memNew(item, Type(object));
+					Type* item = new Type(object);
 					if (item == NULL) throw eOutOfMemory;
 					this->m_stack[index] = item;
 				} catch (...) {
@@ -100,7 +100,7 @@ public:
 					try {
 						Iterator<Type> it = collection->iterator();
 						while (it->hasNext()) {
-							Type* item = memNew(item, Type(it->next()));
+							Type* item = new Type(it->next());
 							if (item == NULL) throw eOutOfMemory;
 							this->m_stack[index] = item;
 							index++; size--;
@@ -129,7 +129,7 @@ public:
 				if (this->m_stack[i] != NULL) {
 					if (*(this->m_stack[i]) == value) foundIndex = i;
 				} else {
-					if (value == this->nullValue) foundIndex = i;
+					if (Object::isNull(value)) foundIndex = i;
 				}
 			}
 		}
@@ -141,25 +141,22 @@ public:
 		return ListIterator<Type>(*this);
 	}
 	
-	virtual inline const Type set(int32_t index, const Type& value) throw(const char*) {
+	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) {
 		if ((index >= 0) && (index < this->m_count)) {
 			Type* item = this->m_stack[index];
-			if (item == NULL)
-				return this->nullValue;
-			
-			Type result = Type(*item);
-			memDelete(item);
+			if (item != NULL) {
+				delete item;
+			}
 			
 			try {
-				item = memNew(item, Type(value));
+				item = new Type(value);
 				if (item == NULL) throw eOutOfMemory;
 				this->m_stack[index] = item;
+				return *item;
 			} catch (...) {
 				this->m_stack[index] = NULL;
 				throw;
 			}
-
-			return result;
 		} else
 			throw eOutOfRange;
 	}
@@ -200,7 +197,7 @@ public:
 	RefClass(List, List<Type>)
 	
 	inline List(uint32_t initialCapacity) {
-		RefList<Type>* o = memNew(o, RefList<Type>(initialCapacity));
+		RefList<Type>* o = new RefList<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -222,7 +219,7 @@ public:
 	virtual inline bool remove(const Type& value) throw(const char*) { CHECKTHIS; return THIS->RefCollection<Type>::remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->RefCollection<Type>::removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->RefCollection<Type>::retainAll(collection); }
-	virtual inline const Type set(int32_t index, const Type& value) throw(const char*) { CHECKTHIS; return THIS->set(index, value); }
+	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) { CHECKTHIS; return THIS->set(index, value); }
 	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->RefStack<Type>::size(); }
 	virtual inline List<Type> subList(int32_t start, int32_t end) throw(const char*) { CHECKTHIS; return THIS->subList(start, end); }
 	virtual inline const Type** toArray() const throw(const char*) { CHECKTHIS; return THIS->RefCollection<Type>::toArray(); }
@@ -231,6 +228,7 @@ public:
 		return SynchronizedList<Type>(newList);
 	}
 	
+#ifdef DEBUG
 	inline static void _test() {
 		List<Object> list = new List<Object>();
 		Collection<Object> col = new Collection<Object>();
@@ -241,6 +239,7 @@ public:
 		list.clear();
 		list.contains(null);
 		list.containsAll(col);
+		list.push(null);
 		list.get(0);
 		list.indexOf(null);
 		list.isEmpty();
@@ -251,11 +250,13 @@ public:
 		list.remove(null);
 		list.removeAll(col);
 		list.retainAll(col);
+		list.push(null);
 		list.set(0, null);
 		list.size();
 		list.subList(0, 0);
 		list.toArray();
 	}
+#endif
 };
 
 template <typename Type>
@@ -481,18 +482,18 @@ public:
 		return result;
 	}
 	
-	virtual inline const Type set(int32_t index, const Type& value) throw(const char*) {
-		Type result;
+	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) {
+		Type* result;
 		synchronized(this) {
 			try {
-				result = THIS->set(index, value);
+				result = &(THIS->set(index, value));
 			} catch (...) {
 				this->notifyAll();
 				throw;
 			}
 			this->notifyAll();
 		}
-		return result;
+		return *result;
 	}
 	
 	virtual inline int32_t size() const throw(const char*) {
@@ -527,6 +528,7 @@ public:
 		return result;
 	}
 	
+#ifdef DEBUG
 	inline static void _test() {
 		SynchronizedList<Object> list = List<Object>::synchronizedList(new ArrayList<Object>());
 		SynchronizedCollection<Object> col = Collection<Object>::synchronizedCollection(new Collection<Object>());
@@ -537,6 +539,7 @@ public:
 		list.clear();
 		list.contains(null);
 		list.containsAll(col);
+		list.push(null);
 		list.get(0);
 		list.indexOf(null);
 		list.isEmpty();
@@ -547,11 +550,13 @@ public:
 		list.remove(null);
 		list.removeAll(col);
 		list.retainAll(col);
+		list.push(null);
 		list.set(0, null);
 		list.size();
 		list.subList(0, 0);
 		list.toArray();
 	}
+#endif#ifdef DEBUG
 
 };
 

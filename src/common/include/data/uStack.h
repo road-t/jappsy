@@ -18,6 +18,7 @@
 #define JAPPSY_USTACK_H
 
 #include <data/uObject.h>
+#include <data/uJSON.h>
 
 #define STACK_BLOCK_SIZE	16
 
@@ -34,7 +35,7 @@ public:
 		if (count < m_count) {
 			for (int i = count; i < m_count; i++) {
 				if (m_stack[i] != NULL) {
-					memDelete(m_stack[i]);
+					delete m_stack[i];
 					m_stack[i] = NULL;
 				}
 			}
@@ -55,7 +56,7 @@ public:
 		if (count < m_count) {
 			for (int i = count; i < m_count; i++) {
 				if (m_stack[i] != NULL) {
-					memDelete(m_stack[i]);
+					delete m_stack[i];
 					m_stack[i] = NULL;
 				}
 			}
@@ -74,8 +75,6 @@ public:
 	}
 	
 public:
-	static const Type nullValue;
-	
 	inline RefStack() {	TYPE = TypeStack; }
 	
 	inline RefStack(uint32_t initialCapacity) throw(const char*) {
@@ -89,7 +88,7 @@ public:
 		if (m_stack != NULL) {
 			for (int i = 0; i < m_count; i++) {
 				if (m_stack[i] != NULL) {
-					memDelete(m_stack[i]);
+					delete m_stack[i];
 				}
 			}
 			memFree(m_stack);
@@ -99,12 +98,12 @@ public:
 	
 	virtual inline Type& push(const Type& object) throw(const char*) {
 		if ((m_count > 0) && (m_initialCapacity > 0) && (m_count >= m_initialCapacity)) {
-			memDelete(m_stack[0]);
+			delete m_stack[0];
 			if (m_count > 1) {
 				memmove(m_stack, m_stack + 1, (m_count - 1) * sizeof(Type*));
 			}
 			try {
-				Type* newObject = memNew(newObject, Type(object));
+				Type* newObject = new Type(object);
 				if (newObject == NULL) throw eOutOfMemory;
 				m_stack[m_count - 1] = newObject;
 				return *newObject;
@@ -115,7 +114,7 @@ public:
 		} else {
 			resize(m_count + 1);
 			try {
-				Type* newObject = memNew(newObject, Type(object));
+				Type* newObject = new Type(object);
 				if (newObject == NULL) throw eOutOfMemory;
 				m_stack[m_count++] = newObject;
 				return *newObject;
@@ -128,12 +127,12 @@ public:
 	
 	virtual inline Type& unshift(const Type& object) throw(const char*) {
 		if ((m_count > 0) && (m_initialCapacity > 0) && (m_count >= m_initialCapacity)) {
-			memDelete(m_stack[m_count - 1]);
+			delete m_stack[m_count - 1];
 			if (m_count > 1) {
 				memmove(m_stack + 1, m_stack, (m_count - 1) * sizeof(Type*));
 			}
 			try {
-				Type* newObject = memNew(newObject, Type(object));
+				Type* newObject = new Type(object);
 				if (newObject == NULL) throw eOutOfMemory;
 				m_stack[0] = newObject;
 				return *newObject;
@@ -146,7 +145,7 @@ public:
 			memmove(m_stack + 1, m_stack, m_count * sizeof(Type*));
 			m_count++;
 			try {
-				Type* newObject = memNew(newObject, Type(object));
+				Type* newObject = new Type(object);
 				if (newObject == NULL) throw eOutOfMemory;
 				m_stack[0] = newObject;
 				return *newObject;
@@ -163,7 +162,7 @@ public:
 			Type* object = m_stack[m_count];
 			m_stack[m_count] = NULL;
 			Type result = Type(*object);
-			memDelete(object);
+			delete object;
 			return result;
 		}
 		
@@ -179,7 +178,7 @@ public:
 			}
 			m_stack[m_count] = NULL;
 			Type result = Type(*object);
-			memDelete(object);
+			delete object;
 			return result;
 		}
 		
@@ -191,7 +190,7 @@ public:
 			for (int i = m_count-1; i >= 0; i--) {
 				if (m_stack[i] != NULL) {
 					if (*(m_stack[i]) == value) return true;
-				} else if (value == nullValue) {
+				} else if (Object::isNull(value)) {
 					return true;
 				}
 			}
@@ -254,7 +253,7 @@ public:
 			for (int i = m_count-1; i >= 0; i--) {
 				if (m_stack[i] != NULL) {
 					if (*(m_stack[i]) == value) return i;
-				} else if (value == nullValue) {
+				} else if (Object::isNull(value)) {
 					return i;
 				}
 			}
@@ -268,7 +267,7 @@ public:
 			for (int i = m_count-1; i >= 0; i--) {
 				if (m_stack[i] != NULL) {
 					if (*(m_stack[i]) == value) return i;
-				} else if (value == nullValue) {
+				} else if (Object::isNull(value)) {
 					return i;
 				}
 			}
@@ -285,15 +284,23 @@ public:
 			}
 			m_stack[m_count] = NULL;
 			Type result = Type(*object);
-			memDelete(object);
+			delete object;
 			return result;
 		}
 		throw eOutOfRange;
 	}
-};
+	
+	virtual inline String toJSON() const {
+		String json = L"[";
+		for (int i = 0; i < m_count; i++) {
+			if (i != 0) json += L",";
+			json += JSON::stringify(*(m_stack[i]));
+		}
+		json += L"]";
+		return json;
+	}
 
-template <typename Type>
-const Type RefStack<Type>::nullValue;
+};
 
 template <typename Type>
 class Stack : public Object {
@@ -301,7 +308,7 @@ public:
 	RefClass(Stack, Stack<Type>)
 	
 	inline Stack(uint32_t initialCapacity) throw(const char*) {
-		RefStack<Type>* o = memNew(o, RefStack<Type>(initialCapacity));
+		RefStack<Type>* o = new RefStack<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -316,15 +323,18 @@ public:
 	virtual inline int32_t size() const { CHECKTHIS; return THIS->size(); }
 	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
 	
+#ifdef DEBUG
 	inline static void _test() {
 		Stack<Object> test = new Stack<Object>();
 		test.empty();
+		test.push(null);
 		test.peek();
 		test.pop();
 		test.push(null);
 		test.search(null);
 		test.clear();
 	}
+#endif
 };
 
 #endif //JAPPSY_USTACK_H

@@ -51,11 +51,11 @@ void mmQuit();
 #endif
 
 #ifndef MM_T
-    #define MM_T(x)        MM_T_(x)
+    #define MM_T(...)        MM_T_(__VA_ARGS__)
 #endif
 
 #ifndef MM_T_
-    #define MM_T_(x)       #x
+    #define MM_T_(...)       #__VA_ARGS__
 #endif
 
 #ifndef MM_LOC
@@ -76,9 +76,9 @@ void mmQuit();
             memLogFree(MM_T(var), var); \
             mmfree(var)
 
-    #define memNew(var,type) \
-            new type; \
-            memLogNew(MM_LOC, MM_T(var), MM_T(type), var, sizeof(*var))
+    #define memNew(var,type, ...) \
+            new type, ## __VA_ARGS__; \
+            memLogNew(MM_LOC, MM_T(var), MM_T(type, ## __VA_ARGS__), var, sizeof(*var))
 
     #define memDelete(var) \
             memLogDelete(MM_T(var), var); \
@@ -111,9 +111,9 @@ void mmQuit();
     #define memFree(var) \
         mmfree(var)
 
-    #define memNew(var,type) \
-        new type
-
+	#define memNew(var,type, ...) \
+		new type, ## __VA_ARGS__
+	
     #define memDelete(var) \
         delete var
 

@@ -18,9 +18,8 @@
 #define JAPPSY_USTREAM_H
 
 #include <platform.h>
-#include <data/uObject.h>
 
-class Stream : public Object {
+class Stream {
 private:
 	bool m_allocated;
 	uint8_t* m_buffer;

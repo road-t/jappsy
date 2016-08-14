@@ -28,12 +28,12 @@ public:
 
 	inline RefAtomic() throw(const char*) {
 		TYPE = TypeAtomicObject;
-		m_value = memNew(m_value, Type());
+		m_value = new Type();
 		if (m_value == NULL)
 			throw eOutOfMemory;
 	}
 	
-	inline ~RefAtomic() { memDelete(m_value); }
+	inline ~RefAtomic() { delete m_value; }
 	
 	inline Type get() {
 		Type res;
@@ -74,7 +74,7 @@ template <typename Type>
 class AtomicReference : public Object {
 public:
 	virtual inline RefAtomic<Type>* newRef() const throw(const char*) {
-		RefAtomic<Type>* o = memNew(o, RefAtomic<Type>());
+		RefAtomic<Type>* o = new RefAtomic<Type>();
 		if (o == NULL) throw eOutOfMemory;
 		return o;
 	}
@@ -88,13 +88,13 @@ public:
 				try {
 					this->setRef(object->newRef());
 				} catch (...) {
-					memDelete(object);
+					delete object;
 					throw;
 				}
 			} else {
 				this->setRef((void*)(object->_object));
 			}
-			memDelete(object);
+			delete object;
 		}
 	}
 	virtual inline AtomicReference<Type>& operator =(const AtomicReference<Type>& object) {
@@ -114,7 +114,7 @@ public:
 class AtomicObject : public Object {
 public:
 	virtual inline RefAtomic<Object>* newRef() const throw(const char*) {
-		RefAtomic<Object>* o = memNew(o, RefAtomic<Object>());
+		RefAtomic<Object>* o = new RefAtomic<Object>();
 		if (o == NULL) throw eOutOfMemory;
 		return o;
 	}
@@ -127,13 +127,13 @@ public:
 				try {
 					this->setRef(object->newRef());
 				} catch (...) {
-					memDelete(object);
+					delete object;
 					throw;
 				}
 			} else {
 				this->setRef((void*)(object->_object));
 			}
-			memDelete(object);
+			delete object;
 		}
 	}
 	virtual inline AtomicObject& operator =(const AtomicObject& object) {

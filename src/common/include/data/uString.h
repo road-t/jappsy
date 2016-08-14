@@ -277,8 +277,6 @@ extern "C" {
 
 	static String getSubString(String& self, int start, int end);
 
-	extern const wchar_t TypeString[];
-
 	class RefString : public RefObject {
 	private:
 		friend uint32_t getStringLength(const String& self);
@@ -515,6 +513,7 @@ extern "C" {
 		wchar_t charAt(int index) const throw(const char*); //eOutOfRange
 
 		String toString() const;
+		String toJSON() const;
 		inline uint32_t hashCode() const { return (m_data == NULL) ? 0 : mmcrc32(0xFFFFFFFF, m_data, m_size); }
 
 #if defined(__IOS__)

@@ -15,9 +15,10 @@
  */
 
 #include "uGLTouchScreen.h"
+#include <core/uMemory.h>
+#include <core/uSystem.h>
 #include <opengl/uGLRender.h>
 #include <math.h>
-#include <core/uSystem.h>
 
 GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
 	handler = memNew(handler, Handler());

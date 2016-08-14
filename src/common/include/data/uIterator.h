@@ -58,7 +58,7 @@ public:
 				m_next--;
 			}
 			if (m_prev <= m_last) {
-				m_prev--;
+				if (m_prev >= 0) m_prev--;
 			}
 			m_last = -1;
 			return RefStack<Type>::remove(index);
@@ -87,7 +87,7 @@ public:
 	RefClass(Iterator, Iterator<Type>)
 	
 	inline Iterator(uint32_t initialCapacity) throw(const char*) {
-		RefIterator<Type>* o = memNew(o, RefIterator<Type>(initialCapacity));
+		RefIterator<Type>* o = new RefIterator<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		this->setRef(o);
 	}
@@ -97,12 +97,15 @@ public:
 	virtual inline const Type remove() throw(const char*) { CHECKTHIS; return THIS->remove(); }
 	virtual inline void reset(uint32_t index = 0) const throw(const char*) { CHECKTHIS; THIS->reset(index); }
 	
+#ifdef DEBUG
 	inline static void _test() {
 		Iterator<Object> it = new Iterator<Object>();
+		it.push(null);
 		it.hasNext();
 		it.next();
 		it.remove();
 	}
+#endif
 };
 
 #endif //JAPPSY_UITERATOR_H

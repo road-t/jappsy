@@ -18,7 +18,6 @@
 #define JAPPSY_UMOTIONEVENT_H
 
 #include <platform.h>
-#include <data/uObject.h>
 
 struct MotionPointer {
 	float x;
@@ -27,7 +26,7 @@ struct MotionPointer {
 	int64_t time;
 };
 
-class MotionEvent : public Object {
+class MotionEvent {
 private:
 	int32_t* indexes;
 	MotionPointer* pointers;

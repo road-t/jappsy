@@ -38,6 +38,7 @@ extern const char* eConvert;
 extern const char* eOutOfRange;
 extern const char* eOpenGL;
 extern const char* eEmpty;
+extern const char* eNotFound;
 
 extern const char* eUnknown;
 

@@ -55,7 +55,7 @@ extern "C" {
 	 * @return			uint32_t				UTF16 destination string used memory size with null character
 	 */
 	uint32_t utf8_toutf16(const char* src, uint16_t* dst, uint32_t dstsize);
-
+	
 	/**
 	 * Convert string
 	 * @param			char*		src			UTF8 encoded null terminated source string
@@ -241,6 +241,9 @@ extern "C" {
 		 */
 		wchar_t* wcsupr(wchar_t* s);
 	#endif
+	
+	int utf8_cmpi(const char* s1, const char* s2);
+	int wcs_cmpi(const wchar_t* s1, const wchar_t* s2);
 
 	void uStringInit();
 	void uStringQuit();

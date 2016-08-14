@@ -17,6 +17,90 @@
 #ifndef JAPPSY_UJSON_H
 #define JAPPSY_UJSON_H
 
+#include <platform.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
+	enum json_type {
+		json_type_null = 0,
+		json_type_object = 1,
+		json_type_array = 2,
+		json_type_string = 3,
+		json_type_number = 4,
+		json_type_boolean = 5
+	};
+	
+	struct json_node {
+		struct json_node*	parent;
+		json_type	type;
+		int32_t		level;
+		union {
+			char*		data;
+			wchar_t*	wdata;
+		};
+		uint32_t	size;
+		
+		union {
+			struct {
+				struct json_node** k;
+				struct json_node** v;
+				uint32_t 	 c;
+			} o;
+			
+			struct {
+				struct json_node** v;
+				uint32_t	 c;
+			} a;
+			
+			char*		s;
+			wchar_t*	ws;
+			
+			struct {
+				bool is_float;
+				union {
+					int64_t	 i;
+					double	 f;
+				} v;
+			} n;
+			
+			bool		b;
+		} value;
+	};
+
+	bool json_check(const char* json);
+	bool jsonw_check(const wchar_t* json);
+	
+	struct json_node* json_create(struct json_node* parent, json_type type, uint32_t level, const char* data, uint32_t size);
+	struct json_node* jsonw_create(struct json_node* parent, json_type type, uint32_t level, const wchar_t* data, uint32_t size);
+	void json_destroy(struct json_node* j);
+	#define jsonw_destroy json_destroy
+	bool json_object_add(struct json_node* node, struct json_node* vkey, struct json_node* value);
+	#define jsonw_object_add json_object_add
+	bool json_array_add(struct json_node* node, struct json_node* value);
+	#define jsonw_array_add json_array_add
+	
+	struct json_node* json_parse(const char* json);
+	struct json_node* jsonw_parse(const wchar_t* json);
+	
+	struct json_node* json_array_get(const struct json_node* node, uint32_t index);
+	struct json_node* json_object_get(const struct json_node* node, const char* key);
+	struct json_node* json_object_geti(const struct json_node* node, const char* key);
+	struct json_node* jsonw_object_get(const struct json_node* node, const wchar_t* key);
+	struct json_node* jsonw_object_geti(const struct json_node* node, const wchar_t* key);
+	
+	const char* json_key(const struct json_node* value, const char* def = 0);
+	const wchar_t* jsonw_key(const struct json_node* value, const wchar_t* def = 0);
+	const char* json_value(const struct json_node* value, const char* def = 0);
+	const wchar_t* jsonw_value(const struct json_node* value, const wchar_t* def = 0);
+
+#ifdef __cplusplus
+}
+#endif
+
+#ifdef __cplusplus
+
 #include <data/uObject.h>
 #include <data/uString.h>
 
@@ -31,7 +115,7 @@ private:
 	
 public:
 	RefClass(JSON, JSON);
-
+	
 	static String encode(const String& value) throw(const char*);
 	
 	inline static String keyify(const RefObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
@@ -54,7 +138,7 @@ public:
 	inline static String keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
 	inline static String keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
 	inline static String keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-
+	
 	inline static String stringify(const RefObject& object) throw(const char*) { return object.toJSON(); }
 	inline static String stringify(const Object& object) throw(const char*) { return object.toJSON(); }
 	inline static String stringify(const RefObject* object) throw(const char*) { return object->toJSON(); }
@@ -76,5 +160,7 @@ public:
 	inline static String stringify(const float value) throw(const char*) { return value; }
 	inline static String stringify(const double value) throw(const char*) { return value; }
 };
+
+#endif
 
 #endif //JAPPSY_UJSON_H

@@ -738,6 +738,161 @@ extern "C" {
 	}
 #endif
 	
+	int utf8_cmpi(const char* ptr1, const char* ptr2) {
+		if (ptr1 == NULL)
+			return (ptr2 == NULL) ? 0 : -1;
+		else if (ptr2 == NULL)
+			return 1;
+		
+		uint32_t len1 = (uint32_t)utf8_strlen(ptr1, NULL);
+		uint32_t len2 = (uint32_t)utf8_strlen(ptr2, NULL);
+		uint32_t len = (len1 < len2) ? len1 : len2;
+		if (len1 == 0)
+			return (len2 == 0) ? 0 : -1;
+		else if (len2 == 0)
+			return 1;
+		
+		while (len-- > 0) {
+			char ch1 = *ptr1; ptr1++;
+			char ch2 = *ptr2; ptr2++;
+			uint32_t v1;
+			uint32_t v2;
+			if (ch1 & 0x80) {
+				if (ch2 & 0x80) {
+					do {
+						int cnt;
+						if ((ch1 & 0xE0) == 0xC0) cnt = 1;
+						else if ((ch1 & 0xF0) == 0xE0) cnt = 2;
+						else if ((ch1 & 0xF8) == 0xF0) cnt = 3;
+						else if ((ch1 & 0xFC) == 0xF8) cnt = 4;
+						else if ((ch1 & 0xFE) == 0xFC) cnt = 6;
+						else {
+							v1 = ch1;
+							break;
+						}
+						
+						int skip = 0;
+						uint32_t utf8 = (uint32_t)ch1;
+						while (((ch1 = *ptr1) != '\0') && (cnt > 0)) {
+							ptr1++; skip++;
+							if ((ch1 & 0xC0) != 0x80)
+								break;
+							cnt--;
+						}
+						if (cnt > 0) {
+							ptr1 -= skip;
+							break;
+						} else {
+							int shift = (6 * skip);
+							utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
+							ptr1 -= skip;
+							while (skip > 0) {
+								shift -= 6;
+								utf8 |= ((uint32_t)(*ptr1) & 0x3F) << shift;
+								ptr1++;
+								skip--;
+							}
+							
+							#if __WCHAR_MAX__ > 0x10000
+								v1 = towlower((wchar_t)utf8);
+							#else
+								if (utf8 <= 0xFFFF) {
+									v1 = towlower((wchar_t)utf8);
+								} else {
+									v1 = utf8;
+								}
+							#endif
+						}
+					} while (false);
+							
+					do {
+						int cnt;
+						if ((ch2 & 0xE0) == 0xC0) cnt = 1;
+						else if ((ch2 & 0xF0) == 0xE0) cnt = 2;
+						else if ((ch2 & 0xF8) == 0xF0) cnt = 3;
+						else if ((ch2 & 0xFC) == 0xF8) cnt = 4;
+						else if ((ch2 & 0xFE) == 0xFC) cnt = 6;
+						else {
+							v2 = ch2;
+							break;
+						}
+						
+						int skip = 0;
+						uint32_t utf8 = (uint32_t)ch2;
+						while (((ch2 = *ptr2) != '\0') && (cnt > 0)) {
+							ptr2++; skip++;
+							if ((ch2 & 0xC0) != 0x80)
+								break;
+							cnt--;
+						}
+						if (cnt > 0) {
+							ptr2 -= skip;
+							break;
+						} else {
+							int shift = (6 * skip);
+							utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
+							ptr2 -= skip;
+							while (skip > 0) {
+								shift -= 6;
+								utf8 |= ((uint32_t)(*ptr2) & 0x3F) << shift;
+								ptr2++;
+								skip--;
+							}
+							
+							#if __WCHAR_MAX__ > 0x10000
+								v2 = towlower((wchar_t)utf8);
+							#else
+								if (utf8 <= 0xFFFF) {
+									v2 = towlower((wchar_t)utf8);
+								} else {
+									v2 = utf8;
+								}
+							#endif
+						}
+					} while (false);
+				} else {
+					return 1;
+				}
+			} else if (ch2 & 0x80) {
+				return -1;
+			} else {
+				v1 = tolower(ch1);
+				v2 = tolower(ch2);
+			}
+			
+			if (v1 != v2) return (v1 < v2) ? -1 : 1;
+		}
+		if (len1 == len2)
+			return 0;
+		else
+			return (len1 < len2) ? -1 : 1;
+	}
+	
+	int wcs_cmpi(const wchar_t* ptr1, const wchar_t* ptr2) {
+		if (ptr1 == NULL)
+			return (ptr2 == NULL) ? 0 : -1;
+		else if (ptr2 == NULL)
+			return 1;
+		
+		uint32_t len1 = (uint32_t)wcs_strlen(ptr1, NULL);
+		uint32_t len2 = (uint32_t)wcs_strlen(ptr2, NULL);
+		uint32_t len = (len1 < len2) ? len1 : len2;
+		if (len1 == 0)
+			return (len2 == 0) ? 0 : -1;
+		else if (len2 == 0)
+			return 1;
+		
+		while (len-- > 0) {
+			wchar_t v1 = towlower(*ptr1); ptr1++;
+			wchar_t v2 = towlower(*ptr2); ptr2++;
+			if (v1 != v2) return (v1 < v2) ? -1 : 1;
+		}
+		if (len1 == len2)
+			return 0;
+		else
+			return (len1 < len2) ? -1 : 1;
+	}
+	
 #ifdef __cplusplus
 }
 #endif

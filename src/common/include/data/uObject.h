@@ -184,6 +184,14 @@ class Object;
 
 extern const wchar_t TypeNull[];
 extern const wchar_t TypeObject[];
+extern const wchar_t TypeNumber[];
+extern const wchar_t TypeBoolean[];
+extern const wchar_t TypeByte[];
+extern const wchar_t TypeShort[];
+extern const wchar_t TypeInt[];
+extern const wchar_t TypeLong[];
+extern const wchar_t TypeFloat[];
+extern const wchar_t TypeDouble[];
 extern const wchar_t TypeString[];
 extern const wchar_t TypeJSON[];
 extern const wchar_t TypeAtomicObject[];

@@ -49,6 +49,7 @@ void onTouch(const wchar_t* event) {
 #include <data/uHashMap.h>
 #include <data/uLinkedHashMap.h>
 #include <data/uSparseArray.h>
+#include <data/uNumber.h>
 
 OMEngine::OMEngine() {
     context = memNew(context, GLRender(this, 1920, 1080, ::onFrame, ::onTouch));

@@ -21,6 +21,14 @@
 
 const wchar_t TypeNull[] = L"Undefined::";
 const wchar_t TypeObject[] = L"Object::";
+const wchar_t TypeNumber[] = L"Number::";
+const wchar_t TypeBoolean[] = L"Number::Boolean::";
+const wchar_t TypeByte[] = L"Number::Byte::";
+const wchar_t TypeShort[] = L"Number::Short::";
+const wchar_t TypeInt[] = L"Number::Int::";
+const wchar_t TypeLong[] = L"Number::Long::";
+const wchar_t TypeFloat[] = L"Number::Float::";
+const wchar_t TypeDouble[] = L"Number::Double::";
 const wchar_t TypeString[] = L"String::";
 const wchar_t TypeJSON[] = L"JSON::";
 const wchar_t TypeAtomicObject[] = L"Atomic::";

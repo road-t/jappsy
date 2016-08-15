@@ -24,6 +24,7 @@
 		C34FD9C01D5BBC230022FF71 /* OMEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMEngine.h; sourceTree = "<group>"; };
 		C34FD9D11D5BC9830022FF71 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMView.h; sourceTree = "<group>"; };
 		C34FD9D21D5BC9830022FF71 /* OMView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMView.mm; sourceTree = "<group>"; };
+		C3FFBAD01D61234D0099AD22 /* OMLoad.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMLoad.res; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +65,7 @@
 				C34FD9BF1D5BBC230022FF71 /* OMEngine.cpp */,
 				C34FD9D11D5BC9830022FF71 /* OMView.h */,
 				C34FD9D21D5BC9830022FF71 /* OMView.mm */,
+				C3FFBAD01D61234D0099AD22 /* OMLoad.res */,
 			);
 			path = libGameOM;
 			sourceTree = "<group>";

@@ -63,13 +63,15 @@ class Number : public Object {
 public:
 	RefClass(Number, Number)
 	
-	inline bool boolValue() const { return THIS->boolValue(); }
-	inline int8_t byteValue() const { return THIS->byteValue(); }
-	inline int16_t shortValue() const { return THIS->shortValue(); }
-	inline int32_t intValue() const { return THIS->intValue(); }
-	inline int64_t longValue() const { return THIS->longValue(); }
-	inline float floatValue() const { return THIS->floatValue(); }
-	inline double doubleValue() const { return THIS->doubleValue(); }
+	inline bool boolValue() const { CHECKTHIS; return THIS->boolValue(); }
+	inline int8_t byteValue() const { CHECKTHIS; return THIS->byteValue(); }
+	inline int16_t shortValue() const { CHECKTHIS; return THIS->shortValue(); }
+	inline int32_t intValue() const { CHECKTHIS; return THIS->intValue(); }
+	inline int64_t longValue() const { CHECKTHIS; return THIS->longValue(); }
+	inline float floatValue() const { CHECKTHIS; return THIS->floatValue(); }
+	inline double doubleValue() const { CHECKTHIS; return THIS->doubleValue(); }
+	
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 };
 
 #if defined(__IOS__)
@@ -89,6 +91,7 @@ namespace Java {
 		int compareTo(const Boolean& object) const;
 		static Boolean decode(const String& value);
 		inline String toString() const { return String(bValue); }
+		inline String toJSON() const { return toString(); }
 	};
 	
 	class Boolean : public Number {
@@ -114,7 +117,7 @@ namespace Java {
 			return THIS->compareTo(object);
 		}
 		inline static Boolean decode(const String& value) { return RefBoolean::decode(value); }
-		inline String toString() const { return THIS->toString(); }
+		inline String toString() const { CHECKTHIS; return THIS->toString(); }
 		inline static Boolean valueOf(bool value) { return Boolean(value); }
 		
 		inline bool operator ==(const Boolean& src) const { return compareTo(src) == 0; }
@@ -135,6 +138,7 @@ namespace Java {
 		int compareTo(const Byte& object) const;
 		static Byte decode(const String& value);
 		inline String toString() const { return String(bValue); }
+		inline String toJSON() const { return toString(); }
 	};
 	
 	class Byte : public Number {
@@ -160,7 +164,7 @@ namespace Java {
 			return THIS->compareTo(object);
 		}
 		inline static Byte decode(const String& value) { return Byte::decode(value); }
-		inline String toString() const { return THIS->toString(); }
+		inline String toString() const { CHECKTHIS; return THIS->toString(); }
 		inline static Byte valueOf(int8_t value) { return Byte(value); }
 		
 		inline bool operator ==(const Byte& src) const { return compareTo(src) == 0; }
@@ -185,6 +189,7 @@ public:
 	int compareTo(const Short& object) const;
 	static Short decode(const String& value);
 	inline String toString() const { return String(siValue); }
+	inline String toJSON() const { return toString(); }
 };
 
 class Short : public Number {
@@ -210,7 +215,7 @@ public:
 		return THIS->compareTo(object);
 	}
 	inline static Short decode(const String& value) { return Short::decode(value); }
-	inline String toString() const { return THIS->toString(); }
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 	inline static Short valueOf(int16_t value) { return Short(value); }
 	
 	inline bool operator ==(const Short& src) const { return compareTo(src) == 0; }
@@ -231,6 +236,7 @@ public:
 	int compareTo(const Integer& object) const;
 	static Integer decode(const String& value);
 	inline String toString() const { return String(iValue); }
+	inline String toJSON() const { return toString(); }
 };
 
 class Integer : public Number {
@@ -256,7 +262,7 @@ public:
 		return THIS->compareTo(object);
 	}
 	inline static Integer decode(const String& value) { return Integer::decode(value); }
-	inline String toString() const { return THIS->toString(); }
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 	inline static Integer valueOf(int32_t value) { return Integer(value); }
 	inline static Integer valueOf(const String& value, int radix = 10) {
 		if (radix == 10) {
@@ -284,6 +290,7 @@ public:
 	int compareTo(const Long& object) const;
 	static Long decode(const String& value);
 	inline String toString() const { return String(iValue64); }
+	inline String toJSON() const { return toString(); }
 };
 
 class Long : public Number {
@@ -309,7 +316,7 @@ public:
 		return THIS->compareTo(object);
 	}
 	inline static Long decode(const String& value) { return Long::decode(value); }
-	inline String toString() const { return THIS->toString(); }
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 	inline static Long valueOf(int64_t value) { return Long(value); }
 	
 	inline bool operator ==(const Long& src) const { return compareTo(src) == 0; }
@@ -336,6 +343,7 @@ public:
 	int compareTo(const Float& object) const;
 	static Float decode(const String& value);
 	inline String toString() const { return String((float)dValue); }
+	inline String toJSON() const { return toString(); }
 };
 
 class Float : public Number {
@@ -361,7 +369,7 @@ public:
 		return THIS->compareTo(object);
 	}
 	inline static Float decode(const String& value) { return Float::decode(value); }
-	inline String toString() const { return THIS->toString(); }
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 	inline static Float valueOf(float value) { return Float(value); }
 	
 	inline bool operator ==(const Float& src) const { return compareTo(src) == 0; }
@@ -388,6 +396,7 @@ public:
 	int compareTo(const Double& object) const;
 	inline static Double decode(const String& value);
 	inline String toString() const { return String(dValue); }
+	inline String toJSON() const { return toString(); }
 };
 
 class Double : public Number {
@@ -413,7 +422,7 @@ public:
 		return THIS->compareTo(object);
 	}
 	inline static Double decode(const String& value) { return Double::decode(value); }
-	inline String toString() const { return THIS->toString(); }
+	inline String toString() const { CHECKTHIS; return THIS->toString(); }
 	inline static Double valueOf(double value) { return Double(value); }
 	
 	inline bool operator ==(const Double& src) const { return compareTo(src) == 0; }

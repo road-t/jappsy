@@ -87,6 +87,9 @@
 		C3A4B4EC1D5FD41C0039DD09 /* uJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */; };
 		C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3ACF92F1D5DED6D0065A832 /* uURI.cpp */; };
 		C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */ = {isa = PBXBuildFile; fileRef = C3ACF9301D5DED6D0065A832 /* uURI.h */; };
+		C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBAC91D6104910099AD22 /* uJSONArray.h */; };
+		C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */; };
+		C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBACB1D6104910099AD22 /* uJSONObject.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -172,6 +175,9 @@
 		C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSON.h; sourceTree = "<group>"; };
 		C3ACF92F1D5DED6D0065A832 /* uURI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uURI.cpp; sourceTree = "<group>"; };
 		C3ACF9301D5DED6D0065A832 /* uURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURI.h; sourceTree = "<group>"; };
+		C3FFBAC91D6104910099AD22 /* uJSONArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONArray.h; sourceTree = "<group>"; };
+		C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uJSONObject.cpp; sourceTree = "<group>"; };
+		C3FFBACB1D6104910099AD22 /* uJSONObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONObject.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +266,9 @@
 				C34FD97F1D5B8E0A0022FF71 /* uString.h */,
 				C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */,
 				C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */,
+				C3FFBAC91D6104910099AD22 /* uJSONArray.h */,
+				C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */,
+				C3FFBACB1D6104910099AD22 /* uJSONObject.h */,
 				C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */,
 				C3A4B4B61D5EB5D60039DD09 /* uStack.h */,
 				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
@@ -367,6 +376,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */,
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
 				C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */,
@@ -382,6 +392,7 @@
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
 				C34FDA551D5CABD30022FF71 /* uURLRequest.h in Headers */,
+				C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */,
 				C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */,
 				C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */,
 				C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */,
@@ -498,6 +509,7 @@
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
+				C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,

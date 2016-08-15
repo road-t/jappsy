@@ -32,6 +32,44 @@ extern "C" {
 		json_type_boolean = 5
 	};
 	
+	enum json_error_type {
+		json_error_none = 0,
+		json_error_eof = 1,
+		json_error_syntax = 2,
+	};
+	
+	struct json_context {
+		union {
+			char buffer[64];
+			wchar_t wbuffer[64];
+		};
+		
+		struct {
+			json_error_type type;
+			union {
+				const char* ptr;
+				const wchar_t* wptr;
+			};
+		
+			union {
+				const char* expected;
+				const wchar_t* wexpected;
+			};
+		} error;
+		
+		inline void seterror(json_error_type type, const char* ptr, const char* expected = NULL) {
+			this->error.type = type;
+			this->error.ptr = ptr;
+			this->error.expected = expected;
+		}
+
+		inline void wseterror(json_error_type type, const wchar_t* ptr, const wchar_t* expected = NULL) {
+			this->error.type = type;
+			this->error.wptr = ptr;
+			this->error.wexpected = expected;
+		}
+	};
+	
 	struct json_node {
 		struct json_node*	parent;
 		json_type	type;
@@ -69,8 +107,8 @@ extern "C" {
 		} value;
 	};
 
-	bool json_check(const char* json);
-	bool jsonw_check(const wchar_t* json);
+	bool json_check(struct json_context* ctx, const char* json);
+	bool jsonw_check(struct json_context* ctx, const wchar_t* json);
 	
 	struct json_node* json_create(struct json_node* parent, json_type type, uint32_t level, const char* data, uint32_t size);
 	struct json_node* jsonw_create(struct json_node* parent, json_type type, uint32_t level, const wchar_t* data, uint32_t size);
@@ -81,8 +119,8 @@ extern "C" {
 	bool json_array_add(struct json_node* node, struct json_node* value);
 	#define jsonw_array_add json_array_add
 	
-	struct json_node* json_parse(const char* json);
-	struct json_node* jsonw_parse(const wchar_t* json);
+	struct json_node* json_parse(struct json_context* ctx, const char* json);
+	struct json_node* jsonw_parse(struct json_context* ctx, const wchar_t* json);
 	
 	struct json_node* json_array_get(const struct json_node* node, uint32_t index);
 	struct json_node* json_object_get(const struct json_node* node, const char* key);
@@ -101,21 +139,19 @@ extern "C" {
 
 #ifdef __cplusplus
 
-#include <data/uObject.h>
 #include <data/uString.h>
 
-class RefJSON : public RefObject {
-public:
-	inline RefJSON() { TYPE = TypeJSON; }
-};
-
-class JSON : public Object {
+class JSON {
 private:
-	inline static String key(const String& value) throw(const char*) { return String(L"\"").concat(value).concat(L"\""); }
+	inline static String key(const String& value) throw(const char*) {
+		if ((value.length > 0) && (value[0] == L'\"'))
+			return value;
+
+		return String(L"\"").concat(value).concat(L"\"");
+	}
+	
 	
 public:
-	RefClass(JSON, JSON);
-	
 	static String encode(const String& value) throw(const char*);
 	
 	inline static String keyify(const RefObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }

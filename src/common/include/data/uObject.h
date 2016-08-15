@@ -193,7 +193,8 @@ extern const wchar_t TypeLong[];
 extern const wchar_t TypeFloat[];
 extern const wchar_t TypeDouble[];
 extern const wchar_t TypeString[];
-extern const wchar_t TypeJSON[];
+extern const wchar_t TypeJSONObject[];
+extern const wchar_t TypeJSONArray[];
 extern const wchar_t TypeAtomicObject[];
 extern const wchar_t TypeStack[];
 extern const wchar_t TypeIterator[];
@@ -210,8 +211,6 @@ extern const wchar_t TypeSparseArray[];
 
 class RefObject {
 protected:
-	const wchar_t* TYPE;
-	
 	volatile void* _thread = 0;
 	volatile int32_t _lock = 0;
 	volatile int32_t _lockCount = 0;
@@ -225,6 +224,7 @@ protected:
 	virtual void _threadUnlock() const;
 	
 public:
+	const wchar_t* TYPE;
 	volatile int32_t _retainCount = 0;
 	
 	inline RefObject() : TYPE(TypeObject) { }
@@ -281,7 +281,7 @@ public:
 	inline void operator delete[](void* p) { memFree(p); }
 
 	virtual ~Object();
-	inline Object() { initialize(); }
+	inline Object() { }
 	
 	Object(const Object& object);
 	Object& operator =(const Object& object);

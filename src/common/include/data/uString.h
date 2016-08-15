@@ -260,6 +260,7 @@ extern "C" {
 	class RefString;
 #if !defined(__OBJC__)
 	class NSString;
+	class NSNumber;
 #endif
 
 	#ifndef Char
@@ -547,6 +548,8 @@ extern "C" {
 		
 		RefString md5() const throw(const char*); // eOutOfMemory
 	};
+
+	class Number;
 	
 	class String : public Object {
 	private:
@@ -588,6 +591,11 @@ extern "C" {
 		String(uint64_t value) throw(const char*); // eOutOfMemory
 		String(float value) throw(const char*); // eOutOfMemory
 		String(double value) throw(const char*); // eOutOfMemory
+		
+		String(const Number& number);
+#if defined (__IOS__)
+		String(const NSNumber *number);
+#endif
 
 		Property<String, uint32_t> length;
 		

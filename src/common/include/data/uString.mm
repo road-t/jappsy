@@ -901,6 +901,7 @@ extern "C" {
 
 #include <core/uMemory.h>
 #include <core/uError.h>
+#include <data/uNumber.h>
 	
 #define StringTrue L"true"
 #define StringFalse L"false"
@@ -1062,6 +1063,7 @@ RefString& RefString::concat(const RefString& string) throw(const char*) {
 }
 
 String::String(const String& string) throw(const char*) : Object() {
+	initialize();
 	if (string._object != NULL) {
 		RefString* newString = new RefString(*(RefString*)(string._object));
 		setRef(newString);
@@ -1092,6 +1094,12 @@ String& String::concat(const String& string) throw(const char*) {
 		}
 	}
 	return *this;
+}
+
+String::String(const Number& number) : Object() {
+	initialize();
+	RefString* newString = new RefString(number.toString());
+	setRef(newString);
 }
 
 #if defined(__IOS__)
@@ -1139,6 +1147,7 @@ RefString& RefString::concat(const NSString* string) throw(const char*) {
 }
 
 String::String(const NSString* string) throw(const char*) : Object() {
+	initialize();
 	if (string != NULL) {
 		RefString* newString = new RefString(string);
 		setRef(newString);
@@ -1170,15 +1179,21 @@ String& String::concat(const NSString* string) throw(const char*) {
 	}
 	return *this;
 }
+
+String::String(const NSNumber *number) : Object() {
+	initialize();
+	RefString* newString = new RefString([number stringValue]);
+	setRef(newString);
+}
+
 #endif
 
 RefString::RefString(const char* string) throw(const char*) {
 	initialize();
 	if (string != NULL) {
-		uint32_t newSize = 0;
-		uint32_t length = utf8_strlen(string, &newSize);
+		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			this->setSize(newSize);
+			this->setLength(length);
 			utf8_towcs(string, this->m_data, this->m_size);
 		} else {
 			this->setLength(0);
@@ -1188,10 +1203,9 @@ RefString::RefString(const char* string) throw(const char*) {
 
 RefString& RefString::operator =(const char* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t newSize = 0;
-		uint32_t length = utf8_strlen(string, &newSize);
+		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			this->setSize(newSize);
+			this->setLength(length);
 			utf8_towcs(string, this->m_data, this->m_size);
 		} else {
 			this->setLength(0);
@@ -1216,6 +1230,7 @@ RefString& RefString::concat(const char* string) throw(const char*) {
 }
 
 String::String(const char* string) throw(const char*) : Object() {
+	initialize();
 	if (string != NULL) {
 		RefString* newString = new RefString(string);
 		setRef(newString);
@@ -1264,6 +1279,7 @@ RefString::RefString(const char* string, uint32_t length) throw(const char*) {
 }
 
 String::String(const char* string, uint32_t length) throw(const char*) : Object() {
+	initialize();
 	if (string != NULL) {
 		RefString* newString = new RefString(string, length);
 		setRef(newString);
@@ -1314,6 +1330,7 @@ RefString& RefString::concat(const wchar_t* string) throw(const char*) {
 }
 
 String::String(const wchar_t* string) throw(const char*) : Object() {
+	initialize();
 	if (string != NULL) {
 		RefString* newString = new RefString(string);
 		setRef(newString);
@@ -1356,6 +1373,7 @@ RefString::RefString(const wchar_t* string, uint32_t length) throw(const char*) 
 }
 
 String::String(const wchar_t* string, uint32_t length) throw(const char*) : Object() {
+	initialize();
 	if (string != NULL) {
 		RefString* newString = new RefString(string, length);
 		setRef(newString);
@@ -1382,6 +1400,7 @@ RefString& RefString::concat(const char character) throw(const char*) {
 }
 
 String::String(const char character) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(character);
 	setRef(newString);
 }
@@ -1426,6 +1445,7 @@ RefString& RefString::concat(const wchar_t character) throw(const char*) {
 }
 
 String::String(const wchar_t character) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(character);
 	setRef(newString);
 }
@@ -1470,6 +1490,7 @@ RefString& RefString::concat(const bool value) throw(const char*) {
 }
 
 String::String(const bool value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1527,6 +1548,7 @@ RefString& RefString::concat(const int8_t value) throw(const char*) {
 }
 
 String::String(const int8_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1584,6 +1606,7 @@ RefString& RefString::concat(const uint8_t value) throw(const char*) {
 }
 
 String::String(const uint8_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1641,6 +1664,7 @@ RefString& RefString::concat(const int16_t value) throw(const char*) {
 }
 
 String::String(const int16_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1698,6 +1722,7 @@ RefString& RefString::concat(const uint16_t value) throw(const char*) {
 }
 
 String::String(const uint16_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1755,6 +1780,7 @@ RefString& RefString::concat(const int32_t value) throw(const char*) {
 }
 
 String::String(const int32_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1812,6 +1838,7 @@ RefString& RefString::concat(const uint32_t value) throw(const char*) {
 }
 
 String::String(const uint32_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1869,6 +1896,7 @@ RefString& RefString::concat(const int64_t value) throw(const char*) {
 }
 
 String::String(const int64_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -1926,6 +1954,7 @@ RefString& RefString::concat(const uint64_t value) throw(const char*) {
 }
 
 String::String(const uint64_t value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -2041,6 +2070,7 @@ RefString& RefString::concat(const float value) throw(const char*) {
 }
 
 String::String(const float value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -2152,6 +2182,7 @@ RefString& RefString::concat(const double value) throw(const char*) {
 }
 
 String::String(const double value) throw(const char*) : Object() {
+	initialize();
 	RefString* newString = new RefString(value);
 	setRef(newString);
 }
@@ -2195,6 +2226,7 @@ String::operator NSString*() const {
 	}
 	return NULL;
 }
+
 #endif
 
 //==============================================================

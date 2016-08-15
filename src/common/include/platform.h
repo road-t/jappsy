@@ -137,7 +137,7 @@
 		public:
 			inline Property() : m_owner((Owner*)0), m_getter((getter)0), m_setter((setter)0) {}
 			inline Property(Owner * const owner, getter getmethod, setter setmethod) : m_owner(owner), m_getter(getmethod), m_setter(setmethod) {}
-			inline operator Type() { if (m_getter) return m_getter(*m_owner); else return (Type)0; }
+			inline operator Type() const { if (m_getter) return m_getter(*m_owner); else return (Type)0; }
 			inline Type operator =(Type data) { if (m_setter) return m_setter(*m_owner, data); else return (Type)0; }
 			inline void initialize(Owner * const owner, getter getmethod, setter setmethod) { m_owner = owner, m_getter = getmethod; m_setter = setmethod; }
 		};

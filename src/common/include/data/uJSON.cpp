@@ -33,15 +33,19 @@ extern "C" {
 	#define jsonw_cur			*(*ptrptr)
 	#define jsonw_next			(ch = *(++(*ptrptr)))
 	#define jsonw_rev			(*ptrptr)--
+	
+	#define json_err(type, ...)		ctx->seterror(type, *ptrptr, ## __VA_ARGS__)
+	#define jsonw_err(type, ...)	ctx->wseterror(type, *ptrptr, ## __VA_ARGS__)
 
-	bool json_check_number(char** ptrptr, int32_t level) {
+	bool json_check_number(struct json_context* ctx, char** ptrptr, int32_t level) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		char ch = json_cur;
 		if (ch == '-') {
 			json_next;
 		}
 		if (ch == '\0') {
-			return false; // Неожиданный конец
+			json_err(json_error_eof);
+			return false;
 		} else if ((ch == 'i') || (ch == 'I')) {
 			json_next;
 			if ((ch == 'n') || (ch == 'N')) {
@@ -51,16 +55,19 @@ extern "C" {
 				}
 			}
 			if (ch == '\0') {
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			}
-			return false; // Ошибка синтаксиса
+			json_err(json_error_syntax);
+			return false;
 		} else if (ch == '0') {
 			json_next;
 			goto json_check_number_point;
 		} else if ((ch >= '1') && (ch <= '9')) {
 			do {
 				if (json_next == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				} else if ((ch < '0') || (ch > '9')) {
 					break;
 				}
@@ -72,13 +79,15 @@ extern "C" {
 			if ((ch >= '0') && (ch <= '9')) {
 				do {
 					if (json_next == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if ((ch < '0') || (ch > '9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
 		if ((ch == 'e') || (ch == 'E')) {
@@ -89,27 +98,30 @@ extern "C" {
 			if ((ch >= '0') && (ch <= '9')) {
 				do {
 					if (json_next == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if ((ch < '0') || (ch > '9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
 		json_rev;
 		return true;
 	}
 
-	bool jsonw_check_number(wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_number(struct json_context* ctx, wchar_t** ptrptr, int32_t level) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		wchar_t ch = jsonw_cur;
 		if (ch == L'-') {
 			jsonw_next;
 		}
 		if (ch == L'\0') {
-			return false; // Неожиданный конец
+			jsonw_err(json_error_eof);
+			return false;
 		} else if ((ch == L'i') || (ch == L'I')) {
 			jsonw_next;
 			if ((ch == L'n') || (ch == L'N')) {
@@ -119,16 +131,19 @@ extern "C" {
 				}
 			}
 			if (ch == L'\0') {
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			}
-			return false; // Ошибка синтаксиса
+			jsonw_err(json_error_syntax);
+			return false;
 		} else if (ch == L'0') {
 			jsonw_next;
 			goto jsonw_check_number_point;
 		} else if ((ch >= L'1') && (ch <= L'9')) {
 			do {
 				if (jsonw_next == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				} else if ((ch < L'0') || (ch > L'9')) {
 					break;
 				}
@@ -140,13 +155,15 @@ extern "C" {
 			if ((ch >= L'0') && (ch <= L'9')) {
 				do {
 					if (jsonw_next == L'\0') {
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if ((ch < L'0') || (ch > L'9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
 		if ((ch == L'e') || (ch == L'E')) {
@@ -157,20 +174,22 @@ extern "C" {
 			if ((ch >= L'0') && (ch <= L'9')) {
 				do {
 					if (jsonw_next == L'\0') {
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if ((ch < L'0') || (ch > L'9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
 		jsonw_rev;
 		return true;
 	}
 	
-	bool json_check_string(char** ptrptr, int32_t level) {
+	bool json_check_string(struct json_context* ctx, char** ptrptr, int32_t level) {
 		char ch;
 		while (json_next != '\0') {
 			if (ch == '\"') {
@@ -198,9 +217,11 @@ extern "C" {
 				}
 				if (cnt > 0) {
 					if (ch == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
 			} else if (ch == '\\') {
@@ -210,28 +231,34 @@ extern "C" {
 					int cnt = 4;
 					while ((cnt > 0) && (json_next != '\0')) {
 						if (!json_is_hex(ch)) {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == '\0') {
-							return false; // Неожиданный конец
+							json_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 					}
 				} else if (ch == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					json_err(json_error_syntax);
+					return false;
 				}
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 
-	bool jsonw_check_string(wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_string(struct json_context* ctx, wchar_t** ptrptr, int32_t level) {
 		wchar_t ch;
 		while (jsonw_next != L'\0') {
 			if (ch == L'\"') {
@@ -239,7 +266,8 @@ extern "C" {
 #if __WCHAR_MAX__ <= 0x10000
 			} else if ((uint16_t)(ch & 0xFC00) == 0xD800) { // found UTF16
 				if (jsonw_next == L'\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				}
 				if ((uint16_t)(ch & 0xFC00) != 0xDC00) {
 					return false; // Not UTF16
@@ -252,41 +280,47 @@ extern "C" {
 					int cnt = 4;
 					while ((cnt > 0) && (jsonw_next != L'\0')) {
 						if (!jsonw_is_hex(ch)) {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == L'\0') {
-							return false; // Неожиданный конец
+							jsonw_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 					}
 				} else if (ch == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					jsonw_err(json_error_syntax);
+					return false;
 				}
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_check_object(char** ptrptr, int32_t level);
-	bool json_check_array(char** ptrptr, int32_t level);
+	bool json_check_object(struct json_context* ctx, char** ptrptr, int32_t level);
+	bool json_check_array(struct json_context* ctx, char** ptrptr, int32_t level);
 	
-	bool json_check_value(char** ptrptr, int32_t level) {
+	bool json_check_value(struct json_context* ctx, char** ptrptr, int32_t level) {
 		char ch;
 		while (json_next != '\0') {
 			if (ch == '\"') {
-				return json_check_string(ptrptr, level);
+				return json_check_string(ctx, ptrptr, level);
 			} else if ((ch == '-') || ((ch >= '0') && (ch <= '9'))) {
-				return json_check_number(ptrptr, level);
+				return json_check_number(ctx, ptrptr, level);
 			} else if (ch == '{') {
-				return json_check_object(ptrptr, level);
+				return json_check_object(ctx, ptrptr, level);
 			} else if (ch == '[') {
-				return json_check_array(ptrptr, level);
+				return json_check_array(ctx, ptrptr, level);
 			} else if ((ch == 't') || (ch == 'T')) {
 				json_next;
 				if ((ch == 'r') || (ch == 'R')) {
@@ -298,7 +332,8 @@ extern "C" {
 						}
 					}
 				}
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			} else if ((ch == 'f') || (ch == 'F')) {
 				json_next;
 				if ((ch == 'a') || (ch == 'A')) {
@@ -313,7 +348,8 @@ extern "C" {
 						}
 					}
 				}
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			} else if ((ch == 'n') || (ch == 'N')) {
 				json_next;
 				if ((ch == 'u') || (ch == 'U')) {
@@ -330,7 +366,8 @@ extern "C" {
 						return true;
 					}
 				}
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			} else if ((ch == 'i') || (ch == 'I')) {
 				json_next;
 				if ((ch == 'n') || (ch == 'N')) {
@@ -340,30 +377,34 @@ extern "C" {
 					}
 				}
 				if (ch == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				}
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			} else if (!json_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 
-	bool jsonw_check_object(wchar_t** ptrptr, int32_t level);
-	bool jsonw_check_array(wchar_t** ptrptr, int32_t level);
+	bool jsonw_check_object(struct json_context* ctx, wchar_t** ptrptr, int32_t level);
+	bool jsonw_check_array(struct json_context* ctx, wchar_t** ptrptr, int32_t level);
 	
-	bool jsonw_check_value(wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_value(struct json_context* ctx, wchar_t** ptrptr, int32_t level) {
 		wchar_t ch;
 		while (jsonw_next != L'\0') {
 			if (ch == L'\"') {
-				return jsonw_check_string(ptrptr, level);
+				return jsonw_check_string(ctx, ptrptr, level);
 			} else if ((ch == L'-') || ((ch >= L'0') && (ch <= L'9'))) {
-				return jsonw_check_number(ptrptr, level);
+				return jsonw_check_number(ctx, ptrptr, level);
 			} else if (ch == L'{') {
-				return jsonw_check_object(ptrptr, level);
+				return jsonw_check_object(ctx, ptrptr, level);
 			} else if (ch == L'[') {
-				return jsonw_check_array(ptrptr, level);
+				return jsonw_check_array(ctx, ptrptr, level);
 			} else if ((ch == L't') || (ch == L'T')) {
 				jsonw_next;
 				if ((ch == L'r') || (ch == L'R')) {
@@ -375,7 +416,8 @@ extern "C" {
 						}
 					}
 				}
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			} else if ((ch == L'f') || (ch == L'F')) {
 				jsonw_next;
 				if ((ch == L'a') || (ch == L'A')) {
@@ -390,7 +432,8 @@ extern "C" {
 						}
 					}
 				}
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			} else if ((ch == L'n') || (ch == L'N')) {
 				jsonw_next;
 				if ((ch == L'u') || (ch == L'U')) {
@@ -407,7 +450,8 @@ extern "C" {
 						return true;
 					}
 				}
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			} else if ((ch == L'i') || (ch == L'I')) {
 				jsonw_next;
 				if ((ch == L'n') || (ch == L'N')) {
@@ -417,17 +461,21 @@ extern "C" {
 					}
 				}
 				if (ch == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				}
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			} else if (!jsonw_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_check_array(char** ptrptr, int32_t level) {
+	bool json_check_array(struct json_context* ctx, char** ptrptr, int32_t level) {
 		char ch;
 		level++;
 	json_check_array_repeat:
@@ -436,7 +484,7 @@ extern "C" {
 				return true;
 			} else if (!json_is_space(ch)) {
 				json_rev;
-				if (!json_check_value(ptrptr, level)) {
+				if (!json_check_value(ctx, ptrptr, level)) {
 					return false;
 				}
 				while (json_next != '\0') {
@@ -445,16 +493,19 @@ extern "C" {
 					} else if (ch == ']') {
 						return true;
 					} else if (!json_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 
-	bool jsonw_check_array(wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_array(struct json_context* ctx, wchar_t** ptrptr, int32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_check_array_repeat:
@@ -463,7 +514,7 @@ extern "C" {
 				return true;
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_rev;
-				if (!jsonw_check_value(ptrptr, level)) {
+				if (!jsonw_check_value(ctx, ptrptr, level)) {
 					return false;
 				}
 				while (jsonw_next != L'\0') {
@@ -472,16 +523,19 @@ extern "C" {
 					} else if (ch == L']') {
 						return true;
 					} else if (!jsonw_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_check_object(char** ptrptr, int32_t level) {
+	bool json_check_object(struct json_context* ctx, char** ptrptr, int32_t level) {
 		char ch;
 		level++;
 	json_check_object_repeat:
@@ -489,12 +543,12 @@ extern "C" {
 			if (ch == '}') {
 				return true;
 			} else if (ch == '\"') {
-				if (!json_check_string(ptrptr, level)) {
+				if (!json_check_string(ctx, ptrptr, level)) {
 					return false;
 				}
 				while (json_next != '\0') {
 					if (ch == ':') {
-						if (!json_check_value(ptrptr, level)) {
+						if (!json_check_value(ctx, ptrptr, level)) {
 							return false;
 						}
 						while (json_next != '\0') {
@@ -503,23 +557,29 @@ extern "C" {
 							} else if (ch == '}') {
 								return true;
 							} else if (!json_is_space(ch)) {
-								return false; // Ошибка синтаксиса
+								json_err(json_error_syntax);
+								return false;
 							}
 						}
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if (!json_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			} else if (!json_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 
-	bool jsonw_check_object(wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_object(struct json_context* ctx, wchar_t** ptrptr, int32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_check_object_repeat:
@@ -527,12 +587,12 @@ extern "C" {
 			if (ch == L'}') {
 				return true;
 			} else if (ch == L'\"') {
-				if (!jsonw_check_string(ptrptr, level)) {
+				if (!jsonw_check_string(ctx, ptrptr, level)) {
 					return false;
 				}
 				while (jsonw_next != L'\0') {
 					if (ch == L':') {
-						if (!jsonw_check_value(ptrptr, level)) {
+						if (!jsonw_check_value(ctx, ptrptr, level)) {
 							return false;
 						}
 						while (jsonw_next != L'\0') {
@@ -541,23 +601,29 @@ extern "C" {
 							} else if (ch == L'}') {
 								return true;
 							} else if (!jsonw_is_space(ch)) {
-								return false; // Ошибка синтаксиса
+								jsonw_err(json_error_syntax);
+								return false;
 							}
 						}
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if (!jsonw_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			} else if (!jsonw_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_check(const char* json) {
+	bool json_check(struct json_context* ctx, const char* json) {
 		char* ptr = (char*)json;
 		char** ptrptr = &ptr;
 		char ch;
@@ -565,23 +631,26 @@ extern "C" {
 			if (json_is_space(ch)) {
 				ptr++;
 			} else if (ch == '{') {
-				if (!json_check_object(ptrptr, 0)) {
+				if (!json_check_object(ctx, ptrptr, 0)) {
 					return false;
 				}
 				while (json_next != '\0') {
 					if (!json_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
 				return true;
 			} else {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 
-	bool jsonw_check(const wchar_t* json) {
+	bool jsonw_check(struct json_context* ctx, const wchar_t* json) {
 		wchar_t* ptr = (wchar_t*)json;
 		wchar_t** ptrptr = &ptr;
 		wchar_t ch;
@@ -589,20 +658,23 @@ extern "C" {
 			if (jsonw_is_space(ch)) {
 				ptr++;
 			} else if (ch == L'{') {
-				if (!jsonw_check_object(ptrptr, 0)) {
+				if (!jsonw_check_object(ctx, ptrptr, 0)) {
 					return false;
 				}
 				while (jsonw_next != L'\0') {
 					if (!jsonw_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return false;
 					}
 				}
 				return true;
 			} else {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
 	struct json_node* json_create(struct json_node* parent, json_type type, uint32_t level, const char* data, uint32_t size) {
@@ -740,7 +812,7 @@ extern "C" {
 #include <math.h>
 #include <wchar.h>
 	
-	bool json_parse_number(char** ptrptr, struct json_node* node) {
+	bool json_parse_number(struct json_context* ctx, char** ptrptr, struct json_node* node) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		char ch = *(*ptrptr);
 		bool minus = false;
@@ -749,7 +821,8 @@ extern "C" {
 			json_next;
 		}
 		if (ch == '\0') {
-			return false; // Неожиданный конец
+			json_err(json_error_eof);
+			return false;
 		} else if ((ch == 'i') || (ch == 'I')) {
 			json_next;
 			if ((ch == 'n') || (ch == 'N')) {
@@ -762,16 +835,19 @@ extern "C" {
 				}
 			}
 			if (ch == '\0') {
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			}
-			return false; // Ошибка синтаксиса
+			json_err(json_error_syntax);
+			return false;
 		} else if (ch == '0') {
 			json_next;
 			goto json_parse_number_point;
 		} else if ((ch >= '1') && (ch <= '9')) {
 			do {
 				if (json_next == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				} else if ((ch < '0') || (ch > '9')) {
 					break;
 				}
@@ -785,13 +861,15 @@ extern "C" {
 			if ((ch >= '0') && (ch <= '9')) {
 				do {
 					if (json_next == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if ((ch < '0') || (ch > '9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
 		if ((ch == 'e') || (ch == 'E')) {
@@ -803,32 +881,39 @@ extern "C" {
 			if ((ch >= '0') && (ch <= '9')) {
 				do {
 					if (json_next == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if ((ch < '0') || (ch > '9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
 		
 		node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data));
-		*(*ptrptr) = '\0';
+		if (node->size > 63 * sizeof(char)) {
+			json_err(json_error_syntax);
+			return false;
+		}
+		
+		memcpy(ctx->buffer, node->data, node->size);
+		ctx->buffer[node->size / sizeof(char)] = 0;
 		if (is_float) {
 			node->value.n.is_float = true;
-			node->value.n.v.f = atof(node->data);
+			node->value.n.v.f = atof(ctx->buffer);
 		} else {
 			node->value.n.is_float = false;
-			node->value.n.v.i = atoll(node->data);
+			node->value.n.v.i = atoll(ctx->buffer);
 		}
-		*(*ptrptr) = ch;
 		
 		json_rev;
 		return true;
 	}
 	
-	bool jsonw_parse_number(wchar_t** ptrptr, struct json_node* node) {
+	bool jsonw_parse_number(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		wchar_t ch = *(*ptrptr);
 		bool minus = false;
@@ -837,7 +922,8 @@ extern "C" {
 			jsonw_next;
 		}
 		if (ch == L'\0') {
-			return false; // Неожиданный конец
+			jsonw_err(json_error_eof);
+			return false;
 		} else if ((ch == L'i') || (ch == L'I')) {
 			jsonw_next;
 			if ((ch == L'n') || (ch == L'N')) {
@@ -850,16 +936,19 @@ extern "C" {
 				}
 			}
 			if (ch == L'\0') {
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			}
-			return false; // Ошибка синтаксиса
+			jsonw_err(json_error_syntax);
+			return false;
 		} else if (ch == L'0') {
 			jsonw_next;
 			goto jsonw_parse_number_point;
 		} else if ((ch >= L'1') && (ch <= L'9')) {
 			do {
 				if (jsonw_next == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				} else if ((ch < L'0') || (ch > L'9')) {
 					break;
 				}
@@ -873,13 +962,15 @@ extern "C" {
 			if ((ch >= L'0') && (ch <= L'9')) {
 				do {
 					if (jsonw_next == L'\0') {
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if ((ch < L'0') || (ch > L'9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
 		if ((ch == L'e') || (ch == L'E')) {
@@ -891,32 +982,39 @@ extern "C" {
 			if ((ch >= L'0') && (ch <= L'9')) {
 				do {
 					if (json_next == L'\0') {
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if ((ch < L'0') || (ch > L'9')) {
 						break;
 					}
 				} while (true);
 			} else {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
 		
 		node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata));
-		*(*ptrptr) = L'\0';
+		if (node->size > 63 * sizeof(wchar_t)) {
+			jsonw_err(json_error_syntax);
+			return false;
+		}
+		
+		memcpy(ctx->wbuffer, node->wdata, node->size);
+		ctx->wbuffer[node->size / sizeof(wchar_t)] = 0;
 		if (is_float) {
 			node->value.n.is_float = true;
-			node->value.n.v.f = wcstold(node->wdata, NULL);
+			node->value.n.v.f = wcstold(ctx->wbuffer, NULL);
 		} else {
 			node->value.n.is_float = false;
-			node->value.n.v.i = wcstoll(node->wdata, NULL, 10);
+			node->value.n.v.i = wcstoll(ctx->wbuffer, NULL, 10);
 		}
-		*(*ptrptr) = ch;
 		
 		jsonw_rev;
 		return true;
 	}
 	
-	bool json_parse_string(char** ptrptr, struct json_node* node) {
+	bool json_parse_string(struct json_context* ctx, char** ptrptr, struct json_node* node) {
 		char ch;
 		uint32_t len = 0;
 		char* save = *ptrptr;
@@ -950,9 +1048,11 @@ extern "C" {
 				}
 				if (cnt > 0) {
 					if (ch == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
 			} else if (ch == '\\') {
@@ -971,15 +1071,18 @@ extern "C" {
 						} else if ((ch >= 'a') && (ch <= 'a')) {
 							utf16 |= (uint16_t)(ch - 'a' + 10);
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == '\0') {
-							return false; // Неожиданный конец
+							json_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -999,32 +1102,40 @@ extern "C" {
 									} else if ((ch >= 'a') && (ch <= 'a')) {
 										utf16_2 |= (uint16_t)(ch - 'a' + 10);
 									} else {
-										return false; // Ошибка синтаксиса
+										json_err(json_error_syntax);
+										return false;
 									}
 									cnt--;
 								}
 								if (cnt > 0) {
 									if (ch == '\0') {
-										return false; // Неожиданный конец
+										json_err(json_error_eof);
+										return false;
 									} else {
-										return false; // Ошибка синтаксиса
+										json_err(json_error_syntax);
+										return false;
 									}
 								}
 								
 								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
 									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
 								} else { // Not UTF16
-									return false; // Ошибка синтаксиса
+									json_err(json_error_syntax);
+									return false;
 								}
 							} else if (ch == '\0') {
-								return false; // Неожиданный конец
+								json_err(json_error_eof);
+								return false;
 							} else {
-								return false; // Ошибка синтаксиса
+								json_err(json_error_syntax);
+								return false;
 							}
 						} else if (ch == '\0') {
-							return false; // Неожиданный конец
+							json_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1044,15 +1155,18 @@ extern "C" {
 						return false;
 					}
 				} else if (ch == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					json_err(json_error_syntax);
+					return false;
 				}
 			} else {
 				len++;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 		
 	json_parse_string_alloc:
 		char* ptr = memAlloc(char, ptr, (len + 1) * sizeof(char));
@@ -1090,9 +1204,11 @@ extern "C" {
 				}
 				if (cnt > 0) {
 					if (ch == '\0') {
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
 			} else if (ch == '\\') {
@@ -1111,15 +1227,18 @@ extern "C" {
 						} else if ((ch >= 'a') && (ch <= 'a')) {
 							utf16 |= (uint16_t)(ch - 'a' + 10);
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == '\0') {
-							return false; // Неожиданный конец
+							json_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1139,32 +1258,40 @@ extern "C" {
 									} else if ((ch >= 'a') && (ch <= 'a')) {
 										utf16_2 |= (uint16_t)(ch - 'a' + 10);
 									} else {
-										return false; // Ошибка синтаксиса
+										json_err(json_error_syntax);
+										return false;
 									}
 									cnt--;
 								}
 								if (cnt > 0) {
 									if (ch == '\0') {
-										return false; // Неожиданный конец
+										json_err(json_error_eof);
+										return false;
 									} else {
-										return false; // Ошибка синтаксиса
+										json_err(json_error_syntax);
+										return false;
 									}
 								}
 								
 								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
 									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
 								} else { // Not UTF16
-									return false; // Ошибка синтаксиса
+									json_err(json_error_syntax);
+									return false;
 								}
 							} else if (ch == '\0') {
-								return false; // Неожиданный конец
+								json_err(json_error_eof);
+								return false;
 							} else {
-								return false; // Ошибка синтаксиса
+								json_err(json_error_syntax);
+								return false;
 							}
 						} else if (ch == '\0') {
-							return false; // Неожиданный конец
+							json_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							json_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1199,18 +1326,21 @@ extern "C" {
 						return false;
 					}
 				} else if (ch == '\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					json_err(json_error_syntax);
+					return false;
 				}
 			} else {
 				*ptr = ch; ptr++;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 	
-	bool jsonw_parse_string(wchar_t** ptrptr, struct json_node* node) {
+	bool jsonw_parse_string(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node) {
 		wchar_t ch;
 		uint32_t len = 0;
 		wchar_t* save = *ptrptr;
@@ -1222,7 +1352,8 @@ extern "C" {
 #if __WCHAR_MAX__ <= 0x10000
 			} else if ((uint16_t)(ch & 0xFC00) == 0xD800) { // found UTF16
 				if (jsonw_next == L'\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				}
 				if ((uint16_t)(ch & 0xFC00) != 0xDC00) {
 					return false; // Not UTF16
@@ -1245,15 +1376,18 @@ extern "C" {
 						} else if ((ch >= L'a') && (ch <= L'a')) {
 							utf16 |= (uint16_t)(ch - L'a' + 10);
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == L'\0') {
-							return false; // Неожиданный конец
+							jsonw_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1273,32 +1407,40 @@ extern "C" {
 									} else if ((ch >= L'a') && (ch <= L'a')) {
 										utf16_2 |= (uint16_t)(ch - L'a' + 10);
 									} else {
-										return false; // Ошибка синтаксиса
+										jsonw_err(json_error_syntax);
+										return false;
 									}
 									cnt--;
 								}
 								if (cnt > 0) {
 									if (ch == L'\0') {
-										return false; // Неожиданный конец
+										jsonw_err(json_error_eof);
+										return false;
 									} else {
-										return false; // Ошибка синтаксиса
+										jsonw_err(json_error_syntax);
+										return false;
 									}
 								}
 								
 								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
 									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
 								} else { // Not UTF16
-									return false; // Ошибка синтаксиса
+									jsonw_err(json_error_syntax);
+									return false;
 								}
 							} else if (ch == L'\0') {
-								return false; // Неожиданный конец
+								jsonw_err(json_error_eof);
+								return false;
 							} else {
-								return false; // Ошибка синтаксиса
+								jsonw_err(json_error_syntax);
+								return false;
 							}
 						} else if (ch == L'\0') {
-							return false; // Неожиданный конец
+							jsonw_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1314,15 +1456,18 @@ extern "C" {
 					len++;
 #endif
 				} else if (ch == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					jsonw_err(json_error_syntax);
+					return false;
 				}
 			} else {
 				len++;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 		
 	jsonw_parse_string_alloc:
 		wchar_t* ptr = memAlloc(wchar_t, ptr, (len + 1) * sizeof(wchar_t));
@@ -1339,7 +1484,8 @@ extern "C" {
 			} else if ((uint16_t)(ch & 0xFC00) == 0xD800) { // found UTF16
 				*ptr = ch; ptr++;
 				if (jsonw_next == L'\0') {
-					return false; // Неожиданный конец
+					json_err(json_error_eof);
+					return false;
 				}
 				if ((uint16_t)(ch & 0xFC00) != 0xDC00) {
 					return false; // Not UTF16
@@ -1362,15 +1508,18 @@ extern "C" {
 						} else if ((ch >= L'a') && (ch <= L'a')) {
 							utf16 |= (uint16_t)(ch - L'a' + 10);
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 						cnt--;
 					}
 					if (cnt > 0) {
 						if (ch == L'\0') {
-							return false; // Неожиданный конец
+							jsonw_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1390,32 +1539,40 @@ extern "C" {
 									} else if ((ch >= L'a') && (ch <= L'a')) {
 										utf16_2 |= (uint16_t)(ch - L'a' + 10);
 									} else {
-										return false; // Ошибка синтаксиса
+										jsonw_err(json_error_syntax);
+										return false;
 									}
 									cnt--;
 								}
 								if (cnt > 0) {
 									if (ch == L'\0') {
-										return false; // Неожиданный конец
+										jsonw_err(json_error_eof);
+										return false;
 									} else {
-										return false; // Ошибка синтаксиса
+										jsonw_err(json_error_syntax);
+										return false;
 									}
 								}
 								
 								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
 									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
 								} else { // Not UTF16
-									return false; // Ошибка синтаксиса
+									jsonw_err(json_error_syntax);
+									return false;
 								}
 							} else if (ch == L'\0') {
-								return false; // Неожиданный конец
+								jsonw_err(json_error_eof);
+								return false;
 							} else {
-								return false; // Ошибка синтаксиса
+								jsonw_err(json_error_syntax);
+								return false;
 							}
 						} else if (ch == L'\0') {
-							return false; // Неожиданный конец
+							jsonw_err(json_error_eof);
+							return false;
 						} else {
-							return false; // Ошибка синтаксиса
+							jsonw_err(json_error_syntax);
+							return false;
 						}
 					}
 					
@@ -1432,21 +1589,24 @@ extern "C" {
 					*ptr = (wchar_t)utf16; ptr++;
 #endif
 				} else if (ch == L'\0') {
-					return false; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return false;
 				} else {
-					return false; // Ошибка синтаксиса
+					jsonw_err(json_error_syntax);
+					return false;
 				}
 			} else {
 				*ptr = ch; ptr++;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_parse_object(char** ptrptr, struct json_node* node, int32_t level);
-	bool json_parse_array(char** ptrptr, struct json_node* node, int32_t level);
+	bool json_parse_object(struct json_context* ctx, char** ptrptr, struct json_node* node, int32_t level);
+	bool json_parse_array(struct json_context* ctx, char** ptrptr, struct json_node* node, int32_t level);
 	
-	struct json_node* json_parse_node(char** ptrptr, struct json_node* parent, int32_t level) {
+	struct json_node* json_parse_node(struct json_context* ctx, char** ptrptr, struct json_node* parent, int32_t level) {
 		char ch;
 		struct json_node* node = NULL;
 		while (json_next != '\0') {
@@ -1455,7 +1615,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!json_parse_string(ptrptr, node)) {
+				if (!json_parse_string(ctx, ptrptr, node)) {
 					json_destroy(node);
 					return NULL;
 				}
@@ -1465,7 +1625,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!json_parse_number(ptrptr, node)) {
+				if (!json_parse_number(ctx, ptrptr, node)) {
 					json_destroy(node);
 					return NULL;
 				}
@@ -1475,7 +1635,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!json_parse_object(ptrptr, node, level)) {
+				if (!json_parse_object(ctx, ptrptr, node, level)) {
 					json_destroy(node);
 					return NULL;
 				}
@@ -1485,7 +1645,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!json_parse_array(ptrptr, node, level)) {
+				if (!json_parse_array(ctx, ptrptr, node, level)) {
 					json_destroy(node);
 					return NULL;
 				}
@@ -1507,9 +1667,11 @@ extern "C" {
 					}
 				}
 				if (ch == '\0') {
-					return NULL; // Неожиданный конец
+					json_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == 'f') || (ch == 'F')) {
 				json_next;
 				if ((ch == 'a') || (ch == 'A')) {
@@ -1530,9 +1692,11 @@ extern "C" {
 					}
 				}
 				if (ch == '\0') {
-					return NULL; // Неожиданный конец
+					json_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == 'n') || (ch == 'N')) {
 				json_next;
 				if ((ch == 'u') || (ch == 'U')) {
@@ -1560,9 +1724,11 @@ extern "C" {
 					}
 				}
 				if (ch == '\0') {
-					return NULL; // Неожиданный конец
+					json_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == 'i') || (ch == 'I')) {
 				json_next;
 				if ((ch == 'n') || (ch == 'N')) {
@@ -1578,20 +1744,24 @@ extern "C" {
 					}
 				}
 				if (ch == '\0') {
-					return NULL; // Неожиданный конец
+					json_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			} else if (!json_is_space(ch)) {
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			}
 		}
-		return NULL; // Неожиданный конец
+		json_err(json_error_eof);
+		return NULL;
 	}
 	
-	bool jsonw_parse_object(wchar_t** ptrptr, struct json_node* node, int32_t level);
-	bool jsonw_parse_array(wchar_t** ptrptr, struct json_node* node, int32_t level);
+	bool jsonw_parse_object(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node, int32_t level);
+	bool jsonw_parse_array(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node, int32_t level);
 	
-	struct json_node* jsonw_parse_node(wchar_t** ptrptr, struct json_node* parent, int32_t level) {
+	struct json_node* jsonw_parse_node(struct json_context* ctx, wchar_t** ptrptr, struct json_node* parent, int32_t level) {
 		wchar_t ch;
 		struct json_node* node = NULL;
 		while (json_next != L'\0') {
@@ -1600,7 +1770,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!jsonw_parse_string(ptrptr, node)) {
+				if (!jsonw_parse_string(ctx, ptrptr, node)) {
 					jsonw_destroy(node);
 					return NULL;
 				}
@@ -1610,7 +1780,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!jsonw_parse_number(ptrptr, node)) {
+				if (!jsonw_parse_number(ctx, ptrptr, node)) {
 					jsonw_destroy(node);
 					return NULL;
 				}
@@ -1620,7 +1790,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!jsonw_parse_object(ptrptr, node, level)) {
+				if (!jsonw_parse_object(ctx, ptrptr, node, level)) {
 					jsonw_destroy(node);
 					return NULL;
 				}
@@ -1630,7 +1800,7 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!jsonw_parse_array(ptrptr, node, level)) {
+				if (!jsonw_parse_array(ctx, ptrptr, node, level)) {
 					jsonw_destroy(node);
 					return NULL;
 				}
@@ -1652,9 +1822,11 @@ extern "C" {
 					}
 				}
 				if (ch == L'\0') {
-					return NULL; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == L'f') || (ch == L'F')) {
 				jsonw_next;
 				if ((ch == L'a') || (ch == L'A')) {
@@ -1675,9 +1847,11 @@ extern "C" {
 					}
 				}
 				if (ch == L'\0') {
-					return NULL; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == L'n') || (ch == L'N')) {
 				jsonw_next;
 				if ((ch == L'u') || (ch == L'U')) {
@@ -1705,9 +1879,11 @@ extern "C" {
 					}
 				}
 				if (ch == L'\0') {
-					return NULL; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			} else if ((ch == L'i') || (ch == L'I')) {
 				jsonw_next;
 				if ((ch == L'n') || (ch == L'N')) {
@@ -1723,17 +1899,21 @@ extern "C" {
 					}
 				}
 				if (ch == L'\0') {
-					return NULL; // Неожиданный конец
+					jsonw_err(json_error_eof);
+					return NULL;
 				}
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			} else if (!jsonw_is_space(ch)) {
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			}
 		}
-		return NULL; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return NULL;
 	}
 	
-	bool json_parse_array(char** ptrptr, struct json_node* node, int32_t level) {
+	bool json_parse_array(struct json_context* ctx, char** ptrptr, struct json_node* node, int32_t level) {
 		char ch;
 		level++;
 	json_parse_array_repeat:
@@ -1743,7 +1923,7 @@ extern "C" {
 				return true;
 			} else if (!json_is_space(ch)) {
 				json_rev;
-				struct json_node* value = json_parse_node(ptrptr, node, level);
+				struct json_node* value = json_parse_node(ctx, ptrptr, node, level);
 				if (value == NULL) {
 					return false;
 				}
@@ -1758,16 +1938,19 @@ extern "C" {
 						node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 						return true;
 					} else if (!json_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 	
-	bool jsonw_parse_array(wchar_t** ptrptr, struct json_node* node, int32_t level) {
+	bool jsonw_parse_array(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node, int32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_parse_array_repeat:
@@ -1777,7 +1960,7 @@ extern "C" {
 				return true;
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_rev;
-				struct json_node* value = jsonw_parse_node(ptrptr, node, level);
+				struct json_node* value = jsonw_parse_node(ctx, ptrptr, node, level);
 				if (value == NULL) {
 					return false;
 				}
@@ -1792,16 +1975,19 @@ extern "C" {
 						node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 						return true;
 					} else if (!jsonw_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	bool json_parse_object(char** ptrptr, struct json_node* node, int32_t level) {
+	bool json_parse_object(struct json_context* ctx, char** ptrptr, struct json_node* node, int32_t level) {
 		char ch;
 		level++;
 	json_parse_object_repeat:
@@ -1814,13 +2000,13 @@ extern "C" {
 				if (vkey == NULL) {
 					return false;
 				}
-				if (!json_parse_string(ptrptr, vkey)) {
+				if (!json_parse_string(ctx, ptrptr, vkey)) {
 					json_destroy(vkey);
 					return false;
 				}
 				while (json_next != '\0') {
 					if (ch == ':') {
-						struct json_node* value = json_parse_node(ptrptr, node, level);
+						struct json_node* value = json_parse_node(ctx, ptrptr, node, level);
 						if (value == NULL) {
 							json_destroy(vkey);
 							return false;
@@ -1837,23 +2023,29 @@ extern "C" {
 								node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 								return true;
 							} else if (!json_is_space(ch)) {
-								return false; // Ошибка синтаксиса
+								json_err(json_error_syntax);
+								return false;
 							}
 						}
-						return false; // Неожиданный конец
+						json_err(json_error_eof);
+						return false;
 					} else if (!json_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				json_err(json_error_eof);
+				return false;
 			} else if (!json_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		json_err(json_error_eof);
+		return false;
 	}
 	
-	bool jsonw_parse_object(wchar_t** ptrptr, struct json_node* node, int32_t level) {
+	bool jsonw_parse_object(struct json_context* ctx, wchar_t** ptrptr, struct json_node* node, int32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_parse_object_repeat:
@@ -1866,13 +2058,13 @@ extern "C" {
 				if (vkey == NULL) {
 					return false;
 				}
-				if (!jsonw_parse_string(ptrptr, vkey)) {
+				if (!jsonw_parse_string(ctx, ptrptr, vkey)) {
 					jsonw_destroy(vkey);
 					return false;
 				}
 				while (jsonw_next != L'\0') {
 					if (ch == L':') {
-						struct json_node* value = jsonw_parse_node(ptrptr, node, level);
+						struct json_node* value = jsonw_parse_node(ctx, ptrptr, node, level);
 						if (value == NULL) {
 							jsonw_destroy(vkey);
 							return false;
@@ -1889,23 +2081,30 @@ extern "C" {
 								node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 								return true;
 							} else if (!jsonw_is_space(ch)) {
-								return false; // Ошибка синтаксиса
+								jsonw_err(json_error_syntax);
+								return false;
 							}
 						}
-						return false; // Неожиданный конец
+						jsonw_err(json_error_eof);
+						return false;
 					} else if (!jsonw_is_space(ch)) {
-						return false; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return false;
 					}
 				}
-				return false; // Неожиданный конец
+				jsonw_err(json_error_eof);
+				return false;
 			} else if (!jsonw_is_space(ch)) {
-				return false; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return false;
 			}
 		}
-		return false; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return false;
 	}
 	
-	struct json_node* json_parse(const char* json) {
+	struct json_node* json_parse(struct json_context* ctx, const char* json) {
+		ctx->seterror(json_error_none, NULL);
 		char* ptr = (char*)json;
 		char** ptrptr = &ptr;
 		char ch;
@@ -1917,25 +2116,29 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!json_parse_object(ptrptr, node, 0)) {
+				if (!json_parse_object(ctx, ptrptr, node, 0)) {
 					json_destroy(node);
 					return NULL;
 				}
 				while (json_next != '\0') {
 					if (!json_is_space(ch)) {
 						json_destroy(node);
-						return NULL; // Ошибка синтаксиса
+						json_err(json_error_syntax);
+						return NULL;
 					}
 				}
 				return node;
 			} else {
-				return NULL; // Ошибка синтаксиса
+				json_err(json_error_syntax);
+				return NULL;
 			}
 		}
-		return NULL; // Неожиданный конец
+		json_err(json_error_eof);
+		return NULL;
 	}
 	
-	struct json_node* jsonw_parse(const wchar_t* json) {
+	struct json_node* jsonw_parse(struct json_context* ctx, const wchar_t* json) {
+		ctx->wseterror(json_error_none, NULL);
 		wchar_t* ptr = (wchar_t*)json;
 		wchar_t** ptrptr = &ptr;
 		wchar_t ch;
@@ -1947,22 +2150,25 @@ extern "C" {
 				if (node == NULL) {
 					return NULL;
 				}
-				if (!jsonw_parse_object(ptrptr, node, 0)) {
+				if (!jsonw_parse_object(ctx, ptrptr, node, 0)) {
 					jsonw_destroy(node);
 					return NULL;
 				}
 				while (jsonw_next != L'\0') {
 					if (!jsonw_is_space(ch)) {
 						jsonw_destroy(node);
-						return NULL; // Ошибка синтаксиса
+						jsonw_err(json_error_syntax);
+						return NULL;
 					}
 				}
 				return node;
 			} else {
-				return NULL; // Ошибка синтаксиса
+				jsonw_err(json_error_syntax);
+				return NULL;
 			}
 		}
-		return NULL; // Неожиданный конец
+		jsonw_err(json_error_eof);
+		return NULL;
 	}
 	
 /*
@@ -2155,7 +2361,6 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-
 
 String JSON::encode(const String& value) throw(const char*) {
 	// TODO: encode JSON string

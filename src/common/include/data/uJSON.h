@@ -34,9 +34,66 @@ extern "C" {
 	
 	enum json_error_type {
 		json_error_none = 0,
-		json_error_eof = 1,
-		json_error_syntax = 2,
+		json_error_oom = 1,
+		json_error_eof = 2,
+		json_error_syntax = 3,
 	};
+
+	struct json_number {
+		bool is_float;
+		union {
+			int64_t	 i;
+			double	 f;
+		} v;
+	};
+	
+	struct json_context;
+	struct json_node;
+	
+	struct json_object_callbacks {
+		typedef void (*object_callback)(struct json_context* ctx, const char* key, void* target);
+		typedef void (*array_callback)(struct json_context* ctx, const char* key, void* target);
+		typedef void (*string_callback)(struct json_context* ctx, const char* key, char* value, void* target);
+		typedef void (*number_callback)(struct json_context* ctx, const char* key, struct json_number& number, void* target);
+		typedef void (*boolean_callback)(struct json_context* ctx, const char* key, bool value, void* target);
+		typedef void (*null_callback)(struct json_context* ctx, const char* key, void* target);
+		
+		object_callback onobject;
+		array_callback onarray;
+		string_callback onstring;
+		number_callback onnumber;
+		boolean_callback onboolean;
+		null_callback onnull;
+	};
+
+	struct json_array_callbacks {
+		typedef void (*object_callback)(struct json_context* ctx, const int index, void* target);
+		typedef void (*array_callback)(struct json_context* ctx, const int index, void* target);
+		typedef void (*string_callback)(struct json_context* ctx, const int index, const char* value, void* target);
+		typedef void (*number_callback)(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+		typedef void (*boolean_callback)(struct json_context* ctx, const int index, const bool value, void* target);
+		typedef void (*null_callback)(struct json_context* ctx, const int index, void* target);
+		
+		object_callback onobject;
+		array_callback onarray;
+		string_callback onstring;
+		number_callback onnumber;
+		boolean_callback onboolean;
+		null_callback onnull;
+	};
+	
+	struct json_callbacks {
+		typedef void (*root_callback)(struct json_context* ctx, void* target);
+		
+		void* target;
+		
+		root_callback onroot;
+		struct json_object_callbacks onobject;
+		struct json_array_callbacks onarray;
+	};
+	
+	inline void json_store_callbacks(struct json_callbacks* dst, const struct json_callbacks* src) { memcpy(dst, src, sizeof(struct json_callbacks)); }
+	inline void json_clear_callbacks(struct json_callbacks* dst, void* newtarget) { memset(dst, 0, sizeof(struct json_callbacks)); dst->target = newtarget; }
 	
 	struct json_context {
 		union {
@@ -68,6 +125,8 @@ extern "C" {
 			this->error.wptr = ptr;
 			this->error.wexpected = expected;
 		}
+		
+		json_callbacks* callbacks;
 	};
 	
 	struct json_node {
@@ -95,13 +154,7 @@ extern "C" {
 			char*		s;
 			wchar_t*	ws;
 			
-			struct {
-				bool is_float;
-				union {
-					int64_t	 i;
-					double	 f;
-				} v;
-			} n;
+			struct json_number n;
 			
 			bool		b;
 		} value;
@@ -121,7 +174,9 @@ extern "C" {
 	
 	struct json_node* json_parse(struct json_context* ctx, const char* json);
 	struct json_node* jsonw_parse(struct json_context* ctx, const wchar_t* json);
-	
+
+	bool json_call(struct json_context* ctx, const char* json);
+
 	struct json_node* json_array_get(const struct json_node* node, uint32_t index);
 	struct json_node* json_object_get(const struct json_node* node, const char* key);
 	struct json_node* json_object_geti(const struct json_node* node, const char* key);
@@ -132,6 +187,9 @@ extern "C" {
 	const wchar_t* jsonw_key(const struct json_node* value, const wchar_t* def = 0);
 	const char* json_value(const struct json_node* value, const char* def = 0);
 	const wchar_t* jsonw_value(const struct json_node* value, const wchar_t* def = 0);
+	
+	void json_debug_error(const struct json_context& ctx, const char* json);
+	void jsonw_debug_error(const struct json_context& ctx, const wchar_t* json);
 
 #ifdef __cplusplus
 }

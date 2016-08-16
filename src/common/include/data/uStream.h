@@ -18,15 +18,16 @@
 #define JAPPSY_USTREAM_H
 
 #include <platform.h>
+#include <data/uObject.h>
 
-class Stream {
+class RefStream : public RefObject {
 private:
-	bool m_allocated;
-	uint8_t* m_buffer;
-	uint32_t m_size;
-	uint32_t m_position;
+	bool m_allocated = false;
+	uint8_t* m_buffer = NULL;
+	uint32_t m_size = 0;
+	uint32_t m_position = 0;
 	
-	inline static bool equalBytes(const Stream& a, const Stream& b) {
+	inline static bool equalBytes(const RefStream& a, const RefStream& b) {
 		if (a.m_size != b.m_size)
 			return false;
 		return (memcmp(a.m_buffer, b.m_buffer, a.m_size) == 0);
@@ -51,18 +52,51 @@ private:
 	}
 
 public:
-	Stream(const wchar_t* data) throw(const char*); // eOutOfMemory
-	Stream(const char* data);
-	Stream(const char* data, bool autorelease);
-	Stream(const void* data, uint32_t length);
-	Stream(const void* data, uint32_t length, bool autorelease);
-	~Stream();
+	inline RefStream() {}
+	RefStream(const wchar_t* data) throw(const char*); // eOutOfMemory
+	RefStream(const char* data, bool autorelease = false);
+	RefStream(const void* data, uint32_t length, bool autorelease = false);
+	~RefStream();
+	
+	inline void* getBuffer() { return m_buffer; }
+	inline uint32_t getSize() { return m_size; }
 	
 	uint8_t* readBytes(uint32_t length) throw(const char*); // eIOReadLimit, eOutOfMemory
 	uint32_t readInt() throw(const char*); // eIOReadLimit
 	uint8_t readUnsignedByte() throw(const char*); // eIOReadLimit
 	
 	int32_t skip(uint32_t length);
+};
+
+class Stream : public Object {
+public:
+	RefClass(Stream, Stream);
+	
+	inline Stream(const wchar_t* data) throw(const char*) {
+		RefStream* o = new RefStream(data);
+		if (o == NULL) throw eOutOfMemory;
+		this->setRef(o);
+	}
+
+	inline Stream(const char* data, bool autorelease) throw(const char*) {
+		RefStream* o = new RefStream(data, autorelease);
+		if (o == NULL) throw eOutOfMemory;
+		this->setRef(o);
+	}
+	
+	inline Stream(const void* data, uint32_t length, bool autorelease) throw(const char*) {
+		RefStream* o = new RefStream(data, length, autorelease);
+		if (o == NULL) throw eOutOfMemory;
+		this->setRef(o);
+	}
+	
+	inline void* getBuffer() throw(const char*) { CHECKTHIS; return THIS->getBuffer(); }
+	inline uint32_t getSize() throw(const char*) { CHECKTHIS; return THIS->getSize(); }
+
+	inline uint8_t* readBytes(uint32_t length) throw(const char*) { CHECKTHIS; return THIS->readBytes(length); }
+	inline uint32_t readInt() throw(const char*) { CHECKTHIS; return THIS->readInt(); }
+	inline uint8_t readUnsignedByte() throw(const char*) { CHECKTHIS; return THIS->readUnsignedByte(); }
+	inline int32_t skip(uint32_t length) throw(const char*) { CHECKTHIS; return THIS->skip(length); }
 };
 
 #endif //JAPPSY_USTREAM_H

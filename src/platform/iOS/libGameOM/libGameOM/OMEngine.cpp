@@ -53,10 +53,25 @@ void onTouch(const wchar_t* event) {
 #include <data/uJSONArray.h>
 #include <data/uJSONObject.h>
 
+#include <net/uHTTPClient.h>
+#include <net/uLoader.h>
+
+bool onStream(const String& url, Stream& stream, const Object& userData) {
+//    JSONObject json = new JSONObject( String((const char*)stream.getBuffer(), stream.getSize()) );
+//    json.log();
+    
+    return true;
+}
+
+void onError(const String& url, const String& error, const Object& userData) {
+    sleep(0);
+}
+
 OMEngine::OMEngine() {
     context = memNew(context, GLRender(this, 1920, 1080, ::onFrame, ::onTouch));
     
     URI::basePath = L"https://localhost/";
+    
     
     //URI* uri = new URI(L"http://user:password@host:12345/path/path2/path3/file.ext?query=query#anchor");
     URI* uri = new URI(L"path/path2/path3/file.ext?query=query#anchor");
@@ -67,9 +82,16 @@ OMEngine::OMEngine() {
         #include "OMLoad.res"
     ;
     
+    Loader loader = new Loader();
+    loader->basePath = L"https://www.cox.ru/res/om/";
+    loader->load(sOMLoadRes);
+    
     JSONObject json;
     json = new JSONObject(L"{\"test\":12345}");
     json.log();
+
+    HTTPClient::Request(L"https://www.cox.ru/res/om/models/ball.json", false, 0, 5, onStream, onError);
+
     json = new JSONObject(sOMLoadRes);
     json.log();
 

@@ -24,12 +24,14 @@ extern "C" {
 
 	#define json_is_space(ch)	(((ch) == ' ') || ((ch) == '\t') || ((ch) == '\r') || ((ch) == '\n') || ((ch) == '\b') || ((ch) == '\f'))
 	#define json_is_hex(ch)		((((ch) >= '0') && ((ch) <= '9')) || (((ch) >= 'a') && ((ch) <= 'f')) || (((ch) >= 'A') && ((ch) <= 'F')))
+	#define json_is_special(ch)	(((ch) == '\t') || ((ch) == '\r') || ((ch) == '\n') || ((ch) == '\b') || ((ch) == '\f'))
 	#define json_cur			*(*ptrptr)
 	#define json_next			(ch = *(++(*ptrptr)))
 	#define json_rev			(*ptrptr)--
 
 	#define jsonw_is_space(ch)	(((ch) == L' ') || ((ch) == L'\t') || ((ch) == L'\r') || ((ch) == L'\n') || ((ch) == L'\b') || ((ch) == L'\f'))
 	#define jsonw_is_hex(ch)	((((ch) >= L'0') && ((ch) <= L'9')) || (((ch) >= L'a') && ((ch) <= L'f')) || (((ch) >= L'A') && ((ch) <= L'F')))
+	#define jsonw_is_special(ch)	(((ch) == L'\t') || ((ch) == L'\r') || ((ch) == L'\n') || ((ch) == L'\b') || ((ch) == L'\f'))
 	#define jsonw_cur			*(*ptrptr)
 	#define jsonw_next			(ch = *(++(*ptrptr)))
 	#define jsonw_rev			(*ptrptr)--
@@ -624,6 +626,7 @@ extern "C" {
 	}
 	
 	bool json_check(struct json_context* ctx, const char* json) {
+		ctx->seterror(json_error_none, NULL);
 		char* ptr = (char*)json;
 		char** ptrptr = &ptr;
 		char ch;
@@ -651,6 +654,7 @@ extern "C" {
 	}
 
 	bool jsonw_check(struct json_context* ctx, const wchar_t* json) {
+		ctx->wseterror(json_error_none, NULL);
 		wchar_t* ptr = (wchar_t*)json;
 		wchar_t** ptrptr = &ptr;
 		wchar_t ch;
@@ -1613,6 +1617,7 @@ extern "C" {
 			if (ch == '\"') {
 				node = json_create(parent, json_type_string, level, *ptrptr, 0);
 				if (node == NULL) {
+					json_err(json_error_oom);
 					return NULL;
 				}
 				if (!json_parse_string(ctx, ptrptr, node)) {
@@ -1623,6 +1628,7 @@ extern "C" {
 			} else if ((ch == '-') || ((ch >= '0') && (ch <= '9'))) {
 				node = json_create(parent, json_type_number, level, *ptrptr, 0);
 				if (node == NULL) {
+					json_err(json_error_oom);
 					return NULL;
 				}
 				if (!json_parse_number(ctx, ptrptr, node)) {
@@ -1633,6 +1639,7 @@ extern "C" {
 			} else if (ch == '{') {
 				node = json_create(parent, json_type_object, level, *ptrptr, 0);
 				if (node == NULL) {
+					json_err(json_error_oom);
 					return NULL;
 				}
 				if (!json_parse_object(ctx, ptrptr, node, level)) {
@@ -1643,6 +1650,7 @@ extern "C" {
 			} else if (ch == '[') {
 				node = json_create(parent, json_type_array, level, *ptrptr, 0);
 				if (node == NULL) {
+					json_err(json_error_oom);
 					return NULL;
 				}
 				if (!json_parse_array(ctx, ptrptr, node, level)) {
@@ -1659,6 +1667,7 @@ extern "C" {
 						if ((ch == 'e') || (ch == 'E')) {
 							node = json_create(parent, json_type_boolean, level, *ptrptr - 3, 4);
 							if (node == NULL) {
+								json_err(json_error_oom);
 								return NULL;
 							}
 							node->value.b = true;
@@ -1683,6 +1692,7 @@ extern "C" {
 							if ((ch == 'e') || (ch == 'E')) {
 								node = json_create(parent, json_type_boolean, level, *ptrptr - 4, 5);
 								if (node == NULL) {
+									json_err(json_error_oom);
 									return NULL;
 								}
 								node->value.b = false;
@@ -1706,6 +1716,7 @@ extern "C" {
 						if ((ch == 'l') || (ch == 'L')) {
 							node = json_create(parent, json_type_null, level, *ptrptr - 3, 4);
 							if (node == NULL) {
+								json_err(json_error_oom);
 								return NULL;
 							}
 							return node;
@@ -1716,6 +1727,7 @@ extern "C" {
 					if ((ch == 'n') || (ch == 'N')) {
 						node = json_create(parent, json_type_number, level, *ptrptr - 2, 3);
 						if (node == NULL) {
+							json_err(json_error_oom);
 							return NULL;
 						}
 						node->value.n.is_float = true;
@@ -1736,6 +1748,7 @@ extern "C" {
 					if ((ch == 'f') || (ch == 'F')) {
 						node = json_create(parent, json_type_number, level, *ptrptr - 2, 3);
 						if (node == NULL) {
+							json_err(json_error_oom);
 							return NULL;
 						}
 						node->value.n.is_float = true;
@@ -1768,6 +1781,7 @@ extern "C" {
 			if (ch == L'\"') {
 				node = jsonw_create(parent, json_type_string, level, *ptrptr, 0);
 				if (node == NULL) {
+					jsonw_err(json_error_oom);
 					return NULL;
 				}
 				if (!jsonw_parse_string(ctx, ptrptr, node)) {
@@ -1778,6 +1792,7 @@ extern "C" {
 			} else if ((ch == L'-') || ((ch >= L'0') && (ch <= L'9'))) {
 				node = jsonw_create(parent, json_type_number, level, *ptrptr, 0);
 				if (node == NULL) {
+					jsonw_err(json_error_oom);
 					return NULL;
 				}
 				if (!jsonw_parse_number(ctx, ptrptr, node)) {
@@ -1788,6 +1803,7 @@ extern "C" {
 			} else if (ch == L'{') {
 				node = jsonw_create(parent, json_type_object, level, *ptrptr, 0);
 				if (node == NULL) {
+					jsonw_err(json_error_oom);
 					return NULL;
 				}
 				if (!jsonw_parse_object(ctx, ptrptr, node, level)) {
@@ -1798,6 +1814,7 @@ extern "C" {
 			} else if (ch == L'[') {
 				node = jsonw_create(parent, json_type_array, level, *ptrptr, 0);
 				if (node == NULL) {
+					jsonw_err(json_error_oom);
 					return NULL;
 				}
 				if (!jsonw_parse_array(ctx, ptrptr, node, level)) {
@@ -1814,6 +1831,7 @@ extern "C" {
 						if ((ch == L'e') || (ch == L'E')) {
 							node = jsonw_create(parent, json_type_boolean, level, *ptrptr - 3, 4 * sizeof(wchar_t));
 							if (node == NULL) {
+								jsonw_err(json_error_oom);
 								return NULL;
 							}
 							node->value.b = true;
@@ -1838,6 +1856,7 @@ extern "C" {
 							if ((ch == L'e') || (ch == L'E')) {
 								node = jsonw_create(parent, json_type_boolean, level, *ptrptr - 4, 5 * sizeof(wchar_t));
 								if (node == NULL) {
+									jsonw_err(json_error_oom);
 									return NULL;
 								}
 								node->value.b = false;
@@ -1861,6 +1880,7 @@ extern "C" {
 						if ((ch == L'l') || (ch == L'L')) {
 							node = jsonw_create(parent, json_type_null, level, *ptrptr - 3, 4 * sizeof(wchar_t));
 							if (node == NULL) {
+								jsonw_err(json_error_oom);
 								return NULL;
 							}
 							return node;
@@ -1871,6 +1891,7 @@ extern "C" {
 					if ((ch == L'n') || (ch == L'N')) {
 						node = jsonw_create(parent, json_type_number, level, *ptrptr - 2, 3 * sizeof(wchar_t));
 						if (node == NULL) {
+							jsonw_err(json_error_oom);
 							return NULL;
 						}
 						node->value.n.is_float = true;
@@ -1891,6 +1912,7 @@ extern "C" {
 					if ((ch == L'f') || (ch == L'F')) {
 						node = jsonw_create(parent, json_type_number, level, *ptrptr - 2, 3 * sizeof(wchar_t));
 						if (node == NULL) {
+							jsonw_err(json_error_oom);
 							return NULL;
 						}
 						node->value.n.is_float = true;
@@ -1925,6 +1947,7 @@ extern "C" {
 				json_rev;
 				struct json_node* value = json_parse_node(ctx, ptrptr, node, level);
 				if (value == NULL) {
+					json_err(json_error_oom);
 					return false;
 				}
 				if (!json_array_add(node, value)) {
@@ -1998,6 +2021,7 @@ extern "C" {
 			} else if (ch == '\"') {
 				struct json_node* vkey = json_create(node, json_type_string, level, *ptrptr, 0);
 				if (vkey == NULL) {
+					json_err(json_error_oom);
 					return false;
 				}
 				if (!json_parse_string(ctx, ptrptr, vkey)) {
@@ -2024,17 +2048,21 @@ extern "C" {
 								return true;
 							} else if (!json_is_space(ch)) {
 								json_err(json_error_syntax);
+								json_destroy(vkey);
 								return false;
 							}
 						}
 						json_err(json_error_eof);
+						json_destroy(vkey);
 						return false;
 					} else if (!json_is_space(ch)) {
 						json_err(json_error_syntax);
+						json_destroy(vkey);
 						return false;
 					}
 				}
 				json_err(json_error_eof);
+				json_destroy(vkey);
 				return false;
 			} else if (!json_is_space(ch)) {
 				json_err(json_error_syntax);
@@ -2056,6 +2084,7 @@ extern "C" {
 			} else if (ch == L'\"') {
 				struct json_node* vkey = jsonw_create(node, json_type_string, level, *ptrptr, 0);
 				if (vkey == NULL) {
+					jsonw_err(json_error_oom);
 					return false;
 				}
 				if (!jsonw_parse_string(ctx, ptrptr, vkey)) {
@@ -2082,17 +2111,21 @@ extern "C" {
 								return true;
 							} else if (!jsonw_is_space(ch)) {
 								jsonw_err(json_error_syntax);
+								json_destroy(vkey);
 								return false;
 							}
 						}
 						jsonw_err(json_error_eof);
+						json_destroy(vkey);
 						return false;
 					} else if (!jsonw_is_space(ch)) {
 						jsonw_err(json_error_syntax);
+						json_destroy(vkey);
 						return false;
 					}
 				}
 				jsonw_err(json_error_eof);
+				json_destroy(vkey);
 				return false;
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_err(json_error_syntax);
@@ -2114,6 +2147,7 @@ extern "C" {
 			} else if (ch == '{') {
 				json_node* node = json_create(0, json_type_object, 0, ptr, 0);
 				if (node == NULL) {
+					json_err(json_error_oom);
 					return NULL;
 				}
 				if (!json_parse_object(ctx, ptrptr, node, 0)) {
@@ -2148,6 +2182,7 @@ extern "C" {
 			} else if (ch == L'{') {
 				json_node* node = jsonw_create(0, json_type_object, 0, ptr, 0);
 				if (node == NULL) {
+					jsonw_err(json_error_oom);
 					return NULL;
 				}
 				if (!jsonw_parse_object(ctx, ptrptr, node, 0)) {
@@ -2357,6 +2392,1038 @@ extern "C" {
 		}
 		return def;
 	}
+	
+#ifdef DEBUG
+	
+	void json_debug_error(const struct json_context& ctx, const char* json) {
+		uint32_t size = 0;
+		utf8_strlen(json, &size);
+		int errofs = (int)((intptr_t)(ctx.error.ptr) - (intptr_t)(json));
+		int prefix = 4;
+		int start = errofs - 8; if (start < 0) { start = 0; prefix = 0; }
+		int postfix = 4;
+		int end = errofs + 8; if (end > size) { end = size; postfix = 0; }
+		int len = (end - start);
+		char* line1 = (char*)mmalloc((len + prefix + postfix + 1)*sizeof(char));
+		char* line2 = (char*)mmalloc((len + prefix + postfix + 1)*sizeof(char));
+		char* p1 = line1;
+		char* p2 = line2;
+		char* e = (char*)json;
+		while (prefix-- > 1) {
+			*p1 = ' ';
+			*p2 = '.';
+			p1++; p2++;
+		}
+		if (prefix-- > 0) {
+			*p1 = ' ';
+			*p2 = ' ';
+			p1++; p2++;
+		}
+		while (len-- > 0) {
+			if (e == ctx.error.ptr) *p1 = 'v'; else *p1 = ' ';
+			char ch = *e;
+			if (json_is_special(ch)) *p2 = ' '; else *p2 = *e;
+			p1++; p2++; e++;
+		}
+		if (postfix-- > 0) {
+			*p1 = ' ';
+			*p2 = ' ';
+			p1++; p2++;
+		}
+		while (postfix-- > 0) {
+			*p1 = ' ';
+			*p2 = '.';
+			p1++; p2++;
+		}
+		*p1 = '\0';
+		*p2 = '\0';
+		
+		switch (ctx.error.type) {
+			case json_error_none:
+				LOG("JSON Parse: No Error!");
+				break;
+			case json_error_oom:
+				LOG("JSON Parse: Out Of Memory!");
+				break;
+			case json_error_eof:
+				LOG("JSON Parse: Unexpected End!");
+				break;
+			case json_error_syntax:
+				LOG("JSON Parse: Syntax Error!");
+				break;
+		}
+		LOG("%s", line1);
+		LOG("%s", line2);
+		
+		mmfree(line1);
+		mmfree(line2);
+	}
+	
+	void jsonw_log(const wchar_t* wstr) {
+		if (wstr == NULL)
+			return;
+		
+		uint32_t size = wcs_toutf8_size(wstr);
+		if (size == 0)
+			return;
+		
+		char* str = (char*)mmalloc(size);
+		if (str == NULL)
+			return;
+		
+		wcs_toutf8(wstr, str, size);
+		
+		LOG("%s", str);
+		
+		mmfree(str);
+	}
+	
+	void jsonw_debug_error(const struct json_context& ctx, const wchar_t* json) {
+		uint32_t size = wcs_strlen(json, NULL);
+		int errofs = (int)((intptr_t)(ctx.error.ptr) - (intptr_t)(json)) / sizeof(wchar_t);
+		int prefix = 4;
+		int start = errofs - 8; if (start < 0) { start = 0; prefix = 0; }
+		int postfix = 4;
+		int end = errofs + 8; if (end > size) { end = size; postfix = 0; }
+		int len = (end - start);
+		wchar_t* line1 = (wchar_t*)mmalloc((len + prefix + postfix + 1)*sizeof(wchar_t));
+		wchar_t* line2 = (wchar_t*)mmalloc((len + prefix + postfix + 1)*sizeof(wchar_t));
+		wchar_t* p1 = line1;
+		wchar_t* p2 = line2;
+		wchar_t* e = (wchar_t*)json;
+		while (prefix-- > 1) {
+			*p1 = L' ';
+			*p2 = L'.';
+			p1++; p2++;
+		}
+		if (prefix-- > 0) {
+			*p1 = L' ';
+			*p2 = L' ';
+			p1++; p2++;
+		}
+		while (len-- > 0) {
+			if (e == ctx.error.wptr) *p1 = L'v'; else *p1 = L' ';
+			char ch = *e;
+			if (jsonw_is_special(ch)) *p2 = L' '; else *p2 = *e;
+			p1++; p2++; e++;
+		}
+		if (postfix-- > 0) {
+			*p1 = L' ';
+			*p2 = L' ';
+			p1++; p2++;
+		}
+		while (postfix-- > 0) {
+			*p1 = L' ';
+			*p2 = L'.';
+			p1++; p2++;
+		}
+		*p1 = L'\0';
+		*p2 = L'\0';
+		
+		switch (ctx.error.type) {
+			case json_error_none:
+				LOG("JSON Parse: No Error!");
+				break;
+			case json_error_oom:
+				LOG("JSON Parse: Out Of Memory!");
+				break;
+			case json_error_eof:
+				LOG("JSON Parse: Unexpected End!");
+				break;
+			case json_error_syntax:
+				LOG("JSON Parse: Syntax Error!");
+				break;
+		}
+		jsonw_log(line1);
+		jsonw_log(line2);
+		
+		mmfree(line1);
+		mmfree(line2);
+	}
+	
+#endif
+	
+	//////
+	
+	bool json_call_number(struct json_context* ctx, char** ptrptr, struct json_number* number) {
+		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
+		char* nodedata = *ptrptr;
+		char ch = *(*ptrptr);
+		bool minus = false;
+		if (ch == '-') {
+			minus = true;
+			json_next;
+		}
+		if (ch == '\0') {
+			json_err(json_error_eof);
+			return false;
+		} else if ((ch == 'i') || (ch == 'I')) {
+			json_next;
+			if ((ch == 'n') || (ch == 'N')) {
+				json_next;
+				if ((ch == 'f') || (ch == 'F')) {
+					number->is_float = true;
+					number->v.f = (minus ? -INFINITY : INFINITY);
+					return true;
+				}
+			}
+			if (ch == '\0') {
+				json_err(json_error_eof);
+				return false;
+			}
+			json_err(json_error_syntax);
+			return false;
+		} else if (ch == '0') {
+			json_next;
+			goto json_call_number_point;
+		} else if ((ch >= '1') && (ch <= '9')) {
+			do {
+				if (json_next == '\0') {
+					json_err(json_error_eof);
+					return false;
+				} else if ((ch < '0') || (ch > '9')) {
+					break;
+				}
+			} while (true);
+		}
+	json_call_number_point:
+		bool is_float = false;
+		if (ch == '.') {
+			is_float = true;
+			json_next;
+			if ((ch >= '0') && (ch <= '9')) {
+				do {
+					if (json_next == '\0') {
+						json_err(json_error_eof);
+						return false;
+					} else if ((ch < '0') || (ch > '9')) {
+						break;
+					}
+				} while (true);
+			} else {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		if ((ch == 'e') || (ch == 'E')) {
+			is_float = true;
+			json_next;
+			if ((ch == '-') || (ch == '+')) {
+				json_next;
+			}
+			if ((ch >= '0') && (ch <= '9')) {
+				do {
+					if (json_next == '\0') {
+						json_err(json_error_eof);
+						return false;
+					} else if ((ch < '0') || (ch > '9')) {
+						break;
+					}
+				} while (true);
+			} else {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		
+		int nodesize = (int)((intptr_t)(*ptrptr) - (intptr_t)(nodedata));
+		if (nodesize > 63 * sizeof(char)) {
+			json_err(json_error_syntax);
+			return false;
+		}
+		
+		memcpy(ctx->buffer, nodedata, nodesize);
+		ctx->buffer[nodesize / sizeof(char)] = 0;
+		if (is_float) {
+			number->is_float = true;
+			number->v.f = atof(ctx->buffer);
+		} else {
+			number->is_float = false;
+			number->v.i = atoll(ctx->buffer);
+		}
+		
+		json_rev;
+		return true;
+	}
+	
+	bool json_call_string(struct json_context* ctx, char** ptrptr, char** string) {
+		char* nodedata = *ptrptr;
+		int nodesize = 0;
+		char ch;
+		uint32_t len = 0;
+		char* save = *ptrptr;
+		while (json_next != '\0') {
+			if (ch == '\"') {
+				nodesize = (int)((intptr_t)(*ptrptr) - (intptr_t)(nodedata)) + sizeof(char);
+				*ptrptr = save;
+				goto json_call_string_alloc;
+			} else if (ch & 0x80) { // found UTF8
+				len++;
+				int cnt;
+				if ((uint8_t)(ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				} else if ((uint8_t)(ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				} else if ((uint8_t)(ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				} else if ((uint8_t)(ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				} else if ((uint8_t)(ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				} else {
+					return false; // Not UTF8
+				}
+				while ((cnt > 0) && (json_next != '\0')) {
+					len++;
+					if ((uint8_t)(ch & 0xC0) != 0x80) {
+						return false; // Not UTF8
+					}
+					cnt--;
+				}
+				if (cnt > 0) {
+					if (ch == '\0') {
+						json_err(json_error_eof);
+						return false;
+					} else {
+						json_err(json_error_syntax);
+						return false;
+					}
+				}
+			} else if (ch == '\\') {
+				json_next;
+				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+					len++;
+				} else if (ch == 'u') {
+					uint32_t utf16 = 0;
+					int cnt = 4;
+					while ((cnt > 0) && (json_next != '\0')) {
+						utf16 <<= 4;
+						if ((ch >= '0') && (ch <= '9')) {
+							utf16 |= (uint16_t)(ch - '0');
+						} else if ((ch >= 'A') && (ch <= 'F')) {
+							utf16 |= (uint16_t)(ch - 'A' + 10);
+						} else if ((ch >= 'a') && (ch <= 'a')) {
+							utf16 |= (uint16_t)(ch - 'a' + 10);
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+						cnt--;
+					}
+					if (cnt > 0) {
+						if (ch == '\0') {
+							json_err(json_error_eof);
+							return false;
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+					}
+					
+					if ((utf16 & 0xFC00) == 0xD800) { // found UTF16
+						json_next;
+						if (ch == '\\') {
+							json_next;
+							if (ch == 'u') {
+								uint32_t utf16_2 = 0;
+								int cnt = 4;
+								while ((cnt > 0) && (json_next != '\0')) {
+									utf16_2 <<= 4;
+									if ((ch >= '0') && (ch <= '9')) {
+										utf16_2 |= (uint16_t)(ch - '0');
+									} else if ((ch >= 'A') && (ch <= 'F')) {
+										utf16_2 |= (uint16_t)(ch - 'A' + 10);
+									} else if ((ch >= 'a') && (ch <= 'a')) {
+										utf16_2 |= (uint16_t)(ch - 'a' + 10);
+									} else {
+										json_err(json_error_syntax);
+										return false;
+									}
+									cnt--;
+								}
+								if (cnt > 0) {
+									if (ch == '\0') {
+										json_err(json_error_eof);
+										return false;
+									} else {
+										json_err(json_error_syntax);
+										return false;
+									}
+								}
+								
+								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
+								} else { // Not UTF16
+									json_err(json_error_syntax);
+									return false;
+								}
+							} else if (ch == '\0') {
+								json_err(json_error_eof);
+								return false;
+							} else {
+								json_err(json_error_syntax);
+								return false;
+							}
+						} else if (ch == '\0') {
+							json_err(json_error_eof);
+							return false;
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+					}
+					
+					if (utf16 <= 0x7F) { // 1 byte UTF8
+						len++;
+					} else if (utf16 <= 0x7FF) { // 2 byte UTF8
+						len += 2;
+					} else if (utf16 <= 0xFFFF) { // 3 byte UTF8
+						len += 3;
+					} else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
+						len += 4;
+					} else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
+						len += 5;
+					} else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
+						len += 6;
+					} else {
+						return false;
+					}
+				} else if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				} else {
+					json_err(json_error_syntax);
+					return false;
+				}
+			} else {
+				len++;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+		
+	json_call_string_alloc:
+		char* ptr = memAlloc(char, ptr, (len + 1) * sizeof(char));
+		if (ptr == NULL) {
+			return false;
+		}
+		*string = ptr;
+		
+		while (json_next != '\0') {
+			if (ch == '\"') {
+				*ptr = '\0';
+				return true;
+			} else if (ch & 0x80) { // found UTF8
+				*ptr = ch; ptr++;
+				int cnt;
+				if ((ch & 0xE0) == 0xC0) { // 2 byte UTF8
+					cnt = 1;
+				} else if ((ch & 0xF0) == 0xE0) { // 3 byte UTF8
+					cnt = 2;
+				} else if ((ch & 0xF8) == 0xF0) { // 4 byte UTF8
+					cnt = 3;
+				} else if ((ch & 0xFC) == 0xF8) { // 5 byte UTF8
+					cnt = 4;
+				} else if ((ch & 0xFE) == 0xFC) { // 6 byte UTF8
+					cnt = 5;
+				} else {
+					return false; // Not UTF8
+				}
+				while ((cnt > 0) && (json_next != '\0')) {
+					if ((ch & 0xC0) != 0x80) {
+						return false; // Not UTF8
+					}
+					*ptr = ch; ptr++;
+					cnt--;
+				}
+				if (cnt > 0) {
+					if (ch == '\0') {
+						json_err(json_error_eof);
+						return false;
+					} else {
+						json_err(json_error_syntax);
+						return false;
+					}
+				}
+			} else if (ch == '\\') {
+				json_next;
+				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+					*ptr = ch; ptr++;
+				} else if (ch == 'u') {
+					uint32_t utf16 = 0;
+					int cnt = 4;
+					while ((cnt > 0) && (json_next != '\0')) {
+						utf16 <<= 4;
+						if ((ch >= '0') && (ch <= '9')) {
+							utf16 |= (uint16_t)(ch - '0');
+						} else if ((ch >= 'A') && (ch <= 'F')) {
+							utf16 |= (uint16_t)(ch - 'A' + 10);
+						} else if ((ch >= 'a') && (ch <= 'a')) {
+							utf16 |= (uint16_t)(ch - 'a' + 10);
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+						cnt--;
+					}
+					if (cnt > 0) {
+						if (ch == '\0') {
+							json_err(json_error_eof);
+							return false;
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+					}
+					
+					if ((utf16 & 0xFC00) == 0xD800) { // found UTF16
+						json_next;
+						if (ch == '\\') {
+							json_next;
+							if (ch == 'u') {
+								uint32_t utf16_2 = 0;
+								int cnt = 4;
+								while ((cnt > 0) && (json_next != '\0')) {
+									utf16_2 <<= 4;
+									if ((ch >= '0') && (ch <= '9')) {
+										utf16_2 |= (uint16_t)(ch - '0');
+									} else if ((ch >= 'A') && (ch <= 'F')) {
+										utf16_2 |= (uint16_t)(ch - 'A' + 10);
+									} else if ((ch >= 'a') && (ch <= 'a')) {
+										utf16_2 |= (uint16_t)(ch - 'a' + 10);
+									} else {
+										json_err(json_error_syntax);
+										return false;
+									}
+									cnt--;
+								}
+								if (cnt > 0) {
+									if (ch == '\0') {
+										json_err(json_error_eof);
+										return false;
+									} else {
+										json_err(json_error_syntax);
+										return false;
+									}
+								}
+								
+								if ((ch & 0xFC00) == 0xDC00) { // 4 byte UTF16
+									utf16 = (utf16 << 10) + utf16_2 - 0x35FDC00;
+								} else { // Not UTF16
+									json_err(json_error_syntax);
+									return false;
+								}
+							} else if (ch == '\0') {
+								json_err(json_error_eof);
+								return false;
+							} else {
+								json_err(json_error_syntax);
+								return false;
+							}
+						} else if (ch == '\0') {
+							json_err(json_error_eof);
+							return false;
+						} else {
+							json_err(json_error_syntax);
+							return false;
+						}
+					}
+					
+					if (utf16 <= 0x7F) { // 1 byte UTF8
+						*ptr = utf16; ptr++;
+					} else if (utf16 <= 0x7FF) { // 2 byte UTF8
+						*ptr = 0xC0 | (utf16 >> 6); ptr++;
+						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+					} else if (utf16 <= 0xFFFF) { // 3 byte UTF8
+						*ptr = 0xE0 | (utf16 >> 12); ptr++;
+						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+					} else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
+						*ptr = 0xF0 | (utf16 >> 18); ptr++;
+						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+					} else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
+						*ptr = 0xF8 | (utf16 >> 24); ptr++;
+						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+					} else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
+						*ptr = 0xFC | (utf16 >> 30); ptr++;
+						*ptr = 0x80 | ((utf16 >> 24) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+					} else {
+						return false;
+					}
+				} else if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				} else {
+					json_err(json_error_syntax);
+					return false;
+				}
+			} else {
+				*ptr = ch; ptr++;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+
+	bool json_call_object(struct json_context* ctx, char** ptrptr);
+	bool json_call_array(struct json_context* ctx, char** ptrptr);
+	
+	bool json_call_array_node(struct json_context* ctx, char** ptrptr, int index) {
+		char ch;
+		struct json_node* node = NULL;
+		while (json_next != '\0') {
+			if (ch == '\"') {
+				if (ctx->callbacks->onarray.onstring != NULL) {
+					char* value = NULL;
+					if (!json_call_string(ctx, ptrptr, &value)) {
+						return false;
+					}
+					ctx->callbacks->onarray.onstring(ctx, index, value, ctx->callbacks->target);
+					memFree(value);
+				} else {
+					if (!json_check_string(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if ((ch == '-') || ((ch >= '0') && (ch <= '9'))) {
+				if (ctx->callbacks->onarray.onnumber != NULL) {
+					struct json_number number;
+					if (!json_call_number(ctx, ptrptr, &number)) {
+						return false;
+					}
+					ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+				} else {
+					if (!json_check_number(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if (ch == '{') {
+				if (ctx->callbacks->onarray.onobject != NULL) {
+					struct json_callbacks store;
+					json_store_callbacks(&store, ctx->callbacks);
+					ctx->callbacks->onarray.onobject(ctx, index, ctx->callbacks->target);
+					if (!json_call_object(ctx, ptrptr)) {
+						json_store_callbacks(ctx->callbacks, &store);
+						return false;
+					}
+					json_store_callbacks(ctx->callbacks, &store);
+				} else {
+					if (!json_check_object(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if (ch == '[') {
+				if (ctx->callbacks->onarray.onarray != NULL) {
+					struct json_callbacks store;
+					json_store_callbacks(&store, ctx->callbacks);
+					ctx->callbacks->onarray.onarray(ctx, index, ctx->callbacks->target);
+					if (!json_call_array(ctx, ptrptr)) {
+						json_store_callbacks(&store, ctx->callbacks);
+						return false;
+					}
+					json_store_callbacks(&store, ctx->callbacks);
+				} else {
+					if (!json_check_array(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if ((ch == 't') || (ch == 'T')) {
+				json_next;
+				if ((ch == 'r') || (ch == 'R')) {
+					json_next;
+					if ((ch == 'u') || (ch == 'U')) {
+						json_next;
+						if ((ch == 'e') || (ch == 'E')) {
+							if (ctx->callbacks->onarray.onboolean != NULL) {
+								ctx->callbacks->onarray.onboolean(ctx, index, true, ctx->callbacks->target);
+							}
+							return true;
+						}
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if ((ch == 'f') || (ch == 'F')) {
+				json_next;
+				if ((ch == 'a') || (ch == 'A')) {
+					json_next;
+					if ((ch == 'l') || (ch == 'L')) {
+						json_next;
+						if ((ch == 's') || (ch == 'S')) {
+							json_next;
+							if ((ch == 'e') || (ch == 'E')) {
+								if (ctx->callbacks->onarray.onboolean != NULL) {
+									ctx->callbacks->onarray.onboolean(ctx, index, false, ctx->callbacks->target);
+								}
+								return true;
+							}
+						}
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return NULL;
+			} else if ((ch == 'n') || (ch == 'N')) {
+				json_next;
+				if ((ch == 'u') || (ch == 'U')) {
+					json_next;
+					if ((ch == 'l') || (ch == 'L')) {
+						json_next;
+						if ((ch == 'l') || (ch == 'L')) {
+							if (ctx->callbacks->onarray.onnull != NULL) {
+								ctx->callbacks->onarray.onnull(ctx, index, ctx->callbacks->target);
+							}
+							return true;
+						}
+					}
+				} else if ((ch == 'a') || (ch == 'A')) {
+					json_next;
+					if ((ch == 'n') || (ch == 'N')) {
+						if (ctx->callbacks->onarray.onnumber != NULL) {
+							struct json_number number;
+							number.is_float = true;
+							number.v.f = NAN;
+							ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+						}
+						return true;
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if ((ch == 'i') || (ch == 'I')) {
+				json_next;
+				if ((ch == 'n') || (ch == 'N')) {
+					json_next;
+					if ((ch == 'f') || (ch == 'F')) {
+						if (ctx->callbacks->onarray.onnumber != NULL) {
+							struct json_number number;
+							number.is_float = true;
+							number.v.f = INFINITY;
+							ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+						}
+						return true;
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if (!json_is_space(ch)) {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+	
+	bool json_call_object_node(struct json_context* ctx, char** ptrptr, const char* key) {
+		char ch;
+		struct json_node* node = NULL;
+		while (json_next != '\0') {
+			if (ch == '\"') {
+				if (ctx->callbacks->onobject.onstring != NULL) {
+					char* value = NULL;
+					if (!json_call_string(ctx, ptrptr, &value)) {
+						return false;
+					}
+					ctx->callbacks->onobject.onstring(ctx, key, value, ctx->callbacks->target);
+					memFree(value);
+				} else {
+					if (!json_check_string(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if ((ch == '-') || ((ch >= '0') && (ch <= '9'))) {
+				if (ctx->callbacks->onobject.onnumber != NULL) {
+					struct json_number number;
+					if (!json_call_number(ctx, ptrptr, &number)) {
+						return false;
+					}
+					ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+				} else {
+					if (!json_check_number(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if (ch == '{') {
+				if (ctx->callbacks->onobject.onobject != NULL) {
+					struct json_callbacks store;
+					json_store_callbacks(&store, ctx->callbacks);
+					ctx->callbacks->onobject.onobject(ctx, key, ctx->callbacks->target);
+					if (!json_call_object(ctx, ptrptr)) {
+						json_store_callbacks(ctx->callbacks, &store);
+						return false;
+					}
+					json_store_callbacks(ctx->callbacks, &store);
+				} else {
+					if (!json_check_object(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if (ch == '[') {
+				if (ctx->callbacks->onarray.onarray != NULL) {
+					struct json_callbacks store;
+					json_store_callbacks(&store, ctx->callbacks);
+					ctx->callbacks->onobject.onarray(ctx, key, ctx->callbacks->target);
+					if (!json_call_array(ctx, ptrptr)) {
+						json_store_callbacks(ctx->callbacks, &store);
+						return false;
+					}
+					json_store_callbacks(ctx->callbacks, &store);
+				} else {
+					if (!json_check_array(ctx, ptrptr, 0)) {
+						return false;
+					}
+				}
+				return true;
+			} else if ((ch == 't') || (ch == 'T')) {
+				json_next;
+				if ((ch == 'r') || (ch == 'R')) {
+					json_next;
+					if ((ch == 'u') || (ch == 'U')) {
+						json_next;
+						if ((ch == 'e') || (ch == 'E')) {
+							if (ctx->callbacks->onobject.onboolean != NULL) {
+								ctx->callbacks->onobject.onboolean(ctx, key, true, ctx->callbacks->target);
+							}
+							return true;
+						}
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if ((ch == 'f') || (ch == 'F')) {
+				json_next;
+				if ((ch == 'a') || (ch == 'A')) {
+					json_next;
+					if ((ch == 'l') || (ch == 'L')) {
+						json_next;
+						if ((ch == 's') || (ch == 'S')) {
+							json_next;
+							if ((ch == 'e') || (ch == 'E')) {
+								if (ctx->callbacks->onobject.onboolean != NULL) {
+									ctx->callbacks->onobject.onboolean(ctx, key, false, ctx->callbacks->target);
+								}
+								return true;
+							}
+						}
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return NULL;
+			} else if ((ch == 'n') || (ch == 'N')) {
+				json_next;
+				if ((ch == 'u') || (ch == 'U')) {
+					json_next;
+					if ((ch == 'l') || (ch == 'L')) {
+						json_next;
+						if ((ch == 'l') || (ch == 'L')) {
+							if (ctx->callbacks->onobject.onnull != NULL) {
+								ctx->callbacks->onobject.onnull(ctx, key, ctx->callbacks->target);
+							}
+							return true;
+						}
+					}
+				} else if ((ch == 'a') || (ch == 'A')) {
+					json_next;
+					if ((ch == 'n') || (ch == 'N')) {
+						if (ctx->callbacks->onobject.onnumber != NULL) {
+							struct json_number number;
+							number.is_float = true;
+							number.v.f = NAN;
+							ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+						}
+						return true;
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if ((ch == 'i') || (ch == 'I')) {
+				json_next;
+				if ((ch == 'n') || (ch == 'N')) {
+					json_next;
+					if ((ch == 'f') || (ch == 'F')) {
+						if (ctx->callbacks->onobject.onnumber != NULL) {
+							struct json_number number;
+							number.is_float = true;
+							number.v.f = INFINITY;
+							ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+						}
+						return true;
+					}
+				}
+				if (ch == '\0') {
+					json_err(json_error_eof);
+					return false;
+				}
+				json_err(json_error_syntax);
+				return false;
+			} else if (!json_is_space(ch)) {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+	
+	bool json_call_array(struct json_context* ctx, char** ptrptr) {
+		char ch;
+		int index = 0;
+	json_call_array_repeat:
+		while (json_next != '\0') {
+			if (ch == ']') {
+				return true;
+			} else if (!json_is_space(ch)) {
+				json_rev;
+				if (!json_call_array_node(ctx, ptrptr, index)) {
+					return false;
+				}
+				index++;
+				while (json_next != '\0') {
+					if (ch == ',') {
+						goto json_call_array_repeat;
+					} else if (ch == ']') {
+						return true;
+					} else if (!json_is_space(ch)) {
+						json_err(json_error_syntax);
+						return false;
+					}
+				}
+				json_err(json_error_eof);
+				return false;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+
+	bool json_call_object(struct json_context* ctx, char** ptrptr) {
+		char ch;
+	json_call_object_repeat:
+		while (json_next != '\0') {
+			if (ch == '}') {
+				return true;
+			} else if (ch == '\"') {
+				char* vkey = NULL;
+				if (!json_call_string(ctx, ptrptr, &vkey)) {
+					return false;
+				}
+				while (json_next != '\0') {
+					if (ch == ':') {
+						if (!json_call_object_node(ctx, ptrptr, vkey)) {
+							memFree(vkey);
+							return false;
+						}
+						memFree(vkey);
+						while (json_next != '\0') {
+							if (ch == ',') {
+								goto json_call_object_repeat;
+							} else if (ch == '}') {
+								return true;
+							} else if (!json_is_space(ch)) {
+								json_err(json_error_syntax);
+								return false;
+							}
+						}
+						json_err(json_error_eof);
+						return false;
+					} else if (!json_is_space(ch)) {
+						memFree(vkey);
+						json_err(json_error_syntax);
+						return false;
+					}
+				}
+				memFree(vkey);
+				json_err(json_error_eof);
+				return false;
+			} else if (!json_is_space(ch)) {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+
+	bool json_call(struct json_context* ctx, const char* json) {
+		if (ctx->callbacks == NULL)
+			return false;
+		
+		ctx->seterror(json_error_none, NULL);
+		char* ptr = (char*)json;
+		char** ptrptr = &ptr;
+		char ch;
+		while ((ch = *ptr) != '\0') {
+			if (json_is_space(ch)) {
+				ptr++;
+			} else if (ch == '{') {
+				if (ctx->callbacks != NULL) {
+					if (ctx->callbacks->onroot != NULL) {
+						ctx->callbacks->onroot(ctx, ctx->callbacks->target);
+					}
+				}
+				if (!json_call_object(ctx, ptrptr)) {
+					return false;
+				}
+				while (json_next != '\0') {
+					if (!json_is_space(ch)) {
+						json_err(json_error_syntax);
+						return false;
+					}
+				}
+				return true;
+			} else {
+				json_err(json_error_syntax);
+				return false;
+			}
+		}
+		json_err(json_error_eof);
+		return false;
+	}
+	
 
 #ifdef __cplusplus
 }

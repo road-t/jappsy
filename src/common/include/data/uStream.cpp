@@ -18,12 +18,7 @@
 #include <core/uMemory.h>
 #include <data/uString.h>
 
-Stream::Stream(const wchar_t* data) throw(const char*) {
-	m_allocated = false;
-	m_buffer = NULL;
-	m_size = 0;
-	m_position = 0;
-	
+RefStream::RefStream(const wchar_t* data) throw(const char*) {
 	if (data != NULL) {
 		uint32_t size = wcs_toutf8_size(data);
 		if (size != 0) {
@@ -37,28 +32,7 @@ Stream::Stream(const wchar_t* data) throw(const char*) {
 	}
 }
 
-Stream::Stream(const char* data) {
-	m_allocated = false;
-	m_buffer = NULL;
-	m_size = 0;
-	m_position = 0;
-
-	if (data != NULL) {
-		uint32_t size = 0;
-		uint32_t length = utf8_strlen(data, &size);
-		if (length > 0) {
-			m_buffer = (uint8_t*)data;
-			m_size = size - 1;
-		}
-	}
-}
-
-Stream::Stream(const char* data, bool autorelease) {
-	m_allocated = false;
-	m_buffer = NULL;
-	m_size = 0;
-	m_position = 0;
-	
+RefStream::RefStream(const char* data, bool autorelease) {
 	if (data != NULL) {
 		uint32_t size = 0;
 		uint32_t length = utf8_strlen(data, &size);
@@ -70,24 +44,7 @@ Stream::Stream(const char* data, bool autorelease) {
 	}
 }
 
-Stream::Stream(const void* data, uint32_t length) {
-	m_allocated = false;
-	m_buffer = NULL;
-	m_size = 0;
-	m_position = 0;
-	
-	if ((data != NULL) && (length != 0)) {
-		m_buffer = (uint8_t*)data;
-		m_size = length;
-	}
-}
-
-Stream::Stream(const void* data, uint32_t length, bool autorelease) {
-	m_allocated = false;
-	m_buffer = NULL;
-	m_size = 0;
-	m_position = 0;
-	
+RefStream::RefStream(const void* data, uint32_t length, bool autorelease) {
 	if ((data != NULL) && (length != 0)) {
 		m_buffer = (uint8_t*)data;
 		m_size = length;
@@ -95,7 +52,7 @@ Stream::Stream(const void* data, uint32_t length, bool autorelease) {
 	}
 }
 
-Stream::~Stream() {
+RefStream::~RefStream() {
 	if (m_allocated) {
 		memFree(m_buffer);
 	}
@@ -106,7 +63,7 @@ Stream::~Stream() {
 	m_position = 0;
 }
 
-uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
+uint8_t* RefStream::readBytes(uint32_t length) throw(const char*) {
 	if (length == 0)
 		return NULL;
 	
@@ -124,7 +81,7 @@ uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
 	return data;
 }
 
-uint32_t Stream::readInt() throw(const char*) {
+uint32_t RefStream::readInt() throw(const char*) {
 	uint32_t end = m_position + 4;
 	if (end > m_size)
 		throw eIOReadLimit;
@@ -134,7 +91,7 @@ uint32_t Stream::readInt() throw(const char*) {
 	return value;
 }
 
-uint8_t Stream::readUnsignedByte() throw(const char*) {
+uint8_t RefStream::readUnsignedByte() throw(const char*) {
 	uint32_t end = m_position + 1;
 	if (end > m_size)
 		throw eIOReadLimit;
@@ -144,7 +101,7 @@ uint8_t Stream::readUnsignedByte() throw(const char*) {
 	return value;
 }
 
-int32_t Stream::skip(uint32_t length) {
+int32_t RefStream::skip(uint32_t length) {
 	uint32_t end = m_position + length;
 	if (end > m_size)
 		return -1;

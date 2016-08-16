@@ -329,7 +329,7 @@ extern "C" {
 		RefString(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
 		RefString(const char* string) throw(const char*); // eOutOfMemory
-		explicit RefString(const char* string, uint32_t length) throw(const char*); // eOutOfMemory
+		explicit RefString(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
 		RefString(const wchar_t* string) throw(const char*); // eOutOfMemory
 		explicit RefString(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
 		explicit RefString(const char character) throw(const char*); // eOutOfMemory
@@ -575,7 +575,7 @@ extern "C" {
 		String(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
 		String(const char* string) throw(const char*); // eOutOfMemory
-		explicit String(const char* string, uint32_t length) throw(const char*); // eOutOfMemory
+		explicit String(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
 		String(const wchar_t* string) throw(const char*); // eOutOfMemory
 		explicit String(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
 		explicit String(const char character) throw(const char*); // eOutOfMemory

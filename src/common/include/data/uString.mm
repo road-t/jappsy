@@ -1223,7 +1223,7 @@ RefString& RefString::concat(const char* string) throw(const char*) {
 		uint32_t length = utf8_strlen(string, &strSize);
 		if (length > 0) {
 			this->setLength(prevLength + length);
-			utf8_towcs(string, this->m_data + prevLength, strSize);
+			utf8_towcs(string, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
 		}
 	}
 	return *this;
@@ -1263,25 +1263,22 @@ String& String::concat(const char* string) throw(const char*) {
 	return *this;
 }
 
-RefString::RefString(const char* string, uint32_t length) throw(const char*) {
+RefString::RefString(const char* string, uint32_t size) throw(const char*) {
 	initialize();
 	if (string != NULL) {
+		uint32_t strSize = 0;
+		uint32_t length = utf8_strlen_nzt(string, size, &strSize);
 		this->setLength(length);
 		if (length > 0) {
-			wchar_t* dst = this->m_data;
-			char* src = (char*)string;
-			do {
-				(*dst) = (wchar_t)(*src);
-				length--;
-			} while (length > 0);
+			utf8_towcs(string, this->m_data, this->m_size);
 		}
 	}
 }
 
-String::String(const char* string, uint32_t length) throw(const char*) : Object() {
+String::String(const char* string, uint32_t size) throw(const char*) : Object() {
 	initialize();
 	if (string != NULL) {
-		RefString* newString = new RefString(string, length);
+		RefString* newString = new RefString(string, size);
 		setRef(newString);
 	}
 }

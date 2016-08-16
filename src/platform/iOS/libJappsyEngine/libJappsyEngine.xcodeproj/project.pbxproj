@@ -57,8 +57,6 @@
 		C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */; };
 		C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */; };
 		C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */; };
-		C34FDA551D5CABD30022FF71 /* uURLRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA511D5CABD30022FF71 /* uURLRequest.h */; };
-		C34FDA561D5CABD30022FF71 /* uURLRequest.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA521D5CABD30022FF71 /* uURLRequest.mm */; };
 		C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA581D5CADCB0022FF71 /* uStream.cpp */; };
 		C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA591D5CADCB0022FF71 /* uStream.h */; };
 		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
@@ -90,6 +88,8 @@
 		C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBAC91D6104910099AD22 /* uJSONArray.h */; };
 		C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */; };
 		C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBACB1D6104910099AD22 /* uJSONObject.h */; };
+		C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBAD61D62FF360099AD22 /* uHTTPClient.h */; };
+		C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3FFBAD71D62FF360099AD22 /* uHTTPClient.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -143,8 +143,6 @@
 		C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLTypeface.h; sourceTree = "<group>"; };
 		C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLPaint.cpp; sourceTree = "<group>"; };
 		C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLPaint.h; sourceTree = "<group>"; };
-		C34FDA511D5CABD30022FF71 /* uURLRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURLRequest.h; sourceTree = "<group>"; };
-		C34FDA521D5CABD30022FF71 /* uURLRequest.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uURLRequest.mm; sourceTree = "<group>"; };
 		C34FDA581D5CADCB0022FF71 /* uStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uStream.cpp; sourceTree = "<group>"; };
 		C34FDA591D5CADCB0022FF71 /* uStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStream.h; sourceTree = "<group>"; };
 		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
@@ -178,6 +176,8 @@
 		C3FFBAC91D6104910099AD22 /* uJSONArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONArray.h; sourceTree = "<group>"; };
 		C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uJSONObject.cpp; sourceTree = "<group>"; };
 		C3FFBACB1D6104910099AD22 /* uJSONObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONObject.h; sourceTree = "<group>"; };
+		C3FFBAD61D62FF360099AD22 /* uHTTPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHTTPClient.h; sourceTree = "<group>"; };
+		C3FFBAD71D62FF360099AD22 /* uHTTPClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uHTTPClient.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -304,12 +304,12 @@
 		C34FDA4F1D5CABD30022FF71 /* net */ = {
 			isa = PBXGroup;
 			children = (
+				C3FFBAD61D62FF360099AD22 /* uHTTPClient.h */,
+				C3FFBAD71D62FF360099AD22 /* uHTTPClient.mm */,
 				C3ACF92F1D5DED6D0065A832 /* uURI.cpp */,
 				C3ACF9301D5DED6D0065A832 /* uURI.h */,
 				C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */,
 				C34FDA5E1D5CB7350022FF71 /* uLoader.h */,
-				C34FDA511D5CABD30022FF71 /* uURLRequest.h */,
-				C34FDA521D5CABD30022FF71 /* uURLRequest.mm */,
 			);
 			path = net;
 			sourceTree = "<group>";
@@ -380,6 +380,7 @@
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
 				C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */,
+				C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
 				C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */,
@@ -391,7 +392,6 @@
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
-				C34FDA551D5CABD30022FF71 /* uURLRequest.h in Headers */,
 				C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */,
 				C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */,
 				C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */,
@@ -497,7 +497,6 @@
 			files = (
 				C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */,
 				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
-				C34FDA561D5CABD30022FF71 /* uURLRequest.mm in Sources */,
 				C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */,
 				C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */,
 				C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */,
@@ -509,6 +508,7 @@
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
+				C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */,
 				C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,

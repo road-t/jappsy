@@ -41,7 +41,7 @@ public:
 	typedef void (*onTouchCallback)(const wchar_t* event);
 
 private:
-	Handler* handler;
+	Handler handler = new Handler();
 	
 	GLRender* context;
 	onTouchCallback onTouch;
@@ -66,7 +66,7 @@ private:
 	uint64_t mouseTime;
 	bool mouseDown;
 	uint64_t mouseRepeatTime;
-	HandlerRunner* touchTimeout;
+	void* touchTimeout;
 	
 	void setTimeout(int delay);
 	void clearTimeout();

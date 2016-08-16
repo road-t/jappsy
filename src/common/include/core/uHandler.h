@@ -18,43 +18,59 @@
 #define JAPPSY_HANDLER_H
 
 #include <platform.h>
+#include <data/uObject.h>
 
-class HandlerRunner {
+extern const wchar_t TypeHandler[];
+
+class RefHandler : public RefObject {
 public:
 	typedef void (*Callback)(void* userData);
 	
-	volatile int32_t m_lock;
-	
-	Callback m_callback;
-	volatile int m_delay;
-	volatile bool m_enabled;
-	volatile void* m_userData;
-	
-	HandlerRunner(Callback callback, int delay, void* userData);
-};
+private:
+	class HandlerCallback {
+	public:
+		volatile int32_t m_lock;
+		
+		Callback m_callback;
+		volatile int m_delay;
+		volatile bool m_enabled;
+		volatile void* m_userData;
+		
+		HandlerCallback(Callback callback, int delay, void* userData);
+	};
 
-class Handler {
 private:
 	volatile int32_t m_retain;
 	volatile int32_t m_lock;
 
-	HandlerRunner** m_queue;
+	HandlerCallback** m_queue;
 	volatile uint32_t m_count;
 	volatile uint32_t m_memorySize;
 	
 	void resize(uint32_t count) throw(const char*);
-	void push(HandlerRunner* runner);
-	void _remove(HandlerRunner* runner);
+	void push(HandlerCallback* runner);
+	void remove(HandlerCallback* runner);
+	
 public:
-	Handler();
-	~Handler();
+	RefHandler();
+	~RefHandler();
 
-	void run(HandlerRunner* runner);
+	void run(void* runnerid);
 
-	HandlerRunner* postDelayed(HandlerRunner::Callback callback, int delay, void* userData);
-	HandlerRunner* post(HandlerRunner::Callback callback, void* userData);
-	void removeCallbacks(HandlerRunner::Callback callback);
-	void remove(HandlerRunner* runner);
+	void* postDelayed(Callback callback, int delay, void* userData);
+	void* post(Callback callback, void* userData);
+	void removeCallbacks(Callback callback);
+	void remove(void* runnerid);
+};
+
+class Handler : public Object {
+public:
+	RefClass(Handler, Handler);
+	
+	inline void* postDelayed(RefHandler::Callback callback, int delay, void* userData) throw(const char*) { CHECKTHIS; return THIS->postDelayed(callback, delay, userData); }
+	inline void* post(RefHandler::Callback callback, void* userData) throw(const char*) { CHECKTHIS; return THIS->post(callback, userData); }
+	inline void removeCallbacks(RefHandler::Callback callback) throw(const char*) { CHECKTHIS; THIS->removeCallbacks(callback); }
+	inline void remove(void* runnerid) throw(const char*) { CHECKTHIS; THIS->remove(runnerid); }
 };
 
 #endif //JAPPSY_HANDLER_H

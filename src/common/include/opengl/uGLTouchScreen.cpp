@@ -21,8 +21,6 @@
 #include <math.h>
 
 GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
-	handler = memNew(handler, Handler());
-	
 	this->context = context;
 	onTouch = callback;
 	update();
@@ -49,8 +47,6 @@ GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
 
 GLTouchScreen::~GLTouchScreen() {
 	// TODO: cleanup
-	
-	memDelete(handler);
 }
 
 void GLTouchScreen::update() {

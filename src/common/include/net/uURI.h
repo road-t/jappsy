@@ -52,6 +52,7 @@ public:
 	const String& absolutePath(const wchar_t* basePath);
 	inline const String& absolutePath() { return absolutePath(NULL); }
 	const String& uri();
+	inline const String ext() { return m_ext; }
 };
 
 #endif //JAPPSY_UURI_H

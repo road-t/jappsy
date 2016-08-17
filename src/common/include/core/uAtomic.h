@@ -63,197 +63,36 @@
     #import <libkern/OSAtomic.h>
 #endif
 
-#if !defined(AtomicLock)
-    #define AtomicLock AtomicLock_Inline
-
-    static inline void AtomicLock_Inline(volatile int32_t* ptr) {
-        while (__sync_lock_test_and_set(ptr, 1) != 0)
-            #if defined(__WINNT__)
-                Sleep(1);
-            #else
-                sleep(1);
-            #endif
-    }
-#endif
-
-#if !defined(AtomicFastLock)
-    #define AtomicFastLock AtomicFastLock_Inline
-
-    static inline void AtomicFastLock_Inline(volatile int32_t* ptr) {
-        while (__sync_lock_test_and_set(ptr, 1) != 0)
-            #if defined(__WINNT__)
-                Sleep(0);
-            #else
-                sleep(0);
-            #endif
-    }
-#endif
-
-#if !defined(AtomicLockTry)
-	#define AtomicLockTry AtomicLockTry_Inline
-
-	static inline bool AtomicLockTry_Inline(volatile int32_t* ptr) {
-		return __sync_lock_test_and_set(ptr, 1) == 0;
-	}
-#endif
-
-#if !defined(AtomicUnlock)
-    #define AtomicUnlock AtomicUnlock_Inline
-
-    static inline void AtomicUnlock(volatile int32_t* ptr) {
-        __sync_lock_release(ptr);
-    }
-#endif
-
-#if !defined(AtomicGet)
-    #define AtomicGet AtomicGet_Inline
-
-    static inline int32_t AtomicGet_Inline(volatile int32_t* ptr) {
-        #if defined(OSAtomicCompareAndSwap32)
-            int32_t old_val = *ptr;
-            if (OSAtomicCompareAndSwap32(0, 0, ptr))
-                return 0;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, 0, 0);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicExchange)
-    #define AtomicExchange AtomicExchange_Inline
-
-    static inline int32_t AtomicExchange_Inline(volatile int32_t* ptr, int32_t val) {
-        int32_t old_val;
-        do {
-            old_val = *ptr;
-        }
-        #if defined(OSAtomicCompareAndSwap32)
-            while (!OSAtomicCompareAndSwap32(old_val, val, ptr));
-        #else
-            while (__sync_val_compare_and_swap(ptr, old_val, val) != old_val);
-        #endif
-        return old_val;
-    }
-#endif
-
-#if !defined(AtomicSet)
-    #define AtomicSet AtomicExchange
-#endif
+    #define AtomicLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) sleep(1)
+    #define AtomicFastLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) sleep(0)
+	#define AtomicLockTry(ptr) (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL) == false)
+    #define AtomicUnlock(ptr) __atomic_clear(ptr, __ATOMIC_RELEASE)
+    #define AtomicGet(ptr) __atomic_load_n(ptr, __ATOMIC_ACQUIRE)
+    #define AtomicExchange(ptr, val) __atomic_exchange_n(ptr, val, __ATOMIC_ACQ_REL)
+    #define AtomicSet(ptr, val) __atomic_exchange_n(ptr, val, __ATOMIC_ACQ_REL)
 
 #if !defined(AtomicCompareExchange)
     #define AtomicCompareExchange AtomicCompareExchange_Inline
 
     static inline int32_t AtomicCompareExchange_Inline(volatile int32_t* ptr, int32_t val, int32_t compare) {
-        #if defined(OSAtomicCompareAndSwap32)
-            int32_t old_val = *ptr;
-            if (OSAtomicCompareAndSwap32(compare, val, ptr))
-                return compare;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, compare, val);
-        #endif
+		(void)__atomic_compare_exchange_n(ptr, &compare, val, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+		return compare;
     }
 #endif
 
-#if !defined(AtomicAdd)
-    #define AtomicAdd AtomicAdd_Inline
+    #define AtomicAdd(ptr, val) __atomic_fetch_add(ptr, val, __ATOMIC_ACQ_REL)
+    #define AtomicSub(ptr, val) __atomic_fetch_sub(ptr, val, __ATOMIC_ACQ_REL)
+    #define AtomicIncrement(ptr) __atomic_fetch_add(ptr, 1, __ATOMIC_ACQ_REL)
+    #define AtomicDecrement(ptr) __atomic_fetch_sub(ptr, 1, __ATOMIC_ACQ_REL)
+    #define AtomicOr(ptr, val) __atomic_fetch_or(ptr, val, __ATOMIC_ACQ_REL)
+    #define AtomicXor(ptr, val) __atomic_fetch_xor(ptr, val, __ATOMIC_ACQ_REL)
+	#define AtomicNor(ptr, val) __atomic_fetch_and(ptr, ~val, __ATOMIC_ACQ_REL)
+    #define AtomicAnd(ptr, val) __atomic_fetch_and(ptr, val, __ATOMIC_ACQ_REL)
 
-    static inline int32_t AtomicAdd_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAdd32)
-            return OSAtomicAdd32(val, ptr) - val;
-        #else
-            return __sync_fetch_and_add(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicSub)
-    #define AtomicSub AtomicSub_Inline
-
-    static inline int32_t AtomicSub_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAdd32)
-            return OSAtomicAdd32(-val, ptr) + val;
-        #else
-            return __sync_fetch_and_sub(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicIncrement)
-    #define AtomicIncrement AtomicIncrement_Inline
-
-    static inline int32_t AtomicIncrement_Inline(volatile int32_t* ptr) {
-        #if defined(OSAtomicIncrement32)
-            return OSAtomicIncrement32(ptr) - 1;
-        #else
-            return __sync_fetch_and_add(ptr, (int32_t)1);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicDecrement)
-    #define AtomicDecrement AtomicDecrement_Inline
-
-    static inline int32_t AtomicDecrement_Inline(volatile int32_t* ptr) {
-        #if defined(OSAtomicDecrement32)
-            return OSAtomicDecrement32(ptr) + 1;
-        #else
-            return __sync_fetch_and_sub(ptr, (int32_t)1);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicOr)
-    #define AtomicOr AtomicOr_Inline
-
-    static inline int32_t AtomicOr_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicOr32Orig)
-            return OSAtomicOr32Orig(val, ptr);
-        #else
-            return __sync_fetch_and_or(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicXor)
-    #define AtomicXor AtomicXor_Inline
-
-    static inline int32_t AtomicXor_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicXor32Orig)
-            return OSAtomicXor32Orig(val, ptr);
-        #else
-            return __sync_fetch_and_xor(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicNor)
-    #define AtomicNor AtomicNor_Inline
-
-    static inline int32_t AtomicNor_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAnd32Orig)
-            return OSAtomicAnd32Orig(~val, ptr);
-        #else
-            return __sync_fetch_and_and(ptr, ~val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicAnd)
-    #define AtomicAnd AtomicAnd_Inline
-
-    static inline int32_t AtomicAnd_Inline(volatile int32_t* ptr, int32_t val) {
-        #if defined(OSAtomicAnd32Orig)
-            return OSAtomicAnd32Orig(val, ptr);
-        #else
-            return __sync_fetch_and_and(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicNand)
-    #define AtomicNand AtomicNand_Inline
+#if GCC_VERSION >= 40400
+	#define AtomicNand(ptr, val) __atomic_fetch_nand(ptr, val, __ATOMIC_ACQ_REL)
+#else
+	#define AtomicNand AtomicNand_Inline
 
     static inline int32_t AtomicNand_Inline(volatile int32_t* ptr, int32_t val) {
         #if GCC_VERSION >= 40400
@@ -270,203 +109,16 @@
     }
 #endif
 
-#if !defined(AtomicGet64)
-    #define AtomicGet64 AtomicGet64_Inline
-
-    static inline int64_t AtomicGet64_Inline(volatile int64_t* ptr) {
-        #if defined(OSAtomicCompareAndSwap64)
-            int64_t old_val = *ptr;
-            if (OSAtomicCompareAndSwap64(0, 0, ptr))
-                return 0;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, 0, 0);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicExchange64)
-    #define AtomicExchange64 AtomicExchange64_Inline
-
-    static inline int64_t AtomicExchange64_Inline(volatile int64_t* ptr, int64_t val) {
-        int64_t old_val;
-        do {
-            old_val = *ptr;
-        }
-        #if defined(OSAtomicCompareAndSwap64)
-            while (!OSAtomicCompareAndSwap64(old_val, val, ptr));
-        #else
-            while (__sync_val_compare_and_swap(ptr, old_val, val) != old_val);
-        #endif
-        return old_val;
-    }
-#endif
-
-#if !defined(AtomicSet64)
-    #define AtomicSet64 AtomicExchange64
-#endif
-
-#if !defined(AtomicCompareExchange64)
-    #define AtomicCompareExchange64 AtomicCompareExchange64_Inline
-
-    static inline int64_t AtomicCompareExchange64_Inline(volatile int64_t* ptr, int64_t val, int64_t compare) {
-        #if defined(OSAtomicCompareAndSwap64)
-            int64_t old_val = *ptr;
-            if (OSAtomicCompareAndSwap64(compare, val, ptr))
-                return compare;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, compare, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicAdd64)
-    #define AtomicAdd64 AtomicAdd64_Inline
-
-    static inline int64_t AtomicAdd64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicAdd64)
-            return OSAtomicAdd64(val, ptr) - val;
-        #else
-            return __sync_fetch_and_add(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicSub64)
-    #define AtomicSub64 AtomicSub64_Inline
-
-    static inline int64_t AtomicSub64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if defined(OSAtomicAdd64)
-            return OSAtomicAdd64(-val, ptr) + val;
-        #else
-            return __sync_fetch_and_sub(ptr, val);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicIncrement64)
-    #define AtomicIncrement64 AtomicIncrement64_Inline
-
-    static inline int64_t AtomicIncrement64_Inline(volatile int64_t* ptr) {
-        #if defined(OSAtomicIncrement64)
-            return OSAtomicIncrement64(ptr) - 1;
-        #else
-            return __sync_fetch_and_add(ptr, (int64_t)1);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicDecrement64)
-    #define AtomicDecrement64 AtomicDecrement64_Inline
-
-    static inline int64_t AtomicDecrement64_Inline(volatile int64_t* ptr) {
-        #if defined(OSAtomicDecrement64)
-            return OSAtomicDecrement64(ptr) + 1;
-        #else
-            return __sync_fetch_and_sub(ptr, (int64_t)1);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicOr64)
-    #define AtomicOr64 AtomicOr64_Inline
-
-    static inline int64_t AtomicOr64_Inline(volatile int64_t* ptr, int64_t val) {
-        return __sync_fetch_and_or(ptr, val);
-    }
-#endif
-
-#if !defined(AtomicXor64)
-    #define AtomicXor64 AtomicXor64_Inline
-
-    static inline int64_t AtomicXor64_Inline(volatile int64_t* ptr, int64_t val) {
-        return __sync_fetch_and_xor(ptr, val);
-    }
-#endif
-
-#if !defined(AtomicNor64)
-    #define AtomicNor64 AtomicNor64_Inline
-
-    static inline int64_t AtomicNor64_Inline(volatile int64_t* ptr, int64_t val) {
-        return __sync_fetch_and_and(ptr, ~val);
-    }
-#endif
-
-#if !defined(AtomicAnd64)
-    #define AtomicAnd64 AtomicAnd64_Inline
-
-    static inline int64_t AtomicAnd64_Inline(volatile int64_t* ptr, int64_t val) {
-		return __sync_fetch_and_and(ptr, val);
-    }
-#endif
-
-#if !defined(AtomicNand64)
-    #define AtomicNand64 AtomicNand64_Inline
-
-    static inline int64_t AtomicNand64_Inline(volatile int64_t* ptr, int64_t val) {
-        #if GCC_VERSION >= 40400
-            return __sync_fetch_and_nand(ptr, val);
-        #else
-            int64_t i,j;
-            j = *ptr;
-            do {
-                i = j;
-                j = AtomicCompareExchange64((int64_t*)ptr, ~(i & val), i);
-            } while (i != j);
-            return j;
-        #endif
-    }
-#endif
-
-#if !defined(AtomicGetPtr)
-    #define AtomicGetPtr AtomicGetPtr_Inline
-
-    static inline void* AtomicGetPtr_Inline(void* volatile *ptr) {
-        #if defined(OSAtomicCompareAndSwap64)
-            int64_t old_val = *ptr;
-            if (OSAtomicCompareAndSwap64(NULL, NULL, ptr))
-                return NULL;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, NULL, NULL);
-        #endif
-    }
-#endif
-
-#if !defined(AtomicExchangePtr)
-    #define AtomicExchangePtr AtomicExchangePtr_Inline
-
-    static inline void* AtomicExchangePtr_Inline(void* volatile *ptr, void* val) {
-        void* old_val;
-        do {
-            old_val = *ptr;
-        }
-        #if defined(OSAtomicCompareAndSwap64)
-            while (!OSAtomicCompareAndSwap64(old_val, val, ptr));
-        #else
-            while (__sync_val_compare_and_swap(ptr, old_val, val) != old_val);
-        #endif
-        return old_val;
-    }
-#endif
-
-#if !defined(AtomicSetPtr)
+    #define AtomicGetPtr(ptr) __atomic_load_n(ptr, __ATOMIC_ACQUIRE)
+    #define AtomicExchangePtr(ptr, val) __atomic_exchange_n(ptr, val, __ATOMIC_ACQ_REL)
     #define AtomicSetPtr AtomicExchangePtr
-#endif
 
 #if !defined(AtomicCompareExchangePtr)
     #define AtomicCompareExchangePtr AtomicCompareExchangePtr_Inline
 
     static inline void* AtomicCompareExchangePtr_Inline(void* volatile *ptr, void* val, void* compare) {
-        #if defined(OSAtomicCompareAndSwap64)
-            void* old_val = (void*)*ptr;
-            if (OSAtomicCompareAndSwap64(compare, val, ptr))
-                return compare;
-            return old_val;
-        #else
-            return __sync_val_compare_and_swap(ptr, compare, val);
-        #endif
+		(void)__atomic_compare_exchange_n((void* volatile *)ptr, &compare, val, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE);
+		return compare;
     }
 #endif
 

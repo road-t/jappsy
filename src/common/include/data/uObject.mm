@@ -170,21 +170,21 @@ String Object::getClass() const {
 	if (_object == NULL)
 		return TypeNull;
 
-	return THIS->getClass();
+	return THIS.ref().getClass();
 }
 
 String Object::toString() const {
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->toString();
+	return THIS.ref().toString();
 }
 
 String Object::toJSON() const {
 	if (_object == NULL)
 		return L"null";
 	
-	return THIS->toJSON();
+	return THIS.ref().toJSON();
 }
 
 
@@ -362,7 +362,7 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 }
 
 Object& Object::operator =(const RefObject* object) throw(const char*) {
-	this->setRef(object);
+	THIS.setRef(object);
 	return *this;
 }
 

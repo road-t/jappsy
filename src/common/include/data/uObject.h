@@ -23,160 +23,390 @@
 #include <core/uError.h>
 #include <cipher/uCrc.h>
 
-#define synchronized(var)   (var)->wait(); __sync_synchronize();
+#define synchronized(var)   (var).wait(); __sync_synchronize();
 
-#define THIS (*this)
-#define CHECKTHIS { if (this->_object == NULL) throw eNullPointer; }
-
-#define RefClass(Base, Class, ...) \
-	virtual inline Ref ## Class, ## __VA_ARGS__* newRef() const throw(const char*) { \
-		Ref ## Class, ## __VA_ARGS__* o = new Ref ## Class, ## __VA_ARGS__(); \
+#define RefClass(BaseClassType, RefClassType) \
+	virtual inline RefClassType* newRef() const throw(const char*) { \
+		RefClassType* o = new RefClassType(); \
 		if (o == NULL) throw eOutOfMemory; \
 		return o; \
 	} \
-	inline Base(const void* object) { \
-		this->initialize(); \
-		*((Object*)this) = object; \
+	inline BaseClassType(const void* object) throw(const char*) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
 	} \
-	inline Base(const Object& object) { \
-		this->initialize(); \
-		*((Object*)this) = object; \
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const void* object) { \
-		*((Object*)this) = object; \
-		return *this; \
+	virtual inline BaseClassType& operator =(const void* object) throw(const char*) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const Object& object) { \
-		*((Object*)this) = object; \
-		return *this; \
+	virtual inline BaseClassType& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
 	} \
-	inline Base(const Ref ## Class, ## __VA_ARGS__& object) { \
-		this->initialize(); \
-		this->setRef(&object); \
+	inline BaseClassType(const RefClassType& object) { \
+		THIS.initialize(); \
+		THIS.setRef(&object); \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const Ref ## Class, ## __VA_ARGS__& object) { \
-		this->setRef(&object); \
-		return *this; \
+	virtual inline BaseClassType& operator =(const RefClassType& object) { \
+		THIS.setRef(&object); \
+		return THIS; \
 	} \
-	inline Base(const Class, ## __VA_ARGS__* object) throw(const char*) { \
-		this->initialize(); \
+	inline BaseClassType(const RefClassType* object) { \
+		THIS.initialize(); \
+		THIS.setRef(object); \
+	} \
+	virtual inline BaseClassType& operator =(const RefClassType* object) { \
+		THIS.setRef(object); \
+		return THIS; \
+	} \
+	inline BaseClassType() { \
+		THIS.initialize(); \
+	} \
+	virtual inline RefClassType& ref() const throw(const char*) { \
+		if (THIS._object == NULL) throw eNullPointer; \
+		return *(RefClassType*)(THIS._object); \
+	} \
+	inline BaseClassType(const BaseClassType* object) throw(const char*) { \
+		THIS.initialize(); \
 		if (object != NULL) { \
-			if (object->_object == NULL) { \
+			if ((*object)._object == NULL) { \
 				try { \
-					this->setRef(object->newRef()); \
+					THIS.setRef((*object).newRef()); \
 				} catch (...) { \
-					this->setRef(NULL); \
+					THIS.setRef(NULL); \
 					delete object; \
 					throw; \
 				} \
 			} else { \
-				this->setRef((void*)(object->_object)); \
+				THIS.setRef((void*)((*object)._object)); \
 			} \
 			delete object; \
 		} \
 	} \
-	inline Class, ## __VA_ARGS__& operator =(const Class, ## __VA_ARGS__* object) throw(const char*) { \
+	inline BaseClassType& operator =(const BaseClassType* object) throw(const char*) { \
 		if (object != NULL) { \
-			if (object->_object == NULL) { \
+			if ((*object)._object == NULL) { \
 				try { \
-					this->setRef(object->newRef()); \
+					THIS.setRef((*object).newRef()); \
 				} catch (...) { \
-					this->setRef(NULL); \
+					THIS.setRef(NULL); \
 					delete object; \
 					throw; \
 				} \
 			} else { \
-				this->setRef((void*)(object->_object)); \
+				THIS.setRef((void*)((*object)._object)); \
 			} \
 			delete object; \
 		} \
-		return *this; \
-	} \
-	inline Base(const Ref ## Class, ## __VA_ARGS__* object) { \
-		this->initialize(); \
-		this->setRef(object); \
-	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const Ref ## Class, ## __VA_ARGS__* object) { \
-		this->setRef(object); \
-		return *this; \
-	} \
-	inline Base() { this->initialize(); } \
-	virtual inline Ref ## Class, ## __VA_ARGS__* operator->() const { \
-		return (Ref ## Class, ## __VA_ARGS__*)(this->_object); \
-	} \
-	virtual inline Ref ## Class, ## __VA_ARGS__& reference() const { \
-		return *(Ref ## Class, ## __VA_ARGS__*)(this->_object); \
+		return THIS; \
 	}
 
-#define RefCallback(Base, Class, ...) \
-	virtual inline Ref ## Class, ## __VA_ARGS__* newRef() const throw(const char*) { \
-		Ref ## Class, ## __VA_ARGS__* o = new Ref ## Class, ## __VA_ARGS__(); \
+#define RefTemplate(BaseClassType, TemplateClassType, RefClassType) \
+	virtual inline RefClassType<Type>* newRef() const throw(const char*) { \
+		RefClassType<Type>* o = new RefClassType<Type>(); \
 		if (o == NULL) throw eOutOfMemory; \
 		return o; \
 	} \
-	inline Base(const void* object) { \
-		this->initialize(); \
-		*((Object*)this) = object; \
+	inline BaseClassType(const void* object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
 	} \
-	inline Base(const Object& object) { \
-		this->initialize(); \
-		*((Object*)this) = object; \
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const void* object) { \
-		*((Object*)this) = object; \
-		return *this; \
+	virtual inline TemplateClassType<Type>& operator =(const void* object) throw(const char*) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const Object& object) { \
-		*((Object*)this) = object; \
-		return *this; \
+	virtual inline TemplateClassType<Type>& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
 	} \
-	inline Base(const Ref ## Class, ## __VA_ARGS__& object) { \
-		this->initialize(); \
-		this->setRef(&object); \
+	inline BaseClassType(const RefClassType<Type>& object) { \
+		THIS.initialize(); \
+		THIS.setRef(&object); \
 	} \
-	virtual inline Class, ## __VA_ARGS__& operator =(const Ref ## Class, ## __VA_ARGS__& object) { \
-		this->setRef(&object); \
-		return *this; \
+	virtual inline TemplateClassType<Type>& operator =(const RefClassType<Type>& object) { \
+		THIS.setRef(&object); \
+		return THIS; \
 	} \
-	inline Base(const Class, ## __VA_ARGS__* object) throw(const char*) { \
-		this->initialize(); \
+	inline BaseClassType(const RefClassType<Type>* object) { \
+		THIS.initialize(); \
+		THIS.setRef(object); \
+	} \
+	virtual inline TemplateClassType<Type>& operator =(const RefClassType<Type>* object) { \
+		THIS.setRef(object); \
+		return THIS; \
+	} \
+	virtual inline RefClassType<Type>& ref() const throw(const char*) { \
+		if (THIS._object == NULL) throw eNullPointer; \
+		return *(RefClassType<Type>*)(THIS._object); \
+	} \
+	inline BaseClassType(const TemplateClassType<Type>* object) throw(const char*) { \
+		THIS.initialize(); \
 		if (object != NULL) { \
-			if (object->_object == NULL) { \
+			if ((*object)._object == NULL) { \
 				try { \
-					this->setRef(object->newRef()); \
+					THIS.setRef((*object).newRef()); \
 				} catch (...) { \
-					this->setRef(NULL); \
+					THIS.setRef(NULL); \
 					delete object; \
 					throw; \
 				} \
 			} else { \
-				this->setRef((void*)(object->_object)); \
+				THIS.setRef((void*)((*object)._object)); \
 			} \
 			delete object; \
 		} \
 	} \
-	inline Class, ## __VA_ARGS__& operator =(const Class, ## __VA_ARGS__* object) throw(const char*) { \
+	inline TemplateClassType<Type>& operator =(const TemplateClassType<Type>* object) throw(const char*) { \
 		if (object != NULL) { \
-			if (object->_object == NULL) { \
+			if ((*object)._object == NULL) { \
 				try { \
-					this->setRef(object->newRef()); \
+					THIS.setRef((*object).newRef()); \
 				} catch (...) { \
-					this->setRef(NULL); \
+					THIS.setRef(NULL); \
 					delete object; \
 					throw; \
 				} \
 			} else { \
-				this->setRef((void*)(object->_object)); \
+				THIS.setRef((void*)((*object)._object)); \
 			} \
 			delete object; \
 		} \
-		return *this; \
+		return THIS; \
+	}
+
+#define RefTemplate2(BaseClassType, TemplateClassType, RefClassType) \
+	virtual inline RefClassType<K,V>* newRef() const throw(const char*) { \
+		RefClassType<K,V>* o = new RefClassType<K,V>(); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
 	} \
-	inline Base() { this->initialize(); } \
-	virtual inline Ref ## Class, ## __VA_ARGS__* operator->() const { \
-		return (Ref ## Class, ## __VA_ARGS__*)(this->_object); \
+	inline BaseClassType(const void* object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
 	} \
-	inline Base(const Ref ## Class, ## __VA_ARGS__* c) { this->initialize(); setRef(c); }
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	virtual inline TemplateClassType<K,V>& operator =(const void* object) throw(const char*) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	virtual inline TemplateClassType<K,V>& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const RefClassType<K,V>& object) { \
+		THIS.initialize(); \
+		THIS.setRef(&object); \
+	} \
+	virtual inline TemplateClassType<K,V>& operator =(const RefClassType<K,V>& object) { \
+		THIS.setRef(&object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const RefClassType<K,V>* object) { \
+		THIS.initialize(); \
+		THIS.setRef(object); \
+	} \
+	virtual inline TemplateClassType<K,V>& operator =(const RefClassType<K,V>* object) { \
+		THIS.setRef(object); \
+		return THIS; \
+	} \
+	virtual inline RefClassType<K,V>& ref() const throw(const char*) { \
+		if (THIS._object == NULL) throw eNullPointer; \
+		return *(RefClassType<K,V>*)(THIS._object); \
+	} \
+	inline BaseClassType(const TemplateClassType<K,V>* object) throw(const char*) { \
+		THIS.initialize(); \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+	} \
+	inline TemplateClassType<K,V>& operator =(const TemplateClassType<K,V>* object) throw(const char*) { \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+		return THIS; \
+	}
+
+#define RefClassV(BaseClassType, TemplateClassType, ...) \
+	virtual inline Ref ## TemplateClassType, ## __VA_ARGS__* newRef() const throw(const char*) { \
+		Ref ## TemplateClassType, ## __VA_ARGS__* o = new Ref ## TemplateClassType, ## __VA_ARGS__(); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
+	} \
+	inline BaseClassType(const void* object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const void* object) throw(const char*) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
+		THIS.initialize(); \
+		THIS.setRef(&object); \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
+		THIS.setRef(&object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__* object) { \
+		THIS.initialize(); \
+		THIS.setRef(object); \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Ref ## TemplateClassType, ## __VA_ARGS__* object) { \
+		THIS.setRef(object); \
+		return THIS; \
+	} \
+	virtual inline Ref ## TemplateClassType, ## __VA_ARGS__& ref() const throw(const char*) { \
+		if (THIS._object == NULL) throw eNullPointer; \
+		return *(Ref ## TemplateClassType, ## __VA_ARGS__*)(THIS._object); \
+	} \
+	inline BaseClassType(const TemplateClassType, ## __VA_ARGS__* object) throw(const char*) { \
+		THIS.initialize(); \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+	} \
+	inline TemplateClassType, ## __VA_ARGS__& operator =(const TemplateClassType, ## __VA_ARGS__* object) throw(const char*) { \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+		return THIS; \
+	}
+
+#define RefCallbackV(BaseClassType, TemplateClassType, ...) \
+	virtual inline Ref ## TemplateClassType, ## __VA_ARGS__* newRef() const throw(const char*) { \
+		Ref ## TemplateClassType, ## __VA_ARGS__* o = new Ref ## TemplateClassType, ## __VA_ARGS__(); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
+	} \
+	inline BaseClassType(const void* object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const void* object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
+		THIS.initialize(); \
+		THIS.setRef(&object); \
+	} \
+	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
+		THIS.setRef(&object); \
+		return THIS; \
+	} \
+	inline BaseClassType() { \
+		THIS.initialize(); \
+	} \
+	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__* c) { \
+		THIS.initialize(); \
+		setRef(c); \
+	} \
+	inline BaseClassType(const TemplateClassType, ## __VA_ARGS__* object) throw(const char*) { \
+		THIS.initialize(); \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+	} \
+	inline TemplateClassType, ## __VA_ARGS__& operator =(const TemplateClassType, ## __VA_ARGS__* object) throw(const char*) { \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+		return THIS; \
+	} \
 
 class RefString;
 class String;
@@ -281,19 +511,19 @@ public:
 	inline void operator delete[](void* p) { memFree(p); }
 
 	virtual ~Object();
-	inline Object() { }
+	inline Object() { THIS.initialize(); }
 	
 	Object(const Object& object);
-	Object& operator =(const Object& object);
+	virtual Object& operator =(const Object& object);
 	
 	inline bool operator ==(const Object& object) const { return (_object == object._object); }
 	inline bool operator !=(const Object& object) const { return (_object != object._object); }
 	
 	// support for 'null' value
 	Object(const void* object) throw(const char*);
-	Object& operator =(const void* object) throw(const char*);
-	inline bool operator ==(const void* object) const { return (_object == object); }
-	inline bool operator !=(const void* object) const { return (_object != object); }
+	virtual Object& operator =(const void* object) throw(const char*);
+	inline bool operator ==(const void* object) const { return ((void*)_object == object); }
+	inline bool operator !=(const void* object) const { return ((void*)_object != object); }
 	
 	// support for 'new' value
 	Object(const Object* object) throw(const char*);
@@ -303,21 +533,21 @@ public:
 	Object(const RefObject* object) throw(const char*);
 	Object& operator =(const RefObject* object) throw(const char*);
 
-	virtual inline RefObject* operator->() const { return (RefObject*)_object; }
+	virtual inline RefObject& ref() const throw(const char*) { if (_object == NULL) throw eInvalidPointer; return *((RefObject*)_object); }
 	
 	void setRef(const void* object);
 	
-	inline bool equals(const Object& object) const throw(const char*) { CHECKTHIS; return THIS->equals(object); }
-	inline bool equals(const void* object) const throw(const char*) { CHECKTHIS; return THIS->equals(object); }
+	inline bool equals(const Object& object) const throw(const char*) { return THIS.ref().equals(object); }
+	inline bool equals(const void* object) const throw(const char*) { return THIS.ref().equals(object); }
 	String getClass() const;
-	virtual inline uint32_t hashCode() const { if (_object == NULL) return 0; return THIS->hashCode(); }
-	inline void notify() const throw(const char*) { CHECKTHIS; THIS->notify(); }
-	inline void notifyAll() const throw(const char*) { CHECKTHIS; THIS->notifyAll(); }
+	virtual inline uint32_t hashCode() const { if (_object == NULL) return 0; return THIS.ref().hashCode(); }
+	inline void notify() const throw(const char*) { THIS.ref().notify(); }
+	inline void notifyAll() const throw(const char*) { THIS.ref().notifyAll(); }
 	String toString() const;
 	String toJSON() const;
-	inline void wait() const throw(const char*) { CHECKTHIS; THIS->wait(); }
-	inline bool wait(int milis, int nanos) const throw(const char*) { CHECKTHIS; return THIS->wait(milis, nanos); }
-	inline bool wait(int milis) const throw(const char*) { CHECKTHIS; return THIS->wait(milis); }
+	inline void wait() const throw(const char*) { THIS.ref().wait(); }
+	inline bool wait(int milis, int nanos) const throw(const char*) { return THIS.ref().wait(milis, nanos); }
+	inline bool wait(int milis) const throw(const char*) { return THIS.ref().wait(milis); }
 	
 	static bool isNull(const RefString& string);
 	static bool isNull(const RefString* string);
@@ -365,5 +595,192 @@ public:
 
 	void log() const;
 };
+
+/*
+template <typename BaseClassType, typename SubClass, typename RefSubClass>
+ObjectClass {
+	virtual inline RefSubClass* newRef() const throw(const char*) {
+		RefSubClass* o = new RefSubClass();
+		if (o == NULL) throw eOutOfMemory;
+		return o;
+	}
+	
+	inline BaseClassType(const void* object) throw(const char*) {
+		THIS.initialize();
+		THIS.Object::operator =(object);
+	}
+	
+	inline BaseClassType(const Object& object) {
+		THIS.initialize();
+		THIS.Object::operator =(object);
+	}
+	
+	virtual inline SubClass& operator =(const void* object) throw(const char*) {
+		THIS.Object::operator =(object);
+		return THIS;
+	}
+	
+	virtual inline SubClass& operator =(const Object& object) {
+		THIS.Object::operator =(object);
+		return THIS;
+	}
+	
+	inline BaseClassType(const RefSubClass& object) {
+		THIS.initialize();
+		THIS.setRef(&object);
+	}
+	
+	virtual inline SubClass& operator =(const RefSubClass& object) {
+		THIS.setRef(&object);
+		return THIS;
+	}
+	
+	inline BaseClassType(const SubClass* object) throw(const char*) {
+		THIS.initialize();
+		if (object != NULL) {
+			if ((*object)._object == NULL) {
+				try {
+					THIS.setRef((*object).newRef());
+				} catch (...) {
+					THIS.setRef(NULL);
+					delete object;
+					throw;
+				}
+			} else {
+				THIS.setRef((void*)((*object)._object));
+			}
+			delete object;
+		}
+	}
+	
+	inline SubClass& operator =(const SubClass* object) throw(const char*) {
+		if (object != NULL) {
+			if ((*object)._object == NULL) {
+				try {
+					THIS.setRef((*object).newRef());
+				} catch (...) {
+					THIS.setRef(NULL);
+					delete object;
+					throw;
+				}
+			} else {
+				THIS.setRef((void*)((*object)._object));
+			}
+			delete object;
+		}
+		return THIS;
+	}
+	
+	inline BaseClassType(const RefSubClass* object) {
+		THIS.initialize();
+		THIS.setRef(object);
+	}
+	
+	virtual inline SubClass& operator =(const RefSubClass* object) {
+		THIS.setRef(object);
+		return THIS;
+	}
+	
+	inline BaseClassType() {
+		THIS.initialize();
+	}
+	
+	virtual inline RefSubClass& ref() const throw(const char*) {
+		if (THIS._object == NULL) throw eNullPointer;
+		return *(RefSubClass*)(THIS._object);
+	}
+};
+
+/*
+template <typename SubClass, typename RefSubClass>
+class ObjectCallback : public Object {
+public:
+	virtual inline RefSubClass* newRef() const throw(const char*) {
+		RefSubClass* o = new RefSubClass();
+		if (o == NULL) throw eOutOfMemory;
+		return o;
+	}
+	
+	inline ObjectCallback(const void* object) throw(const char*) {
+		THIS.initialize();
+		THIS.Object::operator =(object);
+	}
+	
+	inline ObjectCallback(const Object& object) {
+		THIS.initialize();
+		THIS.Object::operator =(object);
+	}
+	
+	virtual inline SubClass& operator =(const void* object) throw(const char*) {
+		THIS.Object::operator =(object);
+		return THIS;
+	}
+	
+	virtual inline SubClass& operator =(const Object& object) {
+		THIS.Object::operator =(object);
+		return THIS;
+	}
+	
+	inline ObjectCallback(const RefSubClass& object) {
+		THIS.initialize();
+		THIS.setRef(&object);
+	}
+	
+	virtual inline SubClass& operator =(const RefSubClass& object) {
+		THIS.setRef(&object);
+		return THIS;
+	}
+	
+	inline ObjectCallback(const SubClass* object) throw(const char*) {
+		THIS.initialize();
+		if (object != NULL) {
+			if ((*object)._object == NULL) {
+				try {
+					THIS.setRef((*object).newRef());
+				} catch (...) {
+					THIS.setRef(NULL);
+					delete object;
+					throw;
+				}
+			} else {
+				THIS.setRef((void*)((*object)._object));
+			}
+			delete object;
+		}
+	}
+	
+	inline SubClass& operator =(const SubClass* object) throw(const char*) {
+		if (object != NULL) {
+			if ((*object)._object == NULL) {
+				try {
+					THIS.setRef((*object).newRef());
+				} catch (...) {
+					THIS.setRef(NULL);
+					delete object;
+					throw;
+				}
+			} else {
+				THIS.setRef((void*)((*object)._object));
+			}
+			delete object;
+		}
+		return THIS;
+	}
+	
+	inline ObjectCallback() {
+		THIS.initialize();
+	}
+	
+	inline ObjectCallback(const RefSubClass* object) {
+		THIS.initialize();
+		setRef(object);
+	}
+	
+	virtual inline RefSubClass& ref() const throw(const char*) {
+		if (THIS._object == NULL) throw eNullPointer;
+		return *(RefSubClass*)(THIS._object);
+	}
+};
+*/
 
 #endif //JAPPSY_UOBJECT_H

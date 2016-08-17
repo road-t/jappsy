@@ -913,13 +913,13 @@ extern "C" {
 #define StringNull L"null"
 #define StringUndefined L"undefined"
 	
-static uint32_t getStringLength(const String& self) {
+uint32_t getStringLength(const String& self) {
 	if (self._object == NULL)
 		return 0;
 	return self->m_length;
 }
 
-static uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
+uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
 	if (self._object == NULL) {
 		RefString* newString = new RefString();
 		if (newString == NULL)

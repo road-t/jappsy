@@ -24,6 +24,7 @@
 #include <data/uJSONObject.h>
 #include <data/uList.h>
 #include <data/uHashMap.h>
+#include <core/uHandler.h>
 
 class Loader;
 
@@ -82,27 +83,46 @@ public:
 	};
 	
 public:
-	
+	// loader callback types
 	typedef void (*onFileCallback)(const Info& info, const Stream& stream, const Object& userData);
 	typedef void (*onStatusCallback)(const Status& status, const Object& userData);
 	typedef void (*onReadyCallback)(const JSONObject& result, const Object& userData);
 	typedef void (*onErrorCallback)(const String& error, const Object& userData);
 
 private:
+	// loader internal data
 	int loadSpeed = 5;
 	
 	HashMap<String, Stream> result = new HashMap<String, Stream>();
 	List<File> list = new List<File>();
 	struct Status status;
-	volatile int32_t running = 0;
 	volatile int32_t shutdown = 0;
+	volatile bool updating = false;
 	
+	String cacheid;
+
 	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
 	onReadyCallback onready = NULL;
 	onErrorCallback onerror = NULL;
 	
 	Object userData;
+	
+	inline bool hasDownloads() { return list.size(); }
+	
+	inline File& lastDownload() throw(const char*) {
+		return *(File*)&(list.peek());
+	}
+	
+	inline void doneDownload() throw(const char*) {
+		list.pop();
+	}
+	
+	Handler handler = new Handler();
+	void checkUpdate(int time);
+	static void onUpdate(const Object& data);
+	void update();
+	void run();
 	
 private:
 	// json parser callbacks and data
@@ -123,6 +143,7 @@ public:
 	~RefLoader();
 	
 	void load(const char* jsonconfig) throw(const char*);
+	void release();
 };
 
 class Loader : public Object {

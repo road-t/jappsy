@@ -16,6 +16,8 @@
 
 #include "uLoader.h"
 #include <data/uJSON.h>
+#include <net/uURI.h>
+#include <core/uSystem.h>
 
 RefLoader::RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
 	this->onfile = onfile;
@@ -25,12 +27,47 @@ RefLoader::RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCa
 	this->userData = userData;
 }
 
+void RefLoader::release() {
+	this->wait();
+	AtomicSet(&shutdown, 1);
+	handler.release();
+	this->notifyAll();
+}
+
 RefLoader::~RefLoader() {
-	if (AtomicLockTry(&running)) {
-		AtomicSet(&shutdown, 1);
-		AtomicUnlock(&running);
-	}
+	release();
 	// TODO: RELEASE LOADER
+}
+
+void RefLoader::checkUpdate(int time) {
+	this->wait();
+	if (AtomicGet(&shutdown) == 0) {
+		if (AtomicLockTry(&updating)) {
+			handler->postDelayed(onUpdate, time, this);
+		}
+	}
+	this->notifyAll();
+}
+
+void RefLoader::onUpdate(const Object& data) {
+	(*(Loader*)(&data))->update();
+}
+
+void RefLoader::update() {
+	this->wait();
+	AtomicUnlock(&updating);
+
+	if (AtomicGet(&shutdown) == 0) {
+		cacheid = currentTimeMillis();
+		
+		
+		checkUpdate(15);
+	}
+	this->notifyAll();
+}
+
+void RefLoader::run() {
+	checkUpdate(15);
 }
 
 void RefLoader::onroot(struct json_context* ctx, void* target) {
@@ -56,12 +93,14 @@ void RefLoader::onsubgroup(struct json_context* ctx, const char* key, void* targ
 void RefLoader::onsubfile(struct json_context* ctx, const char* key, char* value, void* target) {
 	RefLoader* loader = (RefLoader*)target;
 	
-	List<String> log = new List<String>();
-	log.add(loader->group);
-	log.add(loader->subgroup);
-	log.add(key);
-	log.add(value);
-	log.log();
+	String path = value;
+	URI* uri = new URI((wchar_t*)path);
+	uri->absolutePath((wchar_t*)(loader->basePath));
+	
+	loader->list.add(new RefLoader::RefFile(uri->uri(), uri->ext(), key, loader->subgroup));
+	loader->status.total++;
+	
+	delete uri;
 }
 
 void RefLoader::load(const char* json) throw(const char*) {
@@ -79,4 +118,6 @@ void RefLoader::load(const char* json) throw(const char*) {
 #endif
 		throw eConvert;
 	}
+	
+	run();
 }

@@ -18,7 +18,7 @@
 #define JAPPSY_UGLRENDER_H
 
 #include <platform.h>
-//TODO: #include "uLoader.h"
+#include <net/uLoader.h>
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
 
@@ -50,8 +50,8 @@ public:
 	uint32_t height;
 	
 	GLFrame* frame;
-	GLTouchScreen* touchScreen;
-	//TODO: loader
+	GLTouchScreen touchScreen;
+	Loader loader;
 	
 	GLfloat m_square[8];
 	GLfloat m_line[4];
@@ -85,7 +85,7 @@ public:
 	
 	Vec4 light;
 	
-	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch);
+	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch);
 	~GLRender();
 	
 	void resetBlend();

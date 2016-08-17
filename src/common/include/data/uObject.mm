@@ -57,9 +57,9 @@ void RefObject::_threadLock() const {
 	
 	do {
 		_spinLock();
-		if ((AtomicCompareExchangePtr((void* volatile *)&_thread, thread, NULL) == NULL) ||
-			(AtomicCompareExchangePtr((void* volatile *)&_thread, thread, thread) == thread)) {
-			AtomicIncrement((volatile int32_t*)&_lockCount);
+		if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
+			(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
+			AtomicIncrement(&(((RefObject*)this)->_lockCount));
 			_spinUnlock();
 			break;
 		}
@@ -78,9 +78,9 @@ bool RefObject::_threadLockTry() const {
 #endif
 	
 	_spinLock();
-	if ((AtomicCompareExchangePtr((void* volatile *)&_thread, thread, NULL) == NULL) ||
-		(AtomicCompareExchangePtr((void* volatile *)&_thread, thread, thread) == thread)) {
-		AtomicIncrement((volatile int32_t*)&_lockCount);
+	if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
+		(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
+		AtomicIncrement(&(((RefObject*)this)->_lockCount));
 		_spinUnlock();
 		return true;
 	}
@@ -99,7 +99,7 @@ void RefObject::_threadUnlock() const {
 	
 	_spinLock();
 	if (AtomicDecrement((volatile int32_t*)&_lockCount) == 1) {
-		AtomicCompareExchangePtr((void* volatile *)&_thread, NULL, thread);
+		AtomicCompareExchangePtr((void**)&_thread, NULL, thread);
 	}
 	_spinUnlock();
 }
@@ -305,6 +305,14 @@ Object::Object(const Object* object) throw(const char*) {
 	}
 }
 
+Object::Object(const RefObject* object) throw(const char*) {
+	initialize();
+	RefObject* newObject = (RefObject*)object;
+	AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	if (newObject != NULL)
+		AtomicIncrement(&(newObject->_retainCount));
+}
+
 Object::Object(const Object& object) {
 	initialize();
 	RefObject* newObject = (RefObject*)(object._object);
@@ -350,6 +358,11 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 	if (o != NULL) {
 		delete o;
 	}
+	return *this;
+}
+
+Object& Object::operator =(const RefObject* object) throw(const char*) {
+	this->setRef(object);
 	return *this;
 }
 

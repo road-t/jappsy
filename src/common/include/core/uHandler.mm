@@ -20,12 +20,10 @@
 
 const wchar_t TypeHandler[] = L"Handler::";
 
-RefHandler::HandlerCallback::HandlerCallback(Callback callback, int delay, void* userData) {
-	m_lock = 0;
-	m_callback = callback;
-	m_delay = delay;
-	m_enabled = true;
-	m_userData = userData;
+RefHandler::HandlerCallback::HandlerCallback(Callback callback, int delay, const Object& userData) {
+	this->callback = callback;
+	this->delay = delay;
+	this->userData = new Object(userData);
 }
 
 @interface iOSHandler : NSObject
@@ -35,173 +33,189 @@ RefHandler::HandlerCallback::HandlerCallback(Callback callback, int delay, void*
 
 @end
 
-RefHandler::RefHandler() {
-	m_retain = 0;
-	m_lock = 0;
-
-	m_queue = NULL;
-	m_count = 0;
-	m_memorySize = 0;
-}
-
 #define HANDLER_QUEUE_BLOCK_SIZE	16
 
-void RefHandler::resize(uint32_t count) throw(const char*) {
+RefHandler::HandlerCallback** RefHandler::resize(uint32_t count) throw(const char*) {
 	uint32_t newSize = count * sizeof(HandlerCallback*);
 	
+	HandlerCallback** queue = (HandlerCallback**)AtomicGetPtr((void**)&(this->queue));
 	if (newSize == 0) {
-		if (this->m_queue != NULL) {
-			memFree(this->m_queue);
-			this->m_queue = NULL;
+		if (queue != NULL) {
+			memFree(queue);
+			AtomicSetPtr(&(this->queue), NULL);
 		}
-		this->m_count = 0;
-		this->m_memorySize = 0;
-		return;
+		AtomicSet(&(this->count), 0);
+		AtomicSet(&(this->memorySize), 0);
+		return NULL;
 	}
 	
 	uint32_t newMemSize = newSize - (newSize % HANDLER_QUEUE_BLOCK_SIZE) + HANDLER_QUEUE_BLOCK_SIZE;
-	if (this->m_memorySize != newMemSize) {
-		HandlerCallback** newQueue = memRealloc(HandlerCallback*, newQueue, this->m_queue, newMemSize);
+	if (AtomicGet(&memorySize) != newMemSize) {
+		HandlerCallback** newQueue = memRealloc(HandlerCallback*, newQueue, queue, newMemSize);
 		if (newQueue) {
-			this->m_queue = newQueue;
-			this->m_memorySize = newMemSize;
+			AtomicSetPtr(&(this->queue), newQueue);
+			AtomicSet(&(this->memorySize), newMemSize);
+			queue = newQueue;
 		} else {
 			throw eOutOfMemory;
 		}
 	}
 	
-	this->m_count = count;
+	AtomicSet(&(this->count), count);
+	return queue;
+}
+
+void RefHandler::release() {
+	this->wait();
+	uint32_t count = AtomicGet(&(this->count));
+	HandlerCallback** queue = (HandlerCallback**)AtomicGetPtr((void**)&(this->queue));
+	for (uint32_t i = 0; i < count; i++) {
+		HandlerCallback* runner = AtomicGetPtr(&(queue[i]));
+		AtomicSet(&(runner->shutdown), 1);
+	}
+	
+	AtomicSet(&shutdown, 1);
+	while (AtomicGet(&(this->count)) > 0) {
+		this->notifyAll();
+		sleep(1);
+		this->wait();
+	}
+	this->notifyAll();
 }
 
 RefHandler::~RefHandler() {
-	AtomicLock(&m_lock);
-	for (uint32_t i = 0; i < m_count; i++) {
-		HandlerCallback* runner = m_queue[i];
-		AtomicLock(&(runner->m_lock));
-		runner->m_enabled = false;
-		AtomicUnlock(&(runner->m_lock));
-	}
-	AtomicUnlock(&m_lock);
-	
-	do {
-		AtomicLock(&m_lock);
-		if (m_count == 0) {
-			AtomicSet(&m_retain, -1);
-			break;
-		}
-		AtomicUnlock(&m_lock);
-	} while (true);
-	AtomicUnlock(&m_lock);
+	release();
 }
 
 void RefHandler::push(HandlerCallback* runner) {
-	resize(m_count+1);
-	m_queue[m_count-1] = runner;
+	uint32_t count = AtomicGet(&(this->count));
+	HandlerCallback** queue = resize(count+1);
+	AtomicSetPtr(&(queue[count]), runner);
 }
 
 void RefHandler::remove(HandlerCallback* runner) {
-	for (uint32_t i = 0; i < m_count; i++) {
-		if (m_queue[i] == runner) {
-			if (i < (m_count - 1)) {
-				memmove(m_queue[i], m_queue[i+1], (m_count-i-1) * sizeof(HandlerCallback*));
+	uint32_t count = AtomicGet(&(this->count));
+	HandlerCallback** queue = (HandlerCallback**)AtomicGetPtr((void**)&(this->queue));
+	for (uint32_t i = 0; i < count; i++) {
+		if (AtomicGetPtr(&(queue[i])) == runner) {
+			if (i < (count - 1)) {
+				atomic_memmove(&queue[i], &queue[i+1], (count-i-1) * sizeof(HandlerCallback*));
 			}
-			resize(m_count-1);
+			(void)resize(count-1);
 			break;
 		}
 	}
 }
 
-void* RefHandler::postDelayed(Callback callback, int delay, void* userData) {
-	HandlerCallback* runner = memNew(runner, HandlerCallback(callback, delay, userData));
-	AtomicLock(&m_lock);
-	if (AtomicCompareExchange(&m_retain, -1, -1) == -1) {
-		AtomicUnlock(&m_lock);
-		memDelete(runner);
+void* RefHandler::postDelayed(Callback callback, int delay, const Object& userData) {
+	this->wait();
+	if (AtomicGet(&shutdown) == 0) {
+		HandlerCallback* runner = memNew(runner, HandlerCallback(callback, delay, userData));
+		push(runner);
+		Handler* handler = new Handler(this);
+		[NSThread detachNewThreadSelector:@selector(threadPost:) toTarget:[iOSHandler class] withObject:@[[NSValue valueWithPointer:handler], [NSValue valueWithPointer:runner]]];
+
+		this->notifyAll();
+		return runner;
 	}
-	AtomicIncrement(&m_retain);
-	push(runner);
-	AtomicUnlock(&m_lock);
-	[NSThread detachNewThreadSelector:@selector(threadPost:) toTarget:[iOSHandler class] withObject:@[[NSValue valueWithPointer:this], [NSValue valueWithPointer:runner]]];
-	
-	return runner;
+	this->notifyAll();
+	return NULL;
 }
 
-void* RefHandler::post(Callback callback, void* userData) {
-	HandlerCallback* runner = memNew(runner, HandlerCallback(callback, 0, userData));
-	AtomicLock(&m_lock);
-	if (AtomicCompareExchange(&m_retain, -1, -1) == -1) {
-		AtomicUnlock(&m_lock);
-		memDelete(runner);
-	}
-	AtomicIncrement(&m_retain);
-	push(runner);
-	AtomicUnlock(&m_lock);
-	[NSThread detachNewThreadSelector:@selector(threadPost:) toTarget:[iOSHandler class] withObject:@[[NSValue valueWithPointer:this], [NSValue valueWithPointer:runner]]];
+void* RefHandler::post(Callback callback, const Object& userData) {
+	this->wait();
+	if (AtomicGet(&shutdown) == 0) {
+		HandlerCallback* runner = memNew(runner, HandlerCallback(callback, 0, userData));
+		push(runner);
+		Handler* handler = new Handler(this);
+		[NSThread detachNewThreadSelector:@selector(threadPost:) toTarget:[iOSHandler class] withObject:@[[NSValue valueWithPointer:handler], [NSValue valueWithPointer:runner]]];
 	
-	return runner;
+		this->notifyAll();
+		return runner;
+	}
+	this->notifyAll();
+	return NULL;
 }
 
 void RefHandler::removeCallbacks(Callback callback) {
-	AtomicLock(&m_lock);
-	for (uint32_t i = 0; i < m_count; i++) {
-		HandlerCallback* runner = m_queue[i];
-		AtomicLock(&(runner->m_lock));
-		if (runner->m_callback == callback)
-			runner->m_enabled = false;
-		AtomicUnlock(&(runner->m_lock));
+	this->wait();
+	uint32_t count = AtomicGet(&(this->count));
+	HandlerCallback** queue = (HandlerCallback**)AtomicGetPtr((void**)&(this->queue));
+	for (uint32_t i = 0; i < count; i++) {
+		HandlerCallback* runner = AtomicGetPtr(&(queue[i]));
+		if (AtomicGetPtr(&(runner->callback)) == callback)
+			AtomicSet(&(runner->shutdown), 1);
 	}
-	AtomicUnlock(&m_lock);
+	this->notifyAll();
 }
 
 void RefHandler::remove(void* runnerid) {
+	this->wait();
 	HandlerCallback* runner = (HandlerCallback*)runnerid;
-	AtomicLock(&(runner->m_lock));
-	runner->m_enabled = false;
-	AtomicUnlock(&(runner->m_lock));
+	uint32_t count = AtomicGet(&(this->count));
+	HandlerCallback** queue = (HandlerCallback**)AtomicGetPtr((void**)&(this->queue));
+	for (uint32_t i = 0; i < count; i++) {
+		if (AtomicGetPtr(&(queue[i])) == runner)
+			AtomicSet(&(runner->shutdown), 1);
+	}
+	this->notifyAll();
 }
 
-void RefHandler::run(void* runnerid) {
+void RefHandler::onthread(Handler* handler, void* runnerid) {
 	HandlerCallback* runner = (HandlerCallback*)runnerid;
-	float delay = 0;
-	AtomicLock(&m_lock);
-	AtomicLock(&(runner->m_lock));
-	delay = (float)(runner->m_delay) / 1000.0;
-	AtomicUnlock(&(runner->m_lock));
-	AtomicUnlock(&m_lock);
+	
+	float delay = (float)(AtomicGet(&(runner->delay))) / 1000.0;
 	
 	if (delay > 0) {
 		[NSThread sleepForTimeInterval:delay];
 	}
 	
-	AtomicLock(&m_lock);
-	AtomicLock(&(runner->m_lock));
-	if (runner->m_enabled) {
-		[[iOSHandler class] performSelectorOnMainThread:@selector(threadRun:) withObject:@[[NSValue valueWithPointer:(void*)(runner->m_callback)], [NSValue valueWithPointer:(void*)(runner->m_userData)]] waitUntilDone:NO];
-		runner->m_enabled = false;
+	if (AtomicGet(&(runner->shutdown)) == 0) {
+		[[iOSHandler class] performSelectorOnMainThread:@selector(threadRun:) withObject:@[[NSValue valueWithPointer:handler], [NSValue valueWithPointer:runner]] waitUntilDone:NO];
+	} else {
+		__sync_synchronize();
+		
+		(*handler)->wait();
+		(*handler)->remove(runner);
+		memDelete(runner);
+		(*handler)->notifyAll();
+		delete handler;
 	}
-	remove(runner);
-	AtomicUnlock(&(runner->m_lock));
+}
+
+void RefHandler::onrun(Handler* handler, void* runnerid) {
+	HandlerCallback* runner = (HandlerCallback*)runnerid;
+
+	__sync_synchronize();
+	
+	runner->callback(runner->userData);
+	(*handler)->wait();
+	(*handler)->remove(runner);
 	memDelete(runner);
-	AtomicDecrement(&m_retain);
-	AtomicUnlock(&m_lock);
+	(*handler)->notifyAll();
+	delete handler;
 }
 
 @implementation iOSHandler
 
-+(void)threadPost:(NSArray *)queueData {
-	NSValue* val0 = queueData[0];
-	RefHandler* handler = (RefHandler*)([val0 pointerValue]);
-	NSValue* val1 = queueData[1];
-	void* runner = (void*)([val1 pointerValue]);
-	handler->run(runner);
++(void)threadPost:(NSArray *)threadData {
+	@autoreleasepool {
+		NSValue* val0 = threadData[0];
+		Handler* handler = (Handler*)([val0 pointerValue]);
+		NSValue* val1 = threadData[1];
+		void* runner = (void*)([val1 pointerValue]);
+		RefHandler::onthread(handler, runner);
+	}
 }
 
 +(void)threadRun:(NSArray *)threadData {
-	NSValue* val0 = threadData[0];
-	RefHandler::Callback m_callback = (RefHandler::Callback)([val0 pointerValue]);
-	NSValue* val1 = threadData[1];
-	void* m_userData = (void*)([val1 pointerValue]);
-	m_callback(m_userData);
+	@autoreleasepool {
+		NSValue* val0 = threadData[0];
+		Handler* handler = (Handler*)([val0 pointerValue]);
+		NSValue* val1 = threadData[1];
+		void* runner = (void*)([val1 pointerValue]);
+		RefHandler::onrun(handler, runner);
+	}
 }
 
 @end

@@ -16,7 +16,6 @@
 
 #include "uNumber.h"
 
-
 #if defined(__IOS__)
 namespace Java {
 #endif

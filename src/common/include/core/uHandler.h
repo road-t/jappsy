@@ -22,55 +22,61 @@
 
 extern const wchar_t TypeHandler[];
 
+class Handler;
+
 class RefHandler : public RefObject {
 public:
-	typedef void (*Callback)(void* userData);
+	typedef void (*Callback)(const Object& userData);
 	
 private:
-	class HandlerCallback {
+	class HandlerCallback : public RefObject {
 	public:
-		volatile int32_t m_lock;
+		volatile Callback callback;
+		volatile int32_t delay;
+		Object userData;
 		
-		Callback m_callback;
-		volatile int m_delay;
-		volatile bool m_enabled;
-		volatile void* m_userData;
+		volatile int32_t shutdown = 0;
 		
-		HandlerCallback(Callback callback, int delay, void* userData);
+		inline HandlerCallback() throw(const char*) { throw eInvalidParams; }
+		HandlerCallback(Callback callback, int delay, const Object& userData);
 	};
 
 private:
-	volatile int32_t m_retain;
-	volatile int32_t m_lock;
-
-	HandlerCallback** m_queue;
-	volatile uint32_t m_count;
-	volatile uint32_t m_memorySize;
+	volatile int32_t shutdown = 0;
 	
-	void resize(uint32_t count) throw(const char*);
+	HandlerCallback** queue = NULL;
+	volatile int32_t count = 0;
+	volatile int32_t memorySize = 0;
+	
+	HandlerCallback** resize(uint32_t count) throw(const char*);
 	void push(HandlerCallback* runner);
 	void remove(HandlerCallback* runner);
 	
 public:
-	RefHandler();
+	RefHandler() { TYPE = TypeHandler; }
 	~RefHandler();
 
-	void run(void* runnerid);
+	static void onthread(Handler* handler, void* runnerid);
+	static void onrun(Handler* handler, void* runnerid);
 
-	void* postDelayed(Callback callback, int delay, void* userData);
-	void* post(Callback callback, void* userData);
+	void* postDelayed(Callback callback, int delay, const Object& userData);
+	void* post(Callback callback, const Object& userData);
 	void removeCallbacks(Callback callback);
 	void remove(void* runnerid);
+	
+	void release();
 };
 
 class Handler : public Object {
 public:
 	RefClass(Handler, Handler);
 	
-	inline void* postDelayed(RefHandler::Callback callback, int delay, void* userData) throw(const char*) { CHECKTHIS; return THIS->postDelayed(callback, delay, userData); }
-	inline void* post(RefHandler::Callback callback, void* userData) throw(const char*) { CHECKTHIS; return THIS->post(callback, userData); }
+	inline void* postDelayed(RefHandler::Callback callback, int delay, const Object& userData = null) throw(const char*) { CHECKTHIS; return THIS->postDelayed(callback, delay, userData); }
+	inline void* post(RefHandler::Callback callback, const Object& userData = null) throw(const char*) { CHECKTHIS; return THIS->post(callback, userData); }
 	inline void removeCallbacks(RefHandler::Callback callback) throw(const char*) { CHECKTHIS; THIS->removeCallbacks(callback); }
 	inline void remove(void* runnerid) throw(const char*) { CHECKTHIS; THIS->remove(runnerid); }
+	
+	inline void release() throw(const char*) { CHECKTHIS; THIS->release(); }
 };
 
 #endif //JAPPSY_HANDLER_H

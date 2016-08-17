@@ -556,7 +556,7 @@ public:
 		list.subList(0, 0);
 		list.toArray();
 	}
-#endif#ifdef DEBUG
+#endif
 
 };
 

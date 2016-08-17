@@ -20,7 +20,7 @@
 #include <opengl/uGLRender.h>
 #include <math.h>
 
-GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
+RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback) {
 	this->context = context;
 	onTouch = callback;
 	update();
@@ -45,61 +45,66 @@ GLTouchScreen::GLTouchScreen(GLRender* context, onTouchCallback callback) {
 	touchTimeout = NULL;
 }
 
-GLTouchScreen::~GLTouchScreen() {
-	// TODO: cleanup
+void RefGLTouchScreen::release() {
+	clearTimeout();
+	handler.release();
 }
 
-void GLTouchScreen::update() {
+RefGLTouchScreen::~RefGLTouchScreen() {
+	release();
+}
+
+void RefGLTouchScreen::update() {
 	GLfloat dimension = context->frame->height < context->frame->width ? context->frame->height : context->frame->width;
 	recordDistance = dimension / 20.0f;
 	minimalDistance = dimension / 6.0f;
 	swipeDistance = dimension * 3.0f / 4.0f;
 }
 
-bool GLTouchScreen::checkBounds(float x, float y) {
+bool RefGLTouchScreen::checkBounds(float x, float y) {
 	if ((x < 0) || (x >= context->frame->width) ||
 		(y < 0) || (y >= context->frame->height))
 		return false;
 	return true;
 }
 
-void GLTouchScreen::trackEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
+void RefGLTouchScreen::trackEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
 	// TODO: this.trackList.push({ x: x, y: y, w: w, h: h, name: name, callback: callback });
 }
 
-void GLTouchScreen::clickEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
+void RefGLTouchScreen::clickEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
 	// TODO: this.clickList.push({ x: x, y: y, w: w, h: h, name: name, callback: callback });
 }
 
-void onTouchTimeout(void* userData) {
-	((GLTouchScreen*)userData)->onTimeout();
+void onTouchTimeout(const Object& userData) {
+	(*((GLTouchScreen*)&(userData)))->onTimeout();
 }
 
-void GLTouchScreen::setTimeout(int delay) {
+void RefGLTouchScreen::setTimeout(int delay) {
 	if (touchTimeout == NULL) {
 		touchTimeout = handler->postDelayed(onTouchTimeout, delay, this);
 	}
 }
 
-void GLTouchScreen::clearTimeout() {
+void RefGLTouchScreen::clearTimeout() {
 	if (touchTimeout != NULL) {
 		handler->remove(touchTimeout);
 		touchTimeout = NULL;
 	}
 }
 
-void GLTouchScreen::onTimeout() {
+void RefGLTouchScreen::onTimeout() {
 	touchTimeout = NULL;
 	touchCancel = true;
 }
 
-bool GLTouchScreen::canStartTouch() {
+bool RefGLTouchScreen::canStartTouch() {
 	if (mouseTime == 0) return true;
 	uint64_t time = currentTimeMillis();
 	return (time >= (mouseTime + 1000));
 }
 
-bool GLTouchScreen::canStartMouse() {
+bool RefGLTouchScreen::canStartMouse() {
 	if (touchTime == 0) {
 		if (mouseRepeatTime == 0)
 			return true;
@@ -117,7 +122,7 @@ bool GLTouchScreen::canStartMouse() {
 	}
 }
 
-void GLTouchScreen::onTouchStart(MotionEvent* event) {
+void RefGLTouchScreen::onTouchStart(MotionEvent* event) {
 /*
 	MotionPointer* pointer = event->getPointer(0);
 	float x = pointer->x;
@@ -139,7 +144,7 @@ void GLTouchScreen::onTouchStart(MotionEvent* event) {
  */
 }
 
-void GLTouchScreen::onTouchEnd(MotionEvent* event) {
+void RefGLTouchScreen::onTouchEnd(MotionEvent* event) {
 	if (touchDown) {
 		touchDown = false;
 		touchTime = currentTimeMillis();
@@ -148,14 +153,14 @@ void GLTouchScreen::onTouchEnd(MotionEvent* event) {
 	}
 }
 
-void GLTouchScreen::onTouchMove(MotionEvent* event) {
+void RefGLTouchScreen::onTouchMove(MotionEvent* event) {
 	if (touchDown) {
 		MotionPointer* pointer = event->getPointer(0);
 		record(pointer->x, pointer->y);
 	}
 }
 
-void GLTouchScreen::onMouseDown(MotionEvent* event) {
+void RefGLTouchScreen::onMouseDown(MotionEvent* event) {
 	/*
 	 var x = e.clientX;
 	 var y = e.clientY;
@@ -178,7 +183,7 @@ void GLTouchScreen::onMouseDown(MotionEvent* event) {
 	 */
 }
 
-void GLTouchScreen::onMouseUp(MotionEvent* event) {
+void RefGLTouchScreen::onMouseUp(MotionEvent* event) {
 	if (mouseDown) {
 		mouseDown = false;
 		mouseRepeatTime = mouseTime = currentTimeMillis();
@@ -187,7 +192,7 @@ void GLTouchScreen::onMouseUp(MotionEvent* event) {
 	}
 }
 
-void GLTouchScreen::onMouseOut(MotionEvent* event) {
+void RefGLTouchScreen::onMouseOut(MotionEvent* event) {
 	if (mouseDown) {
 		mouseDown = false;
 		mouseTime = currentTimeMillis();
@@ -196,14 +201,14 @@ void GLTouchScreen::onMouseOut(MotionEvent* event) {
 	}
 }
 
-void GLTouchScreen::onMouseMove(MotionEvent* event) {
+void RefGLTouchScreen::onMouseMove(MotionEvent* event) {
 	if (mouseDown) {
 		MotionPointer* pointer = event->getPointer(0);
 		record(pointer->x, pointer->y);
 	}
 }
 
-void GLTouchScreen::analyze(float x, float y) {
+void RefGLTouchScreen::analyze(float x, float y) {
 	x = roundf(x * context->width / context->frame->width);
 	y = roundf(y * context->height / context->frame->height);
 	
@@ -410,7 +415,7 @@ void GLTouchScreen::analyze(float x, float y) {
 	 */
 }
 
-void GLTouchScreen::recordTrack(float x, float y, bool stop) {
+void RefGLTouchScreen::recordTrack(float x, float y, bool stop) {
 	/*
 	var time = new Date().getTime();
 	
@@ -477,7 +482,7 @@ void GLTouchScreen::recordTrack(float x, float y, bool stop) {
 	 */
 }
 
-void GLTouchScreen::record(float x, float y) {
+void RefGLTouchScreen::record(float x, float y) {
 	/*
 	var rect = this.oView.getBoundingClientRect();
 	x = Math.round((x - rect.left) * this.oView.width / (rect.right - rect.left));

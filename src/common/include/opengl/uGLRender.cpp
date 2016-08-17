@@ -49,14 +49,14 @@ bool GLRender::isExtensionSupported(const char *extension) {
 	return false;
 }
 
-GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch) {
+GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch) {
 	this->engine = engine;
 	this->width = width;
 	this->height = height;
 	
 	frame = memNew(frame, GLFrame(engine, this, onframe));
-	touchScreen = memNew(touchScreen, GLTouchScreen(this, ontouch));
-	// TODO: loader =
+	touchScreen = new GLTouchScreen(this, ontouch);
+	loader = new Loader();
 	
 	//textures = new GLTextures(this);
 	//shaders = new GLShaders(this);
@@ -97,11 +97,9 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 }
 
 GLRender::~GLRender() {
-	// TODO: loader.release()
-	if (touchScreen != NULL) {
-		memDelete(touchScreen);
-		touchScreen = NULL;
-	}
+	loader->release();
+	touchScreen->release();
+	touchScreen = null;
 	if (frame != NULL) {
 		memDelete(frame);
 		frame = NULL;

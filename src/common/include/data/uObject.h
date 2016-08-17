@@ -212,12 +212,12 @@ extern const wchar_t TypeSparseArray[];
 class RefObject {
 protected:
 	volatile void* _thread = 0;
-	volatile int32_t _lock = 0;
+	volatile bool _lock = false;
 	volatile int32_t _lockCount = 0;
 
-	virtual inline void _spinLock() const { AtomicLock((volatile int32_t*)&_lock); }
-	virtual inline bool _spinLockTry() const { return AtomicLockTry((volatile int32_t*)&_lock); }
-	virtual inline void _spinUnlock() const { AtomicUnlock((volatile int32_t*)&_lock); }
+	virtual inline void _spinLock() const { AtomicLock(&(((RefObject*)this)->_lock)); }
+	virtual inline bool _spinLockTry() const { return AtomicLockTry(&(((RefObject*)this)->_lock)); }
+	virtual inline void _spinUnlock() const { AtomicUnlock(&(((RefObject*)this)->_lock)); }
 
 	virtual void _threadLock() const;
 	virtual bool _threadLockTry() const;
@@ -265,11 +265,11 @@ public:
 
 class Object {
 protected:
-	volatile int32_t _lock = 0;
+	volatile bool _lock = false;
 	
-	virtual inline void _spinLock() const { AtomicLock((volatile int32_t*)&_lock); }
-	virtual inline bool _spinLockTry() const { return AtomicLockTry((volatile int32_t*)&_lock); }
-	virtual inline void _spinUnlock() const { AtomicUnlock((volatile int32_t*)&_lock); }
+	virtual inline void _spinLock() const { AtomicLock(&(((Object*)this)->_lock)); }
+	virtual inline bool _spinLockTry() const { return AtomicLockTry(&(((Object*)this)->_lock)); }
+	virtual inline void _spinUnlock() const { AtomicUnlock(&(((Object*)this)->_lock)); }
 
 	virtual inline void initialize() {}
 public:
@@ -298,7 +298,11 @@ public:
 	// support for 'new' value
 	Object(const Object* object) throw(const char*);
 	Object& operator =(const Object* object) throw(const char*);
-	
+
+	// support for 'ref this' value
+	Object(const RefObject* object) throw(const char*);
+	Object& operator =(const RefObject* object) throw(const char*);
+
 	virtual inline RefObject* operator->() const { return (RefObject*)_object; }
 	
 	void setRef(const void* object);

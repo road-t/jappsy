@@ -19,6 +19,7 @@
 
 #include <platform.h>
 #include <opengl/uOpenGL.h>
+#include <data/uObject.h>
 #include <core/uHandler.h>
 #include <event/uMotionEvent.h>
 
@@ -36,7 +37,7 @@ public:
 	Callback onEvent;
 };
 
-class GLTouchScreen {
+class RefGLTouchScreen : public RefObject {
 public:
 	typedef void (*onTouchCallback)(const wchar_t* event);
 
@@ -80,8 +81,11 @@ private:
 	void recordTrack(float x, float y, bool stop);
 	void record(float x, float y);
 public:
-	GLTouchScreen(GLRender* context, onTouchCallback callback);
-	~GLTouchScreen();
+	RefGLTouchScreen() throw(const char*) { throw eInvalidParams; }
+	RefGLTouchScreen(GLRender* context, onTouchCallback callback);
+	~RefGLTouchScreen();
+	
+	void release();
 	
 	void update();
 	
@@ -97,6 +101,17 @@ public:
 	void onMouseUp(MotionEvent* event);
 	void onMouseOut(MotionEvent* event);
 	void onMouseMove(MotionEvent* event);
+};
+
+class GLTouchScreen : public Object {
+public:
+	RefClass(GLTouchScreen, GLTouchScreen);
+	
+	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback) {
+		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback);
+		if (o == NULL) throw eOutOfMemory;
+		this->setRef(o);
+	}
 };
 
 #endif //JAPPSY_UGLTOUCHSCREEN_H

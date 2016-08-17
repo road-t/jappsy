@@ -74,13 +74,13 @@ OMEngine::OMEngine() {
         #include "OMLoad.res"
     ;
     
-    Loader loader = new Loader();
-    loader->basePath = L"https://www.cox.ru/res/om/";
-    loader->load(sOMLoadRes);
+    context->loader->basePath = L"https://www.cox.ru/res/om/";
+    context->loader->load(sOMLoadRes);
     
     HTTPClient::Request(L"https://www.cox.ru/res/om/models/ball.json", false, 0, 5, onStream, onError);
 }
 
 OMEngine::~OMEngine() {
     memDelete(context);
+    //loader->release();
 }

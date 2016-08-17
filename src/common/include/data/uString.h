@@ -274,13 +274,6 @@ extern "C" {
 
 	class String;
 	
-	static uint32_t getStringLength(const String& self);
-	static uint32_t setStringLength(String& self, uint32_t length) throw(const char*);
-	static uint32_t getRefStringLength(const RefString& self);
-	static uint32_t setRefStringLength(RefString& self, uint32_t length) throw(const char*);
-
-	static String getSubString(String& self, int start, int end);
-
 	class RefString : public RefObject {
 	private:
 		friend uint32_t getStringLength(const String& self);

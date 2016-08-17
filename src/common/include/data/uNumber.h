@@ -63,15 +63,15 @@ class Number : public Object {
 public:
 	RefClass(Number, Number)
 	
-	inline bool boolValue() const { CHECKTHIS; return THIS->boolValue(); }
-	inline int8_t byteValue() const { CHECKTHIS; return THIS->byteValue(); }
-	inline int16_t shortValue() const { CHECKTHIS; return THIS->shortValue(); }
-	inline int32_t intValue() const { CHECKTHIS; return THIS->intValue(); }
-	inline int64_t longValue() const { CHECKTHIS; return THIS->longValue(); }
-	inline float floatValue() const { CHECKTHIS; return THIS->floatValue(); }
-	inline double doubleValue() const { CHECKTHIS; return THIS->doubleValue(); }
+	inline bool boolValue() const throw(const char*) { CHECKTHIS; return THIS->boolValue(); }
+	inline int8_t byteValue() const throw(const char*) { CHECKTHIS; return THIS->byteValue(); }
+	inline int16_t shortValue() const throw(const char*) { CHECKTHIS; return THIS->shortValue(); }
+	inline int32_t intValue() const throw(const char*) { CHECKTHIS; return THIS->intValue(); }
+	inline int64_t longValue() const throw(const char*) { CHECKTHIS; return THIS->longValue(); }
+	inline float floatValue() const throw(const char*) { CHECKTHIS; return THIS->floatValue(); }
+	inline double doubleValue() const throw(const char*) { CHECKTHIS; return THIS->doubleValue(); }
 	
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
 };
 
 #if defined(__IOS__)
@@ -88,20 +88,20 @@ namespace Java {
 		inline RefBoolean(bool value) { TYPE = TypeBoolean; bValue = value; format = nfBool; }
 		inline RefBoolean(const String& value) { TYPE = TypeShort; bValue = (bool)value; format = nfBool; }
 		inline static int compare(bool lhs, bool rhs) { return (lhs == rhs) ? 0 : ((lhs == true) ? 1 : -1); }
-		int compareTo(const Boolean& object) const;
-		static Boolean decode(const String& value);
-		inline String toString() const { return String(bValue); }
-		inline String toJSON() const { return toString(); }
+		int compareTo(const Boolean& object) const throw(const char*);
+		static Boolean decode(const String& value) throw(const char*);
+		inline String toString() const throw(const char*) { return String(bValue); }
+		inline String toJSON() const throw(const char*) { return toString(); }
 	};
 	
 	class Boolean : public Number {
 	public:
 		RefClass(Boolean, Boolean)
 		
-		inline Boolean(bool value) { setRef(new RefBoolean(value)); }
-		inline Boolean(const String& value) { setRef(new RefBoolean(value)); }
+		inline Boolean(bool value) throw(const char*) { setRef(new RefBoolean(value)); }
+		inline Boolean(const String& value) throw(const char*) { setRef(new RefBoolean(value)); }
 		
-		inline static String toString(bool value) { return String(value); }
+		inline static String toString(bool value) throw(const char*) { return String(value); }
 		
 		inline static int compare(bool lhs, bool rhs) { return (lhs == rhs) ? 0 : ((lhs == true) ? 1 : -1); }
 		inline int compareTo(const Boolean& object) const {
@@ -116,11 +116,11 @@ namespace Java {
 			}
 			return THIS->compareTo(object);
 		}
-		inline static Boolean decode(const String& value) { return RefBoolean::decode(value); }
-		inline String toString() const { CHECKTHIS; return THIS->toString(); }
-		inline static Boolean valueOf(bool value) { return Boolean(value); }
+		inline static Boolean decode(const String& value) throw(const char*) { return RefBoolean::decode(value); }
+		inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+		inline static Boolean valueOf(bool value) throw(const char*) { return Boolean(value); }
 		
-		inline bool operator ==(const Boolean& src) const { return compareTo(src) == 0; }
+		inline bool operator ==(const Boolean& src) const throw(const char*) { return compareTo(src) == 0; }
 	};
 	
 	class Byte;
@@ -135,20 +135,20 @@ namespace Java {
 		inline RefByte(int8_t value) { TYPE = TypeByte; iValue64 = value; format = nfInt; }
 		inline RefByte(const String& value) { TYPE = TypeByte; iValue64 = (int64_t)value; format = nfInt; }
 		inline static int compare(int8_t lhs, int8_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-		int compareTo(const Byte& object) const;
-		static Byte decode(const String& value);
-		inline String toString() const { return String(bValue); }
-		inline String toJSON() const { return toString(); }
+		int compareTo(const Byte& object) const throw(const char*);
+		static Byte decode(const String& value) throw(const char*);
+		inline String toString() const throw(const char*) { return String(bValue); }
+		inline String toJSON() const throw(const char*) { return toString(); }
 	};
 	
 	class Byte : public Number {
 	public:
 		RefClass(Byte, Byte)
 		
-		inline Byte(int8_t value) { setRef(new RefByte(value)); }
-		inline Byte(const String& value) { setRef(new RefByte(value)); }
+		inline Byte(int8_t value) throw(const char*) { setRef(new RefByte(value)); }
+		inline Byte(const String& value) throw(const char*) { setRef(new RefByte(value)); }
 		
-		inline static String toString(int8_t value) { return String(value); }
+		inline static String toString(int8_t value) throw(const char*) { return String(value); }
 		
 		inline static int compare(int8_t lhs, int8_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 		inline int compareTo(const Byte& object) const {
@@ -163,11 +163,11 @@ namespace Java {
 			}
 			return THIS->compareTo(object);
 		}
-		inline static Byte decode(const String& value) { return Byte::decode(value); }
-		inline String toString() const { CHECKTHIS; return THIS->toString(); }
-		inline static Byte valueOf(int8_t value) { return Byte(value); }
+		inline static Byte decode(const String& value) throw(const char*) { return Byte::decode(value); }
+		inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+		inline static Byte valueOf(int8_t value) throw(const char*) { return Byte(value); }
 		
-		inline bool operator ==(const Byte& src) const { return compareTo(src) == 0; }
+		inline bool operator ==(const Byte& src) const throw(const char*) { return compareTo(src) == 0; }
 	};
 	
 #if defined(__IOS__)
@@ -186,20 +186,20 @@ public:
 	inline RefShort(int16_t value) { TYPE = TypeShort; iValue64 = value; format = nfInt; }
 	inline RefShort(const String& value) { TYPE = TypeShort; iValue64 = (int64_t)value; format = nfInt; }
 	inline static int compare(int16_t lhs, int16_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-	int compareTo(const Short& object) const;
-	static Short decode(const String& value);
-	inline String toString() const { return String(siValue); }
-	inline String toJSON() const { return toString(); }
+	int compareTo(const Short& object) const throw(const char*);
+	static Short decode(const String& value) throw(const char*);
+	inline String toString() const throw(const char*) { return String(siValue); }
+	inline String toJSON() const throw(const char*) { return toString(); }
 };
 
 class Short : public Number {
 public:
 	RefClass(Short, Short)
 	
-	inline Short(int16_t value) { setRef(new RefShort(value)); }
-	inline Short(const String& value) { setRef(new RefShort(value)); }
+	inline Short(int16_t value) throw(const char*) { setRef(new RefShort(value)); }
+	inline Short(const String& value) throw(const char*) { setRef(new RefShort(value)); }
 	
-	inline static String toString(int16_t value) { return String(value); }
+	inline static String toString(int16_t value) throw(const char*) { return String(value); }
 	
 	inline static int compare(int16_t lhs, int16_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 	inline int compareTo(const Short& object) const {
@@ -214,11 +214,11 @@ public:
 		}
 		return THIS->compareTo(object);
 	}
-	inline static Short decode(const String& value) { return Short::decode(value); }
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
-	inline static Short valueOf(int16_t value) { return Short(value); }
+	inline static Short decode(const String& value) throw(const char*) { return Short::decode(value); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline static Short valueOf(int16_t value) throw(const char*) { return Short(value); }
 	
-	inline bool operator ==(const Short& src) const { return compareTo(src) == 0; }
+	inline bool operator ==(const Short& src) const throw(const char*) { return compareTo(src) == 0; }
 };
 
 class Integer;
@@ -233,20 +233,20 @@ public:
 	inline RefInteger(int32_t value) { TYPE = TypeInt; iValue64 = value; format = nfInt; }
 	inline RefInteger(const String& value) { TYPE = TypeInt; iValue64 = (int64_t)value; format = nfInt; }
 	inline static int compare(int32_t lhs, int32_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-	int compareTo(const Integer& object) const;
-	static Integer decode(const String& value);
-	inline String toString() const { return String(iValue); }
-	inline String toJSON() const { return toString(); }
+	int compareTo(const Integer& object) const throw(const char*);
+	static Integer decode(const String& value) throw(const char*);
+	inline String toString() const throw(const char*) { return String(iValue); }
+	inline String toJSON() const throw(const char*) { return toString(); }
 };
 
 class Integer : public Number {
 public:
 	RefClass(Integer, Integer)
 	
-	inline Integer(int32_t value) { setRef(new RefInteger(value)); }
-	inline Integer(const String& value) { setRef(new RefInteger(value)); }
+	inline Integer(int32_t value) throw(const char*) { setRef(new RefInteger(value)); }
+	inline Integer(const String& value) throw(const char*) { setRef(new RefInteger(value)); }
 	
-	inline static String toString(int32_t value) { return String(value); }
+	inline static String toString(int32_t value) throw(const char*) { return String(value); }
 	
 	inline static int compare(int32_t lhs, int32_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 	inline int compareTo(const Integer& object) const {
@@ -261,10 +261,10 @@ public:
 		}
 		return THIS->compareTo(object);
 	}
-	inline static Integer decode(const String& value) { return Integer::decode(value); }
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
-	inline static Integer valueOf(int32_t value) { return Integer(value); }
-	inline static Integer valueOf(const String& value, int radix = 10) {
+	inline static Integer decode(const String& value) throw(const char*) { return Integer::decode(value); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline static Integer valueOf(int32_t value) throw(const char*) { return Integer(value); }
+	inline static Integer valueOf(const String& value, int radix = 10) throw(const char*) {
 		if (radix == 10) {
 			return valueOf((int32_t)value);
 		} else {
@@ -272,7 +272,7 @@ public:
 		}
 	}
 	
-	inline bool operator ==(const Integer& src) const { return compareTo(src) == 0; }
+	inline bool operator ==(const Integer& src) const throw(const char*) { return compareTo(src) == 0; }
 };
 
 class Long;
@@ -287,20 +287,20 @@ public:
 	inline RefLong(int64_t value) { TYPE = TypeLong; iValue64 = value; format = nfInt; }
 	inline RefLong(const String& value) { TYPE = TypeLong; iValue64 = (int64_t)value; format = nfInt; }
 	inline static int compare(int64_t lhs, int64_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-	int compareTo(const Long& object) const;
-	static Long decode(const String& value);
-	inline String toString() const { return String(iValue64); }
-	inline String toJSON() const { return toString(); }
+	int compareTo(const Long& object) const throw(const char*);
+	static Long decode(const String& value) throw(const char*);
+	inline String toString() const throw(const char*) { return String(iValue64); }
+	inline String toJSON() const throw(const char*) { return toString(); }
 };
 
 class Long : public Number {
 public:
 	RefClass(Long, Long)
 	
-	inline Long(int64_t value) { setRef(new RefLong(value)); }
-	inline Long(const String& value) { setRef(new RefLong(value)); }
+	inline Long(int64_t value) throw(const char*) { setRef(new RefLong(value)); }
+	inline Long(const String& value) throw(const char*) { setRef(new RefLong(value)); }
 	
-	inline static String toString(int64_t value) { return String(value); }
+	inline static String toString(int64_t value) throw(const char*) { return String(value); }
 	
 	inline static int compare(int64_t lhs, int64_t rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 	inline int compareTo(const Long& object) const {
@@ -315,11 +315,11 @@ public:
 		}
 		return THIS->compareTo(object);
 	}
-	inline static Long decode(const String& value) { return Long::decode(value); }
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
-	inline static Long valueOf(int64_t value) { return Long(value); }
+	inline static Long decode(const String& value) throw(const char*) { return Long::decode(value); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline static Long valueOf(int64_t value) throw(const char*) { return Long(value); }
 	
-	inline bool operator ==(const Long& src) const { return compareTo(src) == 0; }
+	inline bool operator ==(const Long& src) const throw(const char*) { return compareTo(src) == 0; }
 };
 
 class Float;
@@ -340,20 +340,20 @@ public:
 	inline RefFloat(float value) { TYPE = TypeFloat; dValue = value; format = nfFloat; }
 	inline RefFloat(const String& value) { TYPE = TypeFloat; dValue = (float)value; format = nfFloat; }
 	inline static int compare(float lhs, float rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-	int compareTo(const Float& object) const;
-	static Float decode(const String& value);
-	inline String toString() const { return String((float)dValue); }
-	inline String toJSON() const { return toString(); }
+	int compareTo(const Float& object) const throw(const char*);
+	static Float decode(const String& value) throw(const char*);
+	inline String toString() const throw(const char*) { return String((float)dValue); }
+	inline String toJSON() const throw(const char*) { return toString(); }
 };
 
 class Float : public Number {
 public:
 	RefClass(Float, Float)
 	
-	inline Float(float value) { setRef(new RefFloat(value)); }
-	inline Float(const String& value) { setRef(new RefFloat(value)); }
+	inline Float(float value) throw(const char*) { setRef(new RefFloat(value)); }
+	inline Float(const String& value) throw(const char*) { setRef(new RefFloat(value)); }
 	
-	inline static String toString(float value) { return String(value); }
+	inline static String toString(float value) throw(const char*) { return String(value); }
 	
 	inline static int compare(float lhs, float rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 	inline int compareTo(const Float& object) const {
@@ -368,11 +368,11 @@ public:
 		}
 		return THIS->compareTo(object);
 	}
-	inline static Float decode(const String& value) { return Float::decode(value); }
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
-	inline static Float valueOf(float value) { return Float(value); }
+	inline static Float decode(const String& value) throw(const char*) { return Float::decode(value); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline static Float valueOf(float value) throw(const char*) { return Float(value); }
 	
-	inline bool operator ==(const Float& src) const { return compareTo(src) == 0; }
+	inline bool operator ==(const Float& src) const throw(const char*) { return compareTo(src) == 0; }
 };
 
 class Double;
@@ -393,20 +393,20 @@ public:
 	inline RefDouble(double value) { TYPE = TypeDouble; dValue = value; format = nfFloat; }
 	inline RefDouble(const String& value) { TYPE = TypeDouble; dValue = (double)value; format = nfFloat; }
 	inline static int compare(double lhs, double rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
-	int compareTo(const Double& object) const;
-	inline static Double decode(const String& value);
-	inline String toString() const { return String(dValue); }
-	inline String toJSON() const { return toString(); }
+	int compareTo(const Double& object) const throw(const char*);
+	inline static Double decode(const String& value) throw(const char*);
+	inline String toString() const throw(const char*) { return String(dValue); }
+	inline String toJSON() const throw(const char*) { return toString(); }
 };
 
 class Double : public Number {
 public:
 	RefClass(Double, Double)
 	
-	inline Double(double value) { setRef(new RefDouble(value)); }
-	inline Double(const String& value) { setRef(new RefDouble(value)); }
+	inline Double(double value) throw(const char*) { setRef(new RefDouble(value)); }
+	inline Double(const String& value) throw(const char*) { setRef(new RefDouble(value)); }
 	
-	inline static String toString(double value) { return String(value); }
+	inline static String toString(double value) throw(const char*) { return String(value); }
 	
 	inline static int compare(double lhs, double rhs) { return (lhs < rhs) ? -1 : ((lhs == rhs) ? 0 : 1); }
 	inline int compareTo(const Double& object) const {
@@ -421,11 +421,11 @@ public:
 		}
 		return THIS->compareTo(object);
 	}
-	inline static Double decode(const String& value) { return Double::decode(value); }
-	inline String toString() const { CHECKTHIS; return THIS->toString(); }
-	inline static Double valueOf(double value) { return Double(value); }
+	inline static Double decode(const String& value) throw(const char*) { return Double::decode(value); }
+	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline static Double valueOf(double value) throw(const char*) { return Double(value); }
 	
-	inline bool operator ==(const Double& src) const { return compareTo(src) == 0; }
+	inline bool operator ==(const Double& src) const throw(const char*) { return compareTo(src) == 0; }
 };
 
 #endif

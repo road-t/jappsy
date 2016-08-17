@@ -70,33 +70,33 @@ public:
 
 class Stream : public Object {
 public:
-	RefClass(Stream, Stream);
+	RefClass(Stream, RefStream);
 	
 	inline Stream(const wchar_t* data) throw(const char*) {
 		RefStream* o = new RefStream(data);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 
 	inline Stream(const char* data, bool autorelease) throw(const char*) {
 		RefStream* o = new RefStream(data, autorelease);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 	
 	inline Stream(const void* data, uint32_t length, bool autorelease) throw(const char*) {
 		RefStream* o = new RefStream(data, length, autorelease);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 	
-	inline void* getBuffer() throw(const char*) { CHECKTHIS; return THIS->getBuffer(); }
-	inline uint32_t getSize() throw(const char*) { CHECKTHIS; return THIS->getSize(); }
+	inline void* getBuffer() throw(const char*) { return THIS.ref().getBuffer(); }
+	inline uint32_t getSize() throw(const char*) { return THIS.ref().getSize(); }
 
-	inline uint8_t* readBytes(uint32_t length) throw(const char*) { CHECKTHIS; return THIS->readBytes(length); }
-	inline uint32_t readInt() throw(const char*) { CHECKTHIS; return THIS->readInt(); }
-	inline uint8_t readUnsignedByte() throw(const char*) { CHECKTHIS; return THIS->readUnsignedByte(); }
-	inline int32_t skip(uint32_t length) throw(const char*) { CHECKTHIS; return THIS->skip(length); }
+	inline uint8_t* readBytes(uint32_t length) throw(const char*) { return THIS.ref().readBytes(length); }
+	inline uint32_t readInt() throw(const char*) { return THIS.ref().readInt(); }
+	inline uint8_t readUnsignedByte() throw(const char*) { return THIS.ref().readUnsignedByte(); }
+	inline int32_t skip(uint32_t length) throw(const char*) { return THIS.ref().skip(length); }
 };
 
 #endif //JAPPSY_USTREAM_H

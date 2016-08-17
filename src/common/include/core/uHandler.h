@@ -62,21 +62,21 @@ public:
 	void* postDelayed(Callback callback, int delay, const Object& userData);
 	void* post(Callback callback, const Object& userData);
 	void removeCallbacks(Callback callback);
-	void remove(void* runnerid);
+	void removeRunner(void* runnerid);
 	
 	void release();
 };
 
 class Handler : public Object {
 public:
-	RefClass(Handler, Handler);
+	RefClass(Handler, RefHandler);
 	
-	inline void* postDelayed(RefHandler::Callback callback, int delay, const Object& userData = null) throw(const char*) { CHECKTHIS; return THIS->postDelayed(callback, delay, userData); }
-	inline void* post(RefHandler::Callback callback, const Object& userData = null) throw(const char*) { CHECKTHIS; return THIS->post(callback, userData); }
-	inline void removeCallbacks(RefHandler::Callback callback) throw(const char*) { CHECKTHIS; THIS->removeCallbacks(callback); }
-	inline void remove(void* runnerid) throw(const char*) { CHECKTHIS; THIS->remove(runnerid); }
+	inline void* postDelayed(RefHandler::Callback callback, int delay, const Object& userData = null) throw(const char*) { return THIS.ref().postDelayed(callback, delay, userData); }
+	inline void* post(RefHandler::Callback callback, const Object& userData = null) throw(const char*) { return THIS.ref().post(callback, userData); }
+	inline void removeCallbacks(RefHandler::Callback callback) throw(const char*) { THIS.ref().removeCallbacks(callback); }
+	inline void removeRunner(void* runnerid) throw(const char*) { THIS.ref().removeRunner(runnerid); }
 	
-	inline void release() throw(const char*) { CHECKTHIS; THIS->release(); }
+	inline void release() throw(const char*) { THIS.ref().release(); }
 };
 
 #endif //JAPPSY_HANDLER_H

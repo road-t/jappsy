@@ -28,27 +28,27 @@ public:
 	
 public:
 	inline RefIterator() : RefStack<Type>() {
-		this->TYPE = TypeIterator;
+		THIS.TYPE = TypeIterator;
 	}
 	
 	inline RefIterator(uint32_t initialCapacity) throw(const char*) : RefStack<Type>(initialCapacity) {
-		this->TYPE = TypeIterator;
+		THIS.TYPE = TypeIterator;
 	}
 	
 	virtual inline bool hasNext() const {
-		return (m_next < this->m_count);
+		return (m_next < THIS.m_count);
 	}
 	
 	virtual inline const Type& next() const throw(const char*) {
-		if (m_next >= this->m_count) {
-			((RefIterator*)this)->m_last = this->m_count;
+		if (m_next >= THIS.m_count) {
+			((RefIterator*)this)->m_last = THIS.m_count;
 			throw eOutOfRange;
 		}
 		
-		((RefIterator*)this)->m_last = this->m_next;
-		((RefIterator*)this)->m_prev = this->m_next;
+		((RefIterator*)this)->m_last = THIS.m_next;
+		((RefIterator*)this)->m_prev = THIS.m_next;
 		((RefIterator*)this)->m_next++;
-		return RefStack<Type>::peek(this->m_last);
+		return RefStack<Type>::peek(THIS.m_last);
 	}
 	
 	virtual inline const Type remove() throw(const char*) {
@@ -68,12 +68,12 @@ public:
 	
 	virtual inline void reset(uint32_t index = 0) const {
 		((RefIterator*)this)->m_last = -1;
-		if ((index >= 0) && (index < this->m_count)) {
+		if ((index >= 0) && (index < THIS.m_count)) {
 			((RefIterator*)this)->m_next = index;
 			((RefIterator*)this)->m_prev = index - 1;
-		} else if (index >= this->m_count) {
-			((RefIterator*)this)->m_next = this->m_count;
-			((RefIterator*)this)->m_prev = this->m_count - 1;
+		} else if (index >= THIS.m_count) {
+			((RefIterator*)this)->m_next = THIS.m_count;
+			((RefIterator*)this)->m_prev = THIS.m_count - 1;
 		} else {
 			((RefIterator*)this)->m_next = 0;
 			((RefIterator*)this)->m_prev = -1;
@@ -84,28 +84,23 @@ public:
 template <typename Type>
 class Iterator : public Stack<Type> {
 public:
-	RefClass(Iterator, Iterator<Type>)
+	RefTemplate(Iterator, Iterator, RefIterator)
+
+	inline Iterator() {
+		THIS.initialize();
+	}
 	
 	inline Iterator(uint32_t initialCapacity) throw(const char*) {
+		THIS.initialize();
 		RefIterator<Type>* o = new RefIterator<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 	
-	virtual inline bool hasNext() const throw(const char*) { CHECKTHIS; return THIS->hasNext(); }
-	virtual inline const Type& next() const throw(const char*) { CHECKTHIS; return THIS->next(); }
-	virtual inline const Type remove() throw(const char*) { CHECKTHIS; return THIS->remove(); }
-	virtual inline void reset(uint32_t index = 0) const throw(const char*) { CHECKTHIS; THIS->reset(index); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		Iterator<Object> it = new Iterator<Object>();
-		it.push(null);
-		it.hasNext();
-		it.next();
-		it.remove();
-	}
-#endif
+	virtual inline bool hasNext() const throw(const char*) { return THIS.ref().hasNext(); }
+	virtual inline const Type& next() const throw(const char*) { return THIS.ref().next(); }
+	virtual inline const Type remove() throw(const char*) { return THIS.ref().remove(); }
+	virtual inline void reset(uint32_t index = 0) const throw(const char*) { THIS.ref().reset(index); }
 };
 
 #endif //JAPPSY_UITERATOR_H

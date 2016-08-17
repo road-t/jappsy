@@ -80,7 +80,7 @@ protected:
 	
 public:
 
-	inline RefHashSet() { this->TYPE = TypeHashSet; }
+	inline RefHashSet() { THIS.TYPE = TypeHashSet; }
 	
 	inline ~RefHashSet() {
 		clear();
@@ -243,37 +243,23 @@ public:
 template <typename Type>
 class HashSet : public Set<Type> {
 public:
-	RefClass(HashSet, HashSet<Type>)
+	RefTemplate(HashSet, HashSet, RefHashSet)
 	
-	virtual inline bool add(const Type& object) throw(const char*) { CHECKTHIS; return THIS->add(object); }
-	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->addAll(collection); }
-	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
-	virtual inline bool contains(const Type& value) const throw(const char*) { CHECKTHIS; return THIS->contains(value); }
-	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->containsAll(collection); }
-	virtual inline bool isEmpty() const throw(const char*) { CHECKTHIS; return THIS->isEmpty(); }
-	virtual inline const Iterator<Type> iterator() const throw(const char*) { CHECKTHIS; return THIS->iterator(); }
-	virtual inline bool remove(const Type& value) throw(const char*) { CHECKTHIS; return THIS->remove(value); }
-	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->removeAll(collection); }
-	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { CHECKTHIS; return THIS->retainAll(collection); }
-	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->size(); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		HashSet<Object> set = new HashSet<Object>();
-		Collection<Object> col = new Collection<Object>();
-		set.add(null);
-		set.addAll(col);
-		set.clear();
-		set.contains(null);
-		set.containsAll(col);
-		set.isEmpty();
-		set.iterator();
-		set.remove(null);
-		set.removeAll(col);
-		set.retainAll(col);
-		set.size();
+	inline HashSet() {
+		THIS.initialize();
 	}
-#endif
+	
+	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().add(object); }
+	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().addAll(collection); }
+	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
+	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().contains(value); }
+	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
+	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
+	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
+	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().remove(value); }
+	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
+	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
 };
 
 #endif //JAPPSY_UHASHSET_H

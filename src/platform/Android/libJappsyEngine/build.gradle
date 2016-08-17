@@ -30,6 +30,7 @@ model {
 			moduleName "libJappsyEngine-jni"
 			ldLibs.addAll(["android", "log", "GLESv2"])
 			cppFlags.addAll(["-fexceptions"])
+			cppFlags.addAll(["-std=c++11"])
 			stl = "stlport_static"
 
 			cppFlags.addAll(["-I" + file("src/main/jni/include").absolutePath])

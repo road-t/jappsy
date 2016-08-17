@@ -66,7 +66,7 @@ public:
 
 class GLCamera : public Object {
 public:
-	RefClass(GLCamera, GLCamera);
+	RefClass(GLCamera, RefGLCamera);
 };
 
 class GLCameras {

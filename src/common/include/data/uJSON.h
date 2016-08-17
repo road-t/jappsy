@@ -115,15 +115,15 @@ extern "C" {
 		} error;
 		
 		inline void seterror(json_error_type type, const char* ptr, const char* expected = NULL) {
-			this->error.type = type;
-			this->error.ptr = ptr;
-			this->error.expected = expected;
+			THIS.error.type = type;
+			THIS.error.ptr = ptr;
+			THIS.error.expected = expected;
 		}
 
 		inline void wseterror(json_error_type type, const wchar_t* ptr, const wchar_t* expected = NULL) {
-			this->error.type = type;
-			this->error.wptr = ptr;
-			this->error.wexpected = expected;
+			THIS.error.type = type;
+			THIS.error.wptr = ptr;
+			THIS.error.wexpected = expected;
 		}
 		
 		json_callbacks* callbacks;

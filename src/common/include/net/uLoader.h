@@ -31,7 +31,7 @@ class Loader;
 class RefLoader : public RefObject {
 public:
 	struct Status {
-		bool update = false;
+		jbool update = false;
 		int count = 0;
 		int total = 0;
 		int left = 0;
@@ -49,16 +49,16 @@ private:
 		inline RefFile() {}
 		
 		inline RefFile(const String& file, const String& ext, const String& key, const String& group) {
-			this->file = file;
-			this->ext = ext;
-			this->key = key;
-			this->group = group;
+			THIS.file = file;
+			THIS.ext = ext;
+			THIS.key = key;
+			THIS.group = group;
 		}
 	};
 	
 	class File : public Object {
 	public:
-		RefClass(File, File);
+		RefClass(File, RefFile);
 	};
 	
 public:
@@ -79,7 +79,7 @@ public:
 	
 	class Info : public Object {
 	public:
-		RefClass(Info, Info);
+		RefClass(Info, RefInfo);
 	};
 	
 public:
@@ -93,8 +93,8 @@ private:
 	// loader internal data
 	int loadSpeed = 5;
 	
-	HashMap<String, Stream> result = new HashMap<String, Stream>();
-	List<File> list = new List<File>();
+	HashMap<String, Stream> result;
+	List<File> list;
 	struct Status status;
 	volatile int32_t shutdown = 0;
 	volatile bool updating = false;
@@ -119,7 +119,7 @@ private:
 		list.pop();
 	}
 	
-	Handler handler = new Handler();
+	Handler handler;
 	void checkUpdate(int time);
 	static void onUpdate(const Object& data);
 	void update();
@@ -143,8 +143,14 @@ private:
 public:
 	
 	String basePath;
-	
-	inline RefLoader() {}
+
+	inline void initialize() {
+		result = new HashMap<String, Stream>();
+		list = new List<File>();
+		handler = new Handler();
+	}
+
+	inline RefLoader() { initialize(); }
 	RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData);
 	~RefLoader();
 	
@@ -154,7 +160,9 @@ public:
 
 class Loader : public Object {
 public:
-	RefClass(Loader, Loader);
+	RefClass(Loader, RefLoader);
+	
+	inline void release() throw(const char*) { THIS.ref().release(); }
 };
 
 #endif //JAPPSY_ULOADER_H

@@ -61,23 +61,21 @@ public:
 
 class Number : public Object {
 public:
-	RefClass(Number, Number)
+	RefClass(Number, RefNumber)
 	
-	inline bool boolValue() const throw(const char*) { CHECKTHIS; return THIS->boolValue(); }
-	inline int8_t byteValue() const throw(const char*) { CHECKTHIS; return THIS->byteValue(); }
-	inline int16_t shortValue() const throw(const char*) { CHECKTHIS; return THIS->shortValue(); }
-	inline int32_t intValue() const throw(const char*) { CHECKTHIS; return THIS->intValue(); }
-	inline int64_t longValue() const throw(const char*) { CHECKTHIS; return THIS->longValue(); }
-	inline float floatValue() const throw(const char*) { CHECKTHIS; return THIS->floatValue(); }
-	inline double doubleValue() const throw(const char*) { CHECKTHIS; return THIS->doubleValue(); }
+	inline bool boolValue() const throw(const char*) { return THIS.ref().boolValue(); }
+	inline int8_t byteValue() const throw(const char*) { return THIS.ref().byteValue(); }
+	inline int16_t shortValue() const throw(const char*) { return THIS.ref().shortValue(); }
+	inline int32_t intValue() const throw(const char*) { return THIS.ref().intValue(); }
+	inline int64_t longValue() const throw(const char*) { return THIS.ref().longValue(); }
+	inline float floatValue() const throw(const char*) { return THIS.ref().floatValue(); }
+	inline double doubleValue() const throw(const char*) { return THIS.ref().doubleValue(); }
 	
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 };
 
-#if defined(__IOS__)
 namespace Java {
-#endif
-	
+
 	class Boolean;
 	
 	class RefBoolean : public RefNumber {
@@ -96,7 +94,7 @@ namespace Java {
 	
 	class Boolean : public Number {
 	public:
-		RefClass(Boolean, Boolean)
+		RefClass(Boolean, RefBoolean)
 		
 		inline Boolean(bool value) throw(const char*) { setRef(new RefBoolean(value)); }
 		inline Boolean(const String& value) throw(const char*) { setRef(new RefBoolean(value)); }
@@ -114,10 +112,10 @@ namespace Java {
 			} else if (object._object == NULL) {
 				return 1;
 			}
-			return THIS->compareTo(object);
+			return THIS.ref().compareTo(object);
 		}
 		inline static Boolean decode(const String& value) throw(const char*) { return RefBoolean::decode(value); }
-		inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+		inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 		inline static Boolean valueOf(bool value) throw(const char*) { return Boolean(value); }
 		
 		inline bool operator ==(const Boolean& src) const throw(const char*) { return compareTo(src) == 0; }
@@ -143,7 +141,7 @@ namespace Java {
 	
 	class Byte : public Number {
 	public:
-		RefClass(Byte, Byte)
+		RefClass(Byte, RefByte)
 		
 		inline Byte(int8_t value) throw(const char*) { setRef(new RefByte(value)); }
 		inline Byte(const String& value) throw(const char*) { setRef(new RefByte(value)); }
@@ -161,18 +159,16 @@ namespace Java {
 			} else if (object._object == NULL) {
 				return 1;
 			}
-			return THIS->compareTo(object);
+			return THIS.ref().compareTo(object);
 		}
 		inline static Byte decode(const String& value) throw(const char*) { return Byte::decode(value); }
-		inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+		inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 		inline static Byte valueOf(int8_t value) throw(const char*) { return Byte(value); }
 		
 		inline bool operator ==(const Byte& src) const throw(const char*) { return compareTo(src) == 0; }
 	};
 	
-#if defined(__IOS__)
 }
-#endif
 
 class Short;
 
@@ -194,7 +190,7 @@ public:
 
 class Short : public Number {
 public:
-	RefClass(Short, Short)
+	RefClass(Short, RefShort)
 	
 	inline Short(int16_t value) throw(const char*) { setRef(new RefShort(value)); }
 	inline Short(const String& value) throw(const char*) { setRef(new RefShort(value)); }
@@ -212,10 +208,10 @@ public:
 		} else if (object._object == NULL) {
 			return 1;
 		}
-		return THIS->compareTo(object);
+		return THIS.ref().compareTo(object);
 	}
 	inline static Short decode(const String& value) throw(const char*) { return Short::decode(value); }
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 	inline static Short valueOf(int16_t value) throw(const char*) { return Short(value); }
 	
 	inline bool operator ==(const Short& src) const throw(const char*) { return compareTo(src) == 0; }
@@ -241,7 +237,7 @@ public:
 
 class Integer : public Number {
 public:
-	RefClass(Integer, Integer)
+	RefClass(Integer, RefInteger)
 	
 	inline Integer(int32_t value) throw(const char*) { setRef(new RefInteger(value)); }
 	inline Integer(const String& value) throw(const char*) { setRef(new RefInteger(value)); }
@@ -259,10 +255,10 @@ public:
 		} else if (object._object == NULL) {
 			return 1;
 		}
-		return THIS->compareTo(object);
+		return THIS.ref().compareTo(object);
 	}
 	inline static Integer decode(const String& value) throw(const char*) { return Integer::decode(value); }
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 	inline static Integer valueOf(int32_t value) throw(const char*) { return Integer(value); }
 	inline static Integer valueOf(const String& value, int radix = 10) throw(const char*) {
 		if (radix == 10) {
@@ -295,7 +291,7 @@ public:
 
 class Long : public Number {
 public:
-	RefClass(Long, Long)
+	RefClass(Long, RefLong)
 	
 	inline Long(int64_t value) throw(const char*) { setRef(new RefLong(value)); }
 	inline Long(const String& value) throw(const char*) { setRef(new RefLong(value)); }
@@ -313,10 +309,10 @@ public:
 		} else if (object._object == NULL) {
 			return 1;
 		}
-		return THIS->compareTo(object);
+		return THIS.ref().compareTo(object);
 	}
 	inline static Long decode(const String& value) throw(const char*) { return Long::decode(value); }
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 	inline static Long valueOf(int64_t value) throw(const char*) { return Long(value); }
 	
 	inline bool operator ==(const Long& src) const throw(const char*) { return compareTo(src) == 0; }
@@ -348,7 +344,7 @@ public:
 
 class Float : public Number {
 public:
-	RefClass(Float, Float)
+	RefClass(Float, RefFloat)
 	
 	inline Float(float value) throw(const char*) { setRef(new RefFloat(value)); }
 	inline Float(const String& value) throw(const char*) { setRef(new RefFloat(value)); }
@@ -366,10 +362,10 @@ public:
 		} else if (object._object == NULL) {
 			return 1;
 		}
-		return THIS->compareTo(object);
+		return THIS.ref().compareTo(object);
 	}
 	inline static Float decode(const String& value) throw(const char*) { return Float::decode(value); }
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 	inline static Float valueOf(float value) throw(const char*) { return Float(value); }
 	
 	inline bool operator ==(const Float& src) const throw(const char*) { return compareTo(src) == 0; }
@@ -401,7 +397,7 @@ public:
 
 class Double : public Number {
 public:
-	RefClass(Double, Double)
+	RefClass(Double, RefDouble)
 	
 	inline Double(double value) throw(const char*) { setRef(new RefDouble(value)); }
 	inline Double(const String& value) throw(const char*) { setRef(new RefDouble(value)); }
@@ -419,10 +415,10 @@ public:
 		} else if (object._object == NULL) {
 			return 1;
 		}
-		return THIS->compareTo(object);
+		return THIS.ref().compareTo(object);
 	}
 	inline static Double decode(const String& value) throw(const char*) { return Double::decode(value); }
-	inline String toString() const throw(const char*) { CHECKTHIS; return THIS->toString(); }
+	inline String toString() const throw(const char*) { return THIS.ref().toString(); }
 	inline static Double valueOf(double value) throw(const char*) { return Double(value); }
 	
 	inline bool operator ==(const Double& src) const throw(const char*) { return compareTo(src) == 0; }

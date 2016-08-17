@@ -428,7 +428,7 @@ const String& URI::absolutePath(const wchar_t* basePath) {
 			if (basePath != NULL) {
 				_absolutePath->concat(basePath);
 			} else {
-				_absolutePath->concat(this->basePath);
+				_absolutePath->concat(THIS.basePath);
 			}
 			uint32_t len = _absolutePath->length;
 			if (len > 0) {

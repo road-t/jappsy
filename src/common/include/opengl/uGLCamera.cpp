@@ -24,8 +24,8 @@ static GLfloat defaultHead[3] = { 0, 1, 0 };
 RefGLCamera::RefGLCamera(GLRender* context, const wchar_t* key) {
 	TYPE = L"GLCamera::";
 
-	this->context = context;
-	this->key = key;
+	THIS.context = context;
+	THIS.key = key;
 	Vec3SetV(position.v, defaultPosition);
 	Vec3SetV(target.v, defaultTarget);
 	Vec3SetV(head.v, defaultHead);
@@ -40,8 +40,8 @@ RefGLCamera::RefGLCamera(GLRender* context, const wchar_t* key) {
 }
 
 RefGLCamera::~RefGLCamera() {
-	this->context = NULL;
-	this->key = NULL;
+	THIS.context = NULL;
+	THIS.key = NULL;
 }
 
 RefGLCamera& RefGLCamera::invalidate() {
@@ -50,24 +50,24 @@ RefGLCamera& RefGLCamera::invalidate() {
 }
 
 RefGLCamera& RefGLCamera::size(GLfloat width, GLfloat height) {
-	this->width = width;
-	this->height = height;
+	THIS.width = width;
+	THIS.height = height;
 	invalid = true;
 	return *this;
 }
 
 RefGLCamera& RefGLCamera::perspective(GLfloat fov, GLfloat min, GLfloat max) {
-	this->fov = fov;
-	this->min = min;
-	this->max = max;
+	THIS.fov = fov;
+	THIS.min = min;
+	THIS.max = max;
 	style = PERSPECTIVE;
 	invalid = true;
 	return *this;
 }
 
 RefGLCamera& RefGLCamera::ortho(GLfloat min, GLfloat max) {
-	this->min = min;
-	this->max = max;
+	THIS.min = min;
+	THIS.max = max;
 	style = ORTHOGRAPHIC;
 	invalid = true;
 	return *this;
@@ -82,9 +82,9 @@ RefGLCamera& RefGLCamera::layer(GLfloat offsetX, GLfloat offsetY) {
 }
 
 RefGLCamera& RefGLCamera::lookAt(const Vec3& position, const Vec3& target, const Vec3& head) {
-	this->position.set(position);
-	this->target.set(target);
-	this->head.set(head);
+	THIS.position.set(position);
+	THIS.target.set(target);
+	THIS.head.set(head);
 	invalid = true;
 	return *this;
 }
@@ -137,7 +137,7 @@ bool RefGLCamera::update() {
 }
 
 GLCameras::GLCameras(GLRender* context) throw(const char*) {
-	this->context = context;
+	THIS.context = context;
 	list = new HashMap<String, GLCamera>();
 	gui = null;
 }

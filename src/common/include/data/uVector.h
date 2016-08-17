@@ -17,6 +17,7 @@
 #ifndef JAPPSY_UVECTOR_H
 #define JAPPSY_UVECTOR_H
 
+#include <platform.h>
 #include <opengl/uOpenGL.h>
 
 #ifdef __cplusplus
@@ -103,42 +104,42 @@ extern "C" {
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		
-		inline GLfloat dot(const Vec3& v) { return Vec3Dot(this->v, v.v); }
-		inline GLfloat size() { return Vec3Size(this->v); }
-		inline GLfloat min() { return Vec3Min(this->v); }
-		inline GLfloat max() { return Vec3Max(this->v); }
-		inline GLfloat angle(const Vec3& v) { return Vec3Angle(this->v, v.v); }
-		inline void angles(GLfloat* theta, GLfloat* phi) { Vec3Angles(this->v, theta, phi); }
+		inline GLfloat dot(const Vec3& v) { return Vec3Dot(THIS.v, v.v); }
+		inline GLfloat size() { return Vec3Size(THIS.v); }
+		inline GLfloat min() { return Vec3Min(THIS.v); }
+		inline GLfloat max() { return Vec3Max(THIS.v); }
+		inline GLfloat angle(const Vec3& v) { return Vec3Angle(THIS.v, v.v); }
+		inline void angles(GLfloat* theta, GLfloat* phi) { Vec3Angles(THIS.v, theta, phi); }
 		
-		inline Vec3& set(GLfloat v) { Vec3Set(this->v, v); return *this; }
-		inline Vec3& set(const Vec3& v) { Vec3SetV(this->v, v.v); return *this; }
-		inline Vec3& negative() { Vec3Negative(this->v, this->v); return *this; }
-		inline Vec3& negative(const Vec3& v) { Vec3Negative(this->v, v.v); return *this; }
-		inline Vec3& add(GLfloat v) { Vec3Add(this->v, this->v, v); return *this; }
-		inline Vec3& add(const Vec3& v) { Vec3AddV(this->v, this->v, v.v); return *this; }
-		inline Vec3& add(const Vec3& a, GLfloat b) { Vec3Add(this->v, a.v, b); return *this; }
-		inline Vec3& add(const Vec3& a, const Vec3& b) { Vec3AddV(this->v, a.v, b.v); return *this; }
-		inline Vec3& subtract(GLfloat v) { Vec3Subtract(this->v, this->v, v); return *this; }
-		inline Vec3& subtract(const Vec3& v) { Vec3SubtractV(this->v, this->v, v.v); return *this; }
-		inline Vec3& subtract(const Vec3& a, GLfloat b) { Vec3Subtract(this->v, a.v, b); return *this; }
-		inline Vec3& subtract(const Vec3& a, const Vec3& b) { Vec3SubtractV(this->v, a.v, b.v); return *this; }
-		inline Vec3& multiply(GLfloat v) { Vec3Multiply(this->v, this->v, v); return *this; }
-		inline Vec3& multiply(const Vec3& v) { Vec3MultiplyV(this->v, this->v, v.v); return *this; }
-		inline Vec3& multiply(const Vec3& a, GLfloat b) { Vec3Multiply(this->v, a.v, b); return *this; }
-		inline Vec3& multiply(const Vec3& a, const Vec3& b) { Vec3MultiplyV(this->v, a.v, b.v); return *this; }
-		inline Vec3& divide(GLfloat v) { Vec3Divide(this->v, this->v, v); return *this; }
-		inline Vec3& divide(const Vec3& v) { Vec3DivideV(this->v, this->v, v.v); return *this; }
-		inline Vec3& divide(const Vec3& a, GLfloat b) { Vec3Divide(this->v, a.v, b); return *this; }
-		inline Vec3& divide(const Vec3& a, const Vec3& b) { Vec3DivideV(this->v, a.v, b.v); return *this; }
-		inline Vec3& cross(const Vec3& v) { Vec3Cross(this->v, this->v, v.v); return *this; }
-		inline Vec3& cross(const Vec3& a, const Vec3& b) { Vec3Cross(this->v, a.v, b.v); return *this; }
-		inline Vec3& normalize() { Vec3Normalize(this->v, this->v); return *this; }
-		inline Vec3& normalize(const Vec3& v) { Vec3Normalize(this->v, v.v); return *this; }
+		inline Vec3& set(GLfloat v) { Vec3Set(THIS.v, v); return *this; }
+		inline Vec3& set(const Vec3& v) { Vec3SetV(THIS.v, v.v); return *this; }
+		inline Vec3& negative() { Vec3Negative(THIS.v, THIS.v); return *this; }
+		inline Vec3& negative(const Vec3& v) { Vec3Negative(THIS.v, v.v); return *this; }
+		inline Vec3& add(GLfloat v) { Vec3Add(THIS.v, THIS.v, v); return *this; }
+		inline Vec3& add(const Vec3& v) { Vec3AddV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec3& add(const Vec3& a, GLfloat b) { Vec3Add(THIS.v, a.v, b); return *this; }
+		inline Vec3& add(const Vec3& a, const Vec3& b) { Vec3AddV(THIS.v, a.v, b.v); return *this; }
+		inline Vec3& subtract(GLfloat v) { Vec3Subtract(THIS.v, THIS.v, v); return *this; }
+		inline Vec3& subtract(const Vec3& v) { Vec3SubtractV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec3& subtract(const Vec3& a, GLfloat b) { Vec3Subtract(THIS.v, a.v, b); return *this; }
+		inline Vec3& subtract(const Vec3& a, const Vec3& b) { Vec3SubtractV(THIS.v, a.v, b.v); return *this; }
+		inline Vec3& multiply(GLfloat v) { Vec3Multiply(THIS.v, THIS.v, v); return *this; }
+		inline Vec3& multiply(const Vec3& v) { Vec3MultiplyV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec3& multiply(const Vec3& a, GLfloat b) { Vec3Multiply(THIS.v, a.v, b); return *this; }
+		inline Vec3& multiply(const Vec3& a, const Vec3& b) { Vec3MultiplyV(THIS.v, a.v, b.v); return *this; }
+		inline Vec3& divide(GLfloat v) { Vec3Divide(THIS.v, THIS.v, v); return *this; }
+		inline Vec3& divide(const Vec3& v) { Vec3DivideV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec3& divide(const Vec3& a, GLfloat b) { Vec3Divide(THIS.v, a.v, b); return *this; }
+		inline Vec3& divide(const Vec3& a, const Vec3& b) { Vec3DivideV(THIS.v, a.v, b.v); return *this; }
+		inline Vec3& cross(const Vec3& v) { Vec3Cross(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec3& cross(const Vec3& a, const Vec3& b) { Vec3Cross(THIS.v, a.v, b.v); return *this; }
+		inline Vec3& normalize() { Vec3Normalize(THIS.v, THIS.v); return *this; }
+		inline Vec3& normalize(const Vec3& v) { Vec3Normalize(THIS.v, v.v); return *this; }
 		Vec3& transform(const Mat4& m);
 		Vec3& transform(const Vec3& v, const Mat4& m);
 		Vec3& transformNormal(const Mat4& m);
 		Vec3& transformNormal(const Vec3& v, const Mat4& m);
-		inline Vec3& random(const Vec3& v) { Vec3Random(this->v, v.x, v.y, v.z); return *this; }
+		inline Vec3& random(const Vec3& v) { Vec3Random(THIS.v, v.x, v.y, v.z); return *this; }
 	};
 	
 	struct Vec4 {
@@ -164,31 +165,31 @@ extern "C" {
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		inline operator Vec3() const { return *((Vec3*)this); }
 		
-		inline GLfloat dot(const Vec4& v) { return Vec4Dot(this->v, v.v); }
+		inline GLfloat dot(const Vec4& v) { return Vec4Dot(THIS.v, v.v); }
 		
-		inline Vec4& set(GLfloat v) { Vec4Set(this->v, v); return *this; }
-		inline Vec4& set(const Vec3& v, GLfloat v3) { Vec3SetV(this->v, v.v); this->v[3] = v3; return *this; }
-		inline Vec4& set(const Vec4& v) { Vec4SetV(this->v, v.v); return *this; }
-		inline Vec4& negative() { Vec4Negative(this->v, this->v); return *this; }
-		inline Vec4& negative(const Vec4& v) { Vec4Negative(this->v, v.v); return *this; }
-		inline Vec4& add(GLfloat v) { Vec4Add(this->v, this->v, v); return *this; }
-		inline Vec4& add(const Vec4& v) { Vec4AddV(this->v, this->v, v.v); return *this; }
-		inline Vec4& add(const Vec4& a, GLfloat b) { Vec4Add(this->v, a.v, b); return *this; }
-		inline Vec4& add(const Vec4& a, const Vec4& b) { Vec4AddV(this->v, a.v, b.v); return *this; }
-		inline Vec4& subtract(GLfloat v) { Vec4Subtract(this->v, this->v, v); return *this; }
-		inline Vec4& subtract(const Vec4& v) { Vec4SubtractV(this->v, this->v, v.v); return *this; }
-		inline Vec4& subtract(const Vec4& a, GLfloat b) { Vec4Subtract(this->v, a.v, b); return *this; }
-		inline Vec4& subtract(const Vec4& a, const Vec4& b) { Vec4SubtractV(this->v, a.v, b.v); return *this; }
-		inline Vec4& multiply(GLfloat v) { Vec4Multiply(this->v, this->v, v); return *this; }
-		inline Vec4& multiply(const Vec4& v) { Vec4MultiplyV(this->v, this->v, v.v); return *this; }
-		inline Vec4& multiply(const Vec4& a, GLfloat b) { Vec4Multiply(this->v, a.v, b); return *this; }
-		inline Vec4& multiply(const Vec4& a, const Vec4& b) { Vec4MultiplyV(this->v, a.v, b.v); return *this; }
-		inline Vec4& divide(GLfloat v) { Vec4Divide(this->v, this->v, v); return *this; }
-		inline Vec4& divide(const Vec4& v) { Vec4DivideV(this->v, this->v, v.v); return *this; }
-		inline Vec4& divide(const Vec4& a, GLfloat b) { Vec4Divide(this->v, a.v, b); return *this; }
-		inline Vec4& divide(const Vec4& a, const Vec4& b) { Vec4DivideV(this->v, a.v, b.v); return *this; }
-		inline Vec4& normalize() { Vec4Normalize(this->v, this->v); return *this; }
-		inline Vec4& normalize(const Vec4& v) { Vec4Normalize(this->v, v.v); return *this; }
+		inline Vec4& set(GLfloat v) { Vec4Set(THIS.v, v); return *this; }
+		inline Vec4& set(const Vec3& v, GLfloat v3) { Vec3SetV(THIS.v, v.v); THIS.v[3] = v3; return *this; }
+		inline Vec4& set(const Vec4& v) { Vec4SetV(THIS.v, v.v); return *this; }
+		inline Vec4& negative() { Vec4Negative(THIS.v, THIS.v); return *this; }
+		inline Vec4& negative(const Vec4& v) { Vec4Negative(THIS.v, v.v); return *this; }
+		inline Vec4& add(GLfloat v) { Vec4Add(THIS.v, THIS.v, v); return *this; }
+		inline Vec4& add(const Vec4& v) { Vec4AddV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec4& add(const Vec4& a, GLfloat b) { Vec4Add(THIS.v, a.v, b); return *this; }
+		inline Vec4& add(const Vec4& a, const Vec4& b) { Vec4AddV(THIS.v, a.v, b.v); return *this; }
+		inline Vec4& subtract(GLfloat v) { Vec4Subtract(THIS.v, THIS.v, v); return *this; }
+		inline Vec4& subtract(const Vec4& v) { Vec4SubtractV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec4& subtract(const Vec4& a, GLfloat b) { Vec4Subtract(THIS.v, a.v, b); return *this; }
+		inline Vec4& subtract(const Vec4& a, const Vec4& b) { Vec4SubtractV(THIS.v, a.v, b.v); return *this; }
+		inline Vec4& multiply(GLfloat v) { Vec4Multiply(THIS.v, THIS.v, v); return *this; }
+		inline Vec4& multiply(const Vec4& v) { Vec4MultiplyV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec4& multiply(const Vec4& a, GLfloat b) { Vec4Multiply(THIS.v, a.v, b); return *this; }
+		inline Vec4& multiply(const Vec4& a, const Vec4& b) { Vec4MultiplyV(THIS.v, a.v, b.v); return *this; }
+		inline Vec4& divide(GLfloat v) { Vec4Divide(THIS.v, THIS.v, v); return *this; }
+		inline Vec4& divide(const Vec4& v) { Vec4DivideV(THIS.v, THIS.v, v.v); return *this; }
+		inline Vec4& divide(const Vec4& a, GLfloat b) { Vec4Divide(THIS.v, a.v, b); return *this; }
+		inline Vec4& divide(const Vec4& a, const Vec4& b) { Vec4DivideV(THIS.v, a.v, b.v); return *this; }
+		inline Vec4& normalize() { Vec4Normalize(THIS.v, THIS.v); return *this; }
+		inline Vec4& normalize(const Vec4& v) { Vec4Normalize(THIS.v, v.v); return *this; }
 	};
 	
 	struct Mat4 {
@@ -197,26 +198,26 @@ extern "C" {
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() { return v; }
 		
-		inline Mat4& set(GLfloat v) { Mat4Set(this->v, v); return *this; }
-		inline Mat4& set(const Mat4& m) { Mat4SetV(this->v, m.v); return *this; }
-		inline Mat4& identity() { Mat4Identity(this->v); return *this; }
-		inline Mat4& translate(const Vec3& v) { Mat4Translate(this->v, v.x, v.y, v.z); return *this; }
-		inline Mat4& scale(const Vec3& v) { Mat4Scale(this->v, v.x, v.y, v.z); return *this; }
-		inline Mat4& rotateX(GLfloat a) { Mat4RotateX(this->v, a); return *this; }
-		inline Mat4& rotateY(GLfloat a) { Mat4RotateY(this->v, a); return *this; }
-		inline Mat4& rotateZ(GLfloat a) { Mat4RotateZ(this->v, a); return *this; }
-		inline Mat4& frustum(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Frustum(this->v, l,r,b,t,n,f); return *this; }
-		inline Mat4& perspective(GLfloat fov, GLfloat aspect, GLfloat near, GLfloat far) { Mat4Perspective(this->v, fov, aspect, near, far); return *this; }
-		inline Mat4& ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Ortho(this->v, l,r,b,t,n,f); return *this; }
-		inline Mat4& rotate(const Vec3& v, GLfloat a) { Mat4Rotate(this->v, v.x, v.y, v.z, a); return *this; }
-		inline Mat4& lookAt(const Vec3& eye, const Vec3& center, const Vec3& up) { Mat4LookAt(this->v, eye.v, center.v, up.v); return *this; }
+		inline Mat4& set(GLfloat v) { Mat4Set(THIS.v, v); return *this; }
+		inline Mat4& set(const Mat4& m) { Mat4SetV(THIS.v, m.v); return *this; }
+		inline Mat4& identity() { Mat4Identity(THIS.v); return *this; }
+		inline Mat4& translate(const Vec3& v) { Mat4Translate(THIS.v, v.x, v.y, v.z); return *this; }
+		inline Mat4& scale(const Vec3& v) { Mat4Scale(THIS.v, v.x, v.y, v.z); return *this; }
+		inline Mat4& rotateX(GLfloat a) { Mat4RotateX(THIS.v, a); return *this; }
+		inline Mat4& rotateY(GLfloat a) { Mat4RotateY(THIS.v, a); return *this; }
+		inline Mat4& rotateZ(GLfloat a) { Mat4RotateZ(THIS.v, a); return *this; }
+		inline Mat4& frustum(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Frustum(THIS.v, l,r,b,t,n,f); return *this; }
+		inline Mat4& perspective(GLfloat fov, GLfloat aspect, GLfloat near, GLfloat far) { Mat4Perspective(THIS.v, fov, aspect, near, far); return *this; }
+		inline Mat4& ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Ortho(THIS.v, l,r,b,t,n,f); return *this; }
+		inline Mat4& rotate(const Vec3& v, GLfloat a) { Mat4Rotate(THIS.v, v.x, v.y, v.z, a); return *this; }
+		inline Mat4& lookAt(const Vec3& eye, const Vec3& center, const Vec3& up) { Mat4LookAt(THIS.v, eye.v, center.v, up.v); return *this; }
 
-		inline Mat4& inverse() { Mat4Inverse(this->v, this->v); return *this; }
-		inline Mat4& inverse(const Mat4& m) { Mat4Inverse(this->v, m.v); return *this; }
-		inline Mat4& transpose() { Mat4Transpose(this->v, this->v); return *this; }
-		inline Mat4& transpose(const Mat4& m) { Mat4Transpose(this->v, m.v); return *this; }
-		inline Mat4& multiply(const Mat4& m) { Mat4Multiply(this->v, this->v, m.v); return *this; }
-		inline Mat4& multiply(const Mat4& a, const Mat4& b) { Mat4Multiply(this->v, a.v, b.v); return *this; }
+		inline Mat4& inverse() { Mat4Inverse(THIS.v, THIS.v); return *this; }
+		inline Mat4& inverse(const Mat4& m) { Mat4Inverse(THIS.v, m.v); return *this; }
+		inline Mat4& transpose() { Mat4Transpose(THIS.v, THIS.v); return *this; }
+		inline Mat4& transpose(const Mat4& m) { Mat4Transpose(THIS.v, m.v); return *this; }
+		inline Mat4& multiply(const Mat4& m) { Mat4Multiply(THIS.v, THIS.v, m.v); return *this; }
+		inline Mat4& multiply(const Mat4& a, const Mat4& b) { Mat4Multiply(THIS.v, a.v, b.v); return *this; }
 	};
 	
 #ifdef __cplusplus

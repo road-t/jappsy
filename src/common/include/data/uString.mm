@@ -856,8 +856,8 @@ extern "C" {
 			} else if (ch2 & 0x80) {
 				return -1;
 			} else {
-				v1 = tolower(ch1);
-				v2 = tolower(ch2);
+				v1 = towlower((wchar_t)ch1);
+				v2 = towlower((wchar_t)ch2);
 			}
 			
 			if (v1 != v2) return (v1 < v2) ? -1 : 1;
@@ -916,7 +916,7 @@ extern "C" {
 uint32_t getStringLength(const String& self) {
 	if (self._object == NULL)
 		return 0;
-	return self->m_length;
+	return self.ref().m_length;
 }
 
 uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
@@ -926,8 +926,8 @@ uint32_t setStringLength(String& self, uint32_t length) throw(const char*) {
 			throw eOutOfMemory;
 		self.setRef(newString);
 	}
-	self->setLength(length);
-	return self->m_length;
+	self.ref().setLength(length);
+	return self.ref().m_length;
 }
 
 uint32_t getRefStringLength(const RefString& self) {
@@ -941,11 +941,11 @@ uint32_t setRefStringLength(RefString& self, uint32_t length) throw(const char*)
 
 void RefString::initialize() {
 	TYPE = TypeString;
-	this->length.initialize(this, &getRefStringLength, &setRefStringLength);
+	THIS.length.initialize(this, &getRefStringLength, &setRefStringLength);
 }
 
 void String::initialize() {
-	this->length.initialize(this, &getStringLength, &setStringLength);
+	THIS.length.initialize(this, &getStringLength, &setStringLength);
 }
 
 void String::release() {
@@ -961,64 +961,64 @@ void RefString::setSize(uint32_t size) throw(const char*) {
 	uint32_t newLength = (newSize / sizeof(wchar_t)) - 1;
 	
 	if (newSize < sizeof(wchar_t)) {
-		if (this->m_data != NULL) {
-			memFree(this->m_data);
-			this->m_data = NULL;
+		if (THIS.m_data != NULL) {
+			memFree(THIS.m_data);
+			THIS.m_data = NULL;
 		}
-		this->m_length = 0;
-		this->m_size = 0;
-		this->m_memorySize = 0;
+		THIS.m_length = 0;
+		THIS.m_size = 0;
+		THIS.m_memorySize = 0;
 		return;
 	}
 	
 	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-	if (this->m_memorySize != newMemSize) {
-		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+	if (THIS.m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, THIS.m_data, newMemSize);
 		if (newString) {
-			this->m_data = newString;
-			this->m_memorySize = newMemSize;
+			THIS.m_data = newString;
+			THIS.m_memorySize = newMemSize;
 		} else {
 			throw eOutOfMemory;
 		}
 	}
 	
-	this->m_data[newLength] = 0;
-	this->m_length = newLength;
-	this->m_size = newSize;
+	THIS.m_data[newLength] = 0;
+	THIS.m_length = newLength;
+	THIS.m_size = newSize;
 }
 
 void RefString::setLength(uint32_t length) throw(const char*) {
 	uint32_t newSize = (length + 1) * sizeof(wchar_t);
 	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-	if (this->m_memorySize != newMemSize) {
-		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
+	if (THIS.m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, THIS.m_data, newMemSize);
 		if (newString) {
-			this->m_data = newString;
-			this->m_memorySize = newMemSize;
+			THIS.m_data = newString;
+			THIS.m_memorySize = newMemSize;
 		} else {
 			throw eOutOfMemory;
 		}
 	}
 	
-	this->m_data[length] = 0;
-	this->m_length = length;
-	this->m_size = newSize;
+	THIS.m_data[length] = 0;
+	THIS.m_length = length;
+	THIS.m_size = newSize;
 }
 
 //==============================================================
 
 void RefString::release() {
-	if (this->m_data != NULL) {
-		memFree(this->m_data);
-		this->m_data = NULL;
+	if (THIS.m_data != NULL) {
+		memFree(THIS.m_data);
+		THIS.m_data = NULL;
 	}
-	this->m_length = 0;
-	this->m_size = 0;
-	this->m_memorySize = 0;
+	THIS.m_length = 0;
+	THIS.m_size = 0;
+	THIS.m_memorySize = 0;
 }
 
 RefString::~RefString() {
-	this->release();
+	THIS.release();
 }
 
 //==============================================================
@@ -1033,31 +1033,31 @@ RefString& RefString::operator =(const void* string) throw(const char*) {
 	if (string != NULL) {
 		throw eInvalidPointer;
 	}
-	this->setSize(0);
+	THIS.setSize(0);
 	return *this;
 }
 
 RefString::RefString(const RefString& string) throw(const char*) {
 	initialize();
 	if (string.m_size > 0) {
-		this->setSize(string.m_size);
-		memcpy(this->m_data, string.m_data, this->m_size);
+		THIS.setSize(string.m_size);
+		memcpy(THIS.m_data, string.m_data, THIS.m_size);
 	}
 }
 
 RefString& RefString::operator =(const RefString& string) throw(const char*) {
-	this->setSize(string.m_size);
+	THIS.setSize(string.m_size);
 	if (string.m_size > 0)
-		memcpy(this->m_data, string.m_data, this->m_size);
+		memcpy(THIS.m_data, string.m_data, THIS.m_size);
 	return *this;
 }
 
 RefString& RefString::concat(const RefString& string) throw(const char*) {
 	uint32_t length = string.m_length;
 	if (length != 0) {
-		uint32_t prevLength = this->m_length;
+		uint32_t prevLength = THIS.m_length;
 		setLength(prevLength + length);
-		memcpy(this->m_data + prevLength, string.m_data, string.m_size);
+		memcpy(THIS.m_data + prevLength, string.m_data, string.m_size);
 	}
 	return *this;
 }
@@ -1098,7 +1098,7 @@ String& String::concat(const String& string) throw(const char*) {
 
 String::String(const Number& number) : Object() {
 	initialize();
-	RefString* newString = new RefString(number.toString());
+	RefString* newString = new RefString((const wchar_t*)(number.toString()));
 	setRef(newString);
 }
 
@@ -1108,11 +1108,11 @@ RefString::RefString(const NSString* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			this->setLength(length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-			this->setSize(newSize);
+			THIS.setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data, THIS.m_size);
+			THIS.setSize(newSize);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	}
 }
@@ -1121,26 +1121,26 @@ RefString& RefString::operator =(const NSString* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			this->setLength(length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-			this->setSize(newSize);
+			THIS.setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data, THIS.m_size);
+			THIS.setSize(newSize);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	} else {
-		this->setSize(0);
+		THIS.setSize(0);
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const NSString* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = this->m_length;
+		uint32_t prevLength = THIS.m_length;
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			this->setLength(prevLength + length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
-			this->setSize(newSize);
+			THIS.setLength(prevLength + length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data + prevLength, (length+1) * sizeof(wchar_t));
+			THIS.setSize(newSize);
 		}
 	}
 	return *this;
@@ -1193,10 +1193,10 @@ RefString::RefString(const char* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			this->setLength(length);
-			utf8_towcs(string, this->m_data, this->m_size);
+			THIS.setLength(length);
+			utf8_towcs(string, THIS.m_data, THIS.m_size);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	}
 }
@@ -1205,25 +1205,25 @@ RefString& RefString::operator =(const char* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			this->setLength(length);
-			utf8_towcs(string, this->m_data, this->m_size);
+			THIS.setLength(length);
+			utf8_towcs(string, THIS.m_data, THIS.m_size);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	} else {
-		this->setSize(0);
+		THIS.setSize(0);
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const char* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = this->m_length;
+		uint32_t prevLength = THIS.m_length;
 		uint32_t strSize;
 		uint32_t length = utf8_strlen(string, &strSize);
 		if (length > 0) {
-			this->setLength(prevLength + length);
-			utf8_towcs(string, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
+			THIS.setLength(prevLength + length);
+			utf8_towcs(string, THIS.m_data + prevLength, (length+1) * sizeof(wchar_t));
 		}
 	}
 	return *this;
@@ -1268,9 +1268,9 @@ RefString::RefString(const char* string, uint32_t size) throw(const char*) {
 	if (string != NULL) {
 		uint32_t strSize = 0;
 		uint32_t length = utf8_strlen_nzt(string, size, &strSize);
-		this->setLength(length);
+		THIS.setLength(length);
 		if (length > 0) {
-			utf8_towcs(string, this->m_data, this->m_size);
+			utf8_towcs(string, THIS.m_data, THIS.m_size);
 		}
 	}
 }
@@ -1289,10 +1289,10 @@ RefString::RefString(const wchar_t* string) throw(const char*) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
 		if (length > 0) {
-			this->setSize(newSize);
-			memcpy(this->m_data, string, this->m_size);
+			THIS.setSize(newSize);
+			memcpy(THIS.m_data, string, THIS.m_size);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	}
 }
@@ -1302,25 +1302,25 @@ RefString& RefString::operator =(const wchar_t* string) throw(const char*) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
 		if (length > 0) {
-			this->setSize(newSize);
-			memcpy(this->m_data, string, this->m_size);
+			THIS.setSize(newSize);
+			memcpy(THIS.m_data, string, THIS.m_size);
 		} else {
-			this->setLength(0);
+			THIS.setLength(0);
 		}
 	} else {
-		this->setSize(0);
+		THIS.setSize(0);
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const wchar_t* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = this->m_length;
+		uint32_t prevLength = THIS.m_length;
 		uint32_t strSize;
 		uint32_t length = wcs_strlen(string, &strSize);
 		if (length > 0) {
-			this->setLength(this->m_length + length);
-			memcpy(this->m_data + prevLength, string, strSize);
+			THIS.setLength(THIS.m_length + length);
+			memcpy(THIS.m_data + prevLength, string, strSize);
 		}
 	}
 	return *this;
@@ -1363,9 +1363,9 @@ String& String::concat(const wchar_t* string) throw(const char*) {
 RefString::RefString(const wchar_t* string, uint32_t length) throw(const char*) {
 	initialize();
 	if (string != NULL) {
-		this->setLength(length);
+		THIS.setLength(length);
 		if (length > 0)
-			memcpy(this->m_data, string, length * sizeof(wchar_t));
+			memcpy(THIS.m_data, string, length * sizeof(wchar_t));
 	}
 }
 
@@ -1379,20 +1379,20 @@ String::String(const wchar_t* string, uint32_t length) throw(const char*) : Obje
 
 RefString::RefString(const char character) throw(const char*) {
 	initialize();
-	this->setLength(1);
-	this->m_data[0] = (wchar_t)character;
+	THIS.setLength(1);
+	THIS.m_data[0] = (wchar_t)character;
 }
 
 RefString& RefString::operator =(const char character) throw(const char*) {
-	this->setLength(1);
-	this->m_data[0] = (wchar_t)character;
+	THIS.setLength(1);
+	THIS.m_data[0] = (wchar_t)character;
 	return *this;
 }
 
 RefString& RefString::concat(const char character) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 1);
-	this->m_data[prevLength] = (wchar_t)character;
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 1);
+	THIS.m_data[prevLength] = (wchar_t)character;
 	return *this;
 }
 
@@ -1424,20 +1424,20 @@ String& String::concat(const char character) throw(const char*) {
 
 RefString::RefString(const wchar_t character) throw(const char*) {
 	initialize();
-	this->setLength(1);
-	this->m_data[0] = character;
+	THIS.setLength(1);
+	THIS.m_data[0] = character;
 }
 
 RefString& RefString::operator =(const wchar_t character) throw(const char*) {
-	this->setLength(1);
-	this->m_data[0] = character;
+	THIS.setLength(1);
+	THIS.m_data[0] = character;
 	return *this;
 }
 
 RefString& RefString::concat(const wchar_t character) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 1);
-	this->m_data[prevLength] = character;
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 1);
+	THIS.m_data[prevLength] = character;
 	return *this;
 }
 
@@ -1469,21 +1469,21 @@ String& String::concat(const wchar_t character) throw(const char*) {
 
 RefString::RefString(bool value) throw(const char*) {
 	initialize();
-	this->operator =(value);
+	THIS.operator =(value);
 }
 
 RefString& RefString::operator =(bool value) throw(const char*) {
 	if (value)
-		return this->operator =(StringTrue);
+		return THIS.operator =(StringTrue);
 	else
-		return this->operator =(StringFalse);
+		return THIS.operator =(StringFalse);
 }
 
 RefString& RefString::concat(const bool value) throw(const char*) {
 	if (value)
-		return this->concat(StringTrue);
+		return THIS.concat(StringTrue);
 	else
-		return this->concat(StringFalse);
+		return THIS.concat(StringFalse);
 }
 
 String::String(const bool value) throw(const char*) : Object() {
@@ -1518,28 +1518,28 @@ int RefString::swprintf(wchar_t* target, int8_t value) {
 
 RefString::RefString(int8_t value) throw(const char*) {
 	initialize();
-	this->setLength(4);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(4);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 4) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(int8_t value) throw(const char*) {
-	this->setLength(4);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(4);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 4) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const int8_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 4);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 4);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 4) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1576,28 +1576,28 @@ int RefString::swprintf(wchar_t* target, uint8_t value) {
 
 RefString::RefString(uint8_t value) throw(const char*) {
 	initialize();
-	this->setLength(3);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(3);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 3) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(uint8_t value) throw(const char*) {
-	this->setLength(3);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(3);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 3) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const uint8_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 3);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 3);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 3) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1634,28 +1634,28 @@ int RefString::swprintf(wchar_t* target, int16_t value) {
 
 RefString::RefString(int16_t value) throw(const char*) {
 	initialize();
-	this->setLength(6);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(6);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 6) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(int16_t value) throw(const char*) {
-	this->setLength(6);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(6);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 6) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const int16_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 6);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 6);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 6) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1692,28 +1692,28 @@ int RefString::swprintf(wchar_t* target, uint16_t value) {
 
 RefString::RefString(uint16_t value) throw(const char*) {
 	initialize();
-	this->setLength(5);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(5);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 5) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(uint16_t value) throw(const char*) {
-	this->setLength(5);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(5);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 5) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const uint16_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 5);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 5);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 5) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1750,28 +1750,28 @@ int RefString::swprintf(wchar_t* target, int32_t value) {
 
 RefString::RefString(int32_t value) throw(const char*) {
 	initialize();
-	this->setLength(11);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(11);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 11) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(int32_t value) throw(const char*) {
-	this->setLength(11);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(11);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 11) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const int32_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 11);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 11);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 11) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1808,28 +1808,28 @@ int RefString::swprintf(wchar_t* target, uint32_t value) {
 
 RefString::RefString(uint32_t value) throw(const char*) {
 	initialize();
-	this->setLength(10);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(10);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 10) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(uint32_t value) throw(const char*) {
-	this->setLength(10);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(10);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 10) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const uint32_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 10);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 10);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 10) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1866,28 +1866,28 @@ int RefString::swprintf(wchar_t* target, int64_t value) {
 
 RefString::RefString(int64_t value) throw(const char*) {
 	initialize();
-	this->setLength(21);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(21);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 21) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(int64_t value) throw(const char*) {
-	this->setLength(21);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(21);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 21) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const int64_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 21);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 21);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 21) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1924,28 +1924,28 @@ int RefString::swprintf(wchar_t* target, uint64_t value) {
 
 RefString::RefString(uint64_t value) throw(const char*) {
 	initialize();
-	this->setLength(20);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(20);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 20) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(uint64_t value) throw(const char*) {
-	this->setLength(20);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(20);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length != 20) {
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 RefString& RefString::concat(const uint64_t value) throw(const char*) {
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 20);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 20);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length != 20) {
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -2006,63 +2006,63 @@ int RefString::swprintf(wchar_t* target, float value) {
 RefString::RefString(float value) throw(const char*) {
 	initialize();
 	if (isnan(value)) {
-		this->operator=(StringNan);
+		THIS.operator=(StringNan);
 	} else if (isinf(value)) {
 		if (signbit(value)) {
-			this->operator=(StringNegInfinite);
+			THIS.operator=(StringNegInfinite);
 		} else {
-			this->operator=(StringInfinite);
+			THIS.operator=(StringInfinite);
 		}
 	} else {
-		this->setLength(23);
-		int length = RefString::swprintf(this->m_data, value);
+		THIS.setLength(23);
+		int length = RefString::swprintf(THIS.m_data, value);
 		if (length == EOF) {
-			this->setSize(0);
+			THIS.setSize(0);
 			throw eConvert;
 		} else if (length != 23)
-			this->setLength(static_cast<uint32_t>(length));
+			THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(float value) throw(const char*) {
 	if (isnan(value))
-		return this->operator=(StringNan);
+		return THIS.operator=(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return this->operator=(StringNegInfinite);
+			return THIS.operator=(StringNegInfinite);
 		else
-			return this->operator=(StringInfinite);
+			return THIS.operator=(StringInfinite);
 	}
 	
-	this->setLength(23);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(23);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length == EOF) {
-		this->setSize(0);
+		THIS.setSize(0);
 		throw eConvert;
 	} else if (length != 23)
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	return *this;
 }
 
 RefString& RefString::concat(const float value) throw(const char*) {
 	if (isnan(value))
-		return this->concat(StringNan);
+		return THIS.concat(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return this->concat(StringNegInfinite);
+			return THIS.concat(StringNegInfinite);
 		else
-			return this->concat(StringInfinite);
+			return THIS.concat(StringInfinite);
 	}
 	
-	uint32_t prevSize = this->m_size;
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 23);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevSize = THIS.m_size;
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 23);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length == EOF) {
-		this->setSize(prevSize);
+		THIS.setSize(prevSize);
 		throw eConvert;
 	} else if (length != 23)
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	return *this;
 }
 
@@ -2118,63 +2118,63 @@ int RefString::swprintf(wchar_t* target, double value) {
 RefString::RefString(double value) throw(const char*) {
 	initialize();
 	if (isnan(value)) {
-		this->operator=(StringNan);
+		THIS.operator=(StringNan);
 	} else if (isinf(value)) {
 		if (signbit(value)) {
-			this->operator=(StringNegInfinite);
+			THIS.operator=(StringNegInfinite);
 		} else {
-			this->operator=(StringInfinite);
+			THIS.operator=(StringInfinite);
 		}
 	} else {
-		this->setLength(31);
-		int length = RefString::swprintf(this->m_data, value);
+		THIS.setLength(31);
+		int length = RefString::swprintf(THIS.m_data, value);
 		if (length == EOF) {
-			this->setSize(0);
+			THIS.setSize(0);
 			throw eConvert;
 		} else if (length != 31)
-			this->setLength(static_cast<uint32_t>(length));
+			THIS.setLength(static_cast<uint32_t>(length));
 	}
 }
 
 RefString& RefString::operator =(double value) throw(const char*) {
 	if (isnan(value))
-		return this->operator=(StringNan);
+		return THIS.operator=(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return this->operator=(StringNegInfinite);
+			return THIS.operator=(StringNegInfinite);
 		else
-			return this->operator=(StringInfinite);
+			return THIS.operator=(StringInfinite);
 	}
 	
-	this->setLength(31);
-	int length = RefString::swprintf(this->m_data, value);
+	THIS.setLength(31);
+	int length = RefString::swprintf(THIS.m_data, value);
 	if (length == EOF) {
-		this->setSize(0);
+		THIS.setSize(0);
 		throw eConvert;
 	} else if (length != 31)
-		this->setLength(static_cast<uint32_t>(length));
+		THIS.setLength(static_cast<uint32_t>(length));
 	return *this;
 }
 
 RefString& RefString::concat(const double value) throw(const char*) {
 	if (isnan(value))
-		return this->concat(StringNan);
+		return THIS.concat(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return this->concat(StringNegInfinite);
+			return THIS.concat(StringNegInfinite);
 		else
-			return this->concat(StringInfinite);
+			return THIS.concat(StringInfinite);
 	}
 	
-	uint32_t prevSize = this->m_size;
-	uint32_t prevLength = this->m_length;
-	this->setLength(prevLength + 31);
-	int length = RefString::swprintf(this->m_data + prevLength, value);
+	uint32_t prevSize = THIS.m_size;
+	uint32_t prevLength = THIS.m_length;
+	THIS.setLength(prevLength + 31);
+	int length = RefString::swprintf(THIS.m_data + prevLength, value);
 	if (length == EOF) {
-		this->setSize(prevSize);
+		THIS.setSize(prevSize);
 		throw eConvert;
 	} else if (length != 31)
-		this->setLength(prevLength + static_cast<uint32_t>(length));
+		THIS.setLength(prevLength + static_cast<uint32_t>(length));
 	return *this;
 }
 
@@ -2207,11 +2207,11 @@ String& String::concat(const double value) throw(const char*) {
 #ifdef __IOS__
 RefString::operator NSString*() const {
 	NSString* result = NULL;
-	if (this->m_data != NULL) {
+	if (THIS.m_data != NULL) {
 #if __WCHAR_MAX__ > 0x10000
-		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
+		result = [[NSString alloc] initWithBytes:(char*)(THIS.m_data) length:(THIS.m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
 #else
-		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
+		result = [[NSString alloc] initWithBytes:(char*)(THIS.m_data) length:(THIS.m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
 #endif
 	}
 	return result;
@@ -2526,19 +2526,19 @@ String::operator wchar_t*() const {
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->operator wchar_t*();
+	return THIS.ref().operator wchar_t*();
 }
 
 RefString::operator bool() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return false;
 	
 	uint32_t pos;
 	uint32_t len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
 	switch (type) {
 		case snfNone:
-			return this->m_length != 0; // Не пустое?
+			return THIS.m_length != 0; // Не пустое?
 			
 		case snfUndefined:
 		case snfNil:
@@ -2553,174 +2553,174 @@ RefString::operator bool() const {
 			return true;
 	}
 	
-	return RefString::wtoll(this->m_data + pos, len, type) != 0;
+	return RefString::wtoll(THIS.m_data + pos, len, type) != 0;
 }
 
 String::operator bool() const {
 	if (_object == NULL)
 		return false;
 	
-	return THIS->operator bool();
+	return THIS.ref().operator bool();
 }
 
 RefString::operator int8_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<uint8_t>(RefString::wtoll(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<uint8_t>(RefString::wtoll(THIS.m_data + pos, len, type));
 }
 
 String::operator int8_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator int8_t();
+	return THIS.ref().operator int8_t();
 }
 
 RefString::operator uint8_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<uint8_t>(RefString::wtoull(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<uint8_t>(RefString::wtoull(THIS.m_data + pos, len, type));
 }
 
 String::operator uint8_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator uint8_t();
+	return THIS.ref().operator uint8_t();
 }
 
 RefString::operator int16_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<int16_t>(RefString::wtoll(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<int16_t>(RefString::wtoll(THIS.m_data + pos, len, type));
 }
 
 String::operator int16_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator int16_t();
+	return THIS.ref().operator int16_t();
 }
 
 RefString::operator uint16_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<uint16_t>(RefString::wtoull(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<uint16_t>(RefString::wtoull(THIS.m_data + pos, len, type));
 }
 
 String::operator uint16_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator uint16_t();
+	return THIS.ref().operator uint16_t();
 }
 
 RefString::operator int32_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<int32_t>(RefString::wtoll(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<int32_t>(RefString::wtoll(THIS.m_data + pos, len, type));
 }
 
 String::operator int32_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator int32_t();
+	return THIS.ref().operator int32_t();
 }
 
 RefString::operator uint32_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return static_cast<uint32_t>(RefString::wtoull(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return static_cast<uint32_t>(RefString::wtoull(THIS.m_data + pos, len, type));
 }
 
 String::operator uint32_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator uint32_t();
+	return THIS.ref().operator uint32_t();
 }
 
 RefString::operator int64_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return RefString::wtoll(this->m_data + pos, len, type);
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return RefString::wtoll(THIS.m_data + pos, len, type);
 }
 
 String::operator int64_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator int64_t();
+	return THIS.ref().operator int64_t();
 }
 
 RefString::operator uint64_t() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return RefString::wtoull(this->m_data + pos, len, type);
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return RefString::wtoull(THIS.m_data + pos, len, type);
 }
 
 String::operator uint64_t() const {
 	if (_object == NULL)
 		return 0;
 	
-	return THIS->operator uint64_t();
+	return THIS.ref().operator uint64_t();
 }
 
 RefString::operator float() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return (float)(RefString::wtod(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return (float)(RefString::wtod(THIS.m_data + pos, len, type));
 }
 
 String::operator float() const {
 	if (_object == NULL)
 		return NAN;
 	
-	return THIS->operator float();
+	return THIS.ref().operator float();
 }
 
 RefString::operator double() const {
-	if (this->m_data == NULL)
+	if (THIS.m_data == NULL)
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
-	return (double)(RefString::wtod(this->m_data + pos, len, type));
+	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	return (double)(RefString::wtod(THIS.m_data + pos, len, type));
 }
 
 String::operator double() const {
 	if (_object == NULL)
 		return NAN;
 	
-	return THIS->operator double();
+	return THIS.ref().operator double();
 }
 
 //==============================================================
@@ -2738,7 +2738,7 @@ bool String::equals(const String& string) const {
 	else if (string._object == NULL)
 		return false;
 	else
-		return THIS->equals(*((RefString*)(string._object)));
+		return THIS.ref().equals(*((RefString*)(string._object)));
 }
 
 bool RefString::equals(const RefString& string) const {
@@ -2768,7 +2768,7 @@ bool String::equals(const wchar_t* string) const {
 	if (_object == NULL)
 		return string == NULL;
 	else
-		return THIS->equals(string);
+		return THIS.ref().equals(string);
 }
 
 bool RefString::equals(const char* string) const {
@@ -2803,7 +2803,7 @@ int String::compareTo(const RefString& string) const {
 	if (_object == NULL)
 		return -1;
 	else
-		return THIS->compareTo(string);
+		return THIS.ref().compareTo(string);
 }
 
 int RefString::compareTo(const String& string) const {
@@ -2819,7 +2819,7 @@ int String::compareTo(const String& string) const {
 	else if (string._object == NULL)
 		return 1;
 	else
-		return THIS->compareTo(*((RefString*)(string._object)));
+		return THIS.ref().compareTo(*((RefString*)(string._object)));
 }
 
 int RefString::compareTo(const wchar_t* string) const {
@@ -2837,7 +2837,7 @@ int String::compareTo(const wchar_t* string) const {
 	if (_object == NULL)
 		return (string == NULL) ? 0 : 1;
 	else
-		return THIS->compareTo(string);
+		return THIS.ref().compareTo(string);
 }
 
 //==============================================================
@@ -2856,13 +2856,13 @@ RefString& RefString::toUpperCase() {
 
 String& String::toLowerCase() {
 	if (_object != NULL)
-		THIS->toLowerCase();
+		THIS.ref().toLowerCase();
 	return *this;
 }
 
 String& String::toUpperCase() {
 	if (_object != NULL)
-		THIS->toUpperCase();
+		THIS.ref().toUpperCase();
 	return *this;
 }
 
@@ -2890,7 +2890,7 @@ bool String::equalsIgnoreCase(const RefString& string) const {
 	if (_object == NULL)
 		return false;
 	else
-		return THIS->equalsIgnoreCase(string);
+		return THIS.ref().equalsIgnoreCase(string);
 }
 
 bool RefString::equalsIgnoreCase(const String& string) const {
@@ -2919,7 +2919,7 @@ bool String::equalsIgnoreCase(const String& string) const {
 	if (_object == NULL)
 		return (string._object == NULL);
 	else
-		return THIS->equalsIgnoreCase(string);
+		return THIS.ref().equalsIgnoreCase(string);
 }
 
 bool RefString::equalsIgnoreCase(const wchar_t* string) const {
@@ -2949,7 +2949,7 @@ bool String::equalsIgnoreCase(const wchar_t* string) const {
 	if (_object == NULL)
 		return (string == NULL);
 	else
-		return THIS->equalsIgnoreCase(string);
+		return THIS.ref().equalsIgnoreCase(string);
 }
 
 int RefString::compareToIgnoreCase(const RefString& string) const {
@@ -2978,7 +2978,7 @@ int String::compareToIgnoreCase(const RefString& string) const {
 	if (_object == NULL)
 		return -1;
 	else
-		return THIS->compareToIgnoreCase(string);
+		return THIS.ref().compareToIgnoreCase(string);
 }
 
 int RefString::compareToIgnoreCase(const String& string) const {
@@ -3010,7 +3010,7 @@ int String::compareToIgnoreCase(const String& string) const {
 	if (_object == NULL)
 		return (string._object == NULL) ? 0 : -1;
 	else
-		return THIS->compareToIgnoreCase(string);
+		return THIS.ref().compareToIgnoreCase(string);
 }
 
 int RefString::compareToIgnoreCase(const wchar_t* string) const {
@@ -3042,7 +3042,7 @@ int String::compareToIgnoreCase(const wchar_t* string) const {
 	if (_object == NULL)
 		return (string == NULL) ? 0 : -1;
 	else
-		return THIS->compareToIgnoreCase(string);
+		return THIS.ref().compareToIgnoreCase(string);
 }
 
 //==============================================================
@@ -3067,7 +3067,7 @@ bool String::startsWith(const RefString& string, uint32_t start) const {
 	if (_object == NULL)
 		return false;
 	else
-		return THIS->startsWith(string, start);
+		return THIS.ref().startsWith(string, start);
 }
 
 bool RefString::startsWith(const String& string, uint32_t start) const {
@@ -3093,7 +3093,7 @@ bool String::startsWith(const String& string, uint32_t start) const {
 	if (_object == NULL)
 		return string._object == NULL;
 	else
-		return THIS->startsWith(string, start);
+		return THIS.ref().startsWith(string, start);
 }
 
 bool RefString::startsWith(const wchar_t* string, uint32_t start) const {
@@ -3119,7 +3119,7 @@ bool String::startsWith(const wchar_t* string, uint32_t start) const {
 	if (_object == NULL)
 		return string == NULL;
 	else
-		return THIS->startsWith(string, start);
+		return THIS.ref().startsWith(string, start);
 }
 
 bool RefString::endsWith(const RefString& string) const {
@@ -3141,7 +3141,7 @@ bool String::endsWith(const RefString& string) const {
 	if (_object == NULL)
 		return false;
 	else
-		return THIS->endsWith(string);
+		return THIS.ref().endsWith(string);
 }
 
 bool RefString::endsWith(const String& string) const {
@@ -3166,7 +3166,7 @@ bool String::endsWith(const String& string) const {
 	if (_object == NULL)
 		return string._object == NULL;
 	else
-		return THIS->endsWith(string);
+		return THIS.ref().endsWith(string);
 }
 
 bool RefString::endsWith(const wchar_t* string) const {
@@ -3191,7 +3191,7 @@ bool String::endsWith(const wchar_t* string) const {
 	if (_object == NULL)
 		return string == NULL;
 	else
-		return THIS->endsWith(string);
+		return THIS.ref().endsWith(string);
 }
 
 //==============================================================
@@ -3215,7 +3215,7 @@ int String::indexOf(wchar_t character) const {
 	if (_object == NULL)
 		return -1;
 	
-	return THIS->indexOf(character);
+	return THIS.ref().indexOf(character);
 }
 
 int RefString::indexOf(const RefString& string) const {
@@ -3241,7 +3241,7 @@ int String::indexOf(const RefString& string) const {
 	if (_object == NULL)
 		return -1;
 	
-	return THIS->indexOf(string);
+	return THIS.ref().indexOf(string);
 }
 
 int RefString::indexOf(const String& string) const {
@@ -3270,7 +3270,7 @@ int String::indexOf(const String& string) const {
 	if (_object == NULL)
 		return string._object == NULL ? 0 : -1;
 	
-	return THIS->indexOf(string);
+	return THIS.ref().indexOf(string);
 }
 
 int RefString::indexOf(const wchar_t* string) const {
@@ -3299,7 +3299,7 @@ int String::indexOf(const wchar_t* string) const {
 	if (_object == NULL)
 		return string == NULL ? 0 : -1;
 	
-	return THIS->indexOf(string);
+	return THIS.ref().indexOf(string);
 }
 
 int RefString::lastIndexOf(wchar_t character) const {
@@ -3319,7 +3319,7 @@ int String::lastIndexOf(wchar_t character) const {
 	if (_object == NULL)
 		return -1;
 	
-	return THIS->lastIndexOf(character);
+	return THIS.ref().lastIndexOf(character);
 }
 
 int RefString::lastIndexOf(const RefString& string) const {
@@ -3352,7 +3352,7 @@ int String::lastIndexOf(const RefString& string) const {
 	if (_object == NULL)
 		return -1;
 	
-	return THIS->lastIndexOf(string);
+	return THIS.ref().lastIndexOf(string);
 }
 
 int RefString::lastIndexOf(const String& string) const {
@@ -3388,7 +3388,7 @@ int String::lastIndexOf(const String& string) const {
 	if (_object == NULL)
 		return (string._object == NULL) ? 0 : -1;
 	
-	return THIS->lastIndexOf(string);
+	return THIS.ref().lastIndexOf(string);
 }
 
 int RefString::lastIndexOf(const wchar_t* string) const {
@@ -3423,7 +3423,7 @@ int String::lastIndexOf(const wchar_t* string) const {
 	if (_object == NULL)
 		return (string == NULL) ? 0 : -1;
 	
-	return THIS->lastIndexOf(string);
+	return THIS.ref().lastIndexOf(string);
 }
 
 //==============================================================
@@ -3476,7 +3476,7 @@ String getSubString(String& self, int start, int end) {
 	if (len == 0)
 		return StringEmpty;
 	
-	return RefString(self->m_data + pos, len);
+	return RefString(self.ref().m_data + pos, len);
 }
 
 RefString RefString::replace(const RefString& target, const RefString& replacement) const {
@@ -3498,7 +3498,7 @@ String String::replace(const RefString& target, const RefString& replacement) co
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replace(target, replacement);
+	return THIS.ref().replace(target, replacement);
 }
 
 RefString RefString::replace(const String& target, const String& replacement) const {
@@ -3520,7 +3520,7 @@ RefString RefString::replace(const String& target, const String& replacement) co
 				return substring(0, pos).concat(*((RefString*)(replacement._object)));
 		}
 	} else
-		return String(replacement)->concat(substring(pos + len));
+		return String(replacement).ref().concat(substring(pos + len));
 }
 
 String String::replace(const String& target, const String& replacement) const {
@@ -3557,13 +3557,13 @@ String String::replace(const wchar_t* target, const wchar_t* replacement) const 
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replace(target, replacement);
+	return THIS.ref().replace(target, replacement);
 }
 
 //==============================================================
 
 wchar_t& RefString::operator [](int index) const throw(const char*) {
-	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+	if ((THIS.m_data == NULL) || (index < 0) || (index >= m_length))
 		throw eOutOfRange;
 	return m_data[index];
 }
@@ -3576,7 +3576,7 @@ wchar_t& String::operator [](int index) const throw(const char*) {
 }
 
 wchar_t RefString::charAt(int index) const throw(const char*) {
-	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+	if ((THIS.m_data == NULL) || (index < 0) || (index >= m_length))
 		throw eOutOfRange;
 	return m_data[index];
 }
@@ -3598,7 +3598,7 @@ String RefString::toJSON() const {
 	if (m_data == NULL)
 		return L"null";
 	
-	return String(L"\"")->concat(*this).concat(L"\"");
+	return String(L"\"").ref().concat(*this).concat(L"\"");
 }
 
 //==============================================================
@@ -3609,7 +3609,7 @@ bool RefString::matches(const RefString& regularExpression) const {
 		return m_length == 0;
 	}
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return false;
 	
@@ -3625,7 +3625,7 @@ bool String::matches(const RefString& regularExpression) const {
 	if (_object == NULL)
 		return false;
 	
-	return THIS->matches(regularExpression);
+	return THIS.ref().matches(regularExpression);
 }
 
 bool RefString::matches(const String& regularExpression) const {
@@ -3635,7 +3635,7 @@ bool RefString::matches(const String& regularExpression) const {
 		return m_length == 0;
 	}
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return false;
 	
@@ -3651,7 +3651,7 @@ bool String::matches(const String& regularExpression) const {
 	if (_object == NULL)
 		return regularExpression._object == NULL;
 	
-	return THIS->matches(regularExpression);
+	return THIS.ref().matches(regularExpression);
 }
 
 bool RefString::regionMatches(bool ignoreCase, int thisStart, const RefString& string, int start, int length) const {
@@ -3692,7 +3692,7 @@ bool String::regionMatches(bool ignoreCase, int thisStart, const RefString& stri
 	if (_object == NULL)
 		return false;
 	
-	return THIS->regionMatches(ignoreCase, thisStart, string, start, length);
+	return THIS.ref().regionMatches(ignoreCase, thisStart, string, start, length);
 }
 
 bool RefString::regionMatches(bool ignoreCase, int thisStart, const String& string, int start, int length) const {
@@ -3735,7 +3735,7 @@ bool String::regionMatches(bool ignoreCase, int thisStart, const String& string,
 	if (_object == NULL)
 		return string._object == NULL && start == 0 && length == 0;
 
-	return THIS->regionMatches(ignoreCase, thisStart, string, start, length);
+	return THIS.ref().regionMatches(ignoreCase, thisStart, string, start, length);
 }
 
 bool RefString::regionMatches(int thisStart, const RefString& string, int start, int length) const {
@@ -3766,7 +3766,7 @@ bool String::regionMatches(int thisStart, const RefString& string, int start, in
 	if (_object == NULL)
 		return false;
 	
-	return THIS->regionMatches(thisStart, string, start, length);
+	return THIS.ref().regionMatches(thisStart, string, start, length);
 }
 
 bool RefString::regionMatches(int thisStart, const String& string, int start, int length) const {
@@ -3799,7 +3799,7 @@ bool String::regionMatches(int thisStart, const String& string, int start, int l
 	if (_object == NULL)
 		return string._object == NULL && start == 0 && length == 0;
 	
-	return THIS->regionMatches(thisStart, string, start, length);
+	return THIS.ref().regionMatches(thisStart, string, start, length);
 }
 
 String RefString::replaceAll(const RefString& regularExpression, const RefString& replacement) const {
@@ -3807,7 +3807,7 @@ String RefString::replaceAll(const RefString& regularExpression, const RefString
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 	
@@ -3822,14 +3822,14 @@ String RefString::replaceAll(const RefString& regularExpression, const RefString
 	
 	for (NSTextCheckingResult* find in matches) {
 		if (find.range.location == start)
-			result->concat(replacement);
+			result.ref().concat(replacement);
 		else
-			result->concat(substring(start, (int32_t)find.range.location)).concat(replacement);
+			result.ref().concat(substring(start, (int32_t)find.range.location)).concat(replacement);
 
 		start = (int32_t)find.range.location + (int32_t)find.range.length;
 	}
 	if (start < end)
-		result->concat(substring(start));
+		result.ref().concat(substring(start));
 
 	return result;
 }
@@ -3838,7 +3838,7 @@ String String::replaceAll(const RefString& regularExpression, const RefString& r
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replaceAll(regularExpression, replacement);
+	return THIS.ref().replaceAll(regularExpression, replacement);
 }
 
 String RefString::replaceAll(const String& regularExpression, const String& replacement) const {
@@ -3848,7 +3848,7 @@ String RefString::replaceAll(const String& regularExpression, const String& repl
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 	
@@ -3863,14 +3863,14 @@ String RefString::replaceAll(const String& regularExpression, const String& repl
 	
 	for (NSTextCheckingResult* find in matches) {
 		if (find.range.location == start)
-			result->concat(replacement);
+			result.ref().concat(replacement);
 		else
-			result->concat(substring(start, (int32_t)find.range.location)).concat(replacement);
+			result.ref().concat(substring(start, (int32_t)find.range.location)).concat(replacement);
 
 		start = (int32_t)find.range.location + (int32_t)find.range.length;
 	}
 	if (start < end)
-		result->concat(substring(start));
+		result.ref().concat(substring(start));
 
 	return result;
 }
@@ -3879,7 +3879,7 @@ String String::replaceAll(const String& regularExpression, const String& replace
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replaceAll(regularExpression, replacement);
+	return THIS.ref().replaceAll(regularExpression, replacement);
 }
 
 String RefString::replaceFirst(const RefString& regularExpression, const RefString& replacement) const {
@@ -3887,7 +3887,7 @@ String RefString::replaceFirst(const RefString& regularExpression, const RefStri
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 
@@ -3900,7 +3900,7 @@ String RefString::replaceFirst(const RefString& regularExpression, const RefStri
 		return *this;
 
 	if (find.range.location == 0)
-		return String(replacement)->concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+		return String(replacement).ref().concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
 	else if ((find.range.location + find.range.length) >= m_length)
 		return substring(0, (int32_t)find.range.location).concat(replacement);
 	else
@@ -3911,7 +3911,7 @@ String String::replaceFirst(const RefString& regularExpression, const RefString&
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replaceFirst(regularExpression, replacement);
+	return THIS.ref().replaceFirst(regularExpression, replacement);
 }
 
 String RefString::replaceFirst(const String& regularExpression, const String& replacement) const {
@@ -3921,7 +3921,7 @@ String RefString::replaceFirst(const String& regularExpression, const String& re
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = this->operator NSString*();
+	NSString* string = THIS.operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 
@@ -3934,7 +3934,7 @@ String RefString::replaceFirst(const String& regularExpression, const String& re
 		return *this;
 
 	if (find.range.location == 0)
-		return String(replacement)->concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+		return String(replacement).ref().concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
 	else if ((find.range.location + find.range.length) >= m_length)
 		return substring(0, (int32_t)find.range.location).concat(replacement);
 	else
@@ -3945,7 +3945,7 @@ String String::replaceFirst(const String& regularExpression, const String& repla
 	if (_object == NULL)
 		return NULL;
 	
-	return THIS->replaceFirst(regularExpression, replacement);
+	return THIS.ref().replaceFirst(regularExpression, replacement);
 }
 
 /*
@@ -4019,7 +4019,7 @@ RefString& RefString::trim() {
 
 String& String::trim() {
 	if (_object != NULL)
-		THIS->trim();
+		THIS.ref().trim();
 	
 	return *this;
 }
@@ -4046,7 +4046,7 @@ String& String::trim() {
 #define va_concat(type) \
 	++ptr; \
 	type val = va_arg(arglist, type); \
-	this->concat(val);
+	THIS.concat(val);
 
 int RefString::vswprintf(const wchar_t* string, va_list arglist) {
 	setLength(0);
@@ -4392,7 +4392,7 @@ RefString RefString::md5() const throw(const char*) {
 }
 
 String String::md5() const throw(const char*) {
-	return THIS->md5();
+	return THIS.ref().md5();
 }
 
 //==============================================================

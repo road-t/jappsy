@@ -16,19 +16,15 @@
 
 #include "uNumber.h"
 
-#if defined(__IOS__)
 namespace Java {
-#endif
-	
+
 	int RefBoolean::compareTo(const Boolean& object) const throw(const char*) { return compare(siValue, object.shortValue()); }
 	Boolean RefBoolean::decode(const String& value) throw(const char*) { return Boolean((bool)value); }
 	
 	int RefByte::compareTo(const Byte& object) const throw(const char*) { return compare(bValue, object.byteValue()); }
 	Byte RefByte::decode(const String& value) throw(const char*) { return Byte((int8_t)value); }
 
-#if defined(__IOS__)
 }
-#endif
 
 int RefShort::compareTo(const Short& object) const throw(const char*) { return compare(siValue, object.shortValue()); }
 Short RefShort::decode(const String& value) throw(const char*) { return Short((int16_t)value); }

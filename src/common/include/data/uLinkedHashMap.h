@@ -167,7 +167,7 @@ protected:
 	
 public:
 	
-	inline RefLinkedHashMap() { this->TYPE = TypeLinkedHashMap; }
+	inline RefLinkedHashMap() { THIS.TYPE = TypeLinkedHashMap; }
 	
 	inline ~RefLinkedHashMap() {
 		clear();
@@ -348,38 +348,25 @@ public:
 template <typename K, typename V>
 class LinkedHashMap : public Map<K,V> {
 public:
-	RefClass(LinkedHashMap, LinkedHashMap<K,V>)
+	RefTemplate2(LinkedHashMap, LinkedHashMap, RefLinkedHashMap)
 	
-	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
-	virtual inline bool containsKey(const K& key) const throw(const char*) { CHECKTHIS; return THIS->containsKey(key); }
-	virtual inline bool containsValue(const V& value) const throw(const char*) { CHECKTHIS; return THIS->containsValue(value); }
-	// entrySet
-	virtual inline const V& get(const K& key) const throw(const char*) { CHECKTHIS; return THIS->get(key); }
-	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { CHECKTHIS; return THIS->opt(key, defaultValue); }
-	virtual inline bool isEmpty() const throw(const char*) { CHECKTHIS; return THIS->isEmpty(); }
-	virtual inline const Set<K>& keySet() const throw(const char*) { CHECKTHIS; return THIS->keySet(); }
-	virtual inline V& put(const K& key, const V& value) throw(const char*) { CHECKTHIS; return THIS->put(key, value); }
-	// putAll
-	virtual inline void remove(const K& key) throw(const char*) { CHECKTHIS; THIS->remove(key); }
-	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->size(); }
-	virtual inline const Collection<V>& values() const throw(const char*) { CHECKTHIS; return THIS->values(); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		LinkedHashMap<Object, Object> map = new LinkedHashMap<Object, Object>();
-		map.clear();
-		map.containsKey(null);
-		map.containsValue(null);
-		map.put(null,null);
-		map.get(null);
-		map.isEmpty();
-		map.keySet();
-		map.put(null, null);
-		map.remove(null);
-		map.size();
-		map.values();
+	inline LinkedHashMap() {
+		THIS.initialize();
 	}
-#endif
+	
+	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
+	virtual inline bool containsKey(const K& key) const throw(const char*) { return THIS.ref().containsKey(key); }
+	virtual inline bool containsValue(const V& value) const throw(const char*) { return THIS.ref().containsValue(value); }
+	// entrySet
+	virtual inline const V& get(const K& key) const throw(const char*) { return THIS.ref().get(key); }
+	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
+	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
+	virtual inline const Set<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
+	virtual inline V& put(const K& key, const V& value) throw(const char*) { return THIS.ref().put(key, value); }
+	// putAll
+	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
+	virtual inline const Collection<V>& values() const throw(const char*) { return THIS.ref().values(); }
 };
 
 #endif //JAPPSY_ULINKEDHASHMAP_H

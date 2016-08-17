@@ -18,9 +18,86 @@
 #include <core/uMemory.h>
 #include <core/uSystem.h>
 
+#if defined(__JNI__)
+    #include <asm/fcntl.h>
+    #include <unistd.h>
+    #include <android/looper.h>
+    #include <pthread.h>
+
+    static int mainThreadMessagePipe[2];
+
+    static const int LOOPER_ID_MESSAGEPIPE = 'JPSY';
+
+    void postMainThreadMessage(struct ThreadMessage* msg) {
+        if (write(mainThreadMessagePipe[1], msg, sizeof(msg)) != sizeof(msg)) {
+            LOG("Thread message buffer overrun!")
+        }
+    }
+
+    static int mainThreadMessagePipeCallback(int fd, int events, void *data) {
+        struct ThreadMessage msg;
+
+        while (read(fd, &msg, sizeof(msg)) == sizeof(msg)) {
+            LOG("Got message!");
+            msg.callback(msg.data);
+        }
+
+        return 1;
+    }
+
+    static int setupMainThreadMessageLooper() {
+        int err, opt, i;
+        err = pipe(mainThreadMessagePipe);
+        if (err == -1) {
+            LOG("Create message pipe failed!");
+            return -1;
+        }
+        for (i = 0; i < 2; i++) {
+            opt = fcntl(mainThreadMessagePipe[i], F_GETFL);
+            if ((opt & (O_CLOEXEC | O_NONBLOCK)) != (O_CLOEXEC | O_NONBLOCK)) {
+                opt |= O_CLOEXEC | O_NONBLOCK;
+                fcntl(mainThreadMessagePipe[i], F_SETFL, opt);
+            }
+        }
+
+        ALooper* mainLooper = ALooper_forThread();
+        if (mainLooper == NULL) {
+            LOG("Main thread looper not found!")
+            return -1;
+        }
+
+        ALooper_addFd(mainLooper, mainThreadMessagePipe[0], LOOPER_ID_MESSAGEPIPE, ALOOPER_EVENT_INPUT, mainThreadMessagePipeCallback, NULL);
+    }
+
+    static void* Jappsy_testMainThreadMessageCallback(void* data) {
+        LOG("Running Testing Message: %s", (char*)data);
+
+        return NULL;
+    }
+
+    static void* Jappsy_testMainThreadMessageLooper(void* data) {
+        LOG("Running Testing Thread: %s", (char*)data);
+        struct ThreadMessage msg;
+        msg.callback = Jappsy_testMainThreadMessageCallback;
+        msg.data = data;
+
+        postMainThreadMessage(&msg);
+        return NULL;
+    }
+#endif
+
 void jappsyInit() {
     mmInit();
     uSystemInit();
+
+#if defined(__JNI__)
+    setupMainThreadMessageLooper();
+
+    LOG("Start Testing Thread");
+    pthread_t thread;
+    const char* data = "TestUserData";
+    pthread_create(&thread, NULL, Jappsy_testMainThreadMessageLooper, (void*)data);
+#endif
 }
 
 void jappsyQuit() {

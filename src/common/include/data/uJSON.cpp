@@ -228,7 +228,7 @@ extern "C" {
 				}
 			} else if (ch == '\\') {
 				json_next;
-				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+				if ((ch == '\"') || (ch == '\\') || (ch == '/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
 				} else if (ch == 'u') {
 					int cnt = 4;
 					while ((cnt > 0) && (json_next != '\0')) {
@@ -277,7 +277,7 @@ extern "C" {
 #endif
 			} else if (ch == L'\\') {
 				jsonw_next;
-				if ((ch == L'\"') || (ch == L'\\') || (ch == L'\/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
+				if ((ch == L'\"') || (ch == L'\\') || (ch == L'/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
 				} else if (ch == L'u') {
 					int cnt = 4;
 					while ((cnt > 0) && (jsonw_next != L'\0')) {
@@ -1061,7 +1061,7 @@ extern "C" {
 				}
 			} else if (ch == '\\') {
 				json_next;
-				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+				if ((ch == '\"') || (ch == '\\') || (ch == '/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
 					len++;
 				} else if (ch == 'u') {
 					uint32_t utf16 = 0;
@@ -1217,7 +1217,7 @@ extern "C" {
 				}
 			} else if (ch == '\\') {
 				json_next;
-				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+				if ((ch == '\"') || (ch == '\\') || (ch == '/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
 					*ptr = ch; ptr++;
 				} else if (ch == 'u') {
 					uint32_t utf16 = 0;
@@ -1366,7 +1366,7 @@ extern "C" {
 #endif
 			} else if (ch == L'\\') {
 				jsonw_next;
-				if ((ch == L'\"') || (ch == L'\\') || (ch == L'\/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
+				if ((ch == L'\"') || (ch == L'\\') || (ch == L'/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
 					len++;
 				} else if (ch == L'u') {
 					uint32_t utf16 = 0;
@@ -1498,7 +1498,7 @@ extern "C" {
 #endif
 			} else if (ch == L'\\') {
 				jsonw_next;
-				if ((ch == L'\"') || (ch == L'\\') || (ch == L'\/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
+				if ((ch == L'\"') || (ch == L'\\') || (ch == L'/') || (ch == L'b') || (ch == L'f') || (ch == L'n') || (ch == L'r') || (ch == L't')) {
 					*ptr = ch; ptr++;
 				} else if (ch == L'u') {
 					uint32_t utf16 = 0;
@@ -2691,7 +2691,7 @@ extern "C" {
 				}
 			} else if (ch == '\\') {
 				json_next;
-				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+				if ((ch == '\"') || (ch == '\\') || (ch == '/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
 					len++;
 				} else if (ch == 'u') {
 					uint32_t utf16 = 0;
@@ -2847,7 +2847,7 @@ extern "C" {
 				}
 			} else if (ch == '\\') {
 				json_next;
-				if ((ch == '\"') || (ch == '\\') || (ch == '\/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
+				if ((ch == '\"') || (ch == '\\') || (ch == '/') || (ch == 'b') || (ch == 'f') || (ch == 'n') || (ch == 'r') || (ch == 't')) {
 					*ptr = ch; ptr++;
 				} else if (ch == 'u') {
 					uint32_t utf16 = 0;

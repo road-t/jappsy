@@ -398,30 +398,30 @@ extern "C" {
 		RefString& concat(const float value) throw(const char*); // eOutOfMemory
 		RefString& concat(const double value) throw(const char*); // eOutOfMemory
 
-		inline RefString& operator +=(const RefString& string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+		inline RefString& operator +=(const RefString& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 		#if defined(__IOS__)
-			inline RefString& operator +=(const NSString* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+			inline RefString& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 		#endif
-		inline RefString& operator +=(const char* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
-		inline RefString& operator +=(const wchar_t* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
-		inline RefString& operator +=(const char character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
-		inline RefString& operator +=(const wchar_t character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
-		inline RefString& operator +=(bool value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(float value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(double value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline RefString& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline RefString& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline RefString& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline RefString& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline RefString& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
 
 		#if defined(__IOS__)
 			operator NSString*() const;
 		#endif
-		explicit inline operator wchar_t*() const { return this->m_data; };
+		explicit inline operator wchar_t*() const { return THIS.m_data; };
 		explicit operator bool() const;
 		explicit operator int8_t() const;
 		explicit operator uint8_t() const;
@@ -434,8 +434,8 @@ extern "C" {
 		explicit operator float() const;
 		explicit operator double() const;
 
-		inline double operator +() const { return this->operator double(); }
-		inline double operator -() const { return -(this->operator double()); }
+		inline double operator +() const { return THIS.operator double(); }
+		inline double operator -() const { return -(THIS.operator double()); }
 
 		friend inline RefString operator +(const RefString& src1, const RefString& src2) { return RefString(src1).concat(src2);	}
 		
@@ -444,32 +444,32 @@ extern "C" {
 		bool equals(const wchar_t* string) const;
 		bool equals(const char* string) const;
 
-		inline bool operator ==(const RefString& string) const { return this->equals(string); }
-		inline bool operator ==(const String& string) const { return this->equals(string); }
-		inline bool operator ==(const wchar_t* string) const { return this->equals(string); }
-		inline bool operator ==(const char* string) const { return this->equals(string); }
+		inline bool operator ==(const RefString& string) const { return THIS.equals(string); }
+		inline bool operator ==(const String& string) const { return THIS.equals(string); }
+		inline bool operator ==(const wchar_t* string) const { return THIS.equals(string); }
+		inline bool operator ==(const char* string) const { return THIS.equals(string); }
 
-		inline bool operator !=(const RefString& string) const { return !(this->equals(string)); }
-		inline bool operator !=(const String& string) const { return !(this->equals(string)); }
-		inline bool operator !=(const wchar_t* string) const { return !(this->equals(string)); }
-		inline bool operator !=(const char* string) const { return !(this->equals(string)); }
+		inline bool operator !=(const RefString& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const String& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const wchar_t* string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const char* string) const { return !(THIS.equals(string)); }
 
 		int compareTo(const RefString& string) const;
 		int compareTo(const String& string) const;
 		int compareTo(const wchar_t* string) const;
 
-		inline bool operator <(const RefString& string) const { return (this->compareTo(string) < 0); }
-		inline bool operator <(const String& string) const { return (this->compareTo(string) < 0); }
-		inline bool operator <(const wchar_t* string) const { return (this->compareTo(string) < 0); }
-		inline bool operator >(const RefString& string) const { return (this->compareTo(string) > 0); }
-		inline bool operator >(const String& string) const { return (this->compareTo(string) > 0); }
-		inline bool operator >(const wchar_t* string) const { return (this->compareTo(string) > 0); }
-		inline bool operator <=(const RefString& string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator <=(const String& string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator <=(const wchar_t* string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator >=(const RefString& string) const { return (this->compareTo(string) >= 0); }
-		inline bool operator >=(const String& string) const { return (this->compareTo(string) >= 0); }
-		inline bool operator >=(const wchar_t* string) const { return (this->compareTo(string) >= 0); }
+		inline bool operator <(const RefString& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const String& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const wchar_t* string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator >(const RefString& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const String& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const wchar_t* string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator <=(const RefString& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const String& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const wchar_t* string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator >=(const RefString& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const String& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const wchar_t* string) const { return (THIS.compareTo(string) >= 0); }
 
 		RefString& toLowerCase();
 		RefString& toUpperCase();
@@ -556,8 +556,8 @@ extern "C" {
 		void setSize(uint32_t size) throw(const char*);
 		void setLength(uint32_t length) throw(const char*);
 	public:
-		RefClass(String, String)
-		
+		RefClass(String, RefString)
+
 		/**
 		 * Create copy of string
 		 * @param string  source string
@@ -646,25 +646,25 @@ extern "C" {
 		String& concat(const float value) throw(const char*); // eOutOfMemory
 		String& concat(const double value) throw(const char*); // eOutOfMemory
 		
-		inline String& operator +=(const String& string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+		inline String& operator +=(const String& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 #if defined(__IOS__)
-		inline String& operator +=(const NSString* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
+		inline String& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 #endif
-		inline String& operator +=(const char* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
-		inline String& operator +=(const wchar_t* string) throw(const char*) { return this->concat(string); }; // eOutOfMemory
-		inline String& operator +=(const char character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
-		inline String& operator +=(const wchar_t character) throw(const char*) { return this->concat(character); }; // eOutOfMemory
-		inline String& operator +=(bool value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(int8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint8_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(int16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint16_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(int32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint32_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(int64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint64_t value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(float value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
-		inline String& operator +=(double value) throw(const char*) { return this->concat(value); }; // eOutOfMemory
+		inline String& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline String& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline String& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline String& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline String& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline String& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
 		
 #if defined(__IOS__)
 		operator NSString*() const;
@@ -682,8 +682,8 @@ extern "C" {
 		explicit operator float() const;
 		explicit operator double() const;
 		
-		inline double operator +() const { return this->operator double(); }
-		inline double operator -() const { return -(this->operator double()); }
+		inline double operator +() const { return THIS.operator double(); }
+		inline double operator -() const { return -(THIS.operator double()); }
 		
 		friend inline String operator +(const String& src1, const String& src2) { return String(src1).concat(src2);	}
 		
@@ -695,32 +695,32 @@ extern "C" {
 		bool equals(const wchar_t* string) const;
 		bool equals(const char* string) const;
 
-		inline bool operator ==(const RefString& string) const { return this->equals(string); }
-		inline bool operator ==(const String& string) const { return this->equals(string); }
-		inline bool operator ==(const wchar_t* string) const { return this->equals(string); }
-		inline bool operator ==(const char* string) const { return this->equals(string); }
+		inline bool operator ==(const RefString& string) const { return THIS.equals(string); }
+		inline bool operator ==(const String& string) const { return THIS.equals(string); }
+		inline bool operator ==(const wchar_t* string) const { return THIS.equals(string); }
+		inline bool operator ==(const char* string) const { return THIS.equals(string); }
 		
-		inline bool operator !=(const RefString& string) const { return !(this->equals(string)); }
-		inline bool operator !=(const String& string) const { return !(this->equals(string)); }
-		inline bool operator !=(const wchar_t* string) const { return !(this->equals(string)); }
-		inline bool operator !=(const char* string) const { return !(this->equals(string)); }
+		inline bool operator !=(const RefString& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const String& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const wchar_t* string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const char* string) const { return !(THIS.equals(string)); }
 		
 		int compareTo(const RefString& string) const;
 		int compareTo(const String& string) const;
 		int compareTo(const wchar_t* string) const;
 
-		inline bool operator <(const RefString& string) const { return (this->compareTo(string) < 0); }
-		inline bool operator <(const String& string) const { return (this->compareTo(string) < 0); }
-		inline bool operator <(const wchar_t* string) const { return (this->compareTo(string) < 0); }
-		inline bool operator >(const RefString& string) const { return (this->compareTo(string) > 0); }
-		inline bool operator >(const String& string) const { return (this->compareTo(string) > 0); }
-		inline bool operator >(const wchar_t* string) const { return (this->compareTo(string) > 0); }
-		inline bool operator <=(const RefString& string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator <=(const String& string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator <=(const wchar_t* string) const { return (this->compareTo(string) <= 0); }
-		inline bool operator >=(const RefString& string) const { return (this->compareTo(string) >= 0); }
-		inline bool operator >=(const String& string) const { return (this->compareTo(string) >= 0); }
-		inline bool operator >=(const wchar_t* string) const { return (this->compareTo(string) >= 0); }
+		inline bool operator <(const RefString& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const String& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const wchar_t* string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator >(const RefString& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const String& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const wchar_t* string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator <=(const RefString& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const String& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const wchar_t* string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator >=(const RefString& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const String& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const wchar_t* string) const { return (THIS.compareTo(string) >= 0); }
 
 		String& toLowerCase();
 		String& toUpperCase();
@@ -775,7 +775,7 @@ extern "C" {
 		
 		//List<String> split(const String& regularExpression, uint32_t limit = 0) const;
 #else
-	#error Cross platform String not complete
+	#warning Cross platform String not complete
 #endif
 		
 		String& trim();

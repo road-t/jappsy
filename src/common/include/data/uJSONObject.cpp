@@ -229,7 +229,7 @@ void jsonw_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(
 }
 
 RefJSONObject::RefJSONObject(const String& json) throw(const char*) {
-	TYPE = TypeJSONObject;
+	initialize();
 
 	if (json._object == NULL)
 		return;
@@ -253,7 +253,7 @@ RefJSONObject::RefJSONObject(const String& json) throw(const char*) {
 }
 
 RefJSONObject::RefJSONObject(const wchar_t* json) throw(const char*) {
-	TYPE = TypeJSONObject;
+	initialize();
 
 	if (json == NULL)
 		return;
@@ -277,7 +277,7 @@ RefJSONObject::RefJSONObject(const wchar_t* json) throw(const char*) {
 }
 
 RefJSONObject::RefJSONObject(const char* json) throw(const char*) {
-	TYPE = TypeJSONObject;
+	initialize();
 	
 	if (json == NULL)
 		return;

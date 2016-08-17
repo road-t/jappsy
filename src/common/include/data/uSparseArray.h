@@ -299,51 +299,33 @@ public:
 template <typename Type>
 class SparseArray : public Object {
 public:
-	RefClass(SparseArray, SparseArray<Type>)
+	RefTemplate(SparseArray, SparseArray, RefSparseArray)
+	
+	inline SparseArray() {
+		THIS.initialize();
+	}
 	
 	inline SparseArray(uint32_t initialCapacity) {
+		THIS.initialize();
 		RefSparseArray<Type>* o = new RefSparseArray<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 	
-	virtual inline void append(int32_t key, const Type& value) throw(const char*) { CHECKTHIS; THIS->append(key, value); }
-	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
-	virtual inline const Type& get(int32_t key) const throw(const char*) { CHECKTHIS; return THIS->get(key); }
-	virtual inline const Type& opt(int32_t key, const Type& defaultValue) const throw(const char*) { CHECKTHIS; return THIS->opt(key, defaultValue); }
-	virtual inline int32_t indexOfKey(int32_t key) const throw(const char*) { CHECKTHIS; return THIS->indexOfKey(key); }
-	virtual inline int32_t indexOfValue(const Type& value) const throw(const char*) { CHECKTHIS; return THIS->indexOfValue(value); }
-	virtual inline int32_t keyAt(int index) const throw(const char*) { CHECKTHIS; return THIS->keyAt(index); }
-	virtual inline Type& put(int32_t key, const Type& value) throw(const char*) { CHECKTHIS; return THIS->put(key, value); }
-	virtual inline void remove(int32_t key) throw(const char*) { CHECKTHIS; THIS->remove(key); }
-	virtual inline void removeAt(int index) throw(const char*) { CHECKTHIS; THIS->removeAt(index); }
-	virtual inline void removeAtRange(int index, int size) throw(const char*) { CHECKTHIS; THIS->removeAtRange(index, size); }
-	virtual inline void setValueAt(int index, const Type& value) throw(const char*) { CHECKTHIS; THIS->setValueAt(index, value); }
-	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->size(); }
-	virtual inline const Type& valueAt(int index) const throw(const char*) { CHECKTHIS; return THIS->valueAt(index); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		SparseArray<Object> test = new SparseArray<Object>();
-		test.append(0, null);
-		test.clear();
-		test.put(0, null);
-		test.get(0);
-		test.opt(0, null);
-		test.indexOfKey(0);
-		test.indexOfValue(null);
-		test.keyAt(0);
-		test.put(0, null);
-		test.remove(0);
-		test.put(0, null);
-		test.removeAt(0);
-		test.removeAtRange(0, 0);
-		test.put(0, null);
-		test.setValueAt(0, null);
-		test.size();
-		test.valueAt(0);
-	}
-#endif
+	virtual inline void append(int32_t key, const Type& value) throw(const char*) { THIS.ref().append(key, value); }
+	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
+	virtual inline const Type& get(int32_t key) const throw(const char*) { return THIS.ref().get(key); }
+	virtual inline const Type& opt(int32_t key, const Type& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
+	virtual inline int32_t indexOfKey(int32_t key) const throw(const char*) { return THIS.ref().indexOfKey(key); }
+	virtual inline int32_t indexOfValue(const Type& value) const throw(const char*) { return THIS.ref().indexOfValue(value); }
+	virtual inline int32_t keyAt(int index) const throw(const char*) { return THIS.ref().keyAt(index); }
+	virtual inline Type& put(int32_t key, const Type& value) throw(const char*) { return THIS.ref().put(key, value); }
+	virtual inline void remove(int32_t key) throw(const char*) { THIS.ref().remove(key); }
+	virtual inline void removeAt(int index) throw(const char*) { THIS.ref().removeAt(index); }
+	virtual inline void removeAtRange(int index, int size) throw(const char*) { THIS.ref().removeAtRange(index, size); }
+	virtual inline void setValueAt(int index, const Type& value) throw(const char*) { THIS.ref().setValueAt(index, value); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
+	virtual inline const Type& valueAt(int index) const throw(const char*) { return THIS.ref().valueAt(index); }
 };
 
 #endif //JAPPSY_USPARSEARRAY_H

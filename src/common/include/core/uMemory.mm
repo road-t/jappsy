@@ -725,7 +725,7 @@ struct MemLogElement {
 static volatile struct MemLogElement* memLogElements = 0;
 static volatile int32_t memLogElementsCount = 0;
 #endif
-static volatile bool memLockTrigger = false;
+static volatile jlock memLockTrigger = false;
 
 #define memLock() AtomicFastLock(&memLockTrigger)
 #define memUnlock() AtomicUnlock(&memLockTrigger)

@@ -20,6 +20,7 @@
 #include <GLES2/gl2ext.h>
 
 #include <malloc.h>
+#include <jappsy.h>
 
 static uint64_t getNativeHeapSize() {
 	struct mallinfo info = mallinfo();
@@ -37,7 +38,7 @@ static uint64_t getNativeHeapFreeSize() {
 }
 
 JNIEXPORT void JNICALL
-Java_com_jappsy_JappsyEngine_malinfo(JNIEnv *env, jclass type) {
+Java_com_jappsy_JappsyEngine_mallinfo(JNIEnv *env, jclass type) {
 	LOG("Memory:: Size: %lld, Alloc: %lld, Free %lld", (long long int)getNativeHeapSize(), (long long int)getNativeHeapAllocatedSize(), (long long int)getNativeHeapFreeSize());
 }
 
@@ -46,7 +47,7 @@ Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type) {
 	static uint16_t x = 0x0001;
 	jint result = (jint)*((uint8_t*)&x);
 
-	//jappsyInit();
+	jappsyInit();
 
 	if (result == 0) {
 		__android_log_print(ANDROID_LOG_ERROR, "JNI", "Unsupported Platform!");
@@ -60,7 +61,7 @@ Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type) {
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_free(JNIEnv *env, jclass type) {
-	//jappsyQuit();
+	jappsyQuit();
 
 	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "Stop");
 }

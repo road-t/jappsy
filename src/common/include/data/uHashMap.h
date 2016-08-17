@@ -80,7 +80,7 @@ protected:
 	
 public:
 	
-	inline RefHashMap() { this->TYPE = TypeHashMap; }
+	inline RefHashMap() { THIS.TYPE = TypeHashMap; }
 	
 	inline ~RefHashMap() {
 		clear();
@@ -158,7 +158,7 @@ public:
 	
 	
 	virtual inline const Set<K>& keySet() const throw(const char*) {
-		m_tempSet->clear();
+		m_tempSet.ref().clear();
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
@@ -168,9 +168,9 @@ public:
 							Map<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								Set<K> m2set = m2->keySet();
-								Iterator<K> m2it = m2set->iterator();
-								while (m2it->hasNext()) {
-									m_tempSet->push(m2it->next());
+								Iterator<K> m2it = m2set.iterator();
+								while (m2it.hasNext()) {
+									m_tempSet.ref().push(m2it.next());
 								}
 							}
 						}
@@ -217,7 +217,7 @@ public:
 	}
 	
 	virtual inline const Collection<V>& values() const throw(const char*) {
-		m_tempValues->clear();
+		m_tempValues.ref().clear();
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
@@ -227,9 +227,9 @@ public:
 							Map<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								Collection<V> m2col = m2->values();
-								Iterator<V> m2it = m2col->iterator();
-								while (m2it->hasNext()) {
-									m_tempValues->push(m2it->next());
+								Iterator<V> m2it = m2col.iterator();
+								while (m2it.hasNext()) {
+									m_tempValues.ref().push(m2it.next());
 								}
 							}
 						}
@@ -244,38 +244,25 @@ public:
 template <typename K, typename V>
 class HashMap : public Map<K,V> {
 public:
-	RefClass(HashMap, HashMap<K,V>)
+	RefTemplate2(HashMap, HashMap, RefHashMap)
 	
-	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
-	virtual inline bool containsKey(const K& key) const throw(const char*) { CHECKTHIS; return THIS->containsKey(key); }
-	virtual inline bool containsValue(const V& value) const throw(const char*) { CHECKTHIS; return THIS->containsValue(value); }
-	// entrySet
-	virtual inline const V& get(const K& key) const throw(const char*) { CHECKTHIS; return THIS->get(key); }
-	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { CHECKTHIS; return THIS->opt(key, defaultValue); }
-	virtual inline bool isEmpty() const throw(const char*) { CHECKTHIS; return THIS->isEmpty(); }
-	virtual inline const Set<K>& keySet() const throw(const char*) { CHECKTHIS; return THIS->keySet(); }
-	virtual inline V& put(const K& key, const V& value) throw(const char*) { CHECKTHIS; return THIS->put(key, value); }
-	// putAll
-	virtual inline void remove(const K& key) throw(const char*) { CHECKTHIS; THIS->remove(key); }
-	virtual inline int32_t size() const throw(const char*) { CHECKTHIS; return THIS->size(); }
-	virtual inline const Collection<V>& values() const throw(const char*) { CHECKTHIS; return THIS->values(); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		HashMap<Object, Object> map = new HashMap<Object, Object>();
-		map.clear();
-		map.containsKey(null);
-		map.containsValue(null);
-		map.put(null, null);
-		map.get(null);
-		map.isEmpty();
-		map.keySet();
-		map.put(null, null);
-		map.remove(null);
-		map.size();
-		map.values();
+	inline HashMap() {
+		THIS.initialize();
 	}
-#endif
+	
+	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
+	virtual inline bool containsKey(const K& key) const throw(const char*) { return THIS.ref().containsKey(key); }
+	virtual inline bool containsValue(const V& value) const throw(const char*) { return THIS.ref().containsValue(value); }
+	// entrySet
+	virtual inline const V& get(const K& key) const throw(const char*) { return THIS.ref().get(key); }
+	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
+	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
+	virtual inline const Set<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
+	virtual inline V& put(const K& key, const V& value) throw(const char*) { return THIS.ref().put(key, value); }
+	// putAll
+	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
+	virtual inline const Collection<V>& values() const throw(const char*) { return THIS.ref().values(); }
 };
 
 #endif //JAPPSY_UHASHMAP_H

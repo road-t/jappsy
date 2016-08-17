@@ -17,26 +17,26 @@
 #include "uGLEngine.h"
 
 void GLEngine::onRender() {
-	this->context->frame->loop();
+	THIS.context->frame->loop();
 }
 
 void GLEngine::onUpdate(int width, int height) {
-	this->context->frame->width = width;
-	this->context->frame->height = height;
+	THIS.context->frame->width = width;
+	THIS.context->frame->height = height;
 }
 
 void GLEngine::onTouch(MotionEvent* event) {
 	switch (event->actionEvent) {
 		case MotionEvent::ACTION_DOWN:
-			this->context->touchScreen->onTouchStart(event);
+			THIS.context->touchScreen.ref().onTouchStart(event);
 			break;
 			
 		case MotionEvent::ACTION_MOVE:
-			this->context->touchScreen->onTouchMove(event);
+			THIS.context->touchScreen.ref().onTouchMove(event);
 			break;
 			
 		case MotionEvent::ACTION_UP:
-			this->context->touchScreen->onTouchEnd(event);
+			THIS.context->touchScreen.ref().onTouchEnd(event);
 			break;
 		
 		default:;

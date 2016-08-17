@@ -305,36 +305,28 @@ public:
 template <typename Type>
 class Stack : public Object {
 public:
-	RefClass(Stack, Stack<Type>)
+	RefTemplate(Stack, Stack, RefStack)
+
+	inline Stack() {
+		THIS.initialize();
+	}
 	
 	inline Stack(uint32_t initialCapacity) throw(const char*) {
+		THIS.initialize();
 		RefStack<Type>* o = new RefStack<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
 	
-	virtual inline bool empty() const { CHECKTHIS; return THIS->empty(); }
-	virtual inline const Type& peek() const { CHECKTHIS; return THIS->peek(); }
-	virtual inline Type pop() { CHECKTHIS; return THIS->pop(); }
-	virtual inline Type shift() { CHECKTHIS; return THIS->shift(); }
-	virtual inline Type& push(const Type& object) { CHECKTHIS; return THIS->push(object); }
-	virtual inline Type& unshift(const Type& object) { CHECKTHIS; return THIS->unshift(object); }
-	virtual inline int32_t search(const Type& value) const { CHECKTHIS; return THIS->search(value); }
-	virtual inline int32_t size() const { CHECKTHIS; return THIS->size(); }
-	virtual inline void clear() throw(const char*) { CHECKTHIS; THIS->clear(); }
-	
-#ifdef DEBUG
-	inline static void _test() {
-		Stack<Object> test = new Stack<Object>();
-		test.empty();
-		test.push(null);
-		test.peek();
-		test.pop();
-		test.push(null);
-		test.search(null);
-		test.clear();
-	}
-#endif
+	virtual inline bool empty() const { return THIS.ref().empty(); }
+	virtual inline const Type& peek() const { return THIS.ref().peek(); }
+	virtual inline Type pop() { return THIS.ref().pop(); }
+	virtual inline Type shift() { return THIS.ref().shift(); }
+	virtual inline Type& push(const Type& object) { return THIS.ref().push(object); }
+	virtual inline Type& unshift(const Type& object) { return THIS.ref().unshift(object); }
+	virtual inline int32_t search(const Type& value) const { return THIS.ref().search(value); }
+	virtual inline int32_t size() const { return THIS.ref().size(); }
+	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
 };
 
 #endif //JAPPSY_USTACK_H

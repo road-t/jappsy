@@ -232,22 +232,22 @@ extern "C" {
 	}
 	
 	Vec3& Vec3::transform(const Mat4& m) {
-		Vec3Transform(this->v, this->v, m.v);
+		Vec3Transform(THIS.v, THIS.v, m.v);
 		return *this;
 	}
 	
 	Vec3& Vec3::transform(const Vec3& v, const Mat4& m) {
-		Vec3Transform(this->v, v.v, m.v);
+		Vec3Transform(THIS.v, v.v, m.v);
 		return *this;
 	}
 	
 	Vec3& Vec3::transformNormal(const Mat4& m) {
-		Vec3TransformNormal(this->v, this->v, m.v);
+		Vec3TransformNormal(THIS.v, THIS.v, m.v);
 		return *this;
 	}
 	
 	Vec3& Vec3::transformNormal(const Vec3& v, const Mat4& m) {
-		Vec3TransformNormal(this->v, v.v, m.v);
+		Vec3TransformNormal(THIS.v, v.v, m.v);
 		return *this;
 	}
 	

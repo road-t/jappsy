@@ -80,35 +80,36 @@ public:
 	}
 	
 	inline AtomicReference() { }
-	inline AtomicReference(const void* object) throw(const char*) { this->setRef(newRef()); }
-	inline AtomicReference(const Type& initialValue) throw(const char*) { this->setRef(newRef()); THIS->set(initialValue);	}
+	inline AtomicReference(const void* object) throw(const char*) { THIS.setRef(newRef()); }
+	inline AtomicReference(const Type& initialValue) throw(const char*) { THIS.setRef(newRef()); THIS.ref().set(initialValue);	}
 	inline AtomicReference(const AtomicReference<Type>* object) throw(const char*) {
 		if (object != NULL) {
 			if (object->_object == NULL) {
 				try {
-					this->setRef(object->newRef());
+					THIS.setRef(object->newRef());
 				} catch (...) {
 					delete object;
 					throw;
 				}
 			} else {
-				this->setRef((void*)(object->_object));
+				THIS.setRef((void*)(object->_object));
 			}
 			delete object;
 		}
 	}
 	virtual inline AtomicReference<Type>& operator =(const AtomicReference<Type>& object) {
-		this->setRef((void*)(object._object));
+		THIS.setRef((void*)(object._object));
 		return *this;
 	}
-	virtual inline RefAtomic<Type>* operator->() const {
-		return (RefAtomic<Type>*)(this->_object);
+	virtual inline RefAtomic<Type>& ref() const throw(const char*) {
+		if (_object == NULL) throw eInvalidPointer;
+		return *((RefAtomic<Type>*)(THIS._object));
 	}
 	
-	inline Type get() throw(const char*) { CHECKTHIS; return THIS->get(); }
-	inline void set(const Type& newValue) throw(const char*) { CHECKTHIS; THIS->set(newValue); }
-	inline Type getAndSet(const Type& newValue) throw(const char*) { CHECKTHIS; return THIS->getAndSet(newValue); }
-	inline bool compareAndSet(const Type& compareValue, const Type& newValue) throw(const char*) { CHECKTHIS; return THIS->compareAndSet(compareValue, newValue); }
+	inline Type get() throw(const char*) {  return THIS.ref().get(); }
+	inline void set(const Type& newValue) throw(const char*) {  THIS.ref().set(newValue); }
+	inline Type getAndSet(const Type& newValue) throw(const char*) {  return THIS.ref().getAndSet(newValue); }
+	inline bool compareAndSet(const Type& compareValue, const Type& newValue) throw(const char*) {  return THIS.ref().compareAndSet(compareValue, newValue); }
 };
 
 class AtomicObject : public Object {
@@ -119,35 +120,35 @@ public:
 		return o;
 	}
 	inline AtomicObject() { }
-	inline AtomicObject(const void* object) throw(const char*) { this->setRef(newRef()); }
-	inline AtomicObject(const Object& initialValue) throw(const char*) { this->setRef(newRef()); THIS->set(initialValue); }
+	inline AtomicObject(const void* object) throw(const char*) { THIS.setRef(newRef()); }
+	inline AtomicObject(const Object& initialValue) throw(const char*) { THIS.setRef(newRef()); THIS.ref().set(initialValue); }
 	inline AtomicObject(const AtomicObject* object) throw(const char*) {
 		if (object != NULL) {
 			if (object->_object == NULL) {
 				try {
-					this->setRef(object->newRef());
+					THIS.setRef(object->newRef());
 				} catch (...) {
 					delete object;
 					throw;
 				}
 			} else {
-				this->setRef((void*)(object->_object));
+				THIS.setRef((void*)(object->_object));
 			}
 			delete object;
 		}
 	}
 	virtual inline AtomicObject& operator =(const AtomicObject& object) {
-		this->setRef((void*)(object._object));
+		THIS.setRef((void*)(object._object));
 		return *this;
 	}
-	virtual inline RefAtomic<Object>* operator->() const {
-		return (RefAtomic<Object>*)(this->_object);
+	virtual inline RefAtomic<Object>& ref() const throw(const char*) {
+		return *((RefAtomic<Object>*)(THIS._object));
 	}
 	
-	inline Object get() throw(const char*) { CHECKTHIS; return THIS->get(); }
-	inline void set(const Object& newValue) throw(const char*) { CHECKTHIS; THIS->set(newValue); }
-	inline Object getAndSet(const Object& newValue) throw(const char*) { CHECKTHIS; return THIS->getAndSet(newValue); }
-	inline bool compareAndSet(const Object& compareValue, const Object& newValue) throw(const char*) { CHECKTHIS; return THIS->compareAndSet(compareValue, newValue); }
+	inline Object get() throw(const char*) { return THIS.ref().get(); }
+	inline void set(const Object& newValue) throw(const char*) { THIS.ref().set(newValue); }
+	inline Object getAndSet(const Object& newValue) throw(const char*) { return THIS.ref().getAndSet(newValue); }
+	inline bool compareAndSet(const Object& compareValue, const Object& newValue) throw(const char*) { return THIS.ref().compareAndSet(compareValue, newValue); }
 };
 
 typedef AtomicReference<bool>       AtomicBoolean;

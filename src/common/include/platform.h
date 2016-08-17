@@ -221,6 +221,7 @@
     #include <string.h>
     #include <stdlib.h>
     #include <stdio.h>
+	#include <stddef.h>
     #include <time.h>
 	#include <pthread.h>
 
@@ -241,8 +242,16 @@
         #define MAX_PATH PATH_MAX
 	#endif
 
+	#ifndef NULL
+		#define NULL 0
+	#endif
+
 	#ifndef nullptr
 		#define nullptr NULL
+	#endif
+
+	#ifndef null
+		#define null ((void*)0)
 	#endif
 #endif
 
@@ -269,3 +278,4 @@
     #endif
 #endif
 
+#define THIS (*this)

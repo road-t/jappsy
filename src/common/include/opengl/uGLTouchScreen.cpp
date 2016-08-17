@@ -21,7 +21,7 @@
 #include <math.h>
 
 RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback) {
-	this->context = context;
+	THIS.context = context;
 	onTouch = callback;
 	update();
 	clickList = NULL;
@@ -77,18 +77,18 @@ void RefGLTouchScreen::clickEvent(const wchar_t* name, float x, float y, float w
 }
 
 void onTouchTimeout(const Object& userData) {
-	(*((GLTouchScreen*)&(userData)))->onTimeout();
+	(*((GLTouchScreen*)&(userData))).ref().onTimeout();
 }
 
 void RefGLTouchScreen::setTimeout(int delay) {
 	if (touchTimeout == NULL) {
-		touchTimeout = handler->postDelayed(onTouchTimeout, delay, this);
+		touchTimeout = handler.ref().postDelayed(onTouchTimeout, delay, this);
 	}
 }
 
 void RefGLTouchScreen::clearTimeout() {
 	if (touchTimeout != NULL) {
-		handler->remove(touchTimeout);
+		handler.ref().removeRunner(touchTimeout);
 		touchTimeout = NULL;
 	}
 }
@@ -215,7 +215,7 @@ void RefGLTouchScreen::analyze(float x, float y) {
 	recordTrack(x, y, true);
 	
 	if (touchTimeout != NULL) {
-		handler->removeCallbacks(onTouchTimeout);
+		handler.ref().removeCallbacks(onTouchTimeout);
 		clearTimeout();
 	}
 	if (touchCancel) {

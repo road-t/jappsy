@@ -18,8 +18,8 @@
 #include <core/uMemory.h>
 
 GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*) {
-	this->context = context;
-	this->engine = NULL;
+	THIS.context = context;
+	THIS.engine = NULL;
 	
 	glGenFramebuffers(1, &frameBuffer);
 	if (glGetError() == GL_OUT_OF_MEMORY)
@@ -161,11 +161,11 @@ void GLContext::render() {
 
 void GLContext::touch(MotionEvent* event) {
 	if (engine)
-		this->engine->onTouch(event);
+		THIS.engine->onTouch(event);
 }
 
 void GLContext::initialize(GLEngine* engine) {
-	this->engine = engine;
+	THIS.engine = engine;
 	engine->onUpdate(width, height);
 	engine->onRender();
 }

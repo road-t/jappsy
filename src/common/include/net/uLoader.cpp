@@ -20,18 +20,19 @@
 #include <core/uSystem.h>
 
 RefLoader::RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
-	this->onfile = onfile;
-	this->onstatus = onstatus;
-	this->onready = onready;
-	this->onerror = onerror;
-	this->userData = userData;
+	initialize();
+	THIS.onfile = onfile;
+	THIS.onstatus = onstatus;
+	THIS.onready = onready;
+	THIS.onerror = onerror;
+	THIS.userData = userData;
 }
 
 void RefLoader::release() {
-	this->wait();
+	THIS.wait();
 	AtomicSet(&shutdown, 1);
 	handler.release();
-	this->notifyAll();
+	THIS.notifyAll();
 }
 
 RefLoader::~RefLoader() {
@@ -40,21 +41,21 @@ RefLoader::~RefLoader() {
 }
 
 void RefLoader::checkUpdate(int time) {
-	this->wait();
+	THIS.wait();
 	if (AtomicGet(&shutdown) == 0) {
 		if (AtomicLockTry(&updating)) {
-			handler->postDelayed(onUpdate, time, this);
+			handler.postDelayed(onUpdate, time, this);
 		}
 	}
-	this->notifyAll();
+	THIS.notifyAll();
 }
 
 void RefLoader::onUpdate(const Object& data) {
-	(*(Loader*)(&data))->update();
+	(*(Loader*)(&data)).ref().update();
 }
 
 void RefLoader::update() {
-	this->wait();
+	THIS.wait();
 	AtomicUnlock(&updating);
 
 	if (AtomicGet(&shutdown) == 0) {
@@ -72,7 +73,7 @@ void RefLoader::update() {
 		}
 		while (count > 0) {
 			File* info = &(lastDownload());
-			String ext = (*info)->ext;
+			String ext = (*info).ref().ext;
 			
 			AtomicSet(&(status.update), true);
 			AtomicIncrement(&(status.left));
@@ -115,7 +116,7 @@ void RefLoader::update() {
 			}
 		}
 	}
-	this->notifyAll();
+	THIS.notifyAll();
 }
 
 void RefLoader::run() {
@@ -173,3 +174,20 @@ void RefLoader::load(const char* json) throw(const char*) {
 	
 	run();
 }
+
+void RefLoader::createImageLoader(const File& info) {
+	
+}
+
+void RefLoader::createSoundLoader(const File& info) {
+	
+}
+
+void RefLoader::createJsonLoader(const File& info) {
+	
+}
+
+void RefLoader::createDataLoader(const File& info) {
+	
+}
+

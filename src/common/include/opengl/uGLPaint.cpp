@@ -16,13 +16,14 @@
 
 #include "uGLPaint.h"
 #include <math.h>
+#include <opengl/uGLTypeface.h>
 
 static GLfloat defaultColor[4] = { 0, 0, 0, 1 };
 
 GLPaint::GLPaint() {
 	m_scale = 1.0;
 	m_antialias = false;
-	m_typeface = GLTypeface::DEFAULT;
+	m_typeface = GLTypeface();
 	m_alignX = GLAlignX::LEFT;
 	m_alignY = GLAlignY::BASELINE;
 	m_size = 16.0;

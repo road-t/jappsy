@@ -29,6 +29,17 @@ void jappsyInit();
 // Deinitialize all core static variables
 void jappsyQuit();
 
+#if defined(__JNI__)
+	typedef void* (*ThreadMessageCallback)(void*);
+
+	struct ThreadMessage {
+		ThreadMessageCallback callback;
+		void* data;
+	};
+
+	void postMainThreadMessage(struct ThreadMessage* msg);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

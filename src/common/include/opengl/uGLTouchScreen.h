@@ -105,13 +105,15 @@ public:
 
 class GLTouchScreen : public Object {
 public:
-	RefClass(GLTouchScreen, GLTouchScreen);
+	RefClass(GLTouchScreen, RefGLTouchScreen);
 	
 	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback) {
 		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback);
 		if (o == NULL) throw eOutOfMemory;
-		this->setRef(o);
+		THIS.setRef(o);
 	}
+	
+	inline void release() throw(const char*) { THIS.ref().release(); }
 };
 
 #endif //JAPPSY_UGLTOUCHSCREEN_H

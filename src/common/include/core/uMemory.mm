@@ -223,7 +223,7 @@ void mmerror() {
 }
 
 #define MM_STACK_MAX	20
-volatile int32_t mmLock = 0;
+volatile bool mmLock = false;
 struct MM_STACK_ITEM* mmVirtual[MM_STACK_MAX];
 struct MM_STACK_ITEM* mmUnused;
 
@@ -660,7 +660,10 @@ void mmfree(void* mem) {
         }
 #elif MM_VIRTUAL != 0
 		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
-			free(mem);
+			try {
+				free(mem);
+			} catch (...) {
+			}
 			return;
 		}
         uint32_t* ptr = (uint32_t*)mem; ptr-=2;
@@ -680,6 +683,9 @@ void mmfree(void* mem) {
             sleep(0);
 #endif
         }
+#ifdef DEBUG
+		atomic_bzero(ptr, prevSize);
+#endif
         if (prevSize < 2048) {
             free(ptr);
         } else {
@@ -706,34 +712,38 @@ static volatile int32_t memNewCount = 0;
 static volatile int32_t memSize = 0;
 #endif
 
-struct tMemElement {
+struct MemLogElement {
     char type[60];
     char var[60];
     void* ptr;
-    uint32_t size;
+    int32_t size;
     char loc[MAX_PATH];
     char caller[3][MAX_PATH];
 };
 
 #if MEMORY_LOG == 1
-static struct tMemElement* memElements = 0;
-static volatile uint32_t memElementsCount = 0;
+static volatile struct MemLogElement* memLogElements = 0;
+static volatile int32_t memLogElementsCount = 0;
 #endif
-static volatile int32_t memLockTrigger = 0;
+static volatile bool memLockTrigger = false;
 
 #define memLock() AtomicFastLock(&memLockTrigger)
 #define memUnlock() AtomicUnlock(&memLockTrigger)
 
 #if MEMORY_LOG == 1
-#define memMaxCallStackSize		256
-static int32_t memCallStackCount = -1;
-static char memCallStack[memMaxCallStackSize][MAX_PATH];
+#define memLogMaxCallStackSize		256
+static volatile int32_t memLogCallStackCount = -1;
+static volatile char memLogCallStack[memLogMaxCallStackSize][MAX_PATH];
 #endif
 
 void memLogCallFunction(const char* location) {
 #if MEMORY_LOG == 1
     memLock();
-    strcpy(memCallStack[++memCallStackCount], location);
+	int32_t index;
+	if ((index = AtomicIncrement(&memLogCallStackCount)) < memLogMaxCallStackSize) {
+		int32_t len = strlen(location);
+		atomic_memwrite((char*)memLogCallStack[index], location, len + 1);
+	}
     memUnlock();
 #endif
 }
@@ -741,7 +751,7 @@ void memLogCallFunction(const char* location) {
 void memLogRetFunction() {
 #if MEMORY_LOG == 1
     memLock();
-    memCallStackCount--;
+	AtomicDecrement(&memLogCallStackCount);
     memUnlock();
 #endif
 }
@@ -749,44 +759,54 @@ void memLogRetFunction() {
 void memAdd(const char* location, const char* type, const char* var, const void* ptr, uint32_t size) {
 #if MEMORY_LOG == 1
     memLock();
-    struct tMemElement* el = 0;
-    if (memElements == 0) {
-        memElements = (struct tMemElement*)mmalloc(sizeof(struct tMemElement)*1024);
-        memset(memElements,0,sizeof(struct tMemElement)*1024);
-        memElementsCount = 1024;
-        el = memElements;
+    struct MemLogElement* el = 0;
+	struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+    if (els == 0) {
+        els = (struct MemLogElement*)mmalloc(sizeof(struct MemLogElement)*1024);
+		AtomicSetPtr(&memLogElements, els);
+		atomic_bzero((void*)els, sizeof(struct MemLogElement)*1024);
+        AtomicSet(&memLogElementsCount, 1024);
+        el = els;
     } else {
-        uint32_t i = 0;
-        for (; i < memElementsCount; i++) {
-            if (memElements[i].ptr == 0) {
-                el = &(memElements[i]);
+        int32_t i = 0;
+		int32_t count = AtomicGet(&memLogElementsCount);
+        for (; i < count; i++) {
+            if (AtomicGetPtr(&(els[i].ptr)) == NULL) {
+                el = &(els[i]);
                 break;
             }
         }
     }
     if (el == 0) {
-        struct tMemElement* newElements = (struct tMemElement*)mmalloc((uint32_t)sizeof(struct tMemElement)*(memElementsCount+1024));
-        memset(newElements,0,sizeof(struct tMemElement)*(memElementsCount+1024));
-        memcpy(newElements,memElements,sizeof(struct tMemElement)*memElementsCount);
-        mmfree(memElements);
-        memElements = newElements;
-        el = &(memElements[memElementsCount]);
-        memElementsCount += 1024;
+		int32_t count = AtomicGet(&memLogElementsCount);
+        struct MemLogElement* newElements = (struct MemLogElement*)mmalloc((uint32_t)sizeof(struct MemLogElement)*(count+1024));
+		atomic_bzero((void*)newElements, sizeof(struct MemLogElement)*(count+1024));
+		atomic_memcpy((void*)newElements, (void*)els, sizeof(struct MemLogElement)*(count));
+		mmfree(els);
+		els = newElements;
+		AtomicSetPtr(&memLogElements, els);
+		AtomicAdd(&memLogElementsCount, 1024);
+		el = &(els[count]);
     }
-    memset(el,0,sizeof(struct tMemElement));
-    strcpy(el->loc, location);
-    if (memCallStackCount >= 0) {
-        int cnt = memCallStackCount + 1;
+	bzero(el, sizeof(struct MemLogElement));
+	strcpy(el->loc, location);
+	
+	int cnt = AtomicGet(&memLogCallStackCount);
+    if (cnt >= 0) {
+		__sync_synchronize();
+		
+		cnt++;
         if (cnt > 3) cnt = 3;
         int i = 0;
         for (; i < cnt; i++) {
-            strcpy(el->caller[cnt-i-1], memCallStack[memCallStackCount-i]);
+            strcpy(el->caller[cnt-i-1], (char*)memLogCallStack[memLogCallStackCount-i]);
         }
     }
-    strcpy(el->type, type);
+
+	strcpy(el->type, type);
     strcpy(el->var, var);
-    el->ptr = (void*)ptr;
-    el->size = size;
+    AtomicSetPtr(&(el->ptr), (void*)ptr);
+    AtomicSet(&(el->size), size);
     memUnlock();
     (void)AtomicAdd(&memSize, size);
 #endif
@@ -800,14 +820,17 @@ void memDel(const char* var, const void* ptr) {
         return;
     }
 
-    struct tMemElement* el = 0;
+    struct MemLogElement* el = 0;
     uint32_t freeCount = 0;
-    if (memElements != 0) {
-        uint32_t i = 0;
-        for (; i < memElementsCount; i++) {
-            if (memElements[i].ptr != 0) {
-                if (memElements[i].ptr == ptr) {
-                    el = &(memElements[i]);
+	struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+	int32_t count = AtomicGet(&memLogElementsCount);
+    if (els != 0) {
+        int32_t i = 0;
+        for (; i < count; i++) {
+			void* elptr = AtomicGetPtr(&(els[i].ptr));
+            if (elptr != 0) {
+                if (elptr == ptr) {
+                    el = &(els[i]);
                 }
             } else {
                 freeCount++;
@@ -815,25 +838,18 @@ void memDel(const char* var, const void* ptr) {
         }
         if (el != 0) freeCount++;
     }
+	if ((freeCount > 0) && (freeCount == count)) {
+		AtomicSet(&memLogElementsCount, 0);
+		mmfree(els);
+		AtomicSetPtr(&memLogElements, NULL);
+	}
     if (el == 0) {
-        if ((freeCount > 0) && (freeCount == memElementsCount)) {
-            memElementsCount = 0;
-            mmfree(memElements);
-            memElements = 0;
-        }
-
         memUnlock();
         return;
-    } else {
-        (void)AtomicSub(&memSize, el->size);
-        memset(el,0,sizeof(struct tMemElement));
-
-        if ((freeCount > 0) && (freeCount == memElementsCount)) {
-            memElementsCount = 0;
-            mmfree(memElements);
-            memElements = 0;
-        }
     }
+	
+    (void)AtomicSub(&memSize, el->size);
+    atomic_bzero(el, sizeof(struct MemLogElement));
     memUnlock();
 #endif
 }
@@ -841,17 +857,21 @@ void memDel(const char* var, const void* ptr) {
 void memLogSort() {
 #if MEMORY_LOG == 1
     memLock();
-    if (memElements != 0) {
-        uint32_t i = 0; uint32_t j = 0;
-        while (i < memElementsCount) {
-            if (memElements[i].ptr != 0) {
+	struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+	int32_t count = AtomicGet(&memLogElementsCount);
+    if (els != 0) {
+        int32_t i = 0; int32_t j = 0;
+        while (i < count) {
+			void* elptri = AtomicGetPtr(&(els[i].ptr));
+            if (elptri != 0) {
                 i++; j = i+1;
-            } else if (j < memElementsCount) {
-                if (memElements[j].ptr == 0) {
+            } else if (j < count) {
+				void* elptrj = AtomicGetPtr(&(els[i].ptr));
+                if (elptrj == 0) {
                     j++;
                 } else {
-                    memcpy(&(memElements[i]),&(memElements[j]),sizeof(struct tMemElement));
-                    memset(&(memElements[j]),0,sizeof(struct tMemElement));
+					atomic_memcpy(&(els[i]), &(els[j]), sizeof(struct MemLogElement));
+					atomic_bzero(&(els[j]), sizeof(struct MemLogElement));
                     i++; j++;
                 }
             } else {
@@ -991,8 +1011,9 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
     printf("%s", buf);
 #endif
 
+	__sync_synchronize();
     for (i = 0; i < memCount; i++) {
-        struct tMemElement* item = &(memElements[i]);
+        struct MemLogElement* item = (struct MemLogElement*)&(memLogElements[i]);
         if (item != 0) {
             int j = 0;
             while ((j < 3) && (item->caller[j][0] != 0)) {
@@ -1197,12 +1218,12 @@ void mmInit() {
         (void)AtomicSet(&memNewCount, 0);
 #if MEMORY_LOG == 1
         (void)AtomicSet(&memSize, 0);
-        (void)AtomicSetPtr((void**)&memElements, NULL);
-        (void)AtomicSet((int32_t*)&memElementsCount, 0);
+        (void)AtomicSetPtr(&memLogElements, NULL);
+        (void)AtomicSet(&memLogElementsCount, 0);
 #endif
         (void)AtomicSet(&memLockTrigger, 0);
 #if MEMORY_LOG == 1
-        (void)AtomicSet(&memCallStackCount, -1);
+        (void)AtomicSet(&memLogCallStackCount, -1);
 #endif
     }
 }

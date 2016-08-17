@@ -31,7 +31,7 @@ class Loader;
 class RefLoader : public RefObject {
 public:
 	struct Status {
-		bool update = 0;
+		bool update = false;
 		int count = 0;
 		int total = 0;
 		int left = 0;
@@ -64,12 +64,12 @@ private:
 public:
 	class RefInfo : public RefObject {
 	public:
-		Loader* m_loader;
-		String m_file;
-		String m_ext;
-		String m_key;
-		String m_group;
-		String m_type;
+		Loader* loader;
+		String file;
+		String ext;
+		String key;
+		String group;
+		String type;
 		
 		void onLoad(const Stream& stream);
 		void onError(const String& error);
@@ -86,7 +86,7 @@ public:
 	// loader callback types
 	typedef void (*onFileCallback)(const Info& info, const Stream& stream, const Object& userData);
 	typedef void (*onStatusCallback)(const Status& status, const Object& userData);
-	typedef void (*onReadyCallback)(const JSONObject& result, const Object& userData);
+	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object& userData);
 	typedef void (*onErrorCallback)(const String& error, const Object& userData);
 
 private:
@@ -98,6 +98,7 @@ private:
 	struct Status status;
 	volatile int32_t shutdown = 0;
 	volatile bool updating = false;
+	String lastError;
 	
 	String cacheid;
 
@@ -108,7 +109,7 @@ private:
 	
 	Object userData;
 	
-	inline bool hasDownloads() { return list.size(); }
+	inline int hasDownloads() { return list.size(); }
 	
 	inline File& lastDownload() throw(const char*) {
 		return *(File*)&(list.peek());
@@ -123,6 +124,11 @@ private:
 	static void onUpdate(const Object& data);
 	void update();
 	void run();
+	
+	void createImageLoader(const File& info);
+	void createSoundLoader(const File& info);
+	void createJsonLoader(const File& info);
+	void createDataLoader(const File& info);
 	
 private:
 	// json parser callbacks and data

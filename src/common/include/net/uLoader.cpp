@@ -60,8 +60,60 @@ void RefLoader::update() {
 	if (AtomicGet(&shutdown) == 0) {
 		cacheid = currentTimeMillis();
 		
-		
-		checkUpdate(15);
+		int count = hasDownloads();
+		if (AtomicGet(&(status.error)) > 0) count = 0;
+		if (count > loadSpeed) count = loadSpeed;
+		if (count == 0) count = -1;
+		if (AtomicGet(&(status.left)) > loadSpeed)
+			count = 0;
+		else if (AtomicGet(&(status.update))) {
+			if (onstatus != NULL) onstatus(status, userData);
+			AtomicSet(&(status.update), false);
+		}
+		while (count > 0) {
+			File* info = &(lastDownload());
+			String ext = (*info)->ext;
+			
+			AtomicSet(&(status.update), true);
+			AtomicIncrement(&(status.left));
+			if ((ext.compareToIgnoreCase(L".png") == 0) ||
+				(ext.compareToIgnoreCase(L".jpg") == 0) ||
+				(ext.compareToIgnoreCase(L".jpeg") == 0)) {
+				createImageLoader(*info);
+			} else if (
+				(ext.compareToIgnoreCase(L".mp3") == 0) ||
+				(ext.compareToIgnoreCase(L".ogg") == 0)
+			) {
+				createSoundLoader(*info);
+			} else if (
+				(ext.compareToIgnoreCase(L".jimg") == 0) ||
+				(ext.compareToIgnoreCase(L".jsh") == 0) ||
+				(ext.compareToIgnoreCase(L".json") == 0)) {
+				createDataLoader(*info);
+			} else if (ext.compareToIgnoreCase(L".json") == 0) {
+				createJsonLoader(*info);
+			} else {
+				createDataLoader(*info);
+			}
+			doneDownload();
+			count--;
+		}
+		if (AtomicGet(&(status.left)) > 0) {
+			checkUpdate(15);
+		} else if (count == 0) {
+			checkUpdate(15);
+		} else if (AtomicGet(&(status.error)) > 0) {
+			if (onerror != NULL) onerror(lastError, userData);
+		} else {
+			if (onready != NULL) {
+				try {
+					onready(result, userData);
+				} catch (const char* e) {
+					lastError = e;
+					if (onerror != NULL) onerror(lastError, userData);
+				}
+			}
+		}
 	}
 	this->notifyAll();
 }

@@ -58,7 +58,7 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	touchScreen = new GLTouchScreen(this, ontouch);
 	loader = new Loader();
 	
-	//textures = new GLTextures(this);
+	textures = memNew(textures, GLTextures(this));
 	//shaders = new GLShaders(this);
 	//sprites = new GLSprites(this);
 	//scenes = new GLScenes(this);
@@ -139,7 +139,7 @@ GLRender::~GLRender() {
 	//delete scenes;
 	//delete sprites;
 	//delete shaders;
-	//delete textures;
+	memDelete(textures);
 	
 	drawings = NULL;
 	particles = NULL;

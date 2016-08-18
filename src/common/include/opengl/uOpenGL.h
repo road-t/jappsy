@@ -108,10 +108,27 @@ static inline const char* GetGLErrorString(GLenum error) {
 {														\
     GLenum err = glGetError();							\
     while (err != GL_NO_ERROR) {						\
-        NSLog(@"GLError %s set in File:%s Line:%d\n",   \
+        LOG("GLError %s set in File:%s Line:%d",		\
         GetGLErrorString(err), __FILE__, __LINE__);	    \
         err = glGetError();								\
     }													\
+}
+
+#define CheckGLError()									\
+{														\
+	GLenum err = glGetError();							\
+	GLint count = 0;									\
+	bool oom = false;									\
+	while (err != GL_NO_ERROR) {						\
+		if (err == GL_OUT_OF_MEMORY) oom = true;		\
+		LOG("GLError %s set in File:%s Line:%d",		\
+		GetGLErrorString(err), __FILE__, __LINE__);	    \
+		err = glGetError();								\
+	}													\
+	if (count > 0) {									\
+		if (oom) throw eOutOfMemory;					\
+		throw eOpenGL;									\
+	}													\
 }
 
 static inline const char* GetGLFramebufferStatus(GLenum status) {

@@ -27,8 +27,8 @@ class GLEngine;
 #include <opengl/uGLFrame.h>
 #include <opengl/uGLTouchScreen.h>
 #include <opengl/uGLPaint.h>
+#include <opengl/uGLTexture.h>
 
-class GLTextures;
 class GLShaders;
 class GLShader;
 class GLSprites;

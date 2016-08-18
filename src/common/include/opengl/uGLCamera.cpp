@@ -143,9 +143,9 @@ GLCameras::GLCameras(GLRender* context) throw(const char*) {
 }
 
 GLCameras::~GLCameras() {
-	context = NULL;
 	list = null;
 	gui = null;
+	context = NULL;
 }
 
 GLCamera& GLCameras::get(const wchar_t* key) throw(const char*) {

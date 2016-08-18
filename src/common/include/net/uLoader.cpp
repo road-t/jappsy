@@ -18,6 +18,7 @@
 #include <data/uJSON.h>
 #include <net/uURI.h>
 #include <core/uSystem.h>
+#include <net/uHttpClient.h>
 
 RefLoader::RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
 	initialize();
@@ -77,24 +78,44 @@ void RefLoader::update() {
 			
 			AtomicSet(&(status.update), true);
 			AtomicIncrement(&(status.left));
-			if ((ext.compareToIgnoreCase(L".png") == 0) ||
-				(ext.compareToIgnoreCase(L".jpg") == 0) ||
-				(ext.compareToIgnoreCase(L".jpeg") == 0)) {
-				createImageLoader(*info);
+			if ((ext.compareToIgnoreCase(L"png") == 0) ||
+				(ext.compareToIgnoreCase(L"jpg") == 0) ||
+				(ext.compareToIgnoreCase(L"jpeg") == 0)) {
+				// TODO: PNG JPG Loader not needed
+				// Fake OK
+				AtomicIncrement(&(status.count));
+				AtomicDecrement(&(status.left));
+				AtomicSet(&(status.update), true);
 			} else if (
-				(ext.compareToIgnoreCase(L".mp3") == 0) ||
-				(ext.compareToIgnoreCase(L".ogg") == 0)
+				(ext.compareToIgnoreCase(L"mp3") == 0) ||
+				(ext.compareToIgnoreCase(L"ogg") == 0)
 			) {
-				createSoundLoader(*info);
+				// TODO: MP3 OGG Loader
+				// Fake OK
+				AtomicIncrement(&(status.count));
+				AtomicDecrement(&(status.left));
+				AtomicSet(&(status.update), true);
 			} else if (
-				(ext.compareToIgnoreCase(L".jimg") == 0) ||
-				(ext.compareToIgnoreCase(L".jsh") == 0) ||
-				(ext.compareToIgnoreCase(L".json") == 0)) {
-				createDataLoader(*info);
-			} else if (ext.compareToIgnoreCase(L".json") == 0) {
-				createJsonLoader(*info);
+				(ext.compareToIgnoreCase(L"jimg") == 0) ||
+				(ext.compareToIgnoreCase(L"jsh") == 0)) {
+				// Fake OK
+				AtomicIncrement(&(status.count));
+				AtomicDecrement(&(status.left));
+				AtomicSet(&(status.update), true);
+				//Info user = new Info(*this, info->ref());
+				//HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_data, onhttp_error);
+			} else if (
+				(ext.compareToIgnoreCase(L"json") == 0) ||
+				(ext.compareToIgnoreCase(L"vsh") == 0) ||
+				(ext.compareToIgnoreCase(L"fsh") == 0)) {
+				Info user = new Info(*this, info->ref());
+				HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_text, onhttp_error);
 			} else {
-				createDataLoader(*info);
+				// Unknown File Type
+				// Fake OK
+				AtomicIncrement(&(status.count));
+				AtomicDecrement(&(status.left));
+				AtomicSet(&(status.update), true);
 			}
 			doneDownload();
 			count--;
@@ -123,27 +144,27 @@ void RefLoader::run() {
 	checkUpdate(15);
 }
 
-void RefLoader::onroot(struct json_context* ctx, void* target) {
-	ctx->callbacks->onobject.onobject = ongroup;
+void RefLoader::onjson_root(struct json_context* ctx, void* target) {
+	ctx->callbacks->onobject.onobject = onjson_group;
 }
 
-void RefLoader::ongroup(struct json_context* ctx, const char* key, void* target) {
+void RefLoader::onjson_group(struct json_context* ctx, const char* key, void* target) {
 	RefLoader* loader = (RefLoader*)target;
 	loader->group = key;
 	
 	json_clear_callbacks(ctx->callbacks, target);
-	ctx->callbacks->onobject.onobject = onsubgroup;
+	ctx->callbacks->onobject.onobject = onjson_subgroup;
 }
 
-void RefLoader::onsubgroup(struct json_context* ctx, const char* key, void* target) {
+void RefLoader::onjson_subgroup(struct json_context* ctx, const char* key, void* target) {
 	RefLoader* loader = (RefLoader*)target;
 	loader->subgroup = key;
 	
 	json_clear_callbacks(ctx->callbacks, target);
-	ctx->callbacks->onobject.onstring = onsubfile;
+	ctx->callbacks->onobject.onstring = onjson_subfile;
 }
 
-void RefLoader::onsubfile(struct json_context* ctx, const char* key, char* value, void* target) {
+void RefLoader::onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target) {
 	RefLoader* loader = (RefLoader*)target;
 	
 	String path = value;
@@ -164,7 +185,7 @@ void RefLoader::load(const char* json) throw(const char*) {
 	struct json_callbacks callbacks;
 	ctx.callbacks = &callbacks;
 	json_clear_callbacks(&callbacks, this);
-	callbacks.onroot = onroot;
+	callbacks.onroot = onjson_root;
 	if (!json_call(&ctx, json)) {
 #ifdef DEBUG
 		json_debug_error(ctx, json);
@@ -175,19 +196,54 @@ void RefLoader::load(const char* json) throw(const char*) {
 	run();
 }
 
-void RefLoader::createImageLoader(const File& info) {
-	
+RefLoader::RefInfo::RefInfo(const RefLoader& loader, const RefFile& info) {
+	this->loader = new Loader(&loader);
+	this->info = &info;
 }
 
-void RefLoader::createSoundLoader(const File& info) {
-	
+RefLoader::RefInfo::~RefInfo() {
+	delete loader;
 }
 
-void RefLoader::createJsonLoader(const File& info) {
-	
+bool RefLoader::onhttp_text(const String& url, Stream& stream, const Object& userData) {
+	RefInfo* info = (RefInfo*)&(userData.ref());
+	return info->loader->ref().onText(info->info, stream);
 }
 
-void RefLoader::createDataLoader(const File& info) {
+bool RefLoader::onhttp_data(const String& url, Stream& stream, const Object& userData) {
+	RefInfo* info = (RefInfo*)&(userData.ref());
+	return info->loader->ref().onData(info->info, stream);
+}
+
+void RefLoader::onhttp_error(const String& url, const String& error, const Object& userData) {
+	RefInfo* info = (RefInfo*)&(userData.ref());
+	info->loader->ref().onError(info->info, error);
+
+	String err = String::format(L"Unable to load %ls - %ls", (wchar_t*)url, (wchar_t*)error);
+	err.log();
+}
+
+bool RefLoader::onText(const File& info, Stream& stream) {
 	
+	
+	AtomicIncrement(&(status.count));
+	AtomicDecrement(&(status.left));
+	AtomicSet(&(status.update), true);
+	if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	return true;
+}
+
+bool RefLoader::onData(const File& info, Stream& stream) {
+	AtomicIncrement(&(status.count));
+	AtomicDecrement(&(status.left));
+	AtomicSet(&(status.update), true);
+	if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	return true;
+}
+
+void RefLoader::onError(const File& info, const String& error) {
+	AtomicDecrement(&(status.left));
+	AtomicIncrement(&(status.error));
+	lastError = info.ref().file;
 }
 

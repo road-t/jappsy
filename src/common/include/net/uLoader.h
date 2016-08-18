@@ -64,30 +64,39 @@ private:
 public:
 	class RefInfo : public RefObject {
 	public:
-		Loader* loader;
-		String file;
-		String ext;
-		String key;
-		String group;
-		String type;
+		Loader* loader = NULL;
+		File info;
 		
-		void onLoad(const Stream& stream);
-		void onError(const String& error);
-		
+		inline RefInfo() {}
+
+		RefInfo(const RefLoader& loader, const RefFile& info);
 		~RefInfo();
 	};
 	
 	class Info : public Object {
 	public:
 		RefClass(Info, RefInfo);
+
+		inline Info(const RefLoader& loader, const RefFile& info) {
+			RefInfo* o = new RefInfo(loader, info);
+			if (o == NULL) throw eOutOfMemory;
+			THIS.setRef(o);
+		}
 	};
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const Info& info, const Stream& stream, const Object& userData);
+	typedef void (*onFileCallback)(const String& url, const Stream& stream, const Object& userData);
 	typedef void (*onStatusCallback)(const Status& status, const Object& userData);
 	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object& userData);
 	typedef void (*onErrorCallback)(const String& error, const Object& userData);
+
+	onFileCallback onfile = NULL;
+	onStatusCallback onstatus = NULL;
+	onReadyCallback onready = NULL;
+	onErrorCallback onerror = NULL;
+	
+	Object userData;
 
 private:
 	// loader internal data
@@ -101,13 +110,6 @@ private:
 	String lastError;
 	
 	String cacheid;
-
-	onFileCallback onfile = NULL;
-	onStatusCallback onstatus = NULL;
-	onReadyCallback onready = NULL;
-	onErrorCallback onerror = NULL;
-	
-	Object userData;
 	
 	inline int hasDownloads() { return list.size(); }
 	
@@ -125,20 +127,23 @@ private:
 	void update();
 	void run();
 	
-	void createImageLoader(const File& info);
-	void createSoundLoader(const File& info);
-	void createJsonLoader(const File& info);
-	void createDataLoader(const File& info);
+	static bool onhttp_text(const String& url, Stream& stream, const Object& userData);
+	static bool onhttp_data(const String& url, Stream& stream, const Object& userData);
+	static void onhttp_error(const String& url, const String& error, const Object& userData);
+	
+	bool onText(const File& info, Stream& stream);
+	bool onData(const File& info, Stream& stream);
+	void onError(const File& info, const String& error);
 	
 private:
 	// json parser callbacks and data
 	String group;
 	String subgroup;
 	
-	static void onroot(struct json_context* ctx, void* target);
-	static void ongroup(struct json_context* ctx, const char* key, void* target);
-	static void onsubgroup(struct json_context* ctx, const char* key, void* target);
-	static void onsubfile(struct json_context* ctx, const char* key, char* value, void* target);
+	static void onjson_root(struct json_context* ctx, void* target);
+	static void onjson_group(struct json_context* ctx, const char* key, void* target);
+	static void onjson_subgroup(struct json_context* ctx, const char* key, void* target);
+	static void onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target);
 
 public:
 	

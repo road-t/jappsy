@@ -66,6 +66,28 @@
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
 		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
+		C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B11D6540AA00C1D154 /* uGLReader.cpp */; };
+		C35900B41D6540AA00C1D154 /* uGLReader.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900B21D6540AA00C1D154 /* uGLReader.h */; };
+		C35900C91D6542C700C1D154 /* uGLDrawing.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B51D6542C700C1D154 /* uGLDrawing.cpp */; };
+		C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900B61D6542C700C1D154 /* uGLDrawing.h */; };
+		C35900CB1D6542C700C1D154 /* uGLFunc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B71D6542C700C1D154 /* uGLFunc.cpp */; };
+		C35900CC1D6542C700C1D154 /* uGLFunc.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900B81D6542C700C1D154 /* uGLFunc.h */; };
+		C35900CD1D6542C700C1D154 /* uGLLight.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B91D6542C700C1D154 /* uGLLight.cpp */; };
+		C35900CE1D6542C700C1D154 /* uGLLight.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900BA1D6542C700C1D154 /* uGLLight.h */; };
+		C35900CF1D6542C700C1D154 /* uGLModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900BB1D6542C700C1D154 /* uGLModel.cpp */; };
+		C35900D01D6542C700C1D154 /* uGLModel.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900BC1D6542C700C1D154 /* uGLModel.h */; };
+		C35900D11D6542C700C1D154 /* uGLObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900BD1D6542C700C1D154 /* uGLObject.cpp */; };
+		C35900D21D6542C700C1D154 /* uGLObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900BE1D6542C700C1D154 /* uGLObject.h */; };
+		C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900BF1D6542C700C1D154 /* uGLParticle.cpp */; };
+		C35900D41D6542C700C1D154 /* uGLParticle.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C01D6542C700C1D154 /* uGLParticle.h */; };
+		C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C11D6542C700C1D154 /* uGLScene.cpp */; };
+		C35900D61D6542C700C1D154 /* uGLScene.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C21D6542C700C1D154 /* uGLScene.h */; };
+		C35900D71D6542C700C1D154 /* uGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C31D6542C700C1D154 /* uGLShader.cpp */; };
+		C35900D81D6542C700C1D154 /* uGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C41D6542C700C1D154 /* uGLShader.h */; };
+		C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C51D6542C700C1D154 /* uGLSprite.cpp */; };
+		C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C61D6542C700C1D154 /* uGLSprite.h */; };
+		C35900DB1D6542C700C1D154 /* uGLTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C71D6542C700C1D154 /* uGLTexture.cpp */; };
+		C35900DC1D6542C700C1D154 /* uGLTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C81D6542C700C1D154 /* uGLTexture.h */; };
 		C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */; };
 		C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B61D5EB5D60039DD09 /* uStack.h */; };
 		C3A4B4BC1D5EB5DF0039DD09 /* uIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */; };
@@ -154,6 +176,28 @@
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C35272071D551BBE00F41198 /* uOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uOpenGL.h; sourceTree = "<group>"; };
 		C35272091D551E9F00F41198 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		C35900B11D6540AA00C1D154 /* uGLReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLReader.cpp; sourceTree = "<group>"; };
+		C35900B21D6540AA00C1D154 /* uGLReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLReader.h; sourceTree = "<group>"; };
+		C35900B51D6542C700C1D154 /* uGLDrawing.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLDrawing.cpp; sourceTree = "<group>"; };
+		C35900B61D6542C700C1D154 /* uGLDrawing.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLDrawing.h; sourceTree = "<group>"; };
+		C35900B71D6542C700C1D154 /* uGLFunc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLFunc.cpp; sourceTree = "<group>"; };
+		C35900B81D6542C700C1D154 /* uGLFunc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLFunc.h; sourceTree = "<group>"; };
+		C35900B91D6542C700C1D154 /* uGLLight.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLLight.cpp; sourceTree = "<group>"; };
+		C35900BA1D6542C700C1D154 /* uGLLight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLLight.h; sourceTree = "<group>"; };
+		C35900BB1D6542C700C1D154 /* uGLModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLModel.cpp; sourceTree = "<group>"; };
+		C35900BC1D6542C700C1D154 /* uGLModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLModel.h; sourceTree = "<group>"; };
+		C35900BD1D6542C700C1D154 /* uGLObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLObject.cpp; sourceTree = "<group>"; };
+		C35900BE1D6542C700C1D154 /* uGLObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLObject.h; sourceTree = "<group>"; };
+		C35900BF1D6542C700C1D154 /* uGLParticle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLParticle.cpp; sourceTree = "<group>"; };
+		C35900C01D6542C700C1D154 /* uGLParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLParticle.h; sourceTree = "<group>"; };
+		C35900C11D6542C700C1D154 /* uGLScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLScene.cpp; sourceTree = "<group>"; };
+		C35900C21D6542C700C1D154 /* uGLScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLScene.h; sourceTree = "<group>"; };
+		C35900C31D6542C700C1D154 /* uGLShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLShader.cpp; sourceTree = "<group>"; };
+		C35900C41D6542C700C1D154 /* uGLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLShader.h; sourceTree = "<group>"; };
+		C35900C51D6542C700C1D154 /* uGLSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLSprite.cpp; sourceTree = "<group>"; };
+		C35900C61D6542C700C1D154 /* uGLSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSprite.h; sourceTree = "<group>"; };
+		C35900C71D6542C700C1D154 /* uGLTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLTexture.cpp; sourceTree = "<group>"; };
+		C35900C81D6542C700C1D154 /* uGLTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLTexture.h; sourceTree = "<group>"; };
 		C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uAtomicObject.h; sourceTree = "<group>"; };
 		C3A4B4B61D5EB5D60039DD09 /* uStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStack.h; sourceTree = "<group>"; };
 		C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uIterator.h; sourceTree = "<group>"; };
@@ -354,8 +398,30 @@
 				C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */,
 				C34FDA4B1D5C97BC0022FF71 /* uGLPaint.cpp */,
 				C34FDA4C1D5C97BC0022FF71 /* uGLPaint.h */,
+				C35900B11D6540AA00C1D154 /* uGLReader.cpp */,
+				C35900B21D6540AA00C1D154 /* uGLReader.h */,
 				C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */,
 				C34FDA401D5C01FC0022FF71 /* uGLCamera.h */,
+				C35900B91D6542C700C1D154 /* uGLLight.cpp */,
+				C35900BA1D6542C700C1D154 /* uGLLight.h */,
+				C35900C71D6542C700C1D154 /* uGLTexture.cpp */,
+				C35900C81D6542C700C1D154 /* uGLTexture.h */,
+				C35900C31D6542C700C1D154 /* uGLShader.cpp */,
+				C35900C41D6542C700C1D154 /* uGLShader.h */,
+				C35900BB1D6542C700C1D154 /* uGLModel.cpp */,
+				C35900BC1D6542C700C1D154 /* uGLModel.h */,
+				C35900BF1D6542C700C1D154 /* uGLParticle.cpp */,
+				C35900C01D6542C700C1D154 /* uGLParticle.h */,
+				C35900BD1D6542C700C1D154 /* uGLObject.cpp */,
+				C35900BE1D6542C700C1D154 /* uGLObject.h */,
+				C35900C51D6542C700C1D154 /* uGLSprite.cpp */,
+				C35900C61D6542C700C1D154 /* uGLSprite.h */,
+				C35900B51D6542C700C1D154 /* uGLDrawing.cpp */,
+				C35900B61D6542C700C1D154 /* uGLDrawing.h */,
+				C35900B71D6542C700C1D154 /* uGLFunc.cpp */,
+				C35900B81D6542C700C1D154 /* uGLFunc.h */,
+				C35900C11D6542C700C1D154 /* uGLScene.cpp */,
+				C35900C21D6542C700C1D154 /* uGLScene.h */,
 				C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */,
 				C34FD9631D5B67900022FF71 /* uGLTouchScreen.h */,
 				C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */,
@@ -376,6 +442,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C35900D61D6542C700C1D154 /* uGLScene.h in Headers */,
 				C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */,
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
@@ -383,13 +450,17 @@
 				C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
+				C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */,
 				C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */,
 				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
+				C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */,
 				C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */,
 				C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */,
+				C35900DC1D6542C700C1D154 /* uGLTexture.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
+				C35900D01D6542C700C1D154 /* uGLModel.h in Headers */,
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
 				C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */,
@@ -397,6 +468,7 @@
 				C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */,
 				C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
+				C35900D81D6542C700C1D154 /* uGLShader.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
 				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
 				C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */,
@@ -412,8 +484,11 @@
 				C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */,
 				C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
+				C35900CE1D6542C700C1D154 /* uGLLight.h in Headers */,
+				C35900D41D6542C700C1D154 /* uGLParticle.h in Headers */,
 				C3A4B4EC1D5FD41C0039DD09 /* uJSON.h in Headers */,
 				C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */,
+				C35900CC1D6542C700C1D154 /* uGLFunc.h in Headers */,
 				C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */,
 				C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */,
 				C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */,
@@ -424,7 +499,9 @@
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
 				C305780B1D54BA9C00171EFC /* uSystem.h in Headers */,
 				C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */,
+				C35900B41D6540AA00C1D154 /* uGLReader.h in Headers */,
 				C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */,
+				C35900D21D6542C700C1D154 /* uGLObject.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,7 +573,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */,
+				C35900D71D6542C700C1D154 /* uGLShader.cpp in Sources */,
 				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
+				C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */,
+				C35900CF1D6542C700C1D154 /* uGLModel.cpp in Sources */,
+				C35900CD1D6542C700C1D154 /* uGLLight.cpp in Sources */,
+				C35900C91D6542C700C1D154 /* uGLDrawing.cpp in Sources */,
 				C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */,
 				C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */,
 				C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */,
@@ -504,16 +586,21 @@
 				C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */,
 				C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */,
 				C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */,
+				C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */,
 				C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */,
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
 				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
 				C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */,
+				C35900CB1D6542C700C1D154 /* uGLFunc.cpp in Sources */,
 				C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */,
+				C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
+				C35900DB1D6542C700C1D154 /* uGLTexture.cpp in Sources */,
 				C30577EA1D54BA9C00171EFC /* uCipher.c in Sources */,
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
+				C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */,
 				C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
 				C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */,
@@ -523,6 +610,7 @@
 				C30577F41D54BA9C00171EFC /* uMD5.c in Sources */,
 				C34FD9B71D5BBBB70022FF71 /* GLContext.mm in Sources */,
 				C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
+				C35900D11D6542C700C1D154 /* uGLObject.cpp in Sources */,
 				C30577FA1D54BA9C00171EFC /* uError.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -35,36 +35,20 @@ void onTouch(const wchar_t* event) {
     
 }
 
-#include <net/uURI.h>
-#include <data/uAtomicObject.h>
-#include <data/uStack.h>
-#include <data/uIterator.h>
-#include <data/uListIterator.h>
-#include <data/uCollection.h>
-#include <data/uList.h>
-#include <data/uSet.h>
-#include <data/uHashSet.h>
-#include <data/uLinkedHashSet.h>
-#include <data/uMap.h>
-#include <data/uHashMap.h>
-#include <data/uLinkedHashMap.h>
-#include <data/uSparseArray.h>
-#include <data/uNumber.h>
-#include <data/uJSONArray.h>
-#include <data/uJSONObject.h>
-
-#include <net/uHTTPClient.h>
-#include <net/uLoader.h>
-
-bool onStream(const String& url, Stream& stream, const Object& userData) {
-//    JSONObject json = new JSONObject( String((const char*)stream.getBuffer(), stream.getSize()) );
-//    json.log();
-    
-    return true;
+void onFile(const String& url, const Stream& stream, const Object& userData) {
+    String::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 
-void onError(const String& url, const String& error, const Object& userData) {
-    sleep(0);
+void onStatus(const RefLoader::Status& status, const Object& userData) {
+    String::format(L"STATUS: %d / %d", status.count, status.total).log();
+}
+
+void onReady(const HashMap<String, Stream>& result, const Object& userData) {
+    String::format(L"READY!").log();
+}
+
+void onError(const String& error, const Object& userData) {
+    String::format(L"ERROR: %ls", (wchar_t*)error).log();
 }
 
 OMEngine::OMEngine() {
@@ -74,10 +58,14 @@ OMEngine::OMEngine() {
         #include "OMLoad.res"
     ;
     
-    context->loader.ref().basePath = L"https://www.cox.ru/res/om/";
-    context->loader.ref().load(sOMLoadRes);
-    
-    HTTPClient::Request(L"https://www.cox.ru/res/om/models/ball.json", false, 0, 5, onStream, onError);
+    RefLoader* loader = &(context->loader.ref());
+    loader->basePath = L"https://www.cox.ru/res/om/";
+    loader->onfile = onFile;
+    loader->onstatus = onStatus;
+    loader->onready = onReady;
+    loader->onerror = onError;
+    //loader->userData =
+    loader->load(sOMLoadRes);
 }
 
 OMEngine::~OMEngine() {

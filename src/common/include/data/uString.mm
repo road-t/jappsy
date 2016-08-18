@@ -4280,9 +4280,10 @@ String String::format(const RefString& string, ...) {
 	va_list arglist;
 	va_start(arglist, string);
 	
-	RefString result;
-	if (result.vswprintf((wchar_t*)string, arglist) == EOF) {
+	RefString* result = new RefString();
+	if (result->vswprintf((wchar_t*)string, arglist) == EOF) {
 		va_end(arglist);
+		delete result;
 		return StringNil;
 	}
 	
@@ -4317,9 +4318,10 @@ String String::format(const String& string, ...) {
 	va_list arglist;
 	va_start(arglist, string);
 	
-	RefString result;
-	if (result.vswprintf((wchar_t*)string, arglist) == EOF) {
+	RefString* result = new RefString();
+	if (result->vswprintf((wchar_t*)string, arglist) == EOF) {
 		va_end(arglist);
+		delete result;
 		return StringNil;
 	}
 	
@@ -4356,9 +4358,10 @@ String String::format(const wchar_t* string, ...) {
 	
 	va_list arglist;
 	va_start(arglist, string);
-	RefString result;
-	if (result.vswprintf(string, arglist) == EOF) {
+	RefString* result = new RefString();
+	if (result->vswprintf(string, arglist) == EOF) {
 		va_end(arglist);
+		delete result;
 		return StringNil;
 	}
 	va_end(arglist);

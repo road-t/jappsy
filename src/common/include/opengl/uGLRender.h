@@ -28,15 +28,13 @@ class GLEngine;
 #include <opengl/uGLTouchScreen.h>
 #include <opengl/uGLPaint.h>
 #include <opengl/uGLTexture.h>
-
-class GLShaders;
-class GLShader;
-class GLSprites;
-class GLScenes;
-class GLCameras;
-class GLModels;
-class GLParticles;
-class GLDrawings;
+#include <opengl/uGLShader.h>
+#include <opengl/uGLSprite.h>
+#include <opengl/uGLScene.h>
+#include <opengl/uGLCamera.h>
+#include <opengl/uGLModel.h>
+#include <opengl/uGLParticle.h>
+#include <opengl/uGLDrawing.h>
 
 class GLRender {
 private:

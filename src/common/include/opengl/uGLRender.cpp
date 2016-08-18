@@ -59,13 +59,13 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	loader = new Loader();
 	
 	textures = memNew(textures, GLTextures(this));
-	//shaders = new GLShaders(this);
-	//sprites = new GLSprites(this);
-	//scenes = new GLScenes(this);
+	shaders = memNew(shaders, GLShaders(this));
+	sprites = memNew(sprites, GLSprites(this));
+	scenes = memNew(scenes, GLScenes(this));
 	cameras = memNew(cameras, GLCameras(this));
-	//models = new GLModels(this);
-	//particles = new GLParticles(this);
-	//drawings = new GLDrawings(this);
+	models = memNew(models, GLModels(this));
+	particles = memNew(particles, GLParticles(this));
+	drawings = memNew(drawings, GLDrawings(this));
 	
 	cameras->createCamera(L"gui").ref().size(width, height).layer(0, 0);
 	lightsMaxCount = 6;
@@ -132,13 +132,13 @@ GLRender::~GLRender() {
 	shaderSquareStroke = NULL;
 	shaderSquareTexture = NULL;
 	
-	//delete drawings;
-	//delete particles;
-	//delete models;
+	memDelete(drawings);
+	memDelete(particles);
+	memDelete(models);
 	memDelete(cameras);
-	//delete scenes;
-	//delete sprites;
-	//delete shaders;
+	memDelete(scenes);
+	memDelete(sprites);
+	memDelete(shaders);
 	memDelete(textures);
 	
 	drawings = NULL;

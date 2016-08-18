@@ -35,7 +35,7 @@ void onTouch(const wchar_t* event) {
     
 }
 
-void onFile(const String& url, const Stream& stream, const Object& userData) {
+void onFile(const String& url, const Object& object, const Object& userData) {
     String::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 

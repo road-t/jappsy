@@ -27,6 +27,7 @@
 #include <core/uHandler.h>
 
 class Loader;
+class GLRender;
 
 class RefLoader : public RefObject {
 public:
@@ -86,7 +87,7 @@ public:
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const String& url, const Stream& stream, const Object& userData);
+	typedef void (*onFileCallback)(const String& url, const Object& object, const Object& userData);
 	typedef void (*onStatusCallback)(const Status& status, const Object& userData);
 	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object& userData);
 	typedef void (*onErrorCallback)(const String& error, const Object& userData);
@@ -100,7 +101,11 @@ public:
 
 private:
 	// loader internal data
+#ifdef DEBUG
+	int loadSpeed = 1;
+#else
 	int loadSpeed = 5;
+#endif
 	
 	HashMap<String, Stream> result;
 	List<File> list;
@@ -145,6 +150,9 @@ private:
 	static void onjson_subgroup(struct json_context* ctx, const char* key, void* target);
 	static void onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target);
 
+private:
+	GLRender* context;
+	
 public:
 	
 	String basePath;
@@ -155,8 +163,9 @@ public:
 		handler = new Handler();
 	}
 
-	inline RefLoader() { initialize(); }
-	RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData);
+	inline RefLoader() { throw eInvalidParams; }
+	inline RefLoader(GLRender* context) { initialize(); THIS.context = context; }
+	RefLoader(GLRender* context, onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData);
 	~RefLoader();
 	
 	void load(const char* jsonconfig) throw(const char*);
@@ -166,6 +175,12 @@ public:
 class Loader : public Object {
 public:
 	RefClass(Loader, RefLoader);
+	
+	inline Loader(GLRender* context) {
+		RefLoader* o = new RefLoader(context);
+		if (o == NULL) throw eOutOfMemory;
+		THIS.setRef(o);
+	}
 	
 	inline void release() throw(const char*) { THIS.ref().release(); }
 };

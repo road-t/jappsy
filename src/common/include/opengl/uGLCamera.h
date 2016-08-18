@@ -67,6 +67,18 @@ public:
 class GLCamera : public Object {
 public:
 	RefClass(GLCamera, RefGLCamera);
+	
+	inline RefGLCamera& invalidate() throw(const char*) { return THIS.ref().invalidate(); }
+	inline RefGLCamera& size(GLfloat width, GLfloat height) throw(const char*) { return THIS.ref().size(width, height); }
+	
+	inline RefGLCamera& perspective(GLfloat fov, GLfloat min, GLfloat max) throw(const char*) { return THIS.ref().perspective(fov, min, max); }
+	inline RefGLCamera& ortho(GLfloat min, GLfloat max) throw(const char*) { return THIS.ref().ortho(min, max); }
+	inline RefGLCamera& layer(GLfloat offsetX, GLfloat offsetY) throw(const char*) { return THIS.ref().layer(offsetX, offsetY); }
+	
+	inline RefGLCamera& lookAt(const Vec3& position, const Vec3& target, const Vec3& head) throw(const char*) { return THIS.ref().lookAt(position, target, head); }
+	inline RefGLCamera& rotate(const Vec3& vec, GLfloat angle) throw(const char*) { return THIS.ref().rotate(vec, angle); }
+	
+	inline bool update() throw(const char*) { return THIS.ref().update(); }
 };
 
 class GLCameras {

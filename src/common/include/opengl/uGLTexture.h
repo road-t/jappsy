@@ -27,14 +27,13 @@ class GLRender;
 class RefGLTexture : public RefObject {
 public:
 	GLRender* context = NULL;
-	GLuint* handles = NULL;
+	Vector<GLuint> handles;
 	GLint width = 0;
 	GLint height = 0;
-	GLint* handles1iv = NULL;
-	GLuint count = 0;
+	Vector<GLint> handles1iv;
 	
 	inline RefGLTexture() { throw eInvalidParams; }
-	RefGLTexture(GLRender* context, GLuint* handles, GLuint count, GLint width, GLint height);
+	RefGLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	~RefGLTexture();
 	
 	GLuint bind(GLint index, GLint uniform = -1);
@@ -42,6 +41,7 @@ public:
 
 class GLTexture : public Object {
 public:
+	constexpr static int NONE = 0;
 	constexpr static int SMOOTH = 1;
 	constexpr static int REPEAT = 2;
 	
@@ -60,7 +60,7 @@ public:
 	
 	GLTexture& get(const wchar_t* key) throw(const char*);
 	GLTexture& createSolidTexture(const wchar_t* key, const Vec4& rgba4fv) throw(const char*);
-	GLTexture& createTexture(const wchar_t* key, GLuint* handles, GLuint count, GLint width, GLint height) throw(const char*);
+	GLTexture& createTexture(const wchar_t* key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	
 	GLuint createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*);
 	void releaseTextureHandle(GLuint handle);

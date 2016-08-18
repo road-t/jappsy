@@ -19,14 +19,15 @@
 
 #include <platform.h>
 #include <opengl/uOpenGL.h>
-#include <opengl/uGLRender.h>
-#include <opengl/uGLTexture.h>
-#include <opengl/uGLShader.h>
 #include <data/uString.h>
 #include <data/uStream.h>
 
-namespace GLReader {
+class GLRender;
+class GLTexture;
+class GLShader;
 
+class GLReader {
+public:
 	constexpr static int SDFFHEAD = 0x46464453;	// Signed Distance Field Font Head
 	constexpr static int SDFIHEAD = 0x49464453;	// Signed Distance Field Image Head
 	constexpr static int JIMGHEAD = 0x474D494A;	// Jappsy Image Head
@@ -46,9 +47,8 @@ namespace GLReader {
 	
 	constexpr static int JENDCHUNK = 0x444E454A;	// Jappsy End Chunk
 	
-	static GLTexture* createTexture(GLRender* ctx, const String& key, Stream& stream);
-	static GLShader* createShader(GLRender* ctx, const String& key, Stream& stream);
-	
+	static GLTexture& createTexture(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
+	static GLShader& createShader(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
 };
 
 #endif //JAPPSY_UGLREADER_H

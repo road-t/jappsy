@@ -19,9 +19,11 @@
 #include <net/uURI.h>
 #include <core/uSystem.h>
 #include <net/uHttpClient.h>
+#include <opengl/uGLRender.h>
 
-RefLoader::RefLoader(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
+RefLoader::RefLoader(GLRender* context, onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
 	initialize();
+	THIS.context = context;
 	THIS.onfile = onfile;
 	THIS.onstatus = onstatus;
 	THIS.onready = onready;
@@ -33,6 +35,7 @@ void RefLoader::release() {
 	THIS.wait();
 	AtomicSet(&shutdown, 1);
 	handler.release();
+	context = NULL;
 	THIS.notifyAll();
 }
 
@@ -66,8 +69,7 @@ void RefLoader::update() {
 		if (AtomicGet(&(status.error)) > 0) count = 0;
 		if (count > loadSpeed) count = loadSpeed;
 		if (count == 0) count = -1;
-		if (AtomicGet(&(status.left)) > loadSpeed)
-			count = 0;
+		if (AtomicGet(&(status.left)) >= loadSpeed) count = 0;
 		else if (AtomicGet(&(status.update))) {
 			if (onstatus != NULL) onstatus(status, userData);
 			AtomicSet(&(status.update), false);
@@ -98,12 +100,8 @@ void RefLoader::update() {
 			} else if (
 				(ext.compareToIgnoreCase(L"jimg") == 0) ||
 				(ext.compareToIgnoreCase(L"jsh") == 0)) {
-				// Fake OK
-				AtomicIncrement(&(status.count));
-				AtomicDecrement(&(status.left));
-				AtomicSet(&(status.update), true);
-				//Info user = new Info(*this, info->ref());
-				//HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_data, onhttp_error);
+				Info user = new Info(*this, info->ref());
+				HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_data, onhttp_error);
 			} else if (
 				(ext.compareToIgnoreCase(L"json") == 0) ||
 				(ext.compareToIgnoreCase(L"vsh") == 0) ||
@@ -234,10 +232,33 @@ bool RefLoader::onText(const File& info, Stream& stream) {
 }
 
 bool RefLoader::onData(const File& info, Stream& stream) {
-	AtomicIncrement(&(status.count));
-	AtomicDecrement(&(status.left));
-	AtomicSet(&(status.update), true);
-	if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	String ext = info.ref().ext;
+	if (ext.compareToIgnoreCase(L"jimg") == 0) {
+		try {
+			GLTexture* texture = &(GLReader::createTexture(context, (wchar_t*)(info.ref().key), stream));
+			AtomicIncrement(&(status.count));
+			AtomicDecrement(&(status.left));
+			AtomicSet(&(status.update), true);
+			if (onfile != NULL) onfile(info.ref().file, *texture, userData);
+		} catch (...) {
+			return false;
+		}
+	} else if (ext.compareToIgnoreCase(L"jsh") == 0) {
+		try {
+			GLShader* shader = &(GLReader::createShader(context, (wchar_t*)(info.ref().key), stream));
+			AtomicIncrement(&(status.count));
+			AtomicDecrement(&(status.left));
+			AtomicSet(&(status.update), true);
+			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+		} catch (...) {
+			return false;
+		}
+	} else {
+		AtomicIncrement(&(status.count));
+		AtomicDecrement(&(status.left));
+		AtomicSet(&(status.update), true);
+		if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	}
 	return true;
 }
 

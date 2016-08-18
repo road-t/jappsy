@@ -32,14 +32,24 @@ bool is_gzip(const void* in, uint32_t insize) {
     return (*(uint16_t*)in == GZIP_MAGIC);
 }
 
+voidpf mmzalloc(voidpf opaque, unsigned items, unsigned size) {
+	if (opaque) items += size - size; /* make compiler happy */
+	return (voidpf)mmalloc(items * size);
+}
+
+void mmzfree(voidpf opaque, voidpf ptr) {
+	mmfree(ptr);
+	if (opaque) return; /* make compiler happy */
+}
+
 void* gzip_encode_fast(const void* in, uint32_t insize, uint32_t* outsize) {
     uint32_t outSize = 0;
     uint8_t* outBuffer = 0;
 
     if (in != 0) {
         z_stream gzip;
-        gzip.zalloc = Z_NULL;
-        gzip.zfree = Z_NULL;
+        gzip.zalloc = mmzalloc;
+        gzip.zfree = mmzfree;
         gzip.opaque = Z_NULL;
         gzip.total_out = 0;
         gzip.next_in = (Bytef*)in;
@@ -78,8 +88,8 @@ void* gzip_encode(const void* in, uint32_t insize, uint32_t* outsize) {
 
     if (in != 0) {
         z_stream gzip;
-        gzip.zalloc = Z_NULL;
-        gzip.zfree = Z_NULL;
+        gzip.zalloc = mmzalloc;
+        gzip.zfree = mmzfree;
         gzip.opaque = Z_NULL;
         gzip.total_out = 0;
         gzip.next_in = (Bytef*)in;
@@ -118,8 +128,8 @@ void* gzip_decode(const void* in, uint32_t insize, uint32_t* outsize) {
 
     if (in != 0) {
         z_stream gzip;
-        gzip.zalloc = Z_NULL;
-        gzip.zfree = Z_NULL;
+        gzip.zalloc = mmzalloc;
+        gzip.zfree = mmzfree;
         gzip.opaque = Z_NULL;
         gzip.total_out = 0;
         gzip.next_in = (Bytef*)in;
@@ -127,8 +137,12 @@ void* gzip_decode(const void* in, uint32_t insize, uint32_t* outsize) {
 
         int res = inflateInit2(&gzip, (15+16));
         if (res == Z_OK) {
-            uint32_t gzipBufferSize = insize;
-            if (gzipBufferSize < 1024) gzipBufferSize = 1024;
+			uint32_t gzipBufferSize = 0;
+			if ((outsize != NULL) && (*outsize != 0))
+					gzipBufferSize = *outsize;
+			else if (insize < 1024) gzipBufferSize = 1024;
+			else gzipBufferSize = insize - (insize % 1024) + 1024;
+			
             Bytef* gzipBuffer = memAlloc(Bytef, gzipBuffer, gzipBufferSize);
 
             do {
@@ -145,7 +159,7 @@ void* gzip_decode(const void* in, uint32_t insize, uint32_t* outsize) {
                 gzip.next_out = gzipBuffer + gzip.total_out;
                 gzip.avail_out = (uInt)(gzipBufferSize - gzip.total_out);
                 res = inflate(&gzip, Z_FINISH);
-            } while (res == Z_OK);
+            } while ((res == Z_BUF_ERROR) || (res == Z_OK));
 
             inflateEnd(&gzip);
 

@@ -56,7 +56,7 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	
 	frame = memNew(frame, GLFrame(engine, this, onframe));
 	touchScreen = new GLTouchScreen(this, ontouch);
-	loader = new Loader();
+	loader = new Loader(this);
 	
 	textures = memNew(textures, GLTextures(this));
 	shaders = memNew(shaders, GLShaders(this));

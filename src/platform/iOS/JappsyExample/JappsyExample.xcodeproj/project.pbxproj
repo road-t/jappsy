@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C3401C571D661CB9009B223D /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3401C561D661CB9009B223D /* libz.framework */; };
 		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
 		C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */; };
 		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C3401C561D661CB9009B223D /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
 		C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleJappsyView.h; sourceTree = "<group>"; };
@@ -40,6 +42,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C3401C571D661CB9009B223D /* libz.framework in Frameworks */,
 				C34FD9D01D5BC7FB0022FF71 /* libGameOM.framework in Frameworks */,
 				C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */,
 			);
@@ -51,6 +54,7 @@
 		C3506D721D52575C005BC914 = {
 			isa = PBXGroup;
 			children = (
+				C3401C561D661CB9009B223D /* libz.framework */,
 				C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */,
 				C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */,
 				C3506D7D1D52575C005BC914 /* JappsyExample */,

@@ -18,57 +18,52 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLTexture::RefGLTexture(GLRender* context, GLuint* handles, GLuint count, GLint width, GLint height) {
+RefGLTexture::RefGLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	THIS.context = context;
-	if ((handles != NULL) && (count > 0)) {
-		THIS.handles = memAlloc(GLuint, THIS.handles, count * sizeof(GLuint));
-		if (THIS.handles == NULL)
-			throw eOutOfMemory;
-		memcpy(THIS.handles, handles, count * sizeof(GLuint));
-		
-		handles1iv = memAlloc(GLint, handles1iv, count * sizeof(GLint));
-		if (handles1iv == NULL) {
-			memFree(THIS.handles);
-			THIS.handles = NULL;
-			throw eOutOfMemory;
+	uint32_t count = handles.count();
+	if (count > 0) {
+		THIS.handles.resize(count);
+		memcpy(THIS.handles.items(), handles.items(), count * sizeof(GLuint));
+
+		try {
+			handles1iv.resize(count);
+		} catch (...) {
+			THIS.handles.clear();
+			throw;
 		}
-		
-		THIS.count = count;
 	}
 	THIS.width = width;
 	THIS.height = height;
 }
 
 RefGLTexture::~RefGLTexture() {
-	if (handles != NULL) {
+	uint32_t count = handles.count();
+	if (handles.size() > 0) {
 		for (int i = 0; i < count; i++) {
 			context->textures->releaseTextureHandle(handles[i]);
 		}
-		width = height = 0;
-		memFree(handles);
-		handles = NULL;
-		count = 0;
+		handles.clear();
 	}
-	if (handles1iv != NULL) {
-		memFree(handles1iv);
-		handles1iv = NULL;
-	}
+	handles1iv.clear();
+	width = height = 0;
 	context = NULL;
 }
 
 GLuint RefGLTexture::bind(GLint index, GLint uniform) {
-	for (int i = 0; i < count; i++) {
-		context->activeTexture(handles[i]);
-		glBindTexture(GL_TEXTURE_2D, handles[i]);
+	for (int i = 0; i < handles.count(); i++) {
+		GLuint handle = handles.get(i);
+		context->activeTexture(handle);
+		glBindTexture(GL_TEXTURE_2D, handle);
 		handles1iv[i] = index;
 		index++;
 	}
 	
 	if (uniform != -1) {
+		uint32_t count = handles.count();
 		if (count == 1) {
 			glUniform1i(uniform, handles1iv[0]);
 		} else {
-			glUniform1iv(uniform, count, handles1iv);
+			glUniform1iv(uniform, count, handles1iv.items());
 		}
 	}
 	
@@ -113,8 +108,10 @@ GLTexture& GLTextures::createSolidTexture(const wchar_t* key, const Vec4& rgba4f
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	
 	try {
+		Vector<GLuint> handles;
+		handles.push(handle);
 		list.remove(key);
-		GLTexture* texture = &(list.put(key, new RefGLTexture(context, &handle, 1, 1, 1)));
+		GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, 1, 1)));
 		if (wcscmp(key, L"null") == 0) {
 			defaultTexture = *texture;
 		}
@@ -125,18 +122,13 @@ GLTexture& GLTextures::createSolidTexture(const wchar_t* key, const Vec4& rgba4f
 	}
 }
 
-GLTexture& GLTextures::createTexture(const wchar_t* key, GLuint* handles, GLuint count, GLint width, GLint height) throw(const char*) {
-	try {
-		list.remove(key);
-		GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, count, 1, 1)));
-		if (wcscmp(key, L"null") == 0) {
-			defaultTexture = *texture;
-		}
-		return *texture;
-	} catch (...) {
-		glDeleteTextures(count, handles);
-		throw;
+GLTexture& GLTextures::createTexture(const wchar_t* key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+	list.remove(key);
+	GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, width, height)));
+	if (wcscmp(key, L"null") == 0) {
+		defaultTexture = *texture;
 	}
+	return *texture;
 }
 
 GLuint GLTextures::createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*) {

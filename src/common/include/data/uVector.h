@@ -224,4 +224,168 @@ extern "C" {
 }
 #endif
 
+#ifdef __cplusplus
+
+#include <core/uMemory.h>
+
+template <typename Type>
+class Vector {
+private:
+	Type* m_items = NULL;
+	uint32_t m_count = 0;
+
+public:
+	inline Vector() {}
+	inline Vector(uint32_t count) throw(const char*) { resize(count); }
+	inline ~Vector() { resize(0); }
+	
+	inline void resize(uint32_t count) throw(const char*) {
+		if (count == m_count)
+			return;
+		
+		if (count == 0) {
+			memFree(m_items);
+			m_items = NULL;
+			m_count = 0;
+			return;
+		}
+		
+		Type* newItems = memRealloc(Type, newItems, m_items, count * sizeof(Type));
+		if (newItems == NULL)
+			throw eOutOfMemory;
+		
+		m_items = newItems;
+		m_count = count;
+	}
+	
+	virtual inline Type& push(const Type& value) throw(const char*) {
+		resize(m_count + 1);
+		return (m_items[m_count - 1] = value);
+	}
+	
+	virtual inline Type& unshift(const Type& value) throw(const char*) {
+		resize(m_count + 1);
+		memmove(m_items + 1, m_items, (m_count - 1) * sizeof(Type));
+		return (m_items[0] = value);
+	}
+	
+	virtual inline Type pop() throw(const char*) {
+		if (m_count > 0) {
+			Type result = m_items[m_count - 1];
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline Type shift() throw(const char*) {
+		if (m_count > 0) {
+			Type result = m_items[0];
+			memmove(m_items, m_items + 1, (m_count - 1) * sizeof(Type));
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline bool contains(const Type& value) const {
+		if (m_count > 0) {
+			for (int i = m_count - 1; i >= 0; i--) {
+				if (m_items[i] == value) return true;
+			}
+		}
+		return false;
+	}
+	
+	virtual inline int32_t count() const {
+		return m_count;
+	}
+	
+	// synonym to count()
+	virtual inline int32_t size() const {
+		return m_count;
+	}
+	
+	virtual inline bool empty() const {
+		return (m_count == 0);
+	}
+	
+	// synonym to empty()
+	virtual inline bool isEmpty() const {
+		return (m_count == 0);
+	}
+	
+	virtual inline void clear() throw(const char*) {
+		resize(0);
+	}
+	
+	virtual inline const Type& peek() const throw(const char*) {
+		if (m_count > 0) {
+			return m_items[m_count - 1];
+		}
+		throw eEmpty;
+	}
+	
+	virtual inline const Type& peek(int32_t index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return m_items[index];
+		}
+		throw eOutOfRange;
+	}
+	
+	// synonym to peek(index)
+	virtual inline const Type& get(int32_t index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return m_items[index];
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline int32_t search(const Type& value) const {
+		if (m_count > 0) {
+			for (int i = m_count-1; i >= 0; i--) {
+				if (m_items[i] == value) return i;
+			}
+		}
+		return -1;
+	}
+	
+	// synonym to search(value)
+	virtual inline int32_t indexOf(const Type& value) const {
+		if (m_count > 0) {
+			for (int i = m_count-1; i >= 0; i--) {
+				if (m_items[i] == value) return i;
+			}
+		}
+		return -1;
+	}
+	
+	virtual inline const Type remove(int32_t index) throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			Type result = m_items[index];
+			if ((m_count > 0) && (index < (m_count - 1))) {
+				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type));
+			}
+			resize(m_count - 1);
+			return result;
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline Type* items() const {
+		return m_items;
+	}
+	
+	virtual inline Type& operator [](int index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return m_items[index];
+		}
+		throw eOutOfRange;
+	}
+};
+
+#endif
+
 #endif //JAPPSY_UVECTOR_H

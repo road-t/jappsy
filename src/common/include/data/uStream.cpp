@@ -17,6 +17,7 @@
 #include "uStream.h"
 #include <core/uMemory.h>
 #include <data/uString.h>
+#include <cipher/uCipher.h>
 
 RefStream::RefStream(const wchar_t* data) throw(const char*) {
 	if (data != NULL) {
@@ -109,3 +110,52 @@ int32_t RefStream::skip(uint32_t length) {
 	m_position = end;
 	return (int32_t)length;
 }
+
+char* RefStream::readString(uint32_t length) throw(const char*) {
+	if (length == 0)
+		return NULL;
+	
+	uint32_t end = m_position + length;
+	if (end > m_size)
+		throw eIOReadLimit;
+	
+	uint32_t size = end - m_position;
+	char* data = memAlloc(char, data, size + 1);
+	if (data == NULL)
+		throw eOutOfMemory;
+	
+	memcpy(data, m_buffer + m_position, size);
+	data[size] = '\0';
+	m_position = end;
+	return data;
+}
+
+uint8_t* RefStream::readGZip(uint32_t length, uint32_t* resultSize) throw(const char*) {
+	uint8_t* data = readBytes(length);
+	uint32_t dataSize = length;
+	uint32_t ungzipSize = *resultSize;
+	uint8_t* ungzipData = (uint8_t*)gzip_decode(data, length, &ungzipSize);
+	if (ungzipData != NULL) {
+		memFree(data);
+		data = ungzipData;
+		dataSize = ungzipSize;
+	}
+	*resultSize = dataSize;
+	return data;
+}
+
+char* RefStream::readGZipString(uint32_t length) throw(const char*) {
+	uint32_t ungzipSize = 0;
+	uint8_t* ungzip = readGZip(length, &ungzipSize);
+	
+	char* data = memAlloc(char, data, ungzipSize + 1);
+	if (data == NULL) {
+		memFree(ungzip);
+		throw eOutOfMemory;
+	}
+	
+	memcpy(data, ungzip, ungzipSize);
+	data[ungzipSize] = '\0';
+	return data;
+}
+

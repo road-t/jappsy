@@ -61,9 +61,16 @@ public:
 	inline void* getBuffer() { return m_buffer; }
 	inline uint32_t getSize() { return m_size; }
 	
+	inline void setPosition(uint32_t position) throw(const char*) { if (position > m_size) throw eOutOfRange; m_position = position; }
+	inline uint32_t getPosition() { return m_position; }
+	
 	uint8_t* readBytes(uint32_t length) throw(const char*); // eIOReadLimit, eOutOfMemory
 	uint32_t readInt() throw(const char*); // eIOReadLimit
 	uint8_t readUnsignedByte() throw(const char*); // eIOReadLimit
+	
+	char* readString(uint32_t length) throw(const char*);
+	uint8_t* readGZip(uint32_t length, uint32_t* resultSize) throw(const char*);
+	char* readGZipString(uint32_t length) throw(const char*);
 	
 	int32_t skip(uint32_t length);
 };
@@ -92,11 +99,17 @@ public:
 	
 	inline void* getBuffer() throw(const char*) { return THIS.ref().getBuffer(); }
 	inline uint32_t getSize() throw(const char*) { return THIS.ref().getSize(); }
+	inline void setPosition(uint32_t position) throw(const char*) { THIS.ref().setPosition(position); }
+	inline uint32_t getPosition() throw(const char*) { return THIS.ref().getPosition(); }
 
 	inline uint8_t* readBytes(uint32_t length) throw(const char*) { return THIS.ref().readBytes(length); }
 	inline uint32_t readInt() throw(const char*) { return THIS.ref().readInt(); }
 	inline uint8_t readUnsignedByte() throw(const char*) { return THIS.ref().readUnsignedByte(); }
 	inline int32_t skip(uint32_t length) throw(const char*) { return THIS.ref().skip(length); }
+
+	inline char* readString(uint32_t length) throw(const char*) { return THIS.ref().readString(length); }
+	inline uint8_t* readGZip(uint32_t length, uint32_t* resultSize) throw(const char*) { return THIS.ref().readGZip(length, resultSize); }
+	inline char* readGZipString(uint32_t length) throw(const char*) { return THIS.ref().readGZipString(length); }
 };
 
 #endif //JAPPSY_USTREAM_H

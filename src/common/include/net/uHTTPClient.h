@@ -27,9 +27,10 @@ class HTTPClient {
 public:
 	typedef bool (*onStreamCallback)(const String& url, Stream& stream, const Object& userData);
 	typedef void (*onErrorCallback)(const String& url, const String& error, const Object& userData);
+	typedef bool (*onRetryCallback)(const String& url, const Object& userData);
 	
-	static void Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror) throw(const char*);
-	static void Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror) throw(const char*);
+	static void Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
+	static void Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
 };
 
 #endif //JAPPSY_UHTTPCLIENT_H

@@ -134,11 +134,13 @@ private:
 	static bool onhttp_text(const String& url, Stream& stream, const Object& userData);
 	static bool onhttp_data(const String& url, Stream& stream, const Object& userData);
 	static void onhttp_error(const String& url, const String& error, const Object& userData);
+	static bool onhttp_retry(const String& url, const Object& userData);
 	
 	bool onText(const File& info, Stream& stream);
 	bool onData(const File& info, Stream& stream);
 	void onLoad(const File& info, const Object& object);
 	void onError(const File& info, const String& error);
+	bool onRetry(const File& info);
 	
 private:
 	// json parser callbacks and data

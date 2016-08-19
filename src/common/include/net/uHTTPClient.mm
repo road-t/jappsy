@@ -26,6 +26,7 @@ public:
 	
 	HTTPClient::onStreamCallback onstream = NULL;
 	HTTPClient::onErrorCallback onerror = NULL;
+	HTTPClient::onRetryCallback onretry = NULL;
 	
 	static void run(HTTPRequest* request) throw(const char*);
 };
@@ -86,6 +87,9 @@ Stream NSDataToStream(NSData* data) throw(const char*) {
 				} catch (...) {
 				}
 			}
+			if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+				http->retry = 0;
+			}
 			if (http->retry > 0) {
 				http->retry--;
 			} else if (http->retry == 0) {
@@ -134,6 +138,9 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 						} catch (...) {
 						}
 						memFree((void*)dataResult);
+					}
+					if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+						http->retry = 0;
 					}
 					if (http->retry > 0) {
 						http->retry--;
@@ -220,6 +227,9 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 						} catch (...) {
 						}
 					}
+					if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+						http->retry = 0;
+					}
 					if (http->retry > 0) {
 						http->retry--;
 						repeat = true;
@@ -243,7 +253,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 
 #endif
 
-void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror) throw(const char*) {
+void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -256,6 +266,7 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
+	http->onretry = onretry;
 
 #if defined(__IOS__)
 	HTTPRequest::run(http);
@@ -264,7 +275,7 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 #endif
 }
 
-void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror) throw(const char*) {
+void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -277,6 +288,7 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
+	http->onretry = onretry;
 
 #if defined(__IOS__)
 	HTTPRequest::run(http);

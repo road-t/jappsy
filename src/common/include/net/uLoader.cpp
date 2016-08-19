@@ -40,7 +40,8 @@ void RefLoader::release() {
 		sleep(1);
 	}
 	
-	context = NULL;
+	THIS.userData = null;
+	THIS.context = NULL;
 	THIS.notifyAll();
 }
 
@@ -106,13 +107,13 @@ void RefLoader::update() {
 				(ext.compareToIgnoreCase(L"jimg") == 0) ||
 				(ext.compareToIgnoreCase(L"jsh") == 0)) {
 				Info user = new Info(*this, info->ref());
-				HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_data, onhttp_error);
+				HTTPClient::Request(info->ref().file, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry);
 			} else if (
 				(ext.compareToIgnoreCase(L"json") == 0) ||
 				(ext.compareToIgnoreCase(L"vsh") == 0) ||
 				(ext.compareToIgnoreCase(L"fsh") == 0)) {
 				Info user = new Info(*this, info->ref());
-				HTTPClient::Request(info->ref().file, true, 0, 5, user, onhttp_text, onhttp_error);
+				HTTPClient::Request(info->ref().file, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry);
 			} else {
 				// Unknown File Type
 				// Fake OK
@@ -228,6 +229,11 @@ void RefLoader::onhttp_error(const String& url, const String& error, const Objec
 	info->loader->ref().onError(info->info, error);
 }
 
+bool RefLoader::onhttp_retry(const String& url, const Object& userData) {
+	RefInfo* info = (RefInfo*)&(userData.ref());
+	return info->loader->ref().onRetry(info->info);
+}
+
 bool RefLoader::onText(const File& info, Stream& stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
@@ -288,6 +294,13 @@ void RefLoader::onError(const File& info, const String& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
 	lastError = info.ref().file;
+}
+
+bool RefLoader::onRetry(const File& info) {
+	if (AtomicGet(&shutdown) != 0)
+		return false;
+	
+	return true;
 }
 
 void RefLoader::onLoad(const File& info, const Object& object) {

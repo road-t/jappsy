@@ -239,11 +239,11 @@ void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const cha
 		[[JappsyThreadHandler class] performSelectorOnMainThread:@selector(ThreadRunner:) withObject:[NSValue valueWithPointer:msg] waitUntilDone:YES];
 #elif defined(__JNI__)
 		postMainThreadMessage(msg);
-		memFree(msg);
 #else
 		#error Unsupported platform!
 #endif
 		AtomicLock(&(syncData->syncLock));
+		memFree(msg);
 
 		volatile const char* throwError = AtomicGetPtr(&(syncData->errorData));
 		if (throwError != NULL) {

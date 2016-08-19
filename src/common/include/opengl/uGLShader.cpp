@@ -17,6 +17,7 @@
 #include "uGLShader.h"
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
+#include <core/uSystem.h>
 
 GLShaderData::~GLShaderData() {
 	if (!m_reference) {
@@ -368,4 +369,96 @@ GLuint GLShaders::createProgram(GLuint vertexShader, GLuint fragmentShader) thro
 
 void GLShaders::releaseProgram(GLuint program) {
 	glDeleteProgram(program);
+}
+
+// THREAD SAFE
+
+struct CreateShaderDataThreadData {
+	GLRender* context;
+	const wchar_t* key;
+	Vector<GLShaderData*> textures;
+	
+	const char* shaderSource;
+};
+
+void* GLShaders::CreateVertexShaderCallback(void* threadData) {
+	struct CreateShaderDataThreadData* thread = (struct CreateShaderDataThreadData*)threadData;
+	
+	GLuint sh = 0;
+	try {
+		sh = thread->context->shaders->createVertexShader(thread->shaderSource);
+	} catch (...) {
+		throw;
+	}
+	GLShaderData* shd = NULL;
+	try {
+		shd = memNew(shd, GLShaderData(thread->context));
+		if (shd == NULL)
+			throw eOutOfMemory;
+		shd->setShader(sh, false);
+	} catch (...) {
+		thread->context->shaders->releaseShader(sh);
+		if (shd != NULL) {
+			memDelete(shd);
+			shd = NULL;
+		}
+		throw;
+	}
+	
+	try {
+		return &(thread->context->shaders->createShader(thread->key, shd, NULL, 0, thread->textures));
+	} catch (...) {
+		memDelete(shd);
+		throw;
+	}
+}
+
+void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
+	struct CreateShaderDataThreadData* thread = (struct CreateShaderDataThreadData*)threadData;
+	
+	GLuint sh = 0;
+	try {
+		sh = thread->context->shaders->createFragmentShader(thread->shaderSource);
+	} catch (...) {
+		throw;
+	}
+	GLShaderData* shd = NULL;
+	try {
+		shd = memNew(shd, GLShaderData(thread->context));
+		if (shd == NULL)
+			throw eOutOfMemory;
+		shd->setShader(sh, false);
+	} catch (...) {
+		thread->context->shaders->releaseShader(sh);
+		if (shd != NULL) {
+			memDelete(shd);
+			shd = NULL;
+		}
+		throw;
+	}
+	
+	try {
+		return &(thread->context->shaders->createShader(thread->key, NULL, shd, 0, thread->textures));
+	} catch (...) {
+		memDelete(shd);
+		throw;
+	}
+}
+
+GLShader& GLShaders::createVertexShader(const wchar_t* key, const char* vertexShaderSource) throw(const char*) {
+	struct CreateShaderDataThreadData thread;
+	thread.context = context;
+	thread.key = key;
+	thread.shaderSource = vertexShaderSource;
+	
+	return *(GLShader*)MainThreadSync(CreateVertexShaderCallback, &thread);
+}
+
+GLShader& GLShaders::createFragmentShader(const wchar_t* key, const char* fragmentShaderSource) throw(const char*) {
+	struct CreateShaderDataThreadData thread;
+	thread.context = context;
+	thread.key = key;
+	thread.shaderSource = fragmentShaderSource;
+	
+	return *(GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
 }

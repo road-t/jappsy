@@ -44,9 +44,10 @@ public:
 
 Stream NSDataToStream(NSData* data) throw(const char*) {
 	NSUInteger size = [data length];
-	void* streamptr = memAlloc(void, streamptr, size);
+	uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
 	if (streamptr != NULL) {
 		memcpy(streamptr, [data bytes], size);
+		*((wchar_t*)(streamptr + size)) = L'\0';
 		try {
 			return new Stream(streamptr, size, true);
 		} catch (...) {
@@ -127,12 +128,12 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 						try {
 							Stream stream = NSDataToStream(data);
 							if (http->onstream((http->url), stream, (http->userData))) {
-								mmfree((void*)dataResult);
+								memFree((void*)dataResult);
 								break;
 							}
 						} catch (...) {
 						}
-						mmfree((void*)dataResult);
+						memFree((void*)dataResult);
 					}
 					if (http->retry > 0) {
 						http->retry--;
@@ -180,7 +181,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
 			if (data != nil) {
 				*dataSizePtr = data.length;
-				*dataPtr = mmalloc((uint32_t)data.length);
+				*dataPtr = memAlloc(void*, dataPtr, (uint32_t)data.length);
 				if (*dataPtr != NULL) {
 					[data getBytes:*dataPtr length:data.length];
 				}

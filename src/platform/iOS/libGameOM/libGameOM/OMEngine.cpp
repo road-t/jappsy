@@ -57,6 +57,8 @@ OMEngine::OMEngine() {
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
+ 
+    //sOMLoadRes = "{\"groups\":{\"shaders\":{\"vsh_main\":\"shaders/vsh_main.jsh\"}}}";
     
     RefLoader* loader = &(context->loader.ref());
     loader->basePath = L"https://www.cox.ru/res/om/";

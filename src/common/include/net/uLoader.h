@@ -23,7 +23,6 @@
 #include <data/uString.h>
 #include <data/uJSONObject.h>
 #include <data/uList.h>
-#include <data/uHashMap.h>
 #include <core/uHandler.h>
 
 class Loader;
@@ -107,7 +106,7 @@ private:
 	int loadSpeed = 5;
 #endif
 	
-	HashMap<String, Stream> result;
+	JSONObject result;
 	List<File> list;
 	struct Status status;
 	volatile int32_t shutdown = 0;
@@ -138,6 +137,7 @@ private:
 	
 	bool onText(const File& info, Stream& stream);
 	bool onData(const File& info, Stream& stream);
+	void onLoad(const File& info, const Object& object);
 	void onError(const File& info, const String& error);
 	
 private:
@@ -158,7 +158,7 @@ public:
 	String basePath;
 
 	inline void initialize() {
-		result = new HashMap<String, Stream>();
+		result = new JSONObject();
 		list = new List<File>();
 		handler = new Handler();
 	}

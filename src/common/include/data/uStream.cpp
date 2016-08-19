@@ -134,7 +134,13 @@ uint8_t* RefStream::readGZip(uint32_t length, uint32_t* resultSize) throw(const 
 	uint8_t* data = readBytes(length);
 	uint32_t dataSize = length;
 	uint32_t ungzipSize = *resultSize;
-	uint8_t* ungzipData = (uint8_t*)gzip_decode(data, length, &ungzipSize);
+	uint8_t* ungzipData;
+	try {
+		ungzipData = (uint8_t*)gzip_decode(data, length, &ungzipSize);
+	} catch (...) {
+		memFree(data);
+		throw;
+	}
 	if (ungzipData != NULL) {
 		memFree(data);
 		data = ungzipData;
@@ -145,17 +151,10 @@ uint8_t* RefStream::readGZip(uint32_t length, uint32_t* resultSize) throw(const 
 }
 
 char* RefStream::readGZipString(uint32_t length) throw(const char*) {
-	uint32_t ungzipSize = 0;
-	uint8_t* ungzip = readGZip(length, &ungzipSize);
-	
-	char* data = memAlloc(char, data, ungzipSize + 1);
-	if (data == NULL) {
-		memFree(ungzip);
-		throw eOutOfMemory;
-	}
-	
-	memcpy(data, ungzip, ungzipSize);
-	data[ungzipSize] = '\0';
-	return data;
+	uint32_t dataSize = 0;
+	uint8_t* data = readGZip(length, &dataSize);
+	if (data != NULL)
+		data[dataSize] = '\0';
+	return (char*)data;
 }
 

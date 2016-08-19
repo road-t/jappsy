@@ -100,6 +100,16 @@ public:
 	
 	GLuint createProgram(GLuint vertexShader, GLuint fragmentShader) throw(const char*);
 	void releaseProgram(GLuint program);
+
+private: // Thread Safe
+	static void* CreateVertexShaderCallback(void* threadData);
+	static void* CreateFragmentShaderCallback(void* threadData);
+	
+public: // Thread Safe
+
+	GLShader& createVertexShader(const wchar_t* key, const char* vertexShaderSource) throw(const char*);
+	GLShader& createFragmentShader(const wchar_t* key, const char* fragmentShaderSource) throw(const char*);
+
 };
 
 #endif //JAPPSY_UGLSHADER_H

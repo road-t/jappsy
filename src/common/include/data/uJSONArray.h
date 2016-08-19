@@ -33,23 +33,23 @@ public:
 	
 	inline ~RefJSONArray() { }
 	
-	inline const Object& get(int index) const throw(const char*) {
+	inline Object& get(int index) const throw(const char*) {
 		try {
-			return m_array.get(index);
+			return *(Object*)&(m_array.get(index));
 		} catch (...) {
 			throw eOutOfRange;
 		}
 	}
 	
-	inline const Object& opt(int index, const Object& fallback) const {
+	inline Object& opt(int index, Object& fallback) const {
 		try {
-			return m_array.get(index);
+			return *(Object*)&(m_array.get(index));
 		} catch (...) {
 			return fallback;
 		}
 	}
 	
-	inline const JSONArray& getJSONArray(int index) const throw(const char*) {
+	inline JSONArray& getJSONArray(int index) const throw(const char*) {
 		Object *o = (Object*)&(m_array.get(index));
 		if (o->_object == NULL) {
 			throw eNullPointer;
@@ -60,7 +60,7 @@ public:
 		}
 	}
 	
-	inline const JSONObject& getJSONObject(int index) const throw(const char*) {
+	inline JSONObject& getJSONObject(int index) const throw(const char*) {
 		Object *o = (Object*)&(m_array.get(index));
 		if (o->_object == NULL) {
 			throw eNullPointer;
@@ -71,7 +71,7 @@ public:
 		}
 	}
 	
-	inline const JSONArray& optJSONArray(int index, const JSONArray& fallback) const {
+	inline JSONArray& optJSONArray(int index, JSONArray& fallback) const {
 		try {
 			return THIS.getJSONArray(index);
 		} catch (...) {
@@ -79,7 +79,7 @@ public:
 		}
 	}
 	
-	inline const JSONObject& optJSONObject(int index, const JSONObject& fallback) const {
+	inline JSONObject& optJSONObject(int index, JSONObject& fallback) const {
 		try {
 			return getJSONObject(index);
 		} catch (...) {
@@ -353,12 +353,12 @@ class JSONArray : public Object {
 public:
 	RefClass(JSONArray, RefJSONArray)
 	
-	inline const Object& get(int index) const throw(const char*) { return THIS.ref().get(index); }
-	inline const Object& opt(int index, const Object& fallback) const { return THIS.ref().opt(index, fallback); }
-	inline const JSONArray& getJSONArray(int index) const throw(const char*) { return THIS.ref().getJSONArray(index); }
-	inline const JSONObject& getJSONObject(int index) const throw(const char*) { return THIS.ref().getJSONObject(index); }
-	inline const JSONArray& optJSONArray(int index, const JSONArray& fallback) const { return THIS.ref().optJSONArray(index, fallback); }
-	inline const JSONObject& optJSONObject(int index, const JSONObject& fallback) const { return THIS.ref().optJSONObject(index, fallback); }
+	inline Object& get(int index) const throw(const char*) { return THIS.ref().get(index); }
+	inline Object& opt(int index, Object& fallback) const { return THIS.ref().opt(index, fallback); }
+	inline JSONArray& getJSONArray(int index) const throw(const char*) { return THIS.ref().getJSONArray(index); }
+	inline JSONObject& getJSONObject(int index) const throw(const char*) { return THIS.ref().getJSONObject(index); }
+	inline JSONArray& optJSONArray(int index, JSONArray& fallback) const { return THIS.ref().optJSONArray(index, fallback); }
+	inline JSONObject& optJSONObject(int index, JSONObject& fallback) const { return THIS.ref().optJSONObject(index, fallback); }
 	inline bool getBoolean(int index) const throw(const char*) { return THIS.ref().getBoolean(index); }
 	inline bool optBoolean(int index, bool fallback = false) const { return THIS.ref().optBoolean(index, fallback); }
 	inline int32_t getInt(int index) const throw(const char*) { return THIS.ref().getInt(index); }

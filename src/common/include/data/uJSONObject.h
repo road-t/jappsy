@@ -38,19 +38,19 @@ public:
 	
 	inline ~RefJSONObject() { }
 	
-	inline const Object& get(const String& name) const throw(const char*) {
-		return m_object.get(name);
+	inline Object& get(const String& name) const throw(const char*) {
+		return *(Object*)&(m_object.get(name));
 	}
 	
-	inline const Object& opt(const String& name, const Object& fallback) const {
+	inline Object& opt(const String& name, Object& fallback) const {
 		try {
-			return m_object.get(name);
+			return *(Object*)&(m_object.get(name));
 		} catch (...) {
 			return fallback;
 		}
 	}
 	
-	inline const JSONArray& getJSONArray(const String& name) const throw(const char*) {
+	inline JSONArray& getJSONArray(const String& name) const throw(const char*) {
 		Object *o = (Object*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			throw eNullPointer;
@@ -61,7 +61,7 @@ public:
 		}
 	}
 	
-	inline const JSONObject& getJSONObject(const String& name) const throw(const char*) {
+	inline JSONObject& getJSONObject(const String& name) const throw(const char*) {
 		Object *o = (Object*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			throw eNullPointer;
@@ -72,7 +72,7 @@ public:
 		}
 	}
 	
-	inline const JSONArray& optJSONArray(const String& name, const JSONArray& fallback) const {
+	inline JSONArray& optJSONArray(const String& name, JSONArray& fallback) const {
 		try {
 			return THIS.getJSONArray(name);
 		} catch (...) {
@@ -80,7 +80,7 @@ public:
 		}
 	}
 	
-	inline const JSONObject& optJSONObject(const String& name, const JSONObject& fallback) const {
+	inline JSONObject& optJSONObject(const String& name, JSONObject& fallback) const {
 		try {
 			return THIS.getJSONObject(name);
 		} catch (...) {
@@ -338,12 +338,12 @@ public:
 		THIS.setRef(o);
 	}
 
-	inline const Object& get(const String& name) const throw(const char*) { return THIS.ref().get(name); }
-	inline const Object& opt(const String& name, const Object& fallback) const throw(const char*) { return THIS.ref().opt(name, fallback); }
-	inline const JSONArray& getJSONArray(const String& name) const throw(const char*) { return THIS.ref().getJSONArray(name); }
-	inline const JSONObject& getJSONObject(const String& name) const throw(const char*) { return THIS.ref().getJSONObject(name); }
-	inline const JSONArray& optJSONArray(const String& name, const JSONArray& fallback) const throw(const char*) { return THIS.ref().optJSONArray(name, fallback); }
-	inline const JSONObject& optJSONObject(const String& name, const JSONObject& fallback) const throw(const char*) { return THIS.ref().optJSONObject(name, fallback); }
+	inline Object& get(const String& name) const throw(const char*) { return THIS.ref().get(name); }
+	inline Object& opt(const String& name, Object& fallback) const throw(const char*) { return THIS.ref().opt(name, fallback); }
+	inline JSONArray& getJSONArray(const String& name) const throw(const char*) { return THIS.ref().getJSONArray(name); }
+	inline JSONObject& getJSONObject(const String& name) const throw(const char*) { return THIS.ref().getJSONObject(name); }
+	inline JSONArray& optJSONArray(const String& name, JSONArray& fallback) const throw(const char*) { return THIS.ref().optJSONArray(name, fallback); }
+	inline JSONObject& optJSONObject(const String& name, JSONObject& fallback) const throw(const char*) { return THIS.ref().optJSONObject(name, fallback); }
 	inline bool getBoolean(const String& name) const throw(const char*) { return THIS.ref().getBoolean(name); }
 	inline bool optBoolean(const String& name, bool fallback = false) const throw(const char*) { return THIS.ref().optBoolean(name, fallback); }
 	inline int32_t getInt(const String& name) const throw(const char*) { return THIS.ref().getInt(name); }

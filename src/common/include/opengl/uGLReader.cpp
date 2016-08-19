@@ -159,10 +159,8 @@ void* GLReader::CreateShaderSourceCallback(void* threadData) {
 			sh = thread->context->shaders->createFragmentShader(thread->shaderSource);
 		}
 	} catch (...) {
-		memFree(thread->shaderSource);
 		throw;
 	}
-	memFree(thread->shaderSource);
 	GLShaderData* shd = NULL;
 	try {
 		shd = memNew(shd, GLShaderData(thread->context));
@@ -280,11 +278,10 @@ GLShader& GLReader::createShader(GLRender* ctx, const wchar_t* key, Stream& stre
 		thread.vsh = NULL;
 		thread.fsh = NULL;
 		thread.program = 0;
-		thread.textures;
-		
+
 		uint32_t len = (uint32_t)stream.readInt();
 		uint32_t chunk = (uint32_t)stream.readInt();
-		
+
 		try {
 			while (chunk != GLReader::JENDCHUNK) {
 				if ((chunk == GLReader::VGZCHUNK) ||
@@ -297,8 +294,17 @@ GLShader& GLReader::createShader(GLRender* ctx, const wchar_t* key, Stream& stre
 					} else {
 						thread.shaderSource = stream.readString(len);
 					}
+					
 					thread.chunk = chunk;
-					(void)MainThreadSync(CreateShaderSourceCallback, &thread);
+					try {
+						(void)MainThreadSync(CreateShaderSourceCallback, &thread);
+					} catch (...) {
+						memFree(thread.shaderSource);
+						thread.shaderSource = NULL;
+						throw;
+					}
+					memFree(thread.shaderSource);
+					thread.shaderSource = NULL;
 				} else if ((chunk == GLReader::VRFCHUNK) || (chunk == GLReader::FRFCHUNK) || (chunk == GLReader::IRFCHUNK)) {
 					char* target = stream.readString(len);
 					GLShaderData* shd = NULL;

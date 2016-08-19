@@ -35,6 +35,11 @@ void RefLoader::release() {
 	THIS.wait();
 	AtomicSet(&shutdown, 1);
 	handler.release();
+	
+	while (AtomicGet(&status.left) > 0) {
+		sleep(1);
+	}
+	
 	context = NULL;
 	THIS.notifyAll();
 }
@@ -216,31 +221,50 @@ bool RefLoader::onhttp_data(const String& url, Stream& stream, const Object& use
 }
 
 void RefLoader::onhttp_error(const String& url, const String& error, const Object& userData) {
-	RefInfo* info = (RefInfo*)&(userData.ref());
-	info->loader->ref().onError(info->info, error);
-
 	String err = String::format(L"Unable to load %ls - %ls", (wchar_t*)url, (wchar_t*)error);
 	err.log();
+
+	RefInfo* info = (RefInfo*)&(userData.ref());
+	info->loader->ref().onError(info->info, error);
 }
 
 bool RefLoader::onText(const File& info, Stream& stream) {
+	if (AtomicGet(&shutdown) != 0)
+		return false;
 	
-	
-	AtomicIncrement(&(status.count));
-	AtomicDecrement(&(status.left));
-	AtomicSet(&(status.update), true);
-	if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	String ext = info.ref().ext;
+	if (ext.compareToIgnoreCase(L"vsh") == 0) {
+		try {
+			GLShader* shader = &(context->shaders->createVertexShader((wchar_t*)(info.ref().key), (char*)stream.getBuffer()));
+			onLoad(info, *shader);
+			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+		} catch (...) {
+			return false;
+		}
+	} else if (ext.compareToIgnoreCase(L"fsh") == 0) {
+		try {
+			GLShader* shader = &(context->shaders->createFragmentShader((wchar_t*)(info.ref().key), (char*)stream.getBuffer()));
+			onLoad(info, *shader);
+			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+		} catch (...) {
+			return false;
+		}
+	} else {
+		onLoad(info, stream);
+		if (onfile != NULL) onfile(info.ref().file, stream, userData);
+	}
 	return true;
 }
 
 bool RefLoader::onData(const File& info, Stream& stream) {
+	if (AtomicGet(&shutdown) != 0)
+		return false;
+	
 	String ext = info.ref().ext;
 	if (ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
 			GLTexture* texture = &(GLReader::createTexture(context, (wchar_t*)(info.ref().key), stream));
-			AtomicIncrement(&(status.count));
-			AtomicDecrement(&(status.left));
-			AtomicSet(&(status.update), true);
+			onLoad(info, *texture);
 			if (onfile != NULL) onfile(info.ref().file, *texture, userData);
 		} catch (...) {
 			return false;
@@ -248,17 +272,13 @@ bool RefLoader::onData(const File& info, Stream& stream) {
 	} else if (ext.compareToIgnoreCase(L"jsh") == 0) {
 		try {
 			GLShader* shader = &(GLReader::createShader(context, (wchar_t*)(info.ref().key), stream));
-			AtomicIncrement(&(status.count));
-			AtomicDecrement(&(status.left));
-			AtomicSet(&(status.update), true);
+			onLoad(info, *shader);
 			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
-		AtomicIncrement(&(status.count));
-		AtomicDecrement(&(status.left));
-		AtomicSet(&(status.update), true);
+		onLoad(info, stream);
 		if (onfile != NULL) onfile(info.ref().file, stream, userData);
 	}
 	return true;
@@ -268,5 +288,23 @@ void RefLoader::onError(const File& info, const String& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
 	lastError = info.ref().file;
+}
+
+void RefLoader::onLoad(const File& info, const Object& object) {
+	__sync_synchronize();
+
+	JSONObject group;
+	try {
+		group = result.getJSONObject(info.ref().group);
+	} catch (...) {
+		group = new JSONObject();
+		result.put(info.ref().group, group);
+	}
+	
+	group.put(info.ref().key, object);
+
+	AtomicIncrement(&(status.count));
+	AtomicDecrement(&(status.left));
+	AtomicSet(&(status.update), true);
 }
 

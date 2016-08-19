@@ -25,7 +25,6 @@ void jappsyInit() {
 
 void jappsyQuit() {
 #ifdef DEBUG
-	memLogSort();
     memLogStats(NULL, NULL, NULL, NULL);
 #endif
 

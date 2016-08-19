@@ -47,14 +47,8 @@ const wchar_t TypeLinkedHashMap[] = L"LinkedHashMap::";
 const wchar_t TypeSparseArray[] = L"SparseArray::";
 
 void RefObject::_threadLock() const {
-#if defined(__IOS__)
-	void* thread = (__bridge void *)([NSThread currentThread]);
-#elif defined(__JNI__)
-	void* thread = (void*)((intptr_t)(pthread_self()));
-#else
-	#error Crossplatform Object not finished
-#endif
-	
+	void* thread = CurrentThreadId();
+
 	do {
 		_spinLock();
 		if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
@@ -69,13 +63,7 @@ void RefObject::_threadLock() const {
 }
 
 bool RefObject::_threadLockTry() const {
-#if defined(__IOS__)
-	void* thread = (__bridge void *)([NSThread currentThread]);
-#elif defined(__JNI__)
-	void* thread = (void*)((intptr_t)(pthread_self()));
-#else
-	#error Crossplatform Object not finished
-#endif
+	void* thread = CurrentThreadId();
 	
 	_spinLock();
 	if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
@@ -89,13 +77,7 @@ bool RefObject::_threadLockTry() const {
 }
 
 void RefObject::_threadUnlock() const {
-#if defined(__IOS__)
-	void* thread = (__bridge void *)([NSThread currentThread]);
-#elif defined(__JNI__)
-	void* thread = (void*)((intptr_t)(pthread_self()));
-#else
-	#error Crossplatform Object not finished
-#endif
+	void* thread = CurrentThreadId();
 	
 	_spinLock();
 	if (AtomicDecrement((volatile int32_t*)&_lockCount) == 1) {
@@ -105,7 +87,7 @@ void RefObject::_threadUnlock() const {
 }
 
 bool RefObject::equals(const Object& object) const {
-	return (this == object._object);
+	return ((void*)this == (void*)(object._object));
 }
 
 bool RefObject::equals(const void* object) const {

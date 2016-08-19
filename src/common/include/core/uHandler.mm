@@ -23,7 +23,7 @@
 #endif
 
 #if defined(__JNI__)
-	#include <jappsy.h>
+	#include <core/uSystem.h>
 #endif
 
 const wchar_t TypeHandler[] = L"Handler::";
@@ -243,11 +243,7 @@ void RefHandler::onthread(Handler* handler, void* runnerid) {
 		threadData->handler = handler;
 		threadData->runner = runner;
 
-		struct ThreadMessage msg;
-		msg.callback = RefHandler_threadRun;
-		msg.data = threadData;
-
-		postMainThreadMessage(&msg);
+		MainThreadAsync(RefHandler_threadRun, NULL, threadData);
 #else
 	#error Handler not finished
 #endif

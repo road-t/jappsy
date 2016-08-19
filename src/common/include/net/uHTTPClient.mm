@@ -30,6 +30,8 @@ public:
 	static void run(HTTPRequest* request) throw(const char*);
 };
 
+#if defined(__IOS__)
+
 @interface iOSThread : NSObject
 
 +(void)runSyncMain:(NSValue *)threadData;
@@ -238,6 +240,8 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 
 @end
 
+#endif
+
 void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
@@ -251,8 +255,12 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
-	
+
+#if defined(__IOS__)
 	HTTPRequest::run(http);
+#else
+	#warning Crossplatform http request not ready
+#endif
 }
 
 void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror) throw(const char*) {
@@ -268,6 +276,10 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
-	
+
+#if defined(__IOS__)
 	HTTPRequest::run(http);
+#else
+	#warning Crossplatform http request not ready
+#endif
 }

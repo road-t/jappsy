@@ -14,23 +14,21 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_H
-#define JAPPSY_H
+#include "jappsy.h"
+#include <core/uMemory.h>
+#include <core/uSystem.h>
 
-#include <platform.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Initialize all core static variables
-void jappsyInit();
-
-// Deinitialize all core static variables
-void jappsyQuit();
-
-#ifdef __cplusplus
+void jappsyInit() {
+    mmInit();
+    uSystemInit();
 }
+
+void jappsyQuit() {
+#ifdef DEBUG
+	memLogSort();
+    memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
-#endif //JAPPSY_H
+    uSystemQuit();
+    mmQuit();
+}

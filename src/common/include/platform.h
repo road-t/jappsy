@@ -19,7 +19,7 @@
 
 #ifndef DEBUG
 	// TODO: Remove Always Debug Mode
-	#define DEBUG
+	//#define DEBUG
 #endif
 #define JAPPSY_IO_RESTORE_FILE_POINTER
 
@@ -123,11 +123,18 @@
                             + __GNUC_PATCHLEVEL__)
 #endif
 
+#if __x86_64__
+	#define	__X64__
+#elif defined(__LP64__)
+	#define	__X64__
+#else
+	#define __X32__
+#endif
+
 #if defined(__IOS__) || defined(__JNI__) || defined(__WINNT__)
 	#ifdef __cplusplus
 		template <typename Owner, typename Type>
-		class Property
-		{
+		class Property {
 		protected:
 			typedef Type (*getter)(const Owner& self);
 			typedef Type (*setter)(Owner& self, Type value);
@@ -144,15 +151,34 @@
 	#endif
 #endif
 
-#if __x86_64__
-	#define	__X64__
-#elif defined(__LP64__)
-	#define	__X64__
-#else
-	#define __X32__
+#endif //JAPPSY_PLATFORM_H
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-#endif //JAPPSY_PLATFORM_H
+#ifndef JAPPSYLOG
+	#define JAPPSYLOG
+
+	#ifdef DEBUG
+		#if defined(__IOS__)
+			void CNSLog(const char* format, ...);
+
+			#define LOG(f, ...) CNSLog(f, ##__VA_ARGS__);
+        #elif defined(__WINNT__)
+            #define LOG(f, ...) printf(f, ##__VA_ARGS__);
+        #elif defined(__JNI__)
+            #include <android/log.h>
+            #define LOG(f, ...) __android_log_print(ANDROID_LOG_INFO, "JNI", f, ##__VA_ARGS__);
+        #endif
+	#else
+		#define LOG(f, ...)
+	#endif
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 /* INCLUDES */
 
@@ -255,27 +281,5 @@
 	#endif
 #endif
 
-#ifndef LOG
-    #ifdef DEBUG
-        #if defined(__IOS__)
-			#ifdef __cplusplus
-				extern "C" {
-			#endif
-					void CNSLog(const char* format, ...);
-			#ifdef __cplusplus
-				}
-			#endif
-
-			#define LOG(f, ...) CNSLog(f, ##__VA_ARGS__);
-        #elif defined(__WINNT__)
-            #define LOG(f, ...) printf(f, ##__VA_ARGS__);
-        #elif defined(__JNI__)
-            #include <android/log.h>
-            #define LOG(f, ...) __android_log_print(ANDROID_LOG_INFO, "JNI", f, ##__VA_ARGS__);
-        #endif
-    #else
-        #define LOG(f, ...)
-    #endif
-#endif
-
 #define THIS (*this)
+

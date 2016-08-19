@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-#include "include/platform.h"
+#include <android/log.h>
+#include <platform.h>
 
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>

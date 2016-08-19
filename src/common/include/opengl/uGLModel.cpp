@@ -28,7 +28,7 @@ RefGLModel::~RefGLModel() {
 
 GLModels::GLModels(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLTexture>();
+	list = new HashMap<String, GLModel>();
 }
 
 GLModels::~GLModels() {

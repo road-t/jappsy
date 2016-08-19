@@ -49,6 +49,17 @@ public:
 	
 	static GLTexture& createTexture(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
 	static GLShader& createShader(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
+	
+private:
+	static void* CreateTextureHandleCallback(void* threadData);
+	static void* CreateTextureCallback(void* threadData);
+	static void* CreateTextureErrorCallback(void* threadData);
+	
+	static void* CreateShaderSourceCallback(void* threadData);
+	static void* CreateShaderTextureCallback(void* threadData);
+	static void* CreateShaderProgramCallback(void* threadData);
+	static void* CreateShaderCallback(void* threadData);
+	static void* CreateShaderErrorCallback(void* threadData);
 };
 
 #endif //JAPPSY_UGLREADER_H

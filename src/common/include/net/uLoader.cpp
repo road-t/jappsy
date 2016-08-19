@@ -169,8 +169,10 @@ void RefLoader::onjson_subfile(struct json_context* ctx, const char* key, char* 
 	URI* uri = new URI((wchar_t*)path);
 	uri->absolutePath((wchar_t*)(loader->basePath));
 	
-	loader->list.add(new RefLoader::RefFile(uri->uri(), uri->ext(), key, loader->subgroup));
-	loader->status.total++;
+	if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
+		loader->list.add(new RefLoader::RefFile(uri->uri(), uri->ext(), key, loader->subgroup));
+		loader->status.total++;
+	}
 	
 	delete uri;
 }

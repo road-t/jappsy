@@ -32,7 +32,6 @@ typedef void* (*ThreadResultCallback)(void* userData, void* resultData);
 void* CurrentThreadId();
 
 void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const char*);
-void* NewThreadSync(ThreadRunCallback callback, void* userData) throw(const char*);
 void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);
 void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);
 	

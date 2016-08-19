@@ -259,7 +259,7 @@ GLuint RefGLShader::bind(GLint index, Vector<GLint>& uniforms) {
 
 GLShaders::GLShaders(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLTexture>();
+	list = new HashMap<String, GLShader>();
 }
 
 GLShaders::~GLShaders() {
@@ -274,10 +274,7 @@ GLShader& GLShaders::get(const wchar_t* key) throw(const char*) {
 GLShader& GLShaders::createShader(const wchar_t* key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*) {
 	try {
 		list.remove(key);
-		GLShader* shader = &(list.put(key, new RefGLShader(context, vsh, fsh, program, textures)));
-		if (wcscmp(key, L"null") == 0) {
-		}
-		return *shader;
+		return list.put(key, new RefGLShader(context, vsh, fsh, program, textures));
 	} catch (...) {
 		throw;
 	}

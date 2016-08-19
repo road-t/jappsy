@@ -18,15 +18,18 @@
 		C30577FC1D54BA9C00171EFC /* uError.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577CC1D54BA9C00171EFC /* uError.h */; };
 		C30578011D54BA9C00171EFC /* uMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577CF1D54BA9C00171EFC /* uMemory.h */; };
 		C305780B1D54BA9C00171EFC /* uSystem.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577D51D54BA9C00171EFC /* uSystem.h */; };
-		C305781A1D54BA9C00171EFC /* jappsy.c in Sources */ = {isa = PBXBuildFile; fileRef = C30577E11D54BA9C00171EFC /* jappsy.c */; };
 		C305781C1D54BA9C00171EFC /* jappsy.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577E21D54BA9C00171EFC /* jappsy.h */; };
 		C30578251D54BA9C00171EFC /* platform.h in Headers */ = {isa = PBXBuildFile; fileRef = C30577E91D54BA9C00171EFC /* platform.h */; };
 		C30578281D54BBA000171EFC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578271D54BBA000171EFC /* Foundation.framework */; };
 		C305782A1D54BBAB00171EFC /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578291D54BBAB00171EFC /* OpenGLES.framework */; };
 		C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C305782B1D54BBBB00171EFC /* UIKit.framework */; };
 		C30578371D54C73B00171EFC /* platform.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.m */; };
-		C305783A1D54CADE00171EFC /* uSystem.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578391D54CADE00171EFC /* uSystem.m */; };
 		C30578401D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
+		C3401C5D1D668B4E009B223D /* uSystem.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3401C5C1D668B4E009B223D /* uSystem.mm */; };
+		C3401C5F1D668B70009B223D /* jappsy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C5E1D668B70009B223D /* jappsy.cpp */; };
+		C3401C611D6698CC009B223D /* uHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C601D6698CC009B223D /* uHandler.cpp */; };
+		C3401C631D669B8C009B223D /* uVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C621D669B8C009B223D /* uVector.cpp */; };
+		C3401C651D669BE0009B223D /* uObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C641D669BE0009B223D /* uObject.cpp */; };
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
 		C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
 		C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9541D5B54EB0022FF71 /* uGLFrame.h */; };
@@ -40,7 +43,6 @@
 		C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD97F1D5B8E0A0022FF71 /* uString.h */; };
 		C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9801D5B8E0A0022FF71 /* uString.mm */; };
 		C34FD98A1D5B8E0A0022FF71 /* uVector.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9811D5B8E0A0022FF71 /* uVector.h */; };
-		C34FD98B1D5B8E0A0022FF71 /* uVector.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9821D5B8E0A0022FF71 /* uVector.mm */; };
 		C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9901D5B926A0022FF71 /* uMotionEvent.cpp */; };
 		C34FD9941D5B926A0022FF71 /* uMotionEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9911D5B926A0022FF71 /* uMotionEvent.h */; };
 		C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9B11D5BBBB70022FF71 /* GLContext.h */; };
@@ -49,7 +51,6 @@
 		C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9B41D5BBBB70022FF71 /* JappsyView.mm */; };
 		C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */; };
 		C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA3B1D5BE2E60022FF71 /* uHandler.h */; };
-		C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */; };
 		C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */; };
 		C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA401D5C01FC0022FF71 /* uGLCamera.h */; };
 		C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */; };
@@ -61,7 +62,6 @@
 		C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA591D5CADCB0022FF71 /* uStream.h */; };
 		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
-		C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
@@ -126,15 +126,18 @@
 		C30577CC1D54BA9C00171EFC /* uError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uError.h; sourceTree = "<group>"; };
 		C30577CF1D54BA9C00171EFC /* uMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMemory.h; sourceTree = "<group>"; };
 		C30577D51D54BA9C00171EFC /* uSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSystem.h; sourceTree = "<group>"; };
-		C30577E11D54BA9C00171EFC /* jappsy.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = jappsy.c; sourceTree = "<group>"; };
 		C30577E21D54BA9C00171EFC /* jappsy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jappsy.h; sourceTree = "<group>"; };
 		C30577E91D54BA9C00171EFC /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
 		C30578271D54BBA000171EFC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C30578291D54BBAB00171EFC /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		C305782B1D54BBBB00171EFC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		C30578361D54C73B00171EFC /* platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = platform.m; sourceTree = "<group>"; };
-		C30578391D54CADE00171EFC /* uSystem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uSystem.m; sourceTree = "<group>"; };
 		C305783F1D54CBAB00171EFC /* uMemory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uMemory.mm; sourceTree = "<group>"; };
+		C3401C5C1D668B4E009B223D /* uSystem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uSystem.mm; sourceTree = "<group>"; };
+		C3401C5E1D668B70009B223D /* jappsy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jappsy.cpp; sourceTree = "<group>"; };
+		C3401C601D6698CC009B223D /* uHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uHandler.cpp; sourceTree = "<group>"; };
+		C3401C621D669B8C009B223D /* uVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uVector.cpp; sourceTree = "<group>"; };
+		C3401C641D669BE0009B223D /* uObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uObject.cpp; sourceTree = "<group>"; };
 		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLFrame.cpp; sourceTree = "<group>"; };
 		C34FD9541D5B54EB0022FF71 /* uGLFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLFrame.h; sourceTree = "<group>"; };
@@ -148,7 +151,6 @@
 		C34FD97F1D5B8E0A0022FF71 /* uString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uString.h; sourceTree = "<group>"; };
 		C34FD9801D5B8E0A0022FF71 /* uString.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uString.mm; sourceTree = "<group>"; };
 		C34FD9811D5B8E0A0022FF71 /* uVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uVector.h; sourceTree = "<group>"; };
-		C34FD9821D5B8E0A0022FF71 /* uVector.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uVector.mm; sourceTree = "<group>"; };
 		C34FD9901D5B926A0022FF71 /* uMotionEvent.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uMotionEvent.cpp; sourceTree = "<group>"; };
 		C34FD9911D5B926A0022FF71 /* uMotionEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMotionEvent.h; sourceTree = "<group>"; };
 		C34FD9B11D5BBBB70022FF71 /* GLContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GLContext.h; sourceTree = "<group>"; };
@@ -157,7 +159,6 @@
 		C34FD9B41D5BBBB70022FF71 /* JappsyView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyView.mm; sourceTree = "<group>"; };
 		C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLEngine.cpp; sourceTree = "<group>"; };
 		C34FDA3B1D5BE2E60022FF71 /* uHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHandler.h; sourceTree = "<group>"; };
-		C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uHandler.mm; sourceTree = "<group>"; };
 		C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLCamera.cpp; sourceTree = "<group>"; };
 		C34FDA401D5C01FC0022FF71 /* uGLCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLCamera.h; sourceTree = "<group>"; };
 		C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignX.h; sourceTree = "<group>"; };
@@ -169,7 +170,6 @@
 		C34FDA591D5CADCB0022FF71 /* uStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStream.h; sourceTree = "<group>"; };
 		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
 		C34FDA5E1D5CB7350022FF71 /* uLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLoader.h; sourceTree = "<group>"; };
-		C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uObject.mm; sourceTree = "<group>"; };
 		C34FDA6C1D5DDD0B0022FF71 /* uObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uObject.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
@@ -249,7 +249,7 @@
 				C35271FC1D551B8400F41198 /* opengl */,
 				C30577BF1D54BA9C00171EFC /* cipher */,
 				C30577C91D54BA9C00171EFC /* core */,
-				C30577E11D54BA9C00171EFC /* jappsy.c */,
+				C3401C5E1D668B70009B223D /* jappsy.cpp */,
 				C30577E21D54BA9C00171EFC /* jappsy.h */,
 				C30578361D54C73B00171EFC /* platform.m */,
 				C30577E91D54BA9C00171EFC /* platform.h */,
@@ -279,10 +279,10 @@
 				C30577CC1D54BA9C00171EFC /* uError.h */,
 				C305783F1D54CBAB00171EFC /* uMemory.mm */,
 				C30577CF1D54BA9C00171EFC /* uMemory.h */,
-				C30578391D54CADE00171EFC /* uSystem.m */,
+				C3401C5C1D668B4E009B223D /* uSystem.mm */,
 				C30577D51D54BA9C00171EFC /* uSystem.h */,
 				C34FDA3B1D5BE2E60022FF71 /* uHandler.h */,
-				C34FDA3C1D5BE2E60022FF71 /* uHandler.mm */,
+				C3401C601D6698CC009B223D /* uHandler.cpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -302,7 +302,7 @@
 		C34FD9711D5B7C490022FF71 /* data */ = {
 			isa = PBXGroup;
 			children = (
-				C34FDA6B1D5DDD0B0022FF71 /* uObject.mm */,
+				C3401C641D669BE0009B223D /* uObject.cpp */,
 				C34FDA6C1D5DDD0B0022FF71 /* uObject.h */,
 				C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */,
 				C3A4B4E61D5EB63C0039DD09 /* uNumber.h */,
@@ -331,7 +331,7 @@
 				C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */,
 				C34FD97E1D5B8E0A0022FF71 /* uSmoothValue.h */,
 				C34FD9811D5B8E0A0022FF71 /* uVector.h */,
-				C34FD9821D5B8E0A0022FF71 /* uVector.mm */,
+				C3401C621D669B8C009B223D /* uVector.cpp */,
 			);
 			path = data;
 			sourceTree = "<group>";
@@ -581,16 +581,16 @@
 				C35900C91D6542C700C1D154 /* uGLDrawing.cpp in Sources */,
 				C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */,
 				C34FDA4D1D5C97BC0022FF71 /* uGLPaint.cpp in Sources */,
-				C34FDA3E1D5BE2E60022FF71 /* uHandler.mm in Sources */,
 				C34FD9841D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */,
 				C30577EF1D54BA9C00171EFC /* uCrc.c in Sources */,
 				C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */,
+				C3401C611D6698CC009B223D /* uHandler.cpp in Sources */,
 				C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */,
+				C3401C5F1D668B70009B223D /* jappsy.cpp in Sources */,
 				C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */,
 				C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */,
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
-				C305783A1D54CADE00171EFC /* uSystem.m in Sources */,
 				C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */,
 				C35900CB1D6542C700C1D154 /* uGLFunc.cpp in Sources */,
 				C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */,
@@ -603,11 +603,11 @@
 				C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */,
 				C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
-				C34FDA6D1D5DDD0B0022FF71 /* uObject.mm in Sources */,
-				C34FD98B1D5B8E0A0022FF71 /* uVector.mm in Sources */,
-				C305781A1D54BA9C00171EFC /* jappsy.c in Sources */,
+				C3401C5D1D668B4E009B223D /* uSystem.mm in Sources */,
 				C30578401D54CBAB00171EFC /* uMemory.mm in Sources */,
 				C30577F41D54BA9C00171EFC /* uMD5.c in Sources */,
+				C3401C631D669B8C009B223D /* uVector.cpp in Sources */,
+				C3401C651D669BE0009B223D /* uObject.cpp in Sources */,
 				C34FD9B71D5BBBB70022FF71 /* GLContext.mm in Sources */,
 				C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
 				C35900D11D6542C700C1D154 /* uGLObject.cpp in Sources */,

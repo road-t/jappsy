@@ -48,7 +48,76 @@ struct ThreadMessage {
 	volatile struct ThreadSyncData* syncData;
 };
 
-#if defined(__JNI__)
+void* NewThreadRun(void* data) {
+	struct ThreadMessage* msg = (struct ThreadMessage*)data;
+	volatile struct ThreadSyncData* syncData = AtomicGetPtr(&(msg->syncData));
+	
+	ThreadRunCallback runCallback = AtomicGetPtr(&(msg->runCallback));
+	volatile void *userData = AtomicGetPtr(&(msg->userData));
+	void *result = NULL;
+	
+	try {
+		__sync_synchronize();
+
+		result = runCallback((void*)userData);
+	} catch (const char* error) {
+		if (AtomicGet(&(msg->syncCall))) {
+			AtomicSetPtr(&(syncData->errorData), (char*)error);
+			AtomicUnlock(&(syncData->syncLock));
+			return NULL;
+		} else {
+			memFree(msg);
+			throw;
+		}
+	} catch (...) {
+		if (AtomicGet(&(msg->syncCall))) {
+			AtomicSetPtr(&(syncData->errorData), (char*)eUnknown);
+			AtomicUnlock(&(syncData->syncLock));
+			return NULL;
+		} else {
+			memFree(msg);
+			throw;
+		}
+	}
+	
+	if (AtomicGet(&(msg->syncCall))) {
+		AtomicSetPtr(&(syncData->resultData), result);
+		AtomicUnlock(&(syncData->syncLock));
+	} else {
+		ThreadResultCallback resultCallback = AtomicGetPtr(&(msg->resultCallback));
+		memFree(msg);
+		if (resultCallback != NULL) {
+			try {
+				resultCallback((void*)userData, result);
+			} catch (...) {
+				throw;
+			}
+		}
+	}
+	
+	return NULL;
+}
+
+#if defined(__IOS__)
+
+	@interface JappsyThreadHandler : NSObject
+
+	+(void)ThreadRunner:(NSValue *)threadData;
+
+	@end
+
+	@implementation JappsyThreadHandler
+
+	+(void)ThreadRunner:(NSValue *)threadData {
+		@autoreleasepool {
+			struct ThreadMessage* msg = (struct ThreadMessage*)([threadData pointerValue]);
+			(void)NewThreadRun(msg);
+		}
+	}
+
+	@end
+
+#elif defined(__JNI__)
 	#include <asm/fcntl.h>
 	#include <unistd.h>
 	#include <android/looper.h>
@@ -143,24 +212,34 @@ void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const cha
 	if (CurrentThreadId() == MainThreadId) {
 		return callback(userData);
 	} else {
-		struct ThreadMessage msg;
+		struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
 		struct ThreadSyncData* syncData = memAlloc(struct ThreadSyncData, syncData, sizeof(struct ThreadSyncData));
-		if (syncData == NULL)
+		if ((msg == NULL) || (syncData == NULL)) {
+			if (msg != NULL) {
+				memFree(msg);
+			}
+			if (syncData != NULL) {
+				memFree(syncData);
+			}
 			throw eOutOfMemory;
+		}
 
-		msg.runCallback = callback;
-		msg.resultCallback = NULL;
-		msg.userData = userData;
-		msg.syncCall = true;
-		msg.syncData = syncData;
+		AtomicSetPtr(&(msg->runCallback), (void*)callback);
+		AtomicSetPtr(&(msg->resultCallback), NULL);
+		AtomicSetPtr(&(msg->userData), userData);
+		AtomicSet(&(msg->syncCall), true);
+		AtomicSetPtr(&(msg->syncData), syncData);
 
 		AtomicSet(&(syncData->syncLock), false);
 		AtomicSetPtr(&(syncData->resultData), NULL);
 		AtomicSetPtr(&(syncData->errorData), NULL);
 
 		AtomicLock(&(syncData->syncLock));
-#if defined(__JNI__)
-		postMainThreadMessage(&msg);
+#if defined(__IOS__)
+		[[JappsyThreadHandler class] performSelectorOnMainThread:@selector(ThreadRunner:) withObject:[NSValue valueWithPointer:msg] waitUntilDone:YES];
+#elif defined(__JNI__)
+		postMainThreadMessage(msg);
+		memFree(msg);
 #else
 		#error Unsupported platform!
 #endif
@@ -175,104 +254,10 @@ void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const cha
 		volatile void* result = AtomicGetPtr(&(syncData->resultData));
 		memFree(syncData);
 
+		__sync_synchronize();
+
 		return (void*)result;
 	}
-}
-
-void* NewThreadRun(void* data) {
-	struct ThreadMessage* msg = (struct ThreadMessage*)data;
-	volatile struct ThreadSyncData* syncData = AtomicGetPtr(&(msg->syncData));
-
-	ThreadRunCallback runCallback = AtomicGetPtr(&(msg->runCallback));
-	volatile void *userData = AtomicGetPtr(&(msg->userData));
-	void *result = NULL;
-
-	try {
-		result = runCallback((void*)userData);
-	} catch (const char* error) {
-		if (AtomicGet(&(msg->syncCall))) {
-			AtomicSetPtr(&(syncData->errorData), (char*)error);
-			AtomicUnlock(&(syncData->syncLock));
-			return NULL;
-		} else {
-			memFree(msg);
-			throw;
-		}
-	} catch (...) {
-		if (AtomicGet(&(msg->syncCall))) {
-			AtomicSetPtr(&(syncData->errorData), (char*)eUnknown);
-			AtomicUnlock(&(syncData->syncLock));
-			return NULL;
-		} else {
-			memFree(msg);
-			throw;
-		}
-	}
-
-	if (AtomicGet(&(msg->syncCall))) {
-		AtomicSetPtr(&(syncData->resultData), result);
-		AtomicUnlock(&(syncData->syncLock));
-	} else {
-		ThreadResultCallback resultCallback = AtomicGetPtr(&(msg->resultCallback));
-		memFree(msg);
-		if (resultCallback != NULL) {
-			try {
-				resultCallback((void*)userData, result);
-			} catch (...) {
-				throw;
-			}
-		}
-	}
-
-	return NULL;
-}
-
-void* NewThreadSync(ThreadRunCallback callback, void* userData) throw(const char*) {
-	struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
-	struct ThreadSyncData* syncData = memAlloc(struct ThreadSyncData, syncData, sizeof(struct ThreadSyncData));
-	if ((msg == NULL) || (syncData == NULL)) {
-		if (msg != NULL) {
-			memFree(msg);
-		}
-		if (syncData != NULL) {
-			memFree(syncData);
-		}
-		throw eOutOfMemory;
-	}
-
-	AtomicSetPtr(&(msg->runCallback), (void*)callback);
-	AtomicSetPtr(&(msg->resultCallback), NULL);
-	AtomicSetPtr(&(msg->userData), userData);
-	AtomicSet(&(msg->syncCall), true);
-	AtomicSetPtr(&(msg->syncData), syncData);
-
-	AtomicSet(&(syncData->syncLock), false);
-	AtomicSetPtr(&(syncData->resultData), NULL);
-	AtomicSetPtr(&(syncData->errorData), NULL);
-
-	AtomicLock(&(syncData->syncLock));
-#if defined(__JNI__)
-	pthread_t thread;
-	pthread_create(&thread, NULL, NewThreadRun, msg);
-	void* threadResult = NULL;
-	pthread_join(thread, &threadResult);
-#else
-	#error Unsupported platform!
-#endif
-	AtomicLock(&(syncData->syncLock));
-
-	volatile const char* throwError = AtomicGetPtr(&(syncData->errorData));
-	if (throwError != NULL) {
-		memFree(msg);
-		memFree(syncData);
-		throw (const char*)throwError;
-	}
-
-	volatile void* result = AtomicGetPtr(&(syncData->resultData));
-	memFree(msg);
-	memFree(syncData);
-
-	return (void*)result;
 }
 
 void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*) {
@@ -281,16 +266,21 @@ void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultC
 		if (resultCallback != NULL)
 			resultCallback(userData, result);
 	} else {
-		struct ThreadMessage msg;
+		struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
+		if (msg == NULL)
+			throw eOutOfMemory;
+		
+		AtomicSetPtr(&(msg->runCallback), (void*)runCallback);
+		AtomicSetPtr(&(msg->resultCallback), (void*)resultCallback);
+		AtomicSetPtr(&(msg->userData), userData);
+		AtomicSet(&(msg->syncCall), false);
+		AtomicSetPtr(&(msg->syncData), NULL);
 
-		msg.runCallback = runCallback;
-		msg.resultCallback = resultCallback;
-		msg.userData = userData;
-		msg.syncCall = false;
-		msg.syncData = NULL;
-
-#if defined(__JNI__)
-		postMainThreadMessage(&msg);
+#if defined(__IOS__)
+		[[JappsyThreadHandler class] performSelectorOnMainThread:@selector(ThreadRunner:) withObject:[NSValue valueWithPointer:msg] waitUntilDone:NO];
+#elif defined(__JNI__)
+		postMainThreadMessage(msg);
+		memFree(msg);
 #else
 		#error Unsupported platform!
 #endif
@@ -308,7 +298,9 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
 	AtomicSet(&(msg->syncCall), false);
 	AtomicSetPtr(&(msg->syncData), NULL);
 
-#if defined(__JNI__)
+#if defined(__IOS__)
+	[NSThread detachNewThreadSelector:@selector(ThreadRunner:) toTarget:[JappsyThreadHandler class] withObject:[NSValue valueWithPointer:msg]];
+#elif defined(__JNI__)
 	pthread_t thread;
 	pthread_create(&thread, NULL, NewThreadRun, msg);
 #else
@@ -317,6 +309,7 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
 }
 
 #if defined(__IOS__)
+extern "C" {
 	uint64_t CNSDateNano() {
 		return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000000000);
 	}
@@ -328,6 +321,7 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
 	void CNSThreadSleep(int ms) {
 		[NSThread sleepForTimeInterval:(double)ms / 1000.0];
 	}
+}
 #endif
 
 #if defined(__WINNT__)

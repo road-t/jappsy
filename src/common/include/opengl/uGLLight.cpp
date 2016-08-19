@@ -28,7 +28,7 @@ RefGLLight::~RefGLLight() {
 
 GLLights::GLLights(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLTexture>();
+	list = new HashMap<String, GLLight>();
 }
 
 GLLights::~GLLights() {

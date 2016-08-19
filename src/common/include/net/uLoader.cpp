@@ -238,7 +238,7 @@ bool RefLoader::onText(const File& info, Stream& stream) {
 	String ext = info.ref().ext;
 	if (ext.compareToIgnoreCase(L"vsh") == 0) {
 		try {
-			GLShader* shader = &(context->shaders->createVertexShader((wchar_t*)(info.ref().key), (char*)stream.getBuffer()));
+			GLShader* shader = &(context->shaders->createVertexShader(info.ref().key, (char*)stream.getBuffer()));
 			onLoad(info, *shader);
 			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
 		} catch (...) {
@@ -246,7 +246,7 @@ bool RefLoader::onText(const File& info, Stream& stream) {
 		}
 	} else if (ext.compareToIgnoreCase(L"fsh") == 0) {
 		try {
-			GLShader* shader = &(context->shaders->createFragmentShader((wchar_t*)(info.ref().key), (char*)stream.getBuffer()));
+			GLShader* shader = &(context->shaders->createFragmentShader(info.ref().key, (char*)stream.getBuffer()));
 			onLoad(info, *shader);
 			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
 		} catch (...) {
@@ -266,7 +266,7 @@ bool RefLoader::onData(const File& info, Stream& stream) {
 	String ext = info.ref().ext;
 	if (ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
-			GLTexture* texture = &(GLReader::createTexture(context, (wchar_t*)(info.ref().key), stream));
+			GLTexture* texture = &(GLReader::createTexture(context, info.ref().key, stream));
 			onLoad(info, *texture);
 			if (onfile != NULL) onfile(info.ref().file, *texture, userData);
 		} catch (...) {
@@ -274,7 +274,7 @@ bool RefLoader::onData(const File& info, Stream& stream) {
 		}
 	} else if (ext.compareToIgnoreCase(L"jsh") == 0) {
 		try {
-			GLShader* shader = &(GLReader::createShader(context, (wchar_t*)(info.ref().key), stream));
+			GLShader* shader = &(GLReader::createShader(context, info.ref().key, stream));
 			onLoad(info, *shader);
 			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
 		} catch (...) {

@@ -78,13 +78,13 @@ void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLTexture& GLReader::createTexture(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*) {
+GLTexture& GLReader::createTexture(GLRender* ctx, const String& key, Stream& stream) throw(const char*) {
 	stream.setPosition(0);
 	uint32_t head = (uint32_t)stream.readInt();
 	if ((head == GLReader::SDFFHEAD) || (head == GLReader::SDFIHEAD) || (head == GLReader::JIMGHEAD)) {
 		struct CreateTextureThreadData thread;
 		thread.context = ctx;
-		thread.key = key;
+		thread.key = (wchar_t*)key;
 		thread.width = stream.readInt();
 		thread.height = stream.readInt();
 		thread.style = GLTexture::NONE;
@@ -268,13 +268,13 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLShader& GLReader::createShader(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*) {
+GLShader& GLReader::createShader(GLRender* ctx, const String& key, Stream& stream) throw(const char*) {
 	stream.setPosition(0);
 	uint32_t head = (uint32_t)stream.readInt();
 	if (head == GLReader::JSHDHEAD) {
 		struct CreateShaderThreadData thread;
 		thread.context = ctx;
-		thread.key = key;
+		thread.key = (wchar_t*)key;
 		thread.vsh = NULL;
 		thread.fsh = NULL;
 		thread.program = 0;

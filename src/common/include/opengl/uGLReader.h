@@ -47,8 +47,8 @@ public:
 	
 	constexpr static int JENDCHUNK = 0x444E454A;	// Jappsy End Chunk
 	
-	static GLTexture& createTexture(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
-	static GLShader& createShader(GLRender* ctx, const wchar_t* key, Stream& stream) throw(const char*);
+	static GLTexture& createTexture(GLRender* ctx, const String& key, Stream& stream) throw(const char*);
+	static GLShader& createShader(GLRender* ctx, const String& key, Stream& stream) throw(const char*);
 	
 private:
 	static void* CreateTextureHandleCallback(void* threadData);

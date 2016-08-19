@@ -84,11 +84,11 @@ GLTextures::~GLTextures() {
 	context = NULL;
 }
 
-GLTexture& GLTextures::get(const wchar_t* key) throw(const char*) {
+GLTexture& GLTextures::get(const String& key) throw(const char*) {
 	return (GLTexture&)list.get(key);
 }
 
-GLTexture& GLTextures::createSolidTexture(const wchar_t* key, const Vec4& rgba4fv) throw(const char*) {
+GLTexture& GLTextures::createSolidTexture(const String& key, const Vec4& rgba4fv) throw(const char*) {
 	GLuint handle;
 	glGenTextures(1, &handle);
 	CheckGLError();
@@ -112,7 +112,7 @@ GLTexture& GLTextures::createSolidTexture(const wchar_t* key, const Vec4& rgba4f
 		handles.push(handle);
 		list.remove(key);
 		GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, 1, 1)));
-		if (wcscmp(key, L"null") == 0) {
+		if (key.equals(L"null")) {
 			defaultTexture = *texture;
 		}
 		return *texture;
@@ -122,10 +122,10 @@ GLTexture& GLTextures::createSolidTexture(const wchar_t* key, const Vec4& rgba4f
 	}
 }
 
-GLTexture& GLTextures::createTexture(const wchar_t* key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+GLTexture& GLTextures::createTexture(const String& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	list.remove(key);
 	GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, width, height)));
-	if (wcscmp(key, L"null") == 0) {
+	if (key.equals(L"null")) {
 		defaultTexture = *texture;
 	}
 	return *texture;

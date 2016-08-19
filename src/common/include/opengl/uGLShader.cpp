@@ -272,11 +272,11 @@ const Iterator<String> GLShaders::keys() {
 	return list.keySet().iterator();
 }
 
-GLShader& GLShaders::get(const wchar_t* key) throw(const char*) {
+GLShader& GLShaders::get(const String& key) throw(const char*) {
 	return (GLShader&)list.get(key);
 }
 
-GLShader& GLShaders::createShader(const wchar_t* key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*) {
+GLShader& GLShaders::createShader(const String& key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*) {
 	try {
 		list.remove(key);
 		return list.put(key, new RefGLShader(context, vsh, fsh, program, textures));
@@ -449,25 +449,25 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 	}
 }
 
-GLShader& GLShaders::createVertexShader(const wchar_t* key, const char* vertexShaderSource) throw(const char*) {
+GLShader& GLShaders::createVertexShader(const String& key, const char* vertexShaderSource) throw(const char*) {
 	struct CreateShaderDataThreadData thread;
 	thread.context = context;
-	thread.key = key;
+	thread.key = (wchar_t*)key;
 	thread.shaderSource = vertexShaderSource;
 	
 	return *(GLShader*)MainThreadSync(CreateVertexShaderCallback, &thread);
 }
 
-GLShader& GLShaders::createFragmentShader(const wchar_t* key, const char* fragmentShaderSource) throw(const char*) {
+GLShader& GLShaders::createFragmentShader(const String& key, const char* fragmentShaderSource) throw(const char*) {
 	struct CreateShaderDataThreadData thread;
 	thread.context = context;
-	thread.key = key;
+	thread.key = (wchar_t*)key;
 	thread.shaderSource = fragmentShaderSource;
 	
 	return *(GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
 }
 
-GLShader& GLShaders::createShader(const wchar_t* key, const String& vshReference, const String& fshReference) throw(const char*) {
+GLShader& GLShaders::createShader(const String& key, const String& vshReference, const String& fshReference) throw(const char*) {
 	GLShaderData* vsh = NULL;
 	GLShaderData* fsh = NULL;
 	Vector<GLShaderData*> textures;

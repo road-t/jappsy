@@ -48,7 +48,7 @@ public:
 	GLShaderData& setShader(const GLuint handle, bool reference);
 	
 	inline bool isReference() { return m_type == GLShaderDataType::STRING; }
-	inline const wchar_t* getTarget() { return (wchar_t*)m_target; }
+	inline const String& getTarget() { return m_target; }
 	inline GLuint getShader() { return m_handles[0]; }
 	inline Vector<GLuint>& getTextures() { return m_handles; }
 };
@@ -92,8 +92,8 @@ public:
 	~GLShaders();
 	
 	const Iterator<String> keys();
-	GLShader& get(const wchar_t* key) throw(const char*);
-	GLShader& createShader(const wchar_t* key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*);
+	GLShader& get(const String& key) throw(const char*);
+	GLShader& createShader(const String& key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*);
 	
 	GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);
 	GLuint createFragmentShader(const char* fragmentShaderSource) throw(const char*);
@@ -108,9 +108,9 @@ private: // Thread Safe
 	
 public: // Thread Safe
 
-	GLShader& createVertexShader(const wchar_t* key, const char* vertexShaderSource) throw(const char*);
-	GLShader& createFragmentShader(const wchar_t* key, const char* fragmentShaderSource) throw(const char*);
-	GLShader& createShader(const wchar_t* key, const String& vshReference, const String& fshReference) throw(const char*);
+	GLShader& createVertexShader(const String& key, const char* vertexShaderSource) throw(const char*);
+	GLShader& createFragmentShader(const String& key, const char* fragmentShaderSource) throw(const char*);
+	GLShader& createShader(const String& key, const String& vshReference, const String& fshReference) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSHADER_H

@@ -58,9 +58,9 @@ public:
 	GLTextures(GLRender* context) throw(const char*);
 	~GLTextures();
 	
-	GLTexture& get(const wchar_t* key) throw(const char*);
-	GLTexture& createSolidTexture(const wchar_t* key, const Vec4& rgba4fv) throw(const char*);
-	GLTexture& createTexture(const wchar_t* key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	GLTexture& get(const String& key) throw(const char*);
+	GLTexture& createSolidTexture(const String& key, const Vec4& rgba4fv) throw(const char*);
+	GLTexture& createTexture(const String& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	
 	GLuint createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*);
 	void releaseTextureHandle(GLuint handle);

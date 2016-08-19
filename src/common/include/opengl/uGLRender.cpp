@@ -421,23 +421,22 @@ bool GLRender::createShaders(JSONObject shaders) {
 		JSONArray data = shaders.getJSONArray(key);
 		String vsh = data.optString(0);
 		String fsh = data.optString(1);
-		THIS.shaders->createShader((wchar_t*)key, vsh, fsh);
+		THIS.shaders->createShader(key, vsh, fsh);
 	}
 
 	keys = THIS.shaders->keys();
 	while (keys.hasNext()) {
 		String key = keys.next();
-		if (!THIS.shaders->get((wchar_t*)key).checkReady()) {
+		if (!THIS.shaders->get(key).checkReady()) {
 			return false;
 		}
 	}
-/*
-	for (var key in this.shaders.list) {
-		var shader = this.shaders.list[key];
-		if (!shader.checkReady())
-			return false;
+	keys.reset();
+	while (keys.hasNext()) {
+		String key = keys.next();
+		GLShader shader = THIS.shaders->get(key);
 	}
-	
+/*
 	for (var key in this.shaders.list) {
 		var shader = this.shaders.list[key];
 		var program = shader.program;

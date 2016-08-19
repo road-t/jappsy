@@ -22,8 +22,8 @@ R"JAPPSYRAWSTRING(
             "mobile_effect_star2":					"shaders/mobile_effect_star2.jsh",
         },
 
-/*
         "textures": {
+/*
             "null":						"models/null.jimg",
             "mramor.png":				"models/mramor.jimg",
             "metal.png":				"models/metal.jimg",
@@ -36,11 +36,11 @@ R"JAPPSYRAWSTRING(
             "background4":				"images/background4.jimg",
             "buttons":					"images/buttons.jimg",
             "sprites":					"images/sprites.jimg",
-
+*/
             "mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
             "mobile_tex_random":					"shaders/mobile_tex_random.jimg",
         },
-
+/*
         "models": {
             "ball":						"models/ball.json",
             "cap":						"models/cap.json",

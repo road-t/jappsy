@@ -56,7 +56,6 @@ void mmQuit();
     void memLogNew(const char* location, const char* var, const char* type, const void* ptr, uint32_t size);
     void memLogDelete(const char* var, const void* ptr);
     void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uint32_t* size);
-    void memLogSort();
     void memLogCallFunction(const char* location);
     void memLogRetFunction();
 #endif

@@ -212,7 +212,6 @@ struct MM_STACK_ITEM {
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
 void mmerror() {
 #ifdef DEBUG
-    memLogSort();
     memLogStats(0, 0, 0, 0);
 #if defined(__WINNT__)
     MessageBoxW(0, L"VirtualMemory Error", L"MemoryManager", MB_OK);
@@ -856,7 +855,6 @@ void memDel(const char* var, const void* ptr) {
 
 void memLogSort() {
 #if MEMORY_LOG == 1
-    memLock();
 	struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
 	int32_t count = AtomicGet(&memLogElementsCount);
     if (els != 0) {
@@ -879,7 +877,6 @@ void memLogSort() {
             }
         }
     }
-    memUnlock();
 #endif
 }
 
@@ -928,6 +925,12 @@ void memLogDelete(const char* var, const void* ptr) {
 }
 
 void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uint32_t* size) {
+#if MEMORY_LOG == 1
+	memLock();
+	
+	memLogSort();
+#endif
+	
     if (count) *count = AtomicGet(&memCount);
     if (mallocCount) *mallocCount = AtomicGet(&memAllocCount);
     if (newCount) *newCount = AtomicGet(&memNewCount);
@@ -939,7 +942,6 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
 #endif
 
 #if MEMORY_LOG == 1
-    memLock();
 
 #if defined(__WINNT__)
     HANDLE hFile = CreateFileW(L"memory-dump.log", GENERIC_READ	| GENERIC_WRITE, 0, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);

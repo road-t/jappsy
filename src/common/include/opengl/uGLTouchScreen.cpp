@@ -20,9 +20,10 @@
 #include <opengl/uGLRender.h>
 #include <math.h>
 
-RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback) {
+RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback, Object& userData) {
 	THIS.context = context;
 	onTouch = callback;
+	THIS.userData = userData;
 	update();
 	clickList = NULL;
 	trackList = NULL;

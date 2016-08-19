@@ -50,14 +50,14 @@ bool GLRender::isExtensionSupported(const char *extension) {
 	return false;
 }
 
-GLRender::GLRender(GLEngine& engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch) {
+GLRender::GLRender(GLEngine engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch) {
 	THIS.engine = engine;
 	THIS.width = width;
 	THIS.height = height;
 	
-	frame = memNew(frame, GLFrame(engine, this, onframe));
-	touchScreen = new GLTouchScreen(this, ontouch);
-	loader = new Loader(this);
+	frame = memNew(frame, GLFrame(engine, this, onframe, engine));
+	touchScreen = new GLTouchScreen(this, ontouch, engine);
+	loader = new Loader(this, engine);
 	
 	textures = memNew(textures, GLTextures(this));
 	shaders = memNew(shaders, GLShaders(this));
@@ -224,16 +224,303 @@ void GLRender::fillDepth() {
 
 void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint) {
 	// TODO:
+	/*
+	GLCamera cam = THIS.cameras->gui;
+	cam.update();
+	
+	if ((paint.m_color & 0xFF000000) != 0) {
+		var shader = this.shaderSquareFill;
+		
+		if ((paint.m_color & 0xFF000000) != 0xFF000000)
+			gl.enable(gl.BLEND);
+		else
+			gl.disable(gl.BLEND);
+		
+		gl.useProgram(shader.program);
+		
+		gl.uniformMatrix4fv(shader.uLayerProjectionMatrix, false, cam.projection16fv);
+		
+		var c = this.makeColor(paint.m_color);
+		gl.uniform4fv(shader.uColor, c);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.m_squareBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(x1, y1, x2, y2), gl.DYNAMIC_DRAW);
+		gl.vertexAttribPointer(shader.aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(shader.aVertexPosition);
+		
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		
+		gl.disableVertexAttribArray(shader.aVertexPosition);
+		gl.disable(gl.BLEND);
+		gl.useProgram(null);
+	}
+	
+	if ((paint.m_strokeColor & 0xFF000000) != 0) {
+		var shader = this.shaderSquareStroke;
+		
+		gl.enable(gl.BLEND);
+		gl.useProgram(shader.program);
+		
+		gl.uniformMatrix4fv(shader.uLayerProjectionMatrix, false, cam.projection16fv);
+		
+		var half = Math.floor(paint.m_strokeWidth / 2);
+		gl.uniform2fv(shader.uCorners, new Float32Array([ x1 - half, y1 - half, x2 + half, y2 + half ]));
+		gl.uniform1f(shader.uBorder, paint.m_strokeWidth);
+		
+		var c = this.makeColor(paint.m_strokeColor);
+		gl.uniform4fv(shader.uColor, c);
+		
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.m_squareBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(x1-half, y1-half, x2+half, y2+half), gl.DYNAMIC_DRAW);
+		gl.vertexAttribPointer(shader.aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(shader.aVertexPosition);
+		
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+		
+		gl.disableVertexAttribArray(shader.aVertexPosition);
+		gl.disable(gl.BLEND);
+		gl.useProgram(null);
+	}
+*/
 }
 
 void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key) {
 	// TODO:
+/*
+	var cam = this.cameras.get("gui");
+	cam.update();
+	
+	var shader = this.shaderSquareTexture;
+	
+	gl.enable(gl.BLEND);
+	gl.useProgram(shader.program);
+	
+	gl.uniformMatrix4fv(shader.uLayerProjectionMatrix, false, cam.projection16fv);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_squareBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(x1, y1, x2, y2), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(shader.aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shader.aVertexPosition);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_textureBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(0, 0, 1, 1), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(shader.aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(shader.aTextureCoord);
+	
+	//gl.enable(gl.TEXTURE_2D);
+	var texture = this.textures.get(key);
+	var index = texture.bind(0, shader.uTexture);
+	
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	
+	gl.disableVertexAttribArray(shader.aVertexPosition);
+	gl.disableVertexAttribArray(shader.aTextureCoord);
+	
+	this.cleanup(index);
+	//gl.disable(gl.TEXTURE_2D);
+ */
 }
 
 void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime) {
 	// TODO:
+/*
+	var cam = this.cameras.get("gui");
+	cam.update();
+	
+	var shader = this.shaders.get(key);
+	var program = shader.program;
+	var uLayerProjectionMatrix = gl.getUniformLocation(program, "uLayerProjectionMatrix");
+	//var uTexture = gl.getUniformLocation(program, "uTexture");
+	var aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+	var aTextureCoord = gl.getAttribLocation(program, "aTextureCoord");
+	var uTime = gl.getUniformLocation(program, "uTime");
+	var uWorldTime = gl.getUniformLocation(program, "uWorldTime");
+	var uTexture = gl.getUniformLocation(program, "uTexture");
+	
+	//gl.enable(gl.TEXTURE_2D);
+	gl.enable(gl.BLEND);
+	var index = shader.bind(0, uTexture);
+	
+	gl.uniform1f(uTime, Jappsy.mod(localTime, 1));
+	gl.uniform1f(uWorldTime, Jappsy.mod(worldTime, 1));
+	
+	gl.uniformMatrix4fv(uLayerProjectionMatrix, false, cam.projection16fv);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_squareBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(x1, y1, x2, y2), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(aVertexPosition);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_textureBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(0, 0, 1, 1), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(aTextureCoord);
+	
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+	
+	gl.disableVertexAttribArray(aVertexPosition);
+	gl.disableVertexAttribArray(aTextureCoord);
+	
+	this.cleanup(index);
+	//gl.disable(gl.TEXTURE_2D);
+	gl.disable(gl.BLEND);
+ */
 }
 
 void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime) {
 	// TODO:
+/*
+	var cam = this.cameras.get("gui");
+	cam.update();
+ 
+	var shader = this.shaders.get(key);
+	var program = shader.program;
+	
+	var uLayerProjectionMatrix = gl.getUniformLocation(program, "uLayerProjectionMatrix");
+	var aVertexPosition = gl.getAttribLocation(program, "aVertexPosition");
+	var aTextureCoord = gl.getAttribLocation(program, "aTextureCoord");
+	var uTime = gl.getUniformLocation(program, "uTime");
+	var uTexture0 = gl.getUniformLocation(program, "uTexture0");
+	var uTexture1 = gl.getUniformLocation(program, "uTexture1");
+ 
+	//gl.enable(gl.TEXTURE_2D);
+	gl.enable(gl.BLEND);
+	var index = shader.bind(0, [uTexture0, uTexture1]);
+	
+	gl.uniform2f(uTime, Jappsy.mod(localTime, 1), Jappsy.mod(worldTime, 1));
+ 
+	gl.uniformMatrix4fv(uLayerProjectionMatrix, false, cam.projection16fv);
+ 
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_squareBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(x1, y1, x2, y2), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(aVertexPosition, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(aVertexPosition);
+	
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.m_textureBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, this.makeRect(0, 0, 1, 1), gl.DYNAMIC_DRAW);
+	gl.vertexAttribPointer(aTextureCoord, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(aTextureCoord);
+	
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+ 
+	gl.disableVertexAttribArray(aVertexPosition);
+	gl.disableVertexAttribArray(aTextureCoord);
+ 
+	this.cleanup(index);
+	//gl.disable(gl.TEXTURE_2D);
+	gl.disable(gl.BLEND);
+ */
+}
+
+bool GLRender::createShaders(JSONObject& shaders) {
+	/*
+	for (var key in shaders) {
+		var shader = this.shaders.createShader(key,
+											   new Jappsy.Data(shaders[key][0], Jappsy.DataStyleRefString),
+											   new Jappsy.Data(shaders[key][1], Jappsy.DataStyleRefString),
+											   null,
+											   []);
+		if (shader == null)
+			return false;
+	}
+	
+	for (var key in this.shaders.list) {
+		var shader = this.shaders.list[key];
+		if (!shader.checkReady())
+			return false;
+	}
+	
+	for (var key in this.shaders.list) {
+		var shader = this.shaders.list[key];
+		var program = shader.program;
+		
+		if (key == "sprite") {
+			this.shaderSprite = shader;
+			Jappsy.assign(shader, {
+			uLayerProjectionMatrix: gl.getUniformLocation(program, "uLayerProjectionMatrix"),
+			uPosition: gl.getUniformLocation(program, "uPosition"),
+			uTexture: gl.getUniformLocation(program, "uTexture"),
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			aTextureCoord: gl.getAttribLocation(program, "aTextureCoord"),
+				
+			uLight: gl.getUniformLocation(program, "uLight"),
+			uTime: gl.getUniformLocation(program, "uTime"),
+			});
+		} else if (key == "particle") {
+			this.shaderParticle = shader;
+			Jappsy.assign(shader, {
+			uModelViewProjectionMatrix: gl.getUniformLocation(program, "uModelViewProjectionMatrix"),
+				
+			uPixelX: gl.getUniformLocation(program, "uPixelX"),
+			uPixelY: gl.getUniformLocation(program, "uPixelY"),
+			uTime: gl.getUniformLocation(program, "uTime"),
+			uTexture: gl.getUniformLocation(program, "uTexture"),
+			uColor: gl.getUniformLocation(program, "uColor"),
+				
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			aTextureCoord: gl.getAttribLocation(program, "aTextureCoord"),
+			aVelocity: gl.getAttribLocation(program, "aVelocity"),
+			aAcceleration: gl.getAttribLocation(program, "aAcceleration"),
+			aTime: gl.getAttribLocation(program, "aTime"),
+			});
+		} else if (key == "model") {
+			this.shaderModel = shader;
+			Jappsy.assign(shader, {
+			uModelViewProjectionMatrix: gl.getUniformLocation(program, "uModelViewProjectionMatrix"),
+			uModelViewMatrix: gl.getUniformLocation(program, "uModelViewMatrix"),
+			uNormalMatrix: gl.getUniformLocation(program, "uNormalMatrix"),
+				
+			uAmbientLightColor: gl.getUniformLocation(program, "uAmbientLightColor"),
+				
+			uLightsCount: gl.getUniformLocation(program, "uLightsCount"),
+			uLights: gl.getUniformLocation(program, "uLights"),
+				
+			uColors: gl.getUniformLocation(program, "uColors"),
+			uTexture: gl.getUniformLocation(program, "uTexture"),
+				
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			aTextureCoord: gl.getAttribLocation(program, "aTextureCoord"),
+			aVertexNormal: gl.getAttribLocation(program, "aVertexNormal"),
+			});
+		} else if (key == "square_fill") {
+			this.shaderSquareFill = shader;
+			Jappsy.assign(shader, {
+			uLayerProjectionMatrix: gl.getUniformLocation(program, "uLayerProjectionMatrix"),
+			uColor: gl.getUniformLocation(program, "uColor"),
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			});
+		} else if (key == "square_stroke") {
+			this.shaderSquareStroke = shader;
+			Jappsy.assign(shader, {
+			uLayerProjectionMatrix: gl.getUniformLocation(program, "uLayerProjectionMatrix"),
+			uCorners: gl.getUniformLocation(program, "uCorners"),
+			uBorder: gl.getUniformLocation(program, "uBorder"),
+			uColor: gl.getUniformLocation(program, "uColor"),
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			});
+		} else if (key == "square_texture") {
+			this.shaderSquareTexture = shader;
+			Jappsy.assign(shader, {
+			uLayerProjectionMatrix: gl.getUniformLocation(program, "uLayerProjectionMatrix"),
+			uTexture: gl.getUniformLocation(program, "uTexture"),
+			aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+			aTextureCoord: gl.getAttribLocation(program, "aTextureCoord"),
+			});
+		}
+	}
+	 */
+	
+	return true;
+}
+
+void GLRender::createModels(JSONObject& models) {
+	
+}
+
+void GLRender::createSprites(JSONObject& sprites) {
+	
+}
+
+void GLRender::createDrawings(JSONObject& drawings) {
+	
 }

@@ -23,10 +23,10 @@
 
 #include <opengl/uGLRender.h>
 
-void defaultOnFrame(GLRender* context) {
+void defaultOnFrame(GLRender* context, Object& userData) {
 }
 
-GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback) {
+GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, Object& userData) {
 	THIS.engine = engine;
 	THIS.context = context;
 	
@@ -35,6 +35,7 @@ GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback) 
 	THIS.fps = 0;
 	
 	THIS.onFrame = (callback != NULL) ? callback : defaultOnFrame;
+	THIS.userData = userData;
 }
 
 GLFrame::~GLFrame() {
@@ -70,7 +71,7 @@ void GLFrame::loop() {
 		THIS.frames->put(1000.0 / elapsed);
 	THIS.fps = (uint32_t)floorf(THIS.frames->value());
 	
-	THIS.onFrame(THIS.context);
+	THIS.onFrame(THIS.context, THIS.userData);
 	
 	THIS.lastFrame = THIS.currentTime;
 }

@@ -17,6 +17,60 @@
 #include "uGLEngine.h"
 #include <opengl/uGLRender.h>
 
+void onFrameCallback(GLRender* context, Object& userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onFrame(context);
+}
+
+void onTouchCallback(const wchar_t* event, Object& userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onTouch(event);
+}
+
+void onFileCallback(const String& url, const Object& object, Object userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onFile(url, object);
+}
+
+void onStatusCallback(const LoaderStatus& status, Object userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onStatus(status);
+}
+
+void onReadyCallback(const HashMap<String, Stream>& result, Object userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onReady(result);
+}
+
+void onErrorCallback(const String& error, Object userData) {
+	GLEngine* engine = (GLEngine*)(&userData);
+	engine->ref().onError(error);
+}
+
+RefGLEngine::RefGLEngine() {
+	context = memNew(context, GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback));
+	context->loader.ref().setCallbacks(onFileCallback, onStatusCallback, onReadyCallback, onErrorCallback);
+}
+
+RefGLEngine::~RefGLEngine() {
+	release();
+}
+
+void RefGLEngine::release() {
+	if (context != NULL) {
+		memDelete(context);
+		context = NULL;
+	}
+}
+
+void RefGLEngine::setBasePath(const String& basePath) {
+	context->loader.ref().basePath = basePath;
+}
+
+void RefGLEngine::load(const char* json) {
+	context->loader.ref().load(json);
+}
+
 void RefGLEngine::onRender() {
 	THIS.context->frame->loop();
 }

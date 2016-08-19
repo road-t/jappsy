@@ -21,14 +21,11 @@
 #include <net/uHttpClient.h>
 #include <opengl/uGLRender.h>
 
-RefLoader::RefLoader(GLRender* context, onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData) {
-	initialize();
-	THIS.context = context;
+void RefLoader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror) {
 	THIS.onfile = onfile;
 	THIS.onstatus = onstatus;
 	THIS.onready = onready;
 	THIS.onerror = onerror;
-	THIS.userData = userData;
 }
 
 void RefLoader::release() {

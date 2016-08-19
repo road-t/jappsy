@@ -19,6 +19,8 @@
 
 #include <data/uObject.h>
 #include <event/uMotionEvent.h>
+#include <net/uLoader.h>
+#include <data/uHashMap.h>
 
 class GLRender;
 
@@ -27,14 +29,23 @@ protected:
 	GLRender* context;
 	
 public:
-	inline RefGLEngine() {}
-	virtual inline ~RefGLEngine() { release(); }
-	virtual void release() { context = NULL; }
+	RefGLEngine();
+	~RefGLEngine();
+	void release();
+	
+	void setBasePath(const String& basePath);
+	void load(const char* json);
 	
 	void onRender();
 	void onUpdate(int width, int height);
 	void onTouch(MotionEvent* event);
 
+	virtual void onFrame(GLRender* context) {}
+	virtual void onTouch(const wchar_t* event) {}
+	virtual void onFile(const String& url, const Object& object) {}
+	virtual void onStatus(const LoaderStatus& status) {}
+	virtual void onReady(const HashMap<String, Stream>& result) {}
+	virtual void onError(const String& error) {}
 };
 
 class GLEngine : public Object {

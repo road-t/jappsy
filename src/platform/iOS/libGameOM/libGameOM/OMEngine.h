@@ -19,13 +19,20 @@
 
 #include <opengl/uGLEngine.h>
 #include <event/uMotionEvent.h>
+#include <data/uStream.h>
+#include <data/uHashMap.h>
+#include <net/uLoader.h>
 
 class OMEngine : public RefGLEngine {
 public:
     OMEngine();
-    ~OMEngine();
     
-    virtual void release();
+    void onFrame(GLRender* context);
+    void onTouch(const wchar_t* event);
+    void onFile(const String& url, const Object& object);
+    void onStatus(const LoaderStatus& status);
+    void onReady(const HashMap<String, Stream>& result);
+    void onError(const String& error);
 };
 
 #endif //OMENGINE_H

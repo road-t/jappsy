@@ -18,11 +18,10 @@
 
 #include <opengl/uOpenGL.h>
 #include <opengl/uGLRender.h>
-#include <net/uLoader.h>
 
 static int color = 0;
 
-void onFrame(GLRender* context) {
+void OMEngine::onFrame(GLRender* context) {
     float c = (float)color / 255.0f;
     glClearColor(0.0f, c, 0.0f, 1.0f);
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -31,53 +30,37 @@ void onFrame(GLRender* context) {
     if (color >= 256) color = 0;
 }
 
-void onTouch(const wchar_t* event) {
+void OMEngine::onTouch(const wchar_t* event) {
     
 }
 
-void onFile(const String& url, const Object& object, const Object& userData) {
+void OMEngine::onFile(const String& url, const Object& object) {
     String::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 
-void onStatus(const RefLoader::Status& status, const Object& userData) {
+void OMEngine::onStatus(const LoaderStatus& status) {
     String::format(L"STATUS: %d / %d", status.count, status.total).log();
 }
 
-void onReady(const HashMap<String, Stream>& result, const Object& userData) {
+void OMEngine::onReady(const HashMap<String, Stream>& result) {
     String::format(L"READY!").log();
+    
+    //if (!context->createShaders()) {
+        
+    //}
 }
 
-void onError(const String& error, const Object& userData) {
+void OMEngine::onError(const String& error) {
     String::format(L"ERROR: %ls", (wchar_t*)error).log();
 }
 
 OMEngine::OMEngine() {
-    GLEngine engine = this;
-    context = memNew(context, GLRender(engine, 1920, 1080, ::onFrame, ::onTouch));
-    
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
  
     //sOMLoadRes = "{\"groups\":{\"shaders\":{\"vsh_main\":\"shaders/vsh_main.jsh\"}}}";
     
-    RefLoader* loader = &(context->loader.ref());
-    loader->basePath = L"https://www.cox.ru/res/om/";
-    loader->onfile = onFile;
-    loader->onstatus = onStatus;
-    loader->onready = onReady;
-    loader->onerror = onError;
-    loader->userData = engine;
-    loader->load(sOMLoadRes);
-}
-
-void OMEngine::release() {
-    if (context != NULL) {
-        memDelete(context);
-        context = NULL;
-    }
-}
-
-OMEngine::~OMEngine() {
-    release();
+    THIS.setBasePath(L"https://www.cox.ru/res/om/");
+    THIS.load(sOMLoadRes);
 }

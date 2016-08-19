@@ -28,16 +28,15 @@
 class Loader;
 class GLRender;
 
-class RefLoader : public RefObject {
-public:
-	struct Status {
-		jbool update = false;
-		int count = 0;
-		int total = 0;
-		int left = 0;
-		int error = 0;
-	};
+struct LoaderStatus {
+	jbool update = false;
+	int count = 0;
+	int total = 0;
+	int left = 0;
+	int error = 0;
+};
 
+class RefLoader : public RefObject {
 private:
 	class RefFile : public RefObject {
 	public:
@@ -86,10 +85,10 @@ public:
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const String& url, const Object& object, const Object& userData);
-	typedef void (*onStatusCallback)(const Status& status, const Object& userData);
-	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object& userData);
-	typedef void (*onErrorCallback)(const String& error, const Object& userData);
+	typedef void (*onFileCallback)(const String& url, const Object& object, const Object userData);
+	typedef void (*onStatusCallback)(const LoaderStatus& status, const Object userData);
+	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object userData);
+	typedef void (*onErrorCallback)(const String& error, const Object userData);
 
 	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
@@ -108,7 +107,7 @@ private:
 	
 	JSONObject result;
 	List<File> list;
-	struct Status status;
+	struct LoaderStatus status;
 	volatile int32_t shutdown = 0;
 	volatile bool updating = false;
 	String lastError;
@@ -166,10 +165,10 @@ public:
 	}
 
 	inline RefLoader() { throw eInvalidParams; }
-	inline RefLoader(GLRender* context) { initialize(); THIS.context = context; }
-	RefLoader(GLRender* context, onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror, Object& userData);
+	inline RefLoader(GLRender* context, Object& userData) { initialize(); THIS.context = context; THIS.userData = userData; }
 	~RefLoader();
 	
+	void setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror);
 	void load(const char* jsonconfig) throw(const char*);
 	void release();
 };
@@ -178,8 +177,8 @@ class Loader : public Object {
 public:
 	RefClass(Loader, RefLoader);
 	
-	inline Loader(GLRender* context) {
-		RefLoader* o = new RefLoader(context);
+	inline Loader(GLRender* context, Object& userData) {
+		RefLoader* o = new RefLoader(context, userData);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}

@@ -27,7 +27,7 @@ class GLRender;
 
 class GLTouchEvent {
 public:
-	typedef bool (*Callback)(const wchar_t* event);
+	typedef bool (*Callback)(const wchar_t* event, Object& userData);
 
 	float x;
 	float y;
@@ -39,13 +39,15 @@ public:
 
 class RefGLTouchScreen : public RefObject {
 public:
-	typedef void (*onTouchCallback)(const wchar_t* event);
+	typedef void (*onTouchCallback)(const wchar_t* event, Object& userData);
 
 private:
 	Handler handler = new Handler();
 	
 	GLRender* context;
 	onTouchCallback onTouch;
+	Object userData;
+
 	GLfloat recordDistance;
 	GLfloat minimalDistance;
 	GLfloat swipeDistance;
@@ -82,7 +84,7 @@ private:
 	void record(float x, float y);
 public:
 	RefGLTouchScreen() throw(const char*) { throw eInvalidParams; }
-	RefGLTouchScreen(GLRender* context, onTouchCallback callback);
+	RefGLTouchScreen(GLRender* context, onTouchCallback callback, Object& userData);
 	~RefGLTouchScreen();
 	
 	void release();
@@ -107,8 +109,8 @@ class GLTouchScreen : public Object {
 public:
 	RefClass(GLTouchScreen, RefGLTouchScreen);
 	
-	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback) {
-		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback);
+	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback, Object& userData) {
+		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback, userData);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}

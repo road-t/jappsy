@@ -309,6 +309,72 @@ extern "C" {
 		return false;
 	}
 	
+	bool json_skip_comment(struct json_context* ctx, char** ptrptr) {
+		char ch;
+		if (json_next == '\0') {
+			json_err(json_error_eof);
+			return false;
+		}
+		if (ch == '/') {
+			while (json_next != '\0') {
+				if ((ch == '\n') || (ch == '\r')) {
+					break;
+				}
+			}
+			json_rev;
+			return true;
+		} else if (ch == '*') {
+			json_next;
+			while (ch != '\0') {
+				if (ch == '*') {
+					if (json_next == '\0') {
+						break;
+					} else if (ch == '/') {
+						return true;
+					}
+				}
+				json_next;
+			}
+			json_rev;
+			return true;
+		}
+		json_err(json_error_syntax);
+		return false;
+	}
+	
+	bool jsonw_skip_comment(struct json_context* ctx, wchar_t** ptrptr) {
+		wchar_t ch;
+		if (jsonw_next == L'\0') {
+			jsonw_err(json_error_eof);
+			return false;
+		}
+		if (ch == L'/') {
+			while (jsonw_next != L'\0') {
+				if ((ch == L'\n') || (ch == L'\r')) {
+					break;
+				}
+			}
+			jsonw_rev;
+			return true;
+		} else if (ch == L'*') {
+			jsonw_next;
+			while (ch != L'\0') {
+				if (ch == L'*') {
+					if (jsonw_next == L'\0') {
+						break;
+					} else if (ch == L'/') {
+						return true;
+					}
+				}
+				jsonw_next;
+			}
+			jsonw_rev;
+			return true;
+		}
+		jsonw_err(json_error_syntax);
+		return false;
+	}
+	
 	bool json_check_object(struct json_context* ctx, char** ptrptr, int32_t level);
 	bool json_check_array(struct json_context* ctx, char** ptrptr, int32_t level);
 	
@@ -384,6 +450,10 @@ extern "C" {
 				}
 				json_err(json_error_syntax);
 				return false;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_err(json_error_syntax);
 				return false;
@@ -468,6 +538,10 @@ extern "C" {
 				}
 				jsonw_err(json_error_syntax);
 				return false;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_err(json_error_syntax);
 				return false;
@@ -484,6 +558,10 @@ extern "C" {
 		while (json_next != '\0') {
 			if (ch == ']') {
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_rev;
 				if (!json_check_value(ctx, ptrptr, level)) {
@@ -492,6 +570,10 @@ extern "C" {
 				while (json_next != '\0') {
 					if (ch == ',') {
 						goto json_check_array_repeat;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (ch == ']') {
 						return true;
 					} else if (!json_is_space(ch)) {
@@ -514,6 +596,10 @@ extern "C" {
 		while (jsonw_next != L'\0') {
 			if (ch == L']') {
 				return true;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_rev;
 				if (!jsonw_check_value(ctx, ptrptr, level)) {
@@ -522,6 +608,10 @@ extern "C" {
 				while (jsonw_next != L'\0') {
 					if (ch == L',') {
 						goto jsonw_check_array_repeat;
+					} else if (ch == '/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (ch == L']') {
 						return true;
 					} else if (!jsonw_is_space(ch)) {
@@ -544,6 +634,10 @@ extern "C" {
 		while (json_next != '\0') {
 			if (ch == '}') {
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == '\"') {
 				if (!json_check_string(ctx, ptrptr, level)) {
 					return false;
@@ -556,6 +650,10 @@ extern "C" {
 						while (json_next != '\0') {
 							if (ch == ',') {
 								goto json_check_object_repeat;
+							} else if (ch == '/') {
+								if (!json_skip_comment(ctx, ptrptr)) {
+									return false;
+								}
 							} else if (ch == '}') {
 								return true;
 							} else if (!json_is_space(ch)) {
@@ -565,6 +663,10 @@ extern "C" {
 						}
 						json_err(json_error_eof);
 						return false;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (!json_is_space(ch)) {
 						json_err(json_error_syntax);
 						return false;
@@ -588,6 +690,10 @@ extern "C" {
 		while (jsonw_next != L'\0') {
 			if (ch == L'}') {
 				return true;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == L'\"') {
 				if (!jsonw_check_string(ctx, ptrptr, level)) {
 					return false;
@@ -600,6 +706,10 @@ extern "C" {
 						while (jsonw_next != L'\0') {
 							if (ch == L',') {
 								goto jsonw_check_object_repeat;
+							} else if (ch == '/') {
+								if (!jsonw_skip_comment(ctx, ptrptr)) {
+									return false;
+								}
 							} else if (ch == L'}') {
 								return true;
 							} else if (!jsonw_is_space(ch)) {
@@ -609,6 +719,10 @@ extern "C" {
 						}
 						jsonw_err(json_error_eof);
 						return false;
+					} else if (ch == '/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (!jsonw_is_space(ch)) {
 						jsonw_err(json_error_syntax);
 						return false;
@@ -633,12 +747,20 @@ extern "C" {
 		while ((ch = *ptr) != '\0') {
 			if (json_is_space(ch)) {
 				ptr++;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == '{') {
 				if (!json_check_object(ctx, ptrptr, 0)) {
 					return false;
 				}
 				while (json_next != '\0') {
-					if (!json_is_space(ch)) {
+					if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
+					} else if (!json_is_space(ch)) {
 						json_err(json_error_syntax);
 						return false;
 					}
@@ -661,12 +783,20 @@ extern "C" {
 		while ((ch = *ptr) != L'\0') {
 			if (jsonw_is_space(ch)) {
 				ptr++;
+			} else if (ch == L'/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == L'{') {
 				if (!jsonw_check_object(ctx, ptrptr, 0)) {
 					return false;
 				}
 				while (jsonw_next != L'\0') {
-					if (!jsonw_is_space(ch)) {
+					if (ch == L'/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
+					} else if (!jsonw_is_space(ch)) {
 						jsonw_err(json_error_syntax);
 						return false;
 					}
@@ -1762,6 +1892,10 @@ extern "C" {
 				}
 				json_err(json_error_syntax);
 				return NULL;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return NULL;
+				}
 			} else if (!json_is_space(ch)) {
 				json_err(json_error_syntax);
 				return NULL;
@@ -1926,6 +2060,10 @@ extern "C" {
 				}
 				jsonw_err(json_error_syntax);
 				return NULL;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return NULL;
+				}
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_err(json_error_syntax);
 				return NULL;
@@ -1943,6 +2081,10 @@ extern "C" {
 			if (ch == ']') {
 				node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_rev;
 				struct json_node* value = json_parse_node(ctx, ptrptr, node, level);
@@ -1957,6 +2099,10 @@ extern "C" {
 				while (json_next != '\0') {
 					if (ch == ',') {
 						goto json_parse_array_repeat;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (ch == ']') {
 						node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 						return true;
@@ -1981,6 +2127,10 @@ extern "C" {
 			if (ch == L']') {
 				node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 				return true;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!jsonw_is_space(ch)) {
 				jsonw_rev;
 				struct json_node* value = jsonw_parse_node(ctx, ptrptr, node, level);
@@ -1994,6 +2144,10 @@ extern "C" {
 				while (jsonw_next != L'\0') {
 					if (ch == L',') {
 						goto jsonw_parse_array_repeat;
+					} else if (ch == '/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (ch == L']') {
 						node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 						return true;
@@ -2018,6 +2172,10 @@ extern "C" {
 			if (ch == '}') {
 				node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == '\"') {
 				struct json_node* vkey = json_create(node, json_type_string, level, *ptrptr, 0);
 				if (vkey == NULL) {
@@ -2043,6 +2201,11 @@ extern "C" {
 						while (json_next != '\0') {
 							if (ch == ',') {
 								goto json_parse_object_repeat;
+							} else if (ch == '/') {
+								if (!json_skip_comment(ctx, ptrptr)) {
+									json_destroy(vkey);
+									return false;
+								}
 							} else if (ch == '}') {
 								node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data)) + sizeof(char);
 								return true;
@@ -2055,6 +2218,11 @@ extern "C" {
 						json_err(json_error_eof);
 						json_destroy(vkey);
 						return false;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							json_destroy(vkey);
+							return false;
+						}
 					} else if (!json_is_space(ch)) {
 						json_err(json_error_syntax);
 						json_destroy(vkey);
@@ -2081,6 +2249,10 @@ extern "C" {
 			if (ch == L'}') {
 				node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 				return true;
+			} else if (ch == '/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == L'\"') {
 				struct json_node* vkey = jsonw_create(node, json_type_string, level, *ptrptr, 0);
 				if (vkey == NULL) {
@@ -2099,28 +2271,38 @@ extern "C" {
 							return false;
 						}
 						if (!jsonw_object_add(node, vkey, value)) {
-							json_destroy(vkey);
-							json_destroy(value);
+							jsonw_destroy(vkey);
+							jsonw_destroy(value);
 							return false;
 						}
 						while (jsonw_next != L'\0') {
 							if (ch == L',') {
 								goto jsonw_parse_object_repeat;
+							} else if (ch == L'/') {
+								if (!jsonw_skip_comment(ctx, ptrptr)) {
+									jsonw_destroy(vkey);
+									return false;
+								}
 							} else if (ch == L'}') {
 								node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata)) + sizeof(wchar_t);
 								return true;
 							} else if (!jsonw_is_space(ch)) {
 								jsonw_err(json_error_syntax);
-								json_destroy(vkey);
+								jsonw_destroy(vkey);
 								return false;
 							}
 						}
 						jsonw_err(json_error_eof);
-						json_destroy(vkey);
+						jsonw_destroy(vkey);
 						return false;
+					} else if (ch == '/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							jsonw_destroy(vkey);
+							return false;
+						}
 					} else if (!jsonw_is_space(ch)) {
 						jsonw_err(json_error_syntax);
-						json_destroy(vkey);
+						jsonw_destroy(vkey);
 						return false;
 					}
 				}
@@ -2144,6 +2326,10 @@ extern "C" {
 		while ((ch = *ptr) != '\0') {
 			if (json_is_space(ch)) {
 				ptr++;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return NULL;
+				}
 			} else if (ch == '{') {
 				json_node* node = json_create(0, json_type_object, 0, ptr, 0);
 				if (node == NULL) {
@@ -2155,7 +2341,12 @@ extern "C" {
 					return NULL;
 				}
 				while (json_next != '\0') {
-					if (!json_is_space(ch)) {
+					if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							json_destroy(node);
+							return NULL;
+						}
+					} else if (!json_is_space(ch)) {
 						json_destroy(node);
 						json_err(json_error_syntax);
 						return NULL;
@@ -2179,6 +2370,10 @@ extern "C" {
 		while ((ch = *ptr) != L'\0') {
 			if (jsonw_is_space(ch)) {
 				ptr++;
+			} else if (ch == L'/') {
+				if (!jsonw_skip_comment(ctx, ptrptr)) {
+					return NULL;
+				}
 			} else if (ch == L'{') {
 				json_node* node = jsonw_create(0, json_type_object, 0, ptr, 0);
 				if (node == NULL) {
@@ -2190,7 +2385,12 @@ extern "C" {
 					return NULL;
 				}
 				while (jsonw_next != L'\0') {
-					if (!jsonw_is_space(ch)) {
+					if (ch == L'/') {
+						if (!jsonw_skip_comment(ctx, ptrptr)) {
+							jsonw_destroy(node);
+							return NULL;
+						}
+					} else if (!jsonw_is_space(ch)) {
 						jsonw_destroy(node);
 						jsonw_err(json_error_syntax);
 						return NULL;
@@ -2408,7 +2608,7 @@ extern "C" {
 		char* line2 = (char*)mmalloc((len + prefix + postfix + 1)*sizeof(char));
 		char* p1 = line1;
 		char* p2 = line2;
-		char* e = (char*)json;
+		char* e = (char*)(ctx.error.ptr);
 		while (prefix-- > 1) {
 			*p1 = ' ';
 			*p2 = '.';
@@ -2419,11 +2619,27 @@ extern "C" {
 			*p2 = ' ';
 			p1++; p2++;
 		}
-		while (len-- > 0) {
-			if (e == ctx.error.ptr) *p1 = 'v'; else *p1 = ' ';
+		bool prevspace = false;
+		while (len > 0) {
 			char ch = *e;
-			if (json_is_special(ch)) *p2 = ' '; else *p2 = *e;
-			p1++; p2++; e++;
+			if (ch == '\0')
+				break;
+			if (json_is_space(ch)) {
+				if (!prevspace) {
+					if (e == ctx.error.ptr) *p1 = 'v'; else *p1 = ' ';
+					*p2 = ' ';
+					prevspace = true;
+					p1++; p2++;
+					len--;
+				}
+			} else {
+				if (e == ctx.error.ptr) *p1 = 'v'; else *p1 = ' ';
+				*p2 = *e;
+				prevspace = false;
+				p1++; p2++;
+				len--;
+			}
+			e++;
 		}
 		if (postfix-- > 0) {
 			*p1 = ' ';
@@ -2480,7 +2696,7 @@ extern "C" {
 	
 	void jsonw_debug_error(const struct json_context& ctx, const wchar_t* json) {
 		uint32_t size = wcs_strlen(json, NULL);
-		int errofs = (int)((intptr_t)(ctx.error.ptr) - (intptr_t)(json)) / sizeof(wchar_t);
+		int errofs = (int)((intptr_t)(ctx.error.wptr) - (intptr_t)(json)) / sizeof(wchar_t);
 		int prefix = 4;
 		int start = errofs - 8; if (start < 0) { start = 0; prefix = 0; }
 		int postfix = 4;
@@ -2490,7 +2706,7 @@ extern "C" {
 		wchar_t* line2 = (wchar_t*)mmalloc((len + prefix + postfix + 1)*sizeof(wchar_t));
 		wchar_t* p1 = line1;
 		wchar_t* p2 = line2;
-		wchar_t* e = (wchar_t*)json;
+		wchar_t* e = (wchar_t*)(ctx.error.wptr);
 		while (prefix-- > 1) {
 			*p1 = L' ';
 			*p2 = L'.';
@@ -3134,6 +3350,10 @@ extern "C" {
 				}
 				json_err(json_error_syntax);
 				return false;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_err(json_error_syntax);
 				return false;
@@ -3300,6 +3520,10 @@ extern "C" {
 				}
 				json_err(json_error_syntax);
 				return false;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_err(json_error_syntax);
 				return false;
@@ -3316,6 +3540,10 @@ extern "C" {
 		while (json_next != '\0') {
 			if (ch == ']') {
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (!json_is_space(ch)) {
 				json_rev;
 				if (!json_call_array_node(ctx, ptrptr, index)) {
@@ -3325,6 +3553,10 @@ extern "C" {
 				while (json_next != '\0') {
 					if (ch == ',') {
 						goto json_call_array_repeat;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
 					} else if (ch == ']') {
 						return true;
 					} else if (!json_is_space(ch)) {
@@ -3346,6 +3578,10 @@ extern "C" {
 		while (json_next != '\0') {
 			if (ch == '}') {
 				return true;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
 			} else if (ch == '\"') {
 				char* vkey = NULL;
 				if (!json_call_string(ctx, ptrptr, &vkey)) {
@@ -3361,6 +3597,10 @@ extern "C" {
 						while (json_next != '\0') {
 							if (ch == ',') {
 								goto json_call_object_repeat;
+							} else if (ch == '/') {
+								if (!json_skip_comment(ctx, ptrptr)) {
+									return false;
+								}
 							} else if (ch == '}') {
 								return true;
 							} else if (!json_is_space(ch)) {
@@ -3370,6 +3610,11 @@ extern "C" {
 						}
 						json_err(json_error_eof);
 						return false;
+					} else if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							memFree(vkey);
+							return false;
+						}
 					} else if (!json_is_space(ch)) {
 						memFree(vkey);
 						json_err(json_error_syntax);
@@ -3399,6 +3644,11 @@ extern "C" {
 		while ((ch = *ptr) != '\0') {
 			if (json_is_space(ch)) {
 				ptr++;
+			} else if (ch == '/') {
+				if (!json_skip_comment(ctx, ptrptr)) {
+					return false;
+				}
+				ptr++;
 			} else if (ch == '{') {
 				if (ctx->callbacks != NULL) {
 					if (ctx->callbacks->onroot != NULL) {
@@ -3409,7 +3659,11 @@ extern "C" {
 					return false;
 				}
 				while (json_next != '\0') {
-					if (!json_is_space(ch)) {
+					if (ch == '/') {
+						if (!json_skip_comment(ctx, ptrptr)) {
+							return false;
+						}
+					} else if (!json_is_space(ch)) {
 						json_err(json_error_syntax);
 						return false;
 					}

@@ -22,8 +22,7 @@
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
 
-class GLEngine;
-
+#include <opengl/uGLEngine.h>
 #include <opengl/uGLFrame.h>
 #include <opengl/uGLTouchScreen.h>
 #include <opengl/uGLPaint.h>
@@ -42,7 +41,7 @@ private:
 	static bool isExtensionSupported(const char *extension);
 	
 public:
-	GLEngine* engine;
+	GLEngine engine;
 	
 	uint32_t width;
 	uint32_t height;
@@ -83,7 +82,7 @@ public:
 	
 	Vec4 light;
 	
-	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch);
+	GLRender(GLEngine& engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch);
 	~GLRender();
 	
 	void resetBlend();

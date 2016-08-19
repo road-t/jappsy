@@ -34,9 +34,10 @@
 
 @implementation JappsyView
 
-- (void) engine:(void*)engine {
+- (void) engine:(void*)refEngine {
 	if (_renderer != NULL) {
-		_renderer->initialize((GLEngine*)engine);
+		GLEngine engine = (RefGLEngine*)refEngine;
+		_renderer->initialize(engine);
 	}
 }
 

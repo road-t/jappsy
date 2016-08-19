@@ -17,6 +17,7 @@
 #include "uGLRender.h"
 
 #include <opengl/uGLCamera.h>
+#include <opengl/uGLEngine.h>
 
 const char* GLRender::extensions = NULL;
 
@@ -49,7 +50,7 @@ bool GLRender::isExtensionSupported(const char *extension) {
 	return false;
 }
 
-GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch) {
+GLRender::GLRender(GLEngine& engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch) {
 	THIS.engine = engine;
 	THIS.width = width;
 	THIS.height = height;
@@ -150,7 +151,7 @@ GLRender::~GLRender() {
 	textures = NULL;
 	shaders = NULL;
 	
-	engine = NULL;
+	engine = null;
 }
 
 void GLRender::resetBlend() {

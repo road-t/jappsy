@@ -87,10 +87,11 @@ Stream NSDataToStream(NSData* data) throw(const char*) {
 				} catch (...) {
 				}
 			}
-			if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-				http->retry = 0;
-			}
 			if (http->retry > 0) {
+				if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+					http->onerror(http->url, L"Shutdown", http->userData);
+					break;
+				}
 				http->retry--;
 			} else if (http->retry == 0) {
 				http->onerror(http->url, [error localizedDescription], http->userData);
@@ -139,10 +140,11 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 						}
 						memFree((void*)dataResult);
 					}
-					if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-						http->retry = 0;
-					}
 					if (http->retry > 0) {
+						if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+							http->onerror(http->url, L"Shutdown", http->userData);
+							break;
+						}
 						http->retry--;
 					} else if (http->retry == 0) {
 						http->onerror(http->url, dataError, http->userData);
@@ -227,10 +229,11 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 						} catch (...) {
 						}
 					}
-					if ((http->retry > 0) && (http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-						http->retry = 0;
-					}
 					if (http->retry > 0) {
+						if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+							http->onerror(http->url, L"Shutdown", http->userData);
+							break;
+						}
 						http->retry--;
 						repeat = true;
 					} else if (http->retry == 0) {

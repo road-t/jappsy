@@ -20,10 +20,12 @@
 #include <opengl/uGLEngine.h>
 #include <event/uMotionEvent.h>
 
-class OMEngine : public GLEngine {
+class OMEngine : public RefGLEngine {
 public:
     OMEngine();
     ~OMEngine();
+    
+    virtual void release();
 };
 
 #endif //OMENGINE_H

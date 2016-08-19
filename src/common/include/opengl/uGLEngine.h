@@ -17,20 +17,35 @@
 #ifndef JAPPSY_UGLENGINE_H
 #define JAPPSY_UGLENGINE_H
 
-#include <opengl/uGLRender.h>
+#include <data/uObject.h>
 #include <event/uMotionEvent.h>
 
-class GLEngine {
+class GLRender;
+
+class RefGLEngine : public RefObject {
 protected:
 	GLRender* context;
 	
 public:
-	inline GLEngine() {}
-	virtual inline ~GLEngine() {}
+	inline RefGLEngine() {}
+	virtual inline ~RefGLEngine() { release(); }
+	virtual void release() { context = NULL; }
 	
 	void onRender();
 	void onUpdate(int width, int height);
 	void onTouch(MotionEvent* event);
+
+};
+
+class GLEngine : public Object {
+public:
+	RefClass(GLEngine, RefGLEngine);
+	
+	inline void release() throw(const char*) { THIS.ref().release(); }
+	
+	inline void onRender() throw(const char*) { THIS.ref().onRender(); }
+	inline void onUpdate(int width, int height) throw(const char*) { THIS.ref().onUpdate(width, height); }
+	inline void onTouch(MotionEvent* event) throw(const char*) { THIS.ref().onTouch(event); }
 };
 
 #endif //JAPPSY_UGLENGINE_H

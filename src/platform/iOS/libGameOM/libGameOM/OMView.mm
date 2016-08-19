@@ -24,7 +24,7 @@
 - (BOOL) onStart
 {
     if ([super onStart]) {
-        OMEngine* omEngine = memNew(omEngine, OMEngine());
+        OMEngine* omEngine = new OMEngine();
         [self engine:omEngine];
         
         return YES;

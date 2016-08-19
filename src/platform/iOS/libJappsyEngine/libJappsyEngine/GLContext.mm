@@ -19,7 +19,6 @@
 
 GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*) {
 	THIS.context = context;
-	THIS.engine = NULL;
 	
 	glGenFramebuffers(1, &frameBuffer);
 	if (glGetError() == GL_OUT_OF_MEMORY)
@@ -86,10 +85,8 @@ void GLContext::release() {
 		glDeleteRenderbuffers(1, &depthRenderBuffer); depthRenderBuffer = 0;
 	}
 	
-	if (engine != NULL) {
-		memDelete(engine);
-	}
-	engine = NULL;
+	engine.release();
+	engine = null;
 	context = NULL;
 }
 
@@ -135,8 +132,8 @@ void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
 		throw eOpenGL;
 	}
 	
-	if (engine)
-		engine->onUpdate(width, height);
+	if (engine != null)
+		engine.onUpdate(width, height);
 }
 
 static int color = 0;
@@ -144,8 +141,8 @@ static int color = 0;
 void GLContext::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	
-	if (engine) {
-		engine->onRender();
+	if (engine != null) {
+		engine.onRender();
 	} else {
 		float c = (float)color / 255.0f;
 		glClearColor(c, c, c, 1.0f);
@@ -160,12 +157,12 @@ void GLContext::render() {
 }
 
 void GLContext::touch(MotionEvent* event) {
-	if (engine)
-		THIS.engine->onTouch(event);
+	if (engine != null)
+		THIS.engine.onTouch(event);
 }
 
-void GLContext::initialize(GLEngine* engine) {
+void GLContext::initialize(GLEngine& engine) {
 	THIS.engine = engine;
-	engine->onUpdate(width, height);
-	engine->onRender();
+	engine.onUpdate(width, height);
+	engine.onRender();
 }

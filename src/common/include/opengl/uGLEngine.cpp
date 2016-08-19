@@ -15,17 +15,18 @@
  */
 
 #include "uGLEngine.h"
+#include <opengl/uGLRender.h>
 
-void GLEngine::onRender() {
+void RefGLEngine::onRender() {
 	THIS.context->frame->loop();
 }
 
-void GLEngine::onUpdate(int width, int height) {
+void RefGLEngine::onUpdate(int width, int height) {
 	THIS.context->frame->width = width;
 	THIS.context->frame->height = height;
 }
 
-void GLEngine::onTouch(MotionEvent* event) {
+void RefGLEngine::onTouch(MotionEvent* event) {
 	switch (event->actionEvent) {
 		case MotionEvent::ACTION_DOWN:
 			THIS.context->touchScreen.ref().onTouchStart(event);

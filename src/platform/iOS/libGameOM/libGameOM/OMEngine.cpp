@@ -52,7 +52,8 @@ void onError(const String& error, const Object& userData) {
 }
 
 OMEngine::OMEngine() {
-    context = memNew(context, GLRender(this, 1920, 1080, ::onFrame, ::onTouch));
+    GLEngine engine = this;
+    context = memNew(context, GLRender(engine, 1920, 1080, ::onFrame, ::onTouch));
     
     const char *sOMLoadRes =
         #include "OMLoad.res"
@@ -66,11 +67,17 @@ OMEngine::OMEngine() {
     loader->onstatus = onStatus;
     loader->onready = onReady;
     loader->onerror = onError;
-    //loader->userData =
+    loader->userData = engine;
     loader->load(sOMLoadRes);
 }
 
+void OMEngine::release() {
+    if (context != NULL) {
+        memDelete(context);
+        context = NULL;
+    }
+}
+
 OMEngine::~OMEngine() {
-    memDelete(context);
-    //loader->release();
+    release();
 }

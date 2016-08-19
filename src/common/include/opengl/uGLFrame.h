@@ -20,15 +20,15 @@
 #include <platform.h>
 #include <data/uSmoothValue.h>
 #include <opengl/uOpenGL.h>
+#include <opengl/uGLEngine.h>
 
-class GLEngine;
 class GLRender;
 
 class GLFrame {
 public:
 	typedef void (*onFrameCallback)(GLRender* context);
 	
-	GLEngine* engine;
+	GLEngine engine;
 	GLRender* context;
 	
 	GLint width;
@@ -41,7 +41,7 @@ public:
 	
 	onFrameCallback onFrame;
 	
-	GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback);
+	GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback);
 	~GLFrame();
 	
 	void loop();

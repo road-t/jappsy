@@ -26,6 +26,6 @@
 - (void) onResume;
 - (void) onPause;
 - (void) drawView:(id)sender;
-- (void) engine:(void*)engine;
+- (void) engine:(void*)refEngine;
 
 @end

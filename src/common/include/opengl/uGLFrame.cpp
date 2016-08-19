@@ -21,13 +21,12 @@
 #include <opengl/uOpenGL.h>
 #include <math.h>
 
-#include <opengl/uGLEngine.h>
 #include <opengl/uGLRender.h>
 
 void defaultOnFrame(GLRender* context) {
 }
 
-GLFrame::GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback) {
+GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback) {
 	THIS.engine = engine;
 	THIS.context = context;
 	
@@ -53,7 +52,7 @@ GLFrame::~GLFrame() {
 		glDeleteBuffers(1, &tempBuffer);
 	} while (false);
 	
-	THIS.engine = NULL;
+	THIS.engine = null;
 	THIS.context = NULL;
 	
 	THIS.currentTime = THIS.lastFrame = 0;

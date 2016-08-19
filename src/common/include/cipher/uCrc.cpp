@@ -16,6 +16,10 @@
 
 #include "uCrc.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define _CRC7_POLYNOM_	0x12	// b00010010 G(x) - used for MMC/SD flash cards
 #define _CRC16_POLYNOM_	0x1021	// b0001000000100001 G(x) - used for MMC/SD flash cards
 #define _CRC32_POLYNOM_ 0xEDB88320	// b11101101101110001000001100100000
@@ -335,4 +339,8 @@ Java_com_jappsy_cipher_CRC_crc32(JNIEnv *env, jclass type, jobject data, jlong o
     return 0xFFFFFFFF;
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

@@ -17,6 +17,10 @@
 #include "uMD5.h"
 #include <string.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void md5_init(struct tMD5* md5) {
     md5->count = 0;
     md5->state[0] = 0x67452301;
@@ -200,4 +204,8 @@ Java_com_jappsy_cipher_MD5_utf8(JNIEnv *env, jclass type, jstring s_) {
     return (*env)->NewString(env, res, 32);
 }
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif

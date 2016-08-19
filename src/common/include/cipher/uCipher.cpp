@@ -22,8 +22,13 @@
 #endif
 #include <core/uMemory.h>
 #include <data/uString.h>
+#include <core/uError.h>
 
 #define GZIP_MAGIC 0x8b1f
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 bool is_gzip(const void* in, uint32_t insize) {
     if ((in == NULL) || (insize < 2))
@@ -34,11 +39,12 @@ bool is_gzip(const void* in, uint32_t insize) {
 
 voidpf mmzalloc(voidpf opaque, unsigned items, unsigned size) {
 	if (opaque) items += size - size; /* make compiler happy */
-	return (voidpf)mmalloc(items * size);
+	void* zlib = memAlloc(void, zlib, items * size);
+	return (voidpf)zlib;
 }
 
 void mmzfree(voidpf opaque, voidpf ptr) {
-	mmfree(ptr);
+	memFree(ptr);
 	if (opaque) return; /* make compiler happy */
 }
 
@@ -143,25 +149,30 @@ void* gzip_decode(const void* in, uint32_t insize, uint32_t* outsize) {
 			else if (insize < 1024) gzipBufferSize = 1024;
 			else gzipBufferSize = insize - (insize % 1024) + 1024;
 			
-            Bytef* gzipBuffer = memAlloc(Bytef, gzipBuffer, gzipBufferSize);
+            Bytef* gzipBuffer = memAlloc(Bytef, gzipBuffer, gzipBufferSize + sizeof(wchar_t));
 
-            do {
-                if ((gzipBufferSize - gzip.total_out) < 1024) {
-                    gzipBufferSize += 1024;
-                    Bytef* gzipNewBuffer = memRealloc(Bytef, gzipNewBuffer, gzipBuffer, gzipBufferSize);
-                    if (gzipNewBuffer != 0) {
-                        gzipBuffer = gzipNewBuffer;
-                    } else {
-                        break;
-                    }
-                }
+			if (gzipBuffer != NULL) {
+				do {
+					if ((gzipBufferSize - gzip.total_out) < 1024) {
+						gzipBufferSize += 1024;
+						Bytef* gzipNewBuffer = memRealloc(Bytef, gzipNewBuffer, gzipBuffer, gzipBufferSize + sizeof(wchar_t));
+						if (gzipNewBuffer != 0) {
+							gzipBuffer = gzipNewBuffer;
+						} else {
+							break;
+						}
+					}
 
-                gzip.next_out = gzipBuffer + gzip.total_out;
-                gzip.avail_out = (uInt)(gzipBufferSize - gzip.total_out);
-                res = inflate(&gzip, Z_FINISH);
-            } while ((res == Z_BUF_ERROR) || (res == Z_OK));
+					gzip.next_out = gzipBuffer + gzip.total_out;
+					gzip.avail_out = (uInt)(gzipBufferSize - gzip.total_out);
+					res = inflate(&gzip, Z_FINISH);
+				} while ((res == Z_BUF_ERROR) || (res == Z_OK));
+			}
 
             inflateEnd(&gzip);
+
+			if (gzipBuffer == NULL)
+				throw eOutOfMemory;
 
             if (res != Z_STREAM_END) {
                 memFree(gzipBuffer);
@@ -329,3 +340,8 @@ void* base64_decode_unicode(const wchar_t* in, uint32_t insize, uint32_t* outsiz
     *outBuf = 0;
     return out;
 }
+	
+#ifdef __cplusplus
+}
+#endif
+

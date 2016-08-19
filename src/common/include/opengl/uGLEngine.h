@@ -33,6 +33,8 @@ public:
 	~RefGLEngine();
 	void release();
 	
+	inline void shutdown() {}
+	
 	void setBasePath(const String& basePath);
 	void load(const char* json);
 	

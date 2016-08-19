@@ -412,18 +412,26 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
  */
 }
 
-bool GLRender::createShaders(JSONObject& shaders) {
-	/*
-	for (var key in shaders) {
-		var shader = this.shaders.createShader(key,
-											   new Jappsy.Data(shaders[key][0], Jappsy.DataStyleRefString),
-											   new Jappsy.Data(shaders[key][1], Jappsy.DataStyleRefString),
-											   null,
-											   []);
-		if (shader == null)
-			return false;
+bool GLRender::createShaders(JSONObject shaders) {
+	Iterator<String> keys;
+ 
+	keys = shaders.keys();
+	while (keys.hasNext()) {
+		String key = keys.next();
+		JSONArray data = shaders.getJSONArray(key);
+		String vsh = data.optString(0);
+		String fsh = data.optString(1);
+		THIS.shaders->createShader((wchar_t*)key, vsh, fsh);
 	}
-	
+
+	keys = THIS.shaders->keys();
+	while (keys.hasNext()) {
+		String key = keys.next();
+		if (!THIS.shaders->get((wchar_t*)key).checkReady()) {
+			return false;
+		}
+	}
+/*
 	for (var key in this.shaders.list) {
 		var shader = this.shaders.list[key];
 		if (!shader.checkReady())
@@ -513,14 +521,14 @@ bool GLRender::createShaders(JSONObject& shaders) {
 	return true;
 }
 
-void GLRender::createModels(JSONObject& models) {
+void GLRender::createModels(JSONObject models) {
 	
 }
 
-void GLRender::createSprites(JSONObject& sprites) {
+void GLRender::createSprites(JSONObject sprites) {
 	
 }
 
-void GLRender::createDrawings(JSONObject& drawings) {
+void GLRender::createDrawings(JSONObject drawings) {
 	
 }

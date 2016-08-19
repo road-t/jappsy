@@ -10,19 +10,6 @@ R"JAPPSYRAWSTRING(
             "sprite":					"shaders/sprite.jsh",
             "particle":					"shaders/particle.jsh",
             "model":					"shaders/model.jsh",
-/*
-            "vsh_effect":				"shaders/vsh_effect.jsh",
-            "effect_torsion":			"shaders/effect_torsion.jsh",
-            "effect_sun1":				"shaders/effect_sun1.jsh",
-            "effect_moon1":				"shaders/effect_moon1.jsh",
-            "effect_unknown":			"shaders/effect_unknown.jsh",
-            "effect_unknown_star":		"shaders/effect_unknown_star.jsh",
-            "effect_sun2":				"shaders/effect_sun2.jsh",
-            "effect_moon2":				"shaders/effect_moon2.jsh",
-            "effect_star1":				"shaders/effect_star1.jsh",
-            "effect_star2":				"shaders/effect_star2.jsh",
-*/
-            //"fsh_effect_test":			"shaders/fsh_effect_test.fsh",
 
             "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
             "mobile_effect_sun1":					"shaders/mobile_effect_sun1.jsh",

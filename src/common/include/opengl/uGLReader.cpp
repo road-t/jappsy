@@ -312,7 +312,7 @@ GLShader& GLReader::createShader(GLRender* ctx, const wchar_t* key, Stream& stre
 						shd = memNew(shd, GLShaderData(ctx));
 						if (shd == NULL)
 							throw eOutOfMemory;
-						shd->setTarget(target, false);
+						shd->setTarget(target);
 					} catch (...) {
 						memFree(target);
 						if (shd != NULL) {

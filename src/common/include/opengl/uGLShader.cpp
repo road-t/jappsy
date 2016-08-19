@@ -39,10 +39,10 @@ GLShaderData::~GLShaderData() {
 	m_type = GLShaderDataType::NONE;
 }
 
-GLShaderData& GLShaderData::setTarget(const String& target, bool reference) {
+GLShaderData& GLShaderData::setTarget(const String& target) {
 	m_target = target;
 	m_handles.clear();
-	m_reference = reference;
+	m_reference = false;
 	m_type = GLShaderDataType::STRING;
 	return THIS;
 }
@@ -268,6 +268,10 @@ GLShaders::~GLShaders() {
 	context = NULL;
 }
 
+const Iterator<String> GLShaders::keys() {
+	return list.keySet().iterator();
+}
+
 GLShader& GLShaders::get(const wchar_t* key) throw(const char*) {
 	return (GLShader&)list.get(key);
 }
@@ -297,7 +301,7 @@ GLuint GLShaders::createVertexShader(const char* vertexShaderSource) throw(const
 		if (logLen > 0) {
 			GLchar* log = memAlloc(GLchar, log, logLen + 1);
 			glGetShaderInfoLog(vertexShader, logLen, &logLen, log);
-			String::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
+			String::format(L"OpenGL Vertex Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
 		}
 #endif
@@ -324,7 +328,7 @@ GLuint GLShaders::createFragmentShader(const char* fragmentShaderSource) throw(c
 		if (logLen > 0) {
 			GLchar* log = memAlloc(GLchar, log, logLen + 1);
 			glGetShaderInfoLog(fragmentShader, logLen, &logLen, log);
-			String::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
+			String::format(L"OpenGL Fragment Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
 		}
 #endif
@@ -462,3 +466,40 @@ GLShader& GLShaders::createFragmentShader(const wchar_t* key, const char* fragme
 	
 	return *(GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
 }
+
+GLShader& GLShaders::createShader(const wchar_t* key, const String& vshReference, const String& fshReference) throw(const char*) {
+	GLShaderData* vsh = NULL;
+	GLShaderData* fsh = NULL;
+	Vector<GLShaderData*> textures;
+	
+	try {
+		vsh = memNew(vsh, GLShaderData(context));
+		if (vsh == NULL)
+			throw eOutOfMemory;
+		vsh->setTarget(vshReference);
+		
+		fsh = memNew(fsh, GLShaderData(context));
+		if (fsh == NULL)
+			throw eOutOfMemory;
+		fsh->setTarget(fshReference);
+	} catch (...) {
+		if (vsh != NULL) {
+			memDelete(vsh);
+			vsh = NULL;
+		}
+		if (fsh != NULL) {
+			memDelete(fsh);
+			fsh = NULL;
+		}
+		throw;
+	}
+	
+	try {
+		return createShader(key, vsh, fsh, 0, textures);
+	} catch (...) {
+		memDelete(vsh);
+		memDelete(fsh);
+		throw;
+	}
+}
+

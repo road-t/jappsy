@@ -43,7 +43,7 @@ public:
 	inline GLShaderData(GLRender* context) { THIS.m_context = context; }
 	~GLShaderData();
 	
-	GLShaderData& setTarget(const String& target, bool reference);
+	GLShaderData& setTarget(const String& target);
 	GLShaderData& setTextures(const Vector<GLuint>& handles, bool reference);
 	GLShaderData& setShader(const GLuint handle, bool reference);
 	
@@ -91,6 +91,7 @@ public:
 	GLShaders(GLRender* context) throw(const char*);
 	~GLShaders();
 	
+	const Iterator<String> keys();
 	GLShader& get(const wchar_t* key) throw(const char*);
 	GLShader& createShader(const wchar_t* key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*);
 	
@@ -109,7 +110,7 @@ public: // Thread Safe
 
 	GLShader& createVertexShader(const wchar_t* key, const char* vertexShaderSource) throw(const char*);
 	GLShader& createFragmentShader(const wchar_t* key, const char* fragmentShaderSource) throw(const char*);
-
+	GLShader& createShader(const wchar_t* key, const String& vshReference, const String& fshReference) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSHADER_H

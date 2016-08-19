@@ -45,9 +45,13 @@ void OMEngine::onStatus(const LoaderStatus& status) {
 void OMEngine::onReady(const HashMap<String, Stream>& result) {
     String::format(L"READY!").log();
     
-    //if (!context->createShaders()) {
-        
-    //}
+    const char *sOMShadersRes =
+        #include "OMShaders.res"
+    ;
+    
+    if (!context->createShaders(sOMShadersRes)) {
+        shutdown();
+    }
 }
 
 void OMEngine::onError(const String& error) {

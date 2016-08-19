@@ -26,8 +26,8 @@ void json_parse_to_object(RefJSONObject* object, const struct json_node* n) thro
 			throw eConvert;
 		}
 		
-		uint32_t cnt = n->value.o.c - 1;
-		for (int i = 0; i <= cnt; i++) {
+		uint32_t cnt = n->value.o.c;
+		for (int i = 0; i < cnt; i++) {
 			char* key = n->value.o.k[i]->value.s;
 			struct json_node* j = n->value.o.v[i];
 			
@@ -78,8 +78,8 @@ void json_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(c
 			throw eConvert;
 		}
 		
-		uint32_t cnt = n->value.a.c - 1;
-		for (int i = 0; i <= cnt; i++) {
+		uint32_t cnt = n->value.a.c;
+		for (int i = 0; i < cnt; i++) {
 			struct json_node* j = n->value.a.v[i];
 
 			if (j != NULL) {
@@ -131,8 +131,8 @@ void jsonw_parse_to_object(RefJSONObject* object, const struct json_node* n) thr
 			throw eConvert;
 		}
 		
-		uint32_t cnt = n->value.o.c - 1;
-		for (int i = 0; i <= cnt; i++) {
+		uint32_t cnt = n->value.o.c;
+		for (int i = 0; i < cnt; i++) {
 			wchar_t* key = n->value.o.k[i]->value.ws;
 			struct json_node* j = n->value.o.v[i];
 			
@@ -183,8 +183,8 @@ void jsonw_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(
 			throw eConvert;
 		}
 		
-		uint32_t cnt = n->value.a.c - 1;
-		for (int i = 0; i <= cnt; i++) {
+		uint32_t cnt = n->value.a.c;
+		for (int i = 0; i < cnt; i++) {
 			struct json_node* j = n->value.a.v[i];
 			
 			if (j != NULL) {

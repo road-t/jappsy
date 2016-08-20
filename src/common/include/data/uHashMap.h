@@ -69,7 +69,8 @@ protected:
 			if (m1 != NULL) {
 				hash >>= 8;
 				Map<K,V> *m2 = m1[hash & 0xFF];
-				return (RefMap<K,V>*)(m2->_object);
+				if (m2 != NULL)
+					return (RefMap<K,V>*)(m2->_object);
 			}
 		}
 		return NULL;

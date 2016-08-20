@@ -101,6 +101,10 @@ extern "C" {
 			GLfloat v[3];
 		};
 		
+		inline Vec3() { }
+		inline Vec3(const GLfloat x, const GLfloat y, const GLfloat z) { v[0] = x; v[1] = y; v[2] = z; }
+		inline Vec3(const GLfloat v[3]) { Vec3SetV(this->v, v); }
+		
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		
@@ -161,6 +165,10 @@ extern "C" {
 			GLfloat v[4];
 		};
 		
+		inline Vec4() { }
+		inline Vec4(const GLfloat x, const GLfloat y, const GLfloat z, const GLfloat w) { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
+		inline Vec4(const GLfloat v[4]) { Vec4SetV(this->v, v); }
+
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		inline operator Vec3() const { return *((Vec3*)this); }

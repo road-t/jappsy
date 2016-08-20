@@ -53,8 +53,12 @@ void OMEngine::onStatus(const LoaderStatus& status) {
     String::format(L"STATUS: %d / %d", status.count, status.total).log();
 }
 
-void OMEngine::onReady(const HashMap<String, Stream>& result) {
+void OMEngine::onReady(const JSONObject& result) {
     String::format(L"READY!").log();
+    
+    JSONObject fallback = new JSONObject();
+    
+    // Подготавливаем шейдеры
     
     const char *sOMShadersRes =
         #include "OMShaders.res"
@@ -63,6 +67,10 @@ void OMEngine::onReady(const HashMap<String, Stream>& result) {
     if (!context->createShaders(sOMShadersRes)) {
         shutdown();
     }
+    
+    // Подготавливаем модели
+    JSONObject models = result.optJSONObject(L"models", fallback);
+    context->createModels(models);
     
     m_paint.setColor(0xFF4080FF);
     ready = true;

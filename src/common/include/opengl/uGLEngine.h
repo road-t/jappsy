@@ -20,7 +20,7 @@
 #include <data/uObject.h>
 #include <event/uMotionEvent.h>
 #include <net/uLoader.h>
-#include <data/uHashMap.h>
+#include <data/uJSONObject.h>
 
 class GLRender;
 
@@ -46,7 +46,7 @@ public:
 	virtual void onTouch(const wchar_t* event) {}
 	virtual void onFile(const String& url, const Object& object) {}
 	virtual void onStatus(const LoaderStatus& status) {}
-	virtual void onReady(const HashMap<String, Stream>& result) {}
+	virtual void onReady(const JSONObject& result) {}
 	virtual void onError(const String& error) {}
 };
 

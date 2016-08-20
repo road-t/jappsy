@@ -87,7 +87,7 @@ public:
 	// loader callback types
 	typedef void (*onFileCallback)(const String& url, const Object& object, const Object userData);
 	typedef void (*onStatusCallback)(const LoaderStatus& status, const Object userData);
-	typedef void (*onReadyCallback)(const HashMap<String, Stream>& result, const Object userData);
+	typedef void (*onReadyCallback)(const JSONObject& result, const Object userData);
 	typedef void (*onErrorCallback)(const String& error, const Object userData);
 
 	onFileCallback onfile = NULL;

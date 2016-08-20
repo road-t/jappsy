@@ -498,7 +498,12 @@ bool GLRender::createShaders(JSONObject shaders) {
 }
 
 void GLRender::createModels(JSONObject models) {
-	
+	Iterator<String> keys = models.keys();
+	while (keys.hasNext()) {
+		String key = keys.next();
+		Stream stream = models.get(key);
+		THIS.models->createModel(key, (const char*)(stream.getBuffer()));
+	}
 }
 
 void GLRender::createSprites(JSONObject sprites) {

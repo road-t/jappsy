@@ -36,7 +36,7 @@ public:
     void onTouch(const wchar_t* event);
     void onFile(const String& url, const Object& object);
     void onStatus(const LoaderStatus& status);
-    void onReady(const HashMap<String, Stream>& result);
+    void onReady(const JSONObject& result);
     void onError(const String& error);
 };
 

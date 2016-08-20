@@ -37,7 +37,7 @@ void onStatusCallback(const LoaderStatus& status, Object userData) {
 	engine->ref().onStatus(status);
 }
 
-void onReadyCallback(const HashMap<String, Stream>& result, Object userData) {
+void onReadyCallback(const JSONObject& result, Object userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onReady(result);
 }

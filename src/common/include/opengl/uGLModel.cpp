@@ -18,6 +18,20 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
+GLMaterialTexture& GLMaterialTexture::texture(GLRender* context, const String& key) {
+	if (key == null) {
+		texture1iv = 0;
+	} else {
+		try {
+			GLTexture* texture = &(context->textures->get(key));
+			texture1iv = texture->ref().handles[0];
+		} catch (...) {
+			texture1iv = 0;
+		}
+	}
+	return *this;
+}
+
 RefGLModel::RefGLModel(GLRender* context) {
 	THIS.context = context;
 }
@@ -36,16 +50,16 @@ GLModels::~GLModels() {
 	context = NULL;
 }
 
-GLModel& GLModels::get(const wchar_t* key) throw(const char*) {
+GLModel& GLModels::get(const String& key) throw(const char*) {
 	return (GLModel&)list.get(key);
 }
 
-GLModel& GLModels::create(const wchar_t* key) throw(const char*) {
+GLModel& GLModels::createModel(const String& key, const char* json) throw(const char*) {
 	try {
 		list.remove(key);
 		GLModel* shader = &(list.put(key, new RefGLModel(context)));
-		if (wcscmp(key, L"null") == 0) {
-		}
+//		if (wcscmp(key, L"null") == 0) {
+//		}
 		return *shader;
 	} catch (...) {
 		throw;

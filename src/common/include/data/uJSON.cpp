@@ -3254,10 +3254,10 @@ extern "C" {
 						ctx->callbacks->onarray.onarrayend(ctx, index, store.target, ctx->callbacks->target, result);
 					}
 					if (!result) {
-						json_store_callbacks(&store, ctx->callbacks);
+						json_store_callbacks(ctx->callbacks, &store);
 						return false;
 					}
-					json_store_callbacks(&store, ctx->callbacks);
+					json_store_callbacks(ctx->callbacks, &store);
 				} else {
 					if (!json_check_array(ctx, ptrptr, 0)) {
 						return false;

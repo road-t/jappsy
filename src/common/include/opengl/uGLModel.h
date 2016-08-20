@@ -288,15 +288,38 @@ private:
 		// root.meshes
 		static void onjson_meshes_start(struct json_context* ctx, const char* key, void* target);
 		static void onjson_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-	
 			// root.meshes[index]
 			static void onjson_mesh_start(struct json_context* ctx, const int index, void* target);
 			static void onjson_mesh_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
 			static void onjson_mesh_string(struct json_context* ctx, const char* key, char* value, void* target);
 			static void onjson_mesh_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
 			static void onjson_mesh_array_start(struct json_context* ctx, const char* key, void* target); // vertices | normals | texturecoords | faces
-	
-	
+				// mesh.vertices
+				static void onjson_vertices_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_vertices_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+					// mesh.vertices[index]
+					static void onjson_vertices_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+				// mesh.normals
+				static void onjson_normals_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_normals_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+					// mesh.normals[index]
+					static void onjson_normals_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+				// mesh.texturecoords
+				static void onjson_texturecoords_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_texturecoords_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+					// mesh.texturecoords[index]
+					static void onjson_coords_start(struct json_context* ctx, const int index, void* target);
+					static void onjson_coords_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+						// mesh.texturecoords[index][index]
+						static void onjson_coords_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+				// mesh.faces
+				static void onjson_faces_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_faces_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+					// mesh.faces[index]
+					static void onjson_triangle_start(struct json_context* ctx, const int index, void* target);
+					static void onjson_triangle_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+						// mesh.faces[index][index]
+						static void onjson_triangle_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
 		// root.materials
 		static void onjson_materials_start(struct json_context* ctx, const char* key, void* target);
 		static void onjson_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);

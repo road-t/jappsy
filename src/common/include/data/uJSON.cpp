@@ -3225,11 +3225,15 @@ extern "C" {
 				}
 				return true;
 			} else if (ch == '{') {
-				if (ctx->callbacks->onarray.onobject != NULL) {
+				if (ctx->callbacks->onarray.onobjectstart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onarray.onobject(ctx, index, ctx->callbacks->target);
-					if (!json_call_object(ctx, ptrptr)) {
+					ctx->callbacks->onarray.onobjectstart(ctx, index, ctx->callbacks->target);
+					bool result = json_call_object(ctx, ptrptr);
+					if (ctx->callbacks->onarray.onobjectend != NULL) {
+						ctx->callbacks->onarray.onobjectend(ctx, index, store.target, ctx->callbacks->target, result);
+					}
+					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
 						return false;
 					}
@@ -3241,11 +3245,15 @@ extern "C" {
 				}
 				return true;
 			} else if (ch == '[') {
-				if (ctx->callbacks->onarray.onarray != NULL) {
+				if (ctx->callbacks->onarray.onarraystart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onarray.onarray(ctx, index, ctx->callbacks->target);
-					if (!json_call_array(ctx, ptrptr)) {
+					ctx->callbacks->onarray.onarraystart(ctx, index, ctx->callbacks->target);
+					bool result = json_call_array(ctx, ptrptr);
+					if (ctx->callbacks->onarray.onarrayend != NULL) {
+						ctx->callbacks->onarray.onarrayend(ctx, index, store.target, ctx->callbacks->target, result);
+					}
+					if (!result) {
 						json_store_callbacks(&store, ctx->callbacks);
 						return false;
 					}
@@ -3395,11 +3403,15 @@ extern "C" {
 				}
 				return true;
 			} else if (ch == '{') {
-				if (ctx->callbacks->onobject.onobject != NULL) {
+				if (ctx->callbacks->onobject.onobjectstart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onobject.onobject(ctx, key, ctx->callbacks->target);
-					if (!json_call_object(ctx, ptrptr)) {
+					ctx->callbacks->onobject.onobjectstart(ctx, key, ctx->callbacks->target);
+					bool result = json_call_object(ctx, ptrptr);
+					if (ctx->callbacks->onobject.onobjectend != NULL) {
+						ctx->callbacks->onobject.onobjectend(ctx, key, store.target, ctx->callbacks->target, result);
+					}
+					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
 						return false;
 					}
@@ -3411,11 +3423,15 @@ extern "C" {
 				}
 				return true;
 			} else if (ch == '[') {
-				if (ctx->callbacks->onobject.onarray != NULL) {
+				if (ctx->callbacks->onobject.onarraystart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onobject.onarray(ctx, key, ctx->callbacks->target);
-					if (!json_call_array(ctx, ptrptr)) {
+					ctx->callbacks->onobject.onarraystart(ctx, key, ctx->callbacks->target);
+					bool result = json_call_array(ctx, ptrptr);
+					if (ctx->callbacks->onobject.onarrayend != NULL) {
+						ctx->callbacks->onobject.onarrayend(ctx, key, store.target, ctx->callbacks->target, result);
+					}
+					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
 						return false;
 					}

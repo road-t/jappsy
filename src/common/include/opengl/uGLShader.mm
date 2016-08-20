@@ -19,59 +19,7 @@
 #include <core/uMemory.h>
 #include <core/uSystem.h>
 
-GLShaderData::~GLShaderData() {
-	if (!m_reference) {
-		if (m_type == GLShaderDataType::TEXTURES) {
-			uint32_t count = m_handles.count();
-			if (count > 0) {
-				GLuint* items = m_handles.items();
-				for (int i = 0; i < count; i++) {
-					m_context->textures->releaseTextureHandle(items[i]);
-				}
-			}
-		} else if (m_type == GLShaderDataType::SHADER) {
-			m_context->shaders->releaseShader(m_handles[0]);
-		}
-	}
-	m_target = null;
-	m_handles.clear();
-	m_reference = false;
-	m_type = GLShaderDataType::NONE;
-}
-
-GLShaderData& GLShaderData::setTarget(const String& target) {
-	m_target = target;
-	m_handles.clear();
-	m_reference = false;
-	m_type = GLShaderDataType::STRING;
-	return THIS;
-}
-
-GLShaderData& GLShaderData::setTextures(const Vector<GLuint>& handles, bool reference) {
-	m_target = null;
-	m_handles.clear();
-	uint32_t count = handles.count();
-	if (count > 0) {
-		GLuint* items = handles.items();
-		for (int i = 0; i < count; i++) {
-			m_handles.push(items[i]);
-		}
-	}
-	m_reference = reference;
-	m_type = GLShaderDataType::TEXTURES;
-	return THIS;
-}
-
-GLShaderData& GLShaderData::setShader(const GLuint handle, bool reference) {
-	m_target = null;
-	m_handles.clear();
-	m_handles.push(handle);
-	m_reference = reference;
-	m_type = GLShaderDataType::SHADER;
-	return THIS;
-}
-
-RefGLShader::RefGLShader(GLRender* context, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*) {
+RefGLShader::RefGLShader(GLRender* context, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	THIS.context = context;
 	THIS.vsh = vsh;
 	THIS.fsh = fsh;
@@ -80,7 +28,7 @@ RefGLShader::RefGLShader(GLRender* context, GLShaderData* vsh, GLShaderData* fsh
 	uint32_t count = textures.count();
 	if (count > 0) {
 		THIS.textures.resize(count);
-		memcpy(THIS.textures.items(), textures.items(), count * sizeof(GLShaderData*));
+		memcpy(THIS.textures.items(), textures.items(), count * sizeof(GLObjectData*));
 	}
 }
 
@@ -88,7 +36,7 @@ RefGLShader::~RefGLShader() {
 	uint32_t count = textures.count();
 	if (count > 0) {
 		for (int i = 0; i < count; i++) {
-			GLShaderData* texture = textures[i];
+			GLObjectData* texture = textures[i];
 			memDelete(texture);
 		}
 		textures.clear();
@@ -118,7 +66,7 @@ RefGLShader::~RefGLShader() {
 bool RefGLShader::checkReady() {
 	if ((THIS.program == 0) && (THIS.vsh != NULL) && (THIS.fsh != NULL)) {
 		if (THIS.vsh->isReference()) {
-			GLShaderData* vsh = THIS.vsh;
+			GLObjectData* vsh = THIS.vsh;
 			do {
 				GLShader* shader;
 				try {
@@ -137,7 +85,7 @@ bool RefGLShader::checkReady() {
 		}
 
 		if (THIS.fsh->isReference()) {
-			GLShaderData* fsh = THIS.fsh;
+			GLObjectData* fsh = THIS.fsh;
 			do {
 				GLShader* shader;
 				try {
@@ -168,7 +116,7 @@ bool RefGLShader::checkReady() {
 	uint32_t handlesCount = 0;
 	uint32_t count = THIS.textures.count();
 	if (count > 0) {
-		GLShaderData** items = THIS.textures.items();
+		GLObjectData** items = THIS.textures.items();
 		for (int i = (int)(count-1); i >= 0; i--) {
 			if (items[i]->isReference()) {
 				GLTexture* texture;
@@ -189,7 +137,7 @@ bool RefGLShader::checkReady() {
 		THIS.handles1iv.resize(handlesCount);
 		
 		GLuint* handles = THIS.handles.items();
-		GLShaderData** items = THIS.textures.items();
+		GLObjectData** items = THIS.textures.items();
 		uint32_t ofs = 0;
 		for (int i = 0; i < count; i++) {
 			Vector<GLuint>* textures = &(items[i]->getTextures());
@@ -276,7 +224,7 @@ GLShader& GLShaders::get(const String& key) throw(const char*) {
 	return (GLShader&)list.get(key);
 }
 
-GLShader& GLShaders::createShader(const String& key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*) {
+GLShader& GLShaders::createShader(const String& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	try {
 		list.remove(key);
 		return list.put(key, new RefGLShader(context, vsh, fsh, program, textures));
@@ -380,7 +328,7 @@ void GLShaders::releaseProgram(GLuint program) {
 struct CreateShaderDataThreadData {
 	GLRender* context;
 	const wchar_t* key;
-	Vector<GLShaderData*> textures;
+	Vector<GLObjectData*> textures;
 	
 	const char* shaderSource;
 };
@@ -394,9 +342,9 @@ void* GLShaders::CreateVertexShaderCallback(void* threadData) {
 	} catch (...) {
 		throw;
 	}
-	GLShaderData* shd = NULL;
+	GLObjectData* shd = NULL;
 	try {
-		shd = memNew(shd, GLShaderData(thread->context));
+		shd = memNew(shd, GLObjectData(thread->context));
 		if (shd == NULL)
 			throw eOutOfMemory;
 		shd->setShader(sh, false);
@@ -426,9 +374,9 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 	} catch (...) {
 		throw;
 	}
-	GLShaderData* shd = NULL;
+	GLObjectData* shd = NULL;
 	try {
-		shd = memNew(shd, GLShaderData(thread->context));
+		shd = memNew(shd, GLObjectData(thread->context));
 		if (shd == NULL)
 			throw eOutOfMemory;
 		shd->setShader(sh, false);
@@ -468,9 +416,9 @@ GLShader& GLShaders::createFragmentShader(const String& key, const char* fragmen
 }
 
 GLShader& GLShaders::createShader(const String& key, const String& vshReference, const String& fshReference) throw(const char*) {
-	GLShaderData* vsh = NULL;
-	GLShaderData* fsh = NULL;
-	Vector<GLShaderData*> textures;
+	GLObjectData* vsh = NULL;
+	GLObjectData* fsh = NULL;
+	Vector<GLObjectData*> textures;
 	
 	if (vshReference.startsWith(L"@")) {
 		NSString *vertexShaderSource = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:(NSString*)(vshReference.substring(1)) ofType:nil] encoding:NSUTF8StringEncoding error:nil];
@@ -485,12 +433,12 @@ GLShader& GLShaders::createShader(const String& key, const String& vshReference,
 	}
 	
 	try {
-		vsh = memNew(vsh, GLShaderData(context));
+		vsh = memNew(vsh, GLObjectData(context));
 		if (vsh == NULL)
 			throw eOutOfMemory;
 		vsh->setTarget(vshReference);
 		
-		fsh = memNew(fsh, GLShaderData(context));
+		fsh = memNew(fsh, GLObjectData(context));
 		if (fsh == NULL)
 			throw eOutOfMemory;
 		fsh->setTarget(fshReference);
@@ -509,7 +457,7 @@ GLShader& GLShaders::createShader(const String& key, const String& vshReference,
 	try {
 		try {
 			GLShader shader = list.get(key);
-			Vector<GLShaderData*> *shaderTextures = &(shader.ref().textures);
+			Vector<GLObjectData*> *shaderTextures = &(shader.ref().textures);
 			int32_t count = shaderTextures->count();
 			for (int i = 0; i < count; i++) {
 				textures.push(shaderTextures->get(i));
@@ -524,7 +472,7 @@ GLShader& GLShaders::createShader(const String& key, const String& vshReference,
 		
 		int32_t count = textures.count();
 		if (count > 0) {
-			GLShaderData** items = textures.items();
+			GLObjectData** items = textures.items();
 			for (int i = 0; i < count; i++) {
 				memDelete(items[i]);
 			}

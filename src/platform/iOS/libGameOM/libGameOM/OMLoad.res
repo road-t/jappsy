@@ -11,10 +11,10 @@ R"JAPPSYRAWSTRING(
             "sprite":					"shaders/sprite.jsh",
             "particle":					"shaders/particle.jsh",
             "model":					"shaders/model.jsh",
-/*
-            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
+
+//            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
             "mobile_effect_sun1":					"shaders/mobile_effect_sun1.jsh",
-            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
+/*            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
             "mobile_effect_unknown":				"shaders/mobile_effect_unknown.jsh",
             "mobile_effect_unknown_star":			"shaders/mobile_effect_unknown_star.jsh",   // iOS ничего не видно
             "mobile_effect_sun2":					"shaders/mobile_effect_sun2.jsh",
@@ -42,14 +42,14 @@ R"JAPPSYRAWSTRING(
             "mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
             "mobile_tex_random":					"shaders/mobile_tex_random.jimg",
         },
-/*
         "models": {
             "ball":						"models/ball.json",
+/*
             "cap":						"models/cap.json",
             "separator":				"models/separator.json",
             "bar":						"models/bar.json",
-        },
 */
+        },
     }
 }
 )JAPPSYRAWSTRING"

@@ -22,6 +22,8 @@
 #include <data/uHashMap.h>
 #include <data/uString.h>
 #include <data/uVector.h>
+#include <data/uList.h>
+#include <opengl/uGLObjectData.h>
 
 class GLRender;
 
@@ -33,11 +35,12 @@ enum GLTextureMapping {
 	UVMAP_SPHERE = 4
 };
 
-class GLMaterialTexture {
+class RefGLMaterialTexture : public RefObject {
 public:
-	String file;
+	GLRender* context = NULL;
+	GLObjectData* texture = NULL;
 	GLfloat blend = 0.0;
-	GLuint texture1iv;
+	GLuint texture1iv = 0;
 	
 	GLfloat x = 0.0;
 	GLfloat y = 0.0;
@@ -46,14 +49,11 @@ public:
 	
 	GLTextureMapping uvmap = GLTextureMapping::UVMAP_DEFAULT;
 	
-	inline ~GLMaterialTexture() {
-		file = null;
-		texture1iv = 0;
-	}
+	inline RefGLMaterialTexture() { throw eInvalidParams; }
+	RefGLMaterialTexture(GLRender* context, const String& textureReference) throw(const char*);
+	~RefGLMaterialTexture();
 	
-	GLMaterialTexture& texture(GLRender* context, const String& key);
-	
-	inline GLMaterialTexture& map(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLTextureMapping uvmap) {
+	inline RefGLMaterialTexture& setUVMap(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLTextureMapping uvmap) {
 		THIS.x = x;
 		THIS.y = y;
 		THIS.w = w;
@@ -61,54 +61,179 @@ public:
 		THIS.uvmap = uvmap;
 		return *this;
 	}
-};
-
-class GLMaterialSimpleColor {
-public:
-	Vec3 color;
 	
-	inline GLMaterialSimpleColor(GLfloat color[3]) { memcpy(THIS.color.v, color, 3 * sizeof(GLfloat)); }
+	bool checkReady();
 };
 
-class GLMaterialColor : public GLMaterialSimpleColor {
+class GLMaterialTexture : public Object {
 public:
-	GLMaterialTexture* texture = NULL;
+	RefClass(GLMaterialTexture, RefGLMaterialTexture);
 	
-	inline GLMaterialColor(GLfloat color[3], GLMaterialTexture* texture) : GLMaterialSimpleColor(color) { THIS.texture = texture; }
-	inline ~GLMaterialColor() { if (texture != NULL) { memDelete(texture); texture = NULL; } }
+	inline GLMaterialTexture(GLRender* context, const String& textureReference) throw(const char*) {
+		RefGLMaterialTexture* o = new RefGLMaterialTexture(context, textureReference);
+		if (o == NULL) throw eOutOfMemory;
+		THIS.setRef(o);
+	}
+	
+	inline bool checkReady() throw(const char*) { return THIS.ref().checkReady(); }
 };
 
-class GLMaterial {
+//===============================
+
+class RefGLMaterial : public RefObject {
 private:
 	String name;
 	
 	// Ambient color is the color of an object where it is in shadow.
 	// This color is what the object reflects when illuminated by ambient light rather than direct light.
 	// 3DSMax - Ambient
-	GLMaterialSimpleColor* ambient = NULL;
+	struct {
+		Vec3 color = {0.0, 0.0, 0.0};
+	} ambient;
 	
 	// Diffuse color is the most instinctive meaning of the color of an object.
 	// It is that essential color that the object reveals under pure white light.
 	// It is perceived as the color of the object itself rather than a reflection of the light.
 	// 3DSMax - Diffuse
-	GLMaterialColor* diffuse = NULL;
+	struct {
+		Vec3 color = {1.0, 1.0, 1.0};
+		GLMaterialTexture texture;
+	} diffuse;
 	
 	// Specular color is the color of the light of a specular reflection.
 	// Specular reflection is the type of reflection that is characteristic of light reflected from a shiny surface.
 	// 3DSMax - Specular
-	GLMaterialColor* specular = NULL;
+	struct {
+		Vec3 color = {1.0, 1.0, 1.0};
+		GLMaterialTexture texture;
+	} specular;
 	
 	// Emissive color is the self-illumination color an object has.
 	// 3DSMax - Self-Illumination
-	GLMaterialColor* emissive;
+	struct {
+		Vec3 color = {0.0, 0.0, 0.0};
+		GLMaterialTexture texture;
+	} emissive;
+	
+	// 3DSMax - (value) Glossiness, (percent) Specular Level, (texture alpha channel) Specular Level Blend
+	struct {
+		GLfloat value = 50;
+		GLfloat percent = 1;
+		GLMaterialTexture texture;
+	} shininess;
+	
+	// 3DSMax - Opacity
+	struct {
+		GLfloat value = 1;
+		GLMaterialTexture texture;
+	} opacity;
+	
+	// 3DSMax - Bump
+	// Not supported
+	struct {
+		GLfloat scale = 1;
+		GLMaterialTexture texture;
+	} bump;
+	
+	// 3DSMax - Reflection
+	// Not supported
+	struct {
+		GLMaterialTexture texture;
+	} reflection;
 	
 public:
-	GLMaterial(const String& name, GLMaterialTexture* texture);
+	Vector<GLfloat> colors4fv;
+	
+	RefGLMaterial();
+	RefGLMaterial(const String& name);
+	RefGLMaterial(const String& name, const GLMaterialTexture& texture);
+	
+	void release();
+	void update();
 };
+
+class GLMaterial : public Object {
+public:
+	RefClass(GLMaterial, RefGLMaterial);
+	
+	inline void release() throw(const char*) { THIS.ref().release(); }
+	inline void update() throw(const char*) { THIS.ref().update(); }
+};
+
+//===============================
+
+class GLModelNode;
+class GLModelMesh;
+
+class RefGLModelNode : public RefObject {
+public:
+	String name;
+	Mat4 transformation;
+	
+	List<GLModelNode> nodes = null;
+	List<GLModelMesh> meshes = null;
+	
+	inline RefGLModelNode() { Mat4Identity(transformation.v); }
+	inline RefGLModelNode(const String& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
+	
+	GLModelNode& insertNode(const GLModelNode& node) throw(const char*);
+	GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*);
+	
+	void release();
+};
+
+class GLModelNode : public Object {
+public:
+	RefClass(GLModelNode, RefGLModelNode);
+
+	inline void release() throw(const char*) { THIS.ref().release(); }
+	inline GLModelNode& insertNode(const GLModelNode& node) throw(const char*) { return THIS.ref().insertNode(node); }
+	inline GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*) { return THIS.ref().insertMesh(mesh); }
+};
+
+class RefGLModelMesh : public RefObject {
+public:
+	String name;
+	GLuint material;
+	GLuint vertices;
+	GLuint normals;
+	GLuint texturecoords;
+	GLuint indexes;
+	GLuint indexCount;
+	
+	inline RefGLModelMesh() {
+		name = null;
+		material = 0;
+		vertices = normals = texturecoords = indexes = indexCount = 0;
+	}
+	
+	inline RefGLModelMesh(const String& name, GLuint materialIndex, GLuint vertexBuffer, GLuint normalsBuffer, GLuint textureBuffer, GLuint indexBuffer, GLuint indexCount) {
+		THIS.name = name;
+		THIS.material = materialIndex;
+		THIS.vertices = vertexBuffer;
+		THIS.normals = normalsBuffer;
+		THIS.texturecoords = textureBuffer;
+		THIS.indexes = indexBuffer;
+		THIS.indexCount = indexCount;
+	}
+	
+	void release();
+};
+
+class GLModelMesh : public Object {
+public:
+	RefClass(GLModelMesh, RefGLModelMesh);
+
+	inline void release() throw(const char*) { THIS.ref().release(); }
+};
+
+//===============================
 
 class RefGLModel : public RefObject {
 public:
 	GLRender* context = NULL;
+	List<GLMaterial> materials;
+	GLModelNode rootnode;
 	
 	inline RefGLModel() { throw eInvalidParams; }
 	RefGLModel(GLRender* context);
@@ -130,7 +255,31 @@ public:
 	~GLModels();
 	
 	GLModel& get(const String& key) throw(const char*);
-	GLModel& createModel(const String& key, const char* json) throw(const char*);
+	GLModel& createModel(const String& key) throw(const char*);
+
+private:
+	// json parser callbacks
+	// root parser
+	static void onjson_root(struct json_context* ctx, void* target);
+	static void onjson_object_root_object(struct json_context* ctx, const char* key, void* target); // rootnode
+	static void onjson_object_root_array(struct json_context* ctx, const char* key, void* target); // meshes | materials
+
+	// root.rootnode | node parser
+	static void onjson_object_node_string_name(struct json_context* ctx, const char* key, char* value, void* target); // node.name
+	static void onjson_object_node_array(struct json_context* ctx, const char* key, void* target); // node.transformation | node.children | node.meshes
+	static void onjson_array_tranformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.transformation[index]
+	static void onjson_array_children_object(struct json_context* ctx, const int index, void* target); // childnode
+	static void onjson_array_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.meshes[index]
+	
+	// root.meshes parser
+	static void onjson_array_meshes_object(struct json_context* ctx, const int index, void* target); // mesh
+	
+	// root.materials parser
+	static void onjson_array_materials_object(struct json_context* ctx, const int index, void* target); // material
+	
+public: // Thread Safe
+	
+	GLModel& createModel(const String& key, const char* jsonModelSource) throw(const char*);
 };
 
 #endif //JAPPSY_UGLMODEL_H

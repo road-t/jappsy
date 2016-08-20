@@ -20,6 +20,7 @@
 #include <core/uSystem.h>
 #include <net/uHttpClient.h>
 #include <opengl/uGLRender.h>
+#include <opengl/uGLReader.h>
 
 void RefLoader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror) {
 	THIS.onfile = onfile;
@@ -146,7 +147,7 @@ void RefLoader::run() {
 }
 
 void RefLoader::onjson_root(struct json_context* ctx, void* target) {
-	ctx->callbacks->onobject.onobject = onjson_group;
+	ctx->callbacks->onobject.onobjectstart = onjson_group;
 }
 
 void RefLoader::onjson_group(struct json_context* ctx, const char* key, void* target) {
@@ -154,7 +155,7 @@ void RefLoader::onjson_group(struct json_context* ctx, const char* key, void* ta
 	loader->group = key;
 	
 	json_clear_callbacks(ctx->callbacks, target);
-	ctx->callbacks->onobject.onobject = onjson_subgroup;
+	ctx->callbacks->onobject.onobjectstart = onjson_subgroup;
 }
 
 void RefLoader::onjson_subgroup(struct json_context* ctx, const char* key, void* target) {
@@ -249,6 +250,12 @@ bool RefLoader::onText(const File& info, Stream& stream) {
 			GLShader* shader = &(context->shaders->createFragmentShader(info.ref().key, (char*)stream.getBuffer()));
 			onLoad(info, *shader);
 			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+		} catch (...) {
+			return false;
+		}
+	} else if ((ext.compareToIgnoreCase(L"json") == 0) && (info.ref().group.compareToIgnoreCase(L"models") == 0)) {
+		try {
+			GLModel* model = &(context->models->createModel(info.ref().key, (char*)stream.getBuffer()));
 		} catch (...) {
 			return false;
 		}

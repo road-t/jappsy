@@ -22,50 +22,23 @@
 #include <data/uString.h>
 #include <data/uHashMap.h>
 #include <data/uVector.h>
-#include <opengl/uGLReader.h>
+#include <opengl/uGLObjectData.h>
 
 class GLRender;
-
-enum GLShaderDataType { NONE, STRING, TEXTURES, SHADER };
-
-class GLShaderData : public RefObject {
-private:
-	GLRender* m_context = NULL;
-	
-	GLShaderDataType m_type = GLShaderDataType::NONE;
-	bool m_reference = false;
-
-	String m_target;
-	Vector<GLuint> m_handles;
-	
-public:
-	inline GLShaderData() { throw eInvalidParams; }
-	inline GLShaderData(GLRender* context) { THIS.m_context = context; }
-	~GLShaderData();
-	
-	GLShaderData& setTarget(const String& target);
-	GLShaderData& setTextures(const Vector<GLuint>& handles, bool reference);
-	GLShaderData& setShader(const GLuint handle, bool reference);
-	
-	inline bool isReference() { return m_type == GLShaderDataType::STRING; }
-	inline const String& getTarget() { return m_target; }
-	inline GLuint getShader() { return m_handles[0]; }
-	inline Vector<GLuint>& getTextures() { return m_handles; }
-};
 
 class RefGLShader : public RefObject {
 public:
 	
 	GLRender* context = NULL;
-	GLShaderData* vsh;
-	GLShaderData* fsh;
+	GLObjectData* vsh;
+	GLObjectData* fsh;
 	GLuint program = 0;
-	Vector<GLShaderData*> textures;
+	Vector<GLObjectData*> textures;
 	Vector<GLuint> handles;
 	Vector<GLint> handles1iv;
 	
 	inline RefGLShader() { throw eInvalidParams; }
-	RefGLShader(GLRender* context, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*);
+	RefGLShader(GLRender* context, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	~RefGLShader();
 	
 	bool checkReady();
@@ -93,7 +66,7 @@ public:
 	
 	const Iterator<String> keys();
 	GLShader& get(const String& key) throw(const char*);
-	GLShader& createShader(const String& key, GLShaderData* vsh, GLShaderData* fsh, GLuint program, Vector<GLShaderData*>& textures) throw(const char*);
+	GLShader& createShader(const String& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	
 	GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);
 	GLuint createFragmentShader(const char* fragmentShaderSource) throw(const char*);

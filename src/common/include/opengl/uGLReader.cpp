@@ -18,6 +18,7 @@
 #include <opengl/uGLRender.h>
 #include <opengl/uGLTexture.h>
 #include <opengl/uGLShader.h>
+#include <opengl/uGLObjectData.h>
 #include <data/uVector.h>
 #include <cipher/uCipher.h>
 #include <core/uSystem.h>
@@ -133,10 +134,10 @@ struct CreateShaderThreadData {
 	GLRender* context;
 	const wchar_t* key;
 	
-	GLShaderData* vsh;
-	GLShaderData* fsh;
+	GLObjectData* vsh;
+	GLObjectData* fsh;
 	GLuint program;
-	Vector<GLShaderData*> textures;
+	Vector<GLObjectData*> textures;
 	
 	uint32_t chunk;
 	char* shaderSource;
@@ -161,9 +162,9 @@ void* GLReader::CreateShaderSourceCallback(void* threadData) {
 	} catch (...) {
 		throw;
 	}
-	GLShaderData* shd = NULL;
+	GLObjectData* shd = NULL;
 	try {
-		shd = memNew(shd, GLShaderData(thread->context));
+		shd = memNew(shd, GLObjectData(thread->context));
 		if (shd == NULL)
 			throw eOutOfMemory;
 		shd->setShader(sh, false);
@@ -196,9 +197,9 @@ void* GLReader::CreateShaderTextureCallback(void* threadData) {
 	}
 	memFree(thread->data);
 	
-	GLShaderData* shd = NULL;
+	GLObjectData* shd = NULL;
 	try {
-		shd = memNew(shd, GLShaderData(thread->context));
+		shd = memNew(shd, GLObjectData(thread->context));
 		if (shd == NULL)
 			throw eOutOfMemory;
 		Vector<GLuint> handles;
@@ -258,7 +259,7 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 	
 	uint32_t count = thread->textures.count();
 	if (count > 0) {
-		GLShaderData** items = thread->textures.items();
+		GLObjectData** items = thread->textures.items();
 		for (int i = 0; i < count; i++) {
 			memDelete(items[i]);
 		}
@@ -307,9 +308,9 @@ GLShader& GLReader::createShader(GLRender* ctx, const String& key, Stream& strea
 					thread.shaderSource = NULL;
 				} else if ((chunk == GLReader::VRFCHUNK) || (chunk == GLReader::FRFCHUNK) || (chunk == GLReader::IRFCHUNK)) {
 					char* target = stream.readString(len);
-					GLShaderData* shd = NULL;
+					GLObjectData* shd = NULL;
 					try {
-						shd = memNew(shd, GLShaderData(ctx));
+						shd = memNew(shd, GLObjectData(ctx));
 						if (shd == NULL)
 							throw eOutOfMemory;
 						shd->setTarget(target);

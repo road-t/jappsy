@@ -37,7 +37,7 @@ void main() {
 
     // Noise Static Data
     {
-        float modTime = floor(module(secTime, 3.));
+        float modTime = module(secTime, 3.);
         vec3 vModTime = vec3(0.);
         if (modTime < 1.) vModTime[0] = 1.;
         else if (modTime < 2.) vModTime[1] = 1.;

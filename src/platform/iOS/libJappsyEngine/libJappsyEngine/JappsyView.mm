@@ -70,6 +70,26 @@
 	return self;
 }
 
+- (void) didMoveToWindow
+{
+	// AutoScale Pixels
+	GLfloat scale = [[UIScreen mainScreen] scale];
+	GLfloat dpi = scale * 160.0f;
+	CGRect screen = [[UIScreen mainScreen] bounds];
+	GLfloat width = screen.size.width * scale;
+	GLfloat height = screen.size.height * scale;
+	GLfloat max = (width > height) ? width : height;
+	GLfloat viewScale = 1.0;
+	if (max > 1920) {
+		viewScale = self.window.screen.nativeScale; // enable pixel scale for big screens
+	} else {
+		viewScale = scale; // disable pixel scale for small screens
+	}
+	GLfloat diag = (float)(round(sqrt(width * width + height * height) * 2.0f / dpi) / 2.0f);
+	
+	self.contentScaleFactor = viewScale;
+}
+
 - (void) drawView:(id)sender
 {
 	if (_renderer != NULL) {
@@ -104,7 +124,7 @@
 		if (_context && [EAGLContext setCurrentContext:_context]) {
 			try {
 				CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
-				_renderer = memNew(_renderer, GLContext(_context, eaglLayer));
+				_renderer = memNew(_renderer, GLContext(_context, eaglLayer, self.contentScaleFactor));
 			} catch (const char* e) {
 			}
 		}

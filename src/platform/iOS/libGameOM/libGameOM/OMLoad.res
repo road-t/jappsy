@@ -12,7 +12,7 @@ R"JAPPSYRAWSTRING(
             "particle":					"shaders/particle.jsh",
             "model":					"shaders/model.jsh",
 */
-//            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
+            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
             "mobile_effect_sun1":					"shaders/mobile_effect_sun1.jsh",
 /*            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
             "mobile_effect_unknown":				"shaders/mobile_effect_unknown.jsh",

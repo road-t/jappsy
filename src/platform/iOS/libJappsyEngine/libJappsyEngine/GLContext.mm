@@ -17,7 +17,7 @@
 #include "GLContext.h"
 #include <core/uMemory.h>
 
-GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*) {
+GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*) {
 	THIS.context = context;
 	
 	glGenFramebuffers(1, &frameBuffer);

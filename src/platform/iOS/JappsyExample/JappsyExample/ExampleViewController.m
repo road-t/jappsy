@@ -18,8 +18,6 @@
 #import "ExampleJappsyView.h"
 
 @interface ExampleViewController ()
-@property (weak, nonatomic) IBOutlet ExampleJappsyView *jappsyView;
-@property (weak, nonatomic) IBOutlet UITextView *textView;
 
 @end
 

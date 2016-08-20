@@ -191,7 +191,7 @@ bool RefGLShader::checkReady() {
 		GLuint* handles = THIS.handles.items();
 		GLShaderData** items = THIS.textures.items();
 		uint32_t ofs = 0;
-		for (int i = (int)(count-1); i >= 0; i--) {
+		for (int i = 0; i < count; i++) {
 			Vector<GLuint>* textures = &(items[i]->getTextures());
 			uint32_t textureCount = textures->count();
 			GLuint* textureItems = textures->items();

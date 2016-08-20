@@ -37,7 +37,7 @@ void OMEngine::onFrame(GLRender* context) {
         
         uint64_t time = currentTimeMillis();
         GLfloat worldTime = (GLfloat)(time % 86400000) / 86400000.0;
-        context->drawEffectMobile(200, 200, 600, 600, L"mobile_effect_sun1", 0.5, worldTime);
+        context->drawEffectMobile(0, 0, 1000, 1000, L"mobile_effect_torsion", 0.5, worldTime);
     }
 }
 

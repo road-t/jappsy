@@ -36,7 +36,7 @@ public:
 	GLint width;
 	GLint height;
 	
-	GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*);
+	GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*);
 	~GLContext();
 	void update(CAEAGLLayer* layer) throw(const char*);
 	void render();

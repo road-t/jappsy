@@ -56,12 +56,12 @@ public:
 	
 	virtual inline const Iterator<Type> iterator() const {
 		RefIterator<Type>::reset(0);
-		return Iterator<Type>(*this);
+		return new Iterator<Type>(this);
 	}
 	
 	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const {
 		RefIterator<Type>::reset(index);
-		return ListIterator<Type>(*this);
+		return new ListIterator<Type>(this);
 	}
 	
 	virtual inline bool remove(const Type& value) throw(const char*) {

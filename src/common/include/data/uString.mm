@@ -1070,6 +1070,12 @@ String::String(const String& string) throw(const char*) : Object() {
 	}
 }
 
+String::String(const RefString& string) throw(const char*) : Object() {
+	initialize();
+	RefString* newString = new RefString(string);
+	setRef(newString);
+}
+
 String& String::operator =(const String& string) throw(const char*) {
 	if (string._object != NULL) {
 		if (_object == NULL) {
@@ -1081,6 +1087,12 @@ String& String::operator =(const String& string) throw(const char*) {
 	} else {
 		setRef(NULL);
 	}
+	return *this;
+}
+
+String& String::operator =(const RefString& string) throw(const char*) {
+	RefString* newString = new RefString(string);
+	setRef(newString);
 	return *this;
 }
 
@@ -3476,7 +3488,7 @@ String getSubString(String& self, int start, int end) {
 	if (len == 0)
 		return StringEmpty;
 	
-	return RefString(self.ref().m_data + pos, len);
+	return String(self.ref().m_data + pos, len);
 }
 
 RefString RefString::replace(const RefString& target, const RefString& replacement) const {

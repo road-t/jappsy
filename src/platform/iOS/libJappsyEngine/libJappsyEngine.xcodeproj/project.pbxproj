@@ -30,6 +30,7 @@
 		C3401C611D6698CC009B223D /* uHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C601D6698CC009B223D /* uHandler.cpp */; };
 		C3401C631D669B8C009B223D /* uVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C621D669B8C009B223D /* uVector.cpp */; };
 		C3401C651D669BE0009B223D /* uObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C641D669BE0009B223D /* uObject.cpp */; };
+		C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C340853A1D67F82E007D4835 /* uGLShader.mm */; };
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
 		C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
 		C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9541D5B54EB0022FF71 /* uGLFrame.h */; };
@@ -82,7 +83,6 @@
 		C35900D41D6542C700C1D154 /* uGLParticle.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C01D6542C700C1D154 /* uGLParticle.h */; };
 		C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C11D6542C700C1D154 /* uGLScene.cpp */; };
 		C35900D61D6542C700C1D154 /* uGLScene.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C21D6542C700C1D154 /* uGLScene.h */; };
-		C35900D71D6542C700C1D154 /* uGLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C31D6542C700C1D154 /* uGLShader.cpp */; };
 		C35900D81D6542C700C1D154 /* uGLShader.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C41D6542C700C1D154 /* uGLShader.h */; };
 		C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C51D6542C700C1D154 /* uGLSprite.cpp */; };
 		C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C61D6542C700C1D154 /* uGLSprite.h */; };
@@ -138,6 +138,7 @@
 		C3401C601D6698CC009B223D /* uHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uHandler.cpp; sourceTree = "<group>"; };
 		C3401C621D669B8C009B223D /* uVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uVector.cpp; sourceTree = "<group>"; };
 		C3401C641D669BE0009B223D /* uObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uObject.cpp; sourceTree = "<group>"; };
+		C340853A1D67F82E007D4835 /* uGLShader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uGLShader.mm; sourceTree = "<group>"; };
 		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLFrame.cpp; sourceTree = "<group>"; };
 		C34FD9541D5B54EB0022FF71 /* uGLFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLFrame.h; sourceTree = "<group>"; };
@@ -192,7 +193,6 @@
 		C35900C01D6542C700C1D154 /* uGLParticle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLParticle.h; sourceTree = "<group>"; };
 		C35900C11D6542C700C1D154 /* uGLScene.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLScene.cpp; sourceTree = "<group>"; };
 		C35900C21D6542C700C1D154 /* uGLScene.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLScene.h; sourceTree = "<group>"; };
-		C35900C31D6542C700C1D154 /* uGLShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLShader.cpp; sourceTree = "<group>"; };
 		C35900C41D6542C700C1D154 /* uGLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLShader.h; sourceTree = "<group>"; };
 		C35900C51D6542C700C1D154 /* uGLSprite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLSprite.cpp; sourceTree = "<group>"; };
 		C35900C61D6542C700C1D154 /* uGLSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSprite.h; sourceTree = "<group>"; };
@@ -406,7 +406,7 @@
 				C35900BA1D6542C700C1D154 /* uGLLight.h */,
 				C35900C71D6542C700C1D154 /* uGLTexture.cpp */,
 				C35900C81D6542C700C1D154 /* uGLTexture.h */,
-				C35900C31D6542C700C1D154 /* uGLShader.cpp */,
+				C340853A1D67F82E007D4835 /* uGLShader.mm */,
 				C35900C41D6542C700C1D154 /* uGLShader.h */,
 				C35900BB1D6542C700C1D154 /* uGLModel.cpp */,
 				C35900BC1D6542C700C1D154 /* uGLModel.h */,
@@ -573,7 +573,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */,
-				C35900D71D6542C700C1D154 /* uGLShader.cpp in Sources */,
 				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
 				C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */,
 				C35900CF1D6542C700C1D154 /* uGLModel.cpp in Sources */,
@@ -600,6 +599,7 @@
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
 				C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */,
+				C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */,
 				C33F48841D674A1C00DD03A5 /* uMD5.cpp in Sources */,
 				C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,

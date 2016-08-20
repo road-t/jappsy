@@ -22,10 +22,15 @@
 #include <data/uStream.h>
 #include <data/uHashMap.h>
 #include <net/uLoader.h>
+#include <opengl/uGLPaint.h>
 
 class OMEngine : public RefGLEngine {
 public:
     OMEngine();
+    
+    GLPaint m_paint;
+    
+    bool ready = false;
     
     void onFrame(GLRender* context);
     void onTouch(const wchar_t* event);

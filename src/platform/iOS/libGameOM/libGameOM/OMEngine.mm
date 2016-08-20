@@ -18,6 +18,7 @@
 
 #include <opengl/uOpenGL.h>
 #include <opengl/uGLRender.h>
+#include <core/uSystem.h>
 
 static int color = 0;
 
@@ -28,6 +29,16 @@ void OMEngine::onFrame(GLRender* context) {
     
     color++;
     if (color >= 256) color = 0;
+    
+    if (ready) {
+        context->drawRect(0, 0, 500, 500, m_paint);
+        
+        context->drawTexture(100, 100, 400, 400, L"mramor.png");
+        
+        uint64_t time = currentTimeMillis();
+        GLfloat worldTime = (GLfloat)(time % 86400000) / 86400000.0;
+        context->drawEffectMobile(200, 200, 600, 600, L"mobile_effect_sun1", 0.5, worldTime);
+    }
 }
 
 void OMEngine::onTouch(const wchar_t* event) {
@@ -52,6 +63,9 @@ void OMEngine::onReady(const HashMap<String, Stream>& result) {
     if (!context->createShaders(sOMShadersRes)) {
         shutdown();
     }
+    
+    m_paint.setColor(0xFF4080FF);
+    ready = true;
 }
 
 void OMEngine::onError(const String& error) {

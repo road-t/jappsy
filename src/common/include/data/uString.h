@@ -564,6 +564,7 @@ extern "C" {
 		 * @throws eOutOfMemory
 		 */
 		String(const String& string) throw(const char*); // eOutOfMemory
+		String(const RefString& string) throw(const char*); //eOutOfMemory
 #if defined(__IOS__)
 		String(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
@@ -593,6 +594,7 @@ extern "C" {
 		Property<String, uint32_t> length;
 		
 		String& operator =(const String& string) throw(const char*); // eOutOfMemory
+		String& operator =(const RefString& string) throw(const char*); // eOutOfMemory
 #if defined(__IOS__)
 		String& operator =(const NSString* string) throw(const char*); // eOutOfMemory
 #endif

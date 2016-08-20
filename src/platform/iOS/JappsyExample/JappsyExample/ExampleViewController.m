@@ -15,8 +15,11 @@
  */
 
 #import "ExampleViewController.h"
+#import "ExampleJappsyView.h"
 
 @interface ExampleViewController ()
+@property (weak, nonatomic) IBOutlet ExampleJappsyView *jappsyView;
+@property (weak, nonatomic) IBOutlet UITextView *textView;
 
 @end
 
@@ -41,5 +44,36 @@
     // Pass the selected object to the new view controller.
 }
 */
+
+static int enterCount = 0;
+
+-(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:
+(NSRange)range replacementText:(NSString *)text{
+	if ([text isEqualToString:@"\n"]) {
+		enterCount++;
+		if (enterCount > 1) {
+			[textView resignFirstResponder];
+			return NO;
+		}
+	} else {
+		enterCount = 0;
+	}
+    return YES;
+}
+-(void)textViewDidBeginEditing:(UITextView *)textView{
+    NSLog(@"Did begin editing");
+}
+-(void)textViewDidChange:(UITextView *)textView{
+    NSLog(@"Did Change");
+    
+}
+-(void)textViewDidEndEditing:(UITextView *)textView{
+    NSLog(@"Did End editing");
+    
+}
+-(BOOL)textViewShouldEndEditing:(UITextView *)textView{
+    [textView resignFirstResponder];
+    return YES;
+}
 
 @end

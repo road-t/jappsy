@@ -52,7 +52,7 @@ RefGLTexture::~RefGLTexture() {
 GLuint RefGLTexture::bind(GLint index, GLint uniform) {
 	for (int i = 0; i < handles.count(); i++) {
 		GLuint handle = handles.get(i);
-		context->activeTexture(handle);
+		context->activeTexture(index);
 		glBindTexture(GL_TEXTURE_2D, handle);
 		handles1iv[i] = index;
 		index++;

@@ -138,7 +138,7 @@ public:
 	
 	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const {
 		RefIterator<Type>::reset(index);
-		return ListIterator<Type>(*this);
+		return new ListIterator<Type>(this);
 	}
 	
 	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) {

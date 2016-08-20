@@ -35,6 +35,102 @@
 #include <opengl/uGLParticle.h>
 #include <opengl/uGLDrawing.h>
 
+class GLSpriteShader : public GLShader {
+public:
+	RefClassEx(GLSpriteShader, GLShader, RefGLShader);
+	
+	GLuint program = 0;
+	
+	int uLayerProjectionMatrix;
+	int uPosition;
+	int uTexture;
+	int aVertexPosition;
+	int aTextureCoord;
+	
+	int uLight;
+	int uTime;
+};
+
+class GLParticleShader : public GLShader {
+public:
+	RefClassEx(GLParticleShader, GLShader, RefGLShader);
+	
+	GLuint program = 0;
+	
+	int uModelViewProjectionMatrix;
+	
+	int uPixelX;
+	int uPixelY;
+	int uTime;
+	int uTexture;
+	int uColor;
+	
+	int aVertexPosition;
+	int aTextureCoord;
+	int aVelocity;
+	int aAcceleration;
+	int aTime;
+};
+
+class GLModelShader : public GLShader {
+public:
+	RefClassEx(GLModelShader, GLShader, RefGLShader);
+
+	GLuint program = 0;
+	
+	int uModelViewProjectionMatrix;
+	int uModelViewMatrix;
+	int uNormalMatrix;
+	
+	int uAmbientLightColor;
+	
+	int uLightsCount;
+	int uLights;
+	
+	int uColors;
+	int uTexture;
+	
+	int aVertexPosition;
+	int aTextureCoord;
+	int aVertexNormal;
+};
+
+class GLSquareFillShader : public GLShader {
+public:
+	RefClassEx(GLSquareFillShader, GLShader, RefGLShader);
+	
+	GLuint program = 0;
+	
+	int uLayerProjectionMatrix;
+	int uColor;
+	int aVertexPosition;
+};
+
+class GLSquareStrokeShader : public GLShader {
+public:
+	RefClassEx(GLSquareStrokeShader, GLShader, RefGLShader);
+	
+	GLuint program = 0;
+	
+	int uLayerProjectionMatrix;
+	int uCorners;
+	int uBorder;
+	int uColor;
+	int aVertexPosition;
+};
+
+class GLSquareTextureShader : public GLShader {
+public:
+	RefClassEx(GLSquareTextureShader, GLShader, RefGLShader);
+	
+	GLuint program = 0;
+	
+	int uLayerProjectionMatrix;
+	int uTexture;
+	int aVertexPosition;
+	int aTextureCoord;
+};
+
 class GLRender {
 private:
 	static const char* extensions;
@@ -65,12 +161,12 @@ public:
 	
 	uint32_t lightsMaxCount = 6;
 	
-	GLShader* shaderSprite;
-	GLShader* shaderParticle;
-	GLShader* shaderModel;
-	GLShader* shaderSquareFill;
-	GLShader* shaderSquareStroke;
-	GLShader* shaderSquareTexture;
+	GLSpriteShader shaderSprite;
+	GLParticleShader shaderParticle;
+	GLModelShader shaderModel;
+	GLSquareFillShader shaderSquareFill;
+	GLSquareStrokeShader shaderSquareStroke;
+	GLSquareTextureShader shaderSquareTexture;
 	
 	GLint maxTextureSize;
 	bool isNPOTSupported;
@@ -91,16 +187,16 @@ public:
 	
 	GLfloat* makeRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
 	GLfloat* makeLine(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2);
-	GLfloat* makeColor(uint32_t* color, uint32_t count);
+	GLfloat* makeColor(const uint32_t* color, uint32_t count);
 	
 	void fill(uint32_t color);
 	void fillAlpha(uint8_t alpha);
 	void fillDepth();
 	
 	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint);
-	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key);
-	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime);
-	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const wchar_t* key, GLfloat localTime, GLfloat worldTime);
+	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key);
+	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime);
+	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime);
 	
 	bool createShaders(JSONObject shaders);
 	void createModels(JSONObject models);

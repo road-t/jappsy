@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		C3401C571D661CB9009B223D /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3401C561D661CB9009B223D /* libz.framework */; };
+		C34085381D67F77C007D4835 /* mobile_fsh_effect_sun1.fsh in Resources */ = {isa = PBXBuildFile; fileRef = C34085361D67F77C007D4835 /* mobile_fsh_effect_sun1.fsh */; };
+		C34085391D67F77C007D4835 /* mobile_vsh_effect_sun1.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C34085371D67F77C007D4835 /* mobile_vsh_effect_sun1.vsh */; };
 		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
 		C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */; };
 		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
@@ -21,6 +23,8 @@
 
 /* Begin PBXFileReference section */
 		C3401C561D661CB9009B223D /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
+		C34085361D67F77C007D4835 /* mobile_fsh_effect_sun1.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = mobile_fsh_effect_sun1.fsh; sourceTree = "<group>"; };
+		C34085371D67F77C007D4835 /* mobile_vsh_effect_sun1.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = mobile_vsh_effect_sun1.vsh; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
 		C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleJappsyView.h; sourceTree = "<group>"; };
@@ -74,6 +78,8 @@
 		C3506D7D1D52575C005BC914 /* JappsyExample */ = {
 			isa = PBXGroup;
 			children = (
+				C34085361D67F77C007D4835 /* mobile_fsh_effect_sun1.fsh */,
+				C34085371D67F77C007D4835 /* mobile_vsh_effect_sun1.vsh */,
 				C3506D811D52575C005BC914 /* AppDelegate.h */,
 				C3506D821D52575C005BC914 /* AppDelegate.mm */,
 				C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */,
@@ -157,6 +163,8 @@
 				C3506D8D1D52575C005BC914 /* Main.storyboard in Resources */,
 				C3506D8F1D52575C005BC914 /* Assets.xcassets in Resources */,
 				C3506D921D52575C005BC914 /* LaunchScreen.storyboard in Resources */,
+				C34085391D67F77C007D4835 /* mobile_vsh_effect_sun1.vsh in Resources */,
+				C34085381D67F77C007D4835 /* mobile_fsh_effect_sun1.fsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,7 +293,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.JappsyExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -297,7 +305,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.JappsyExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";

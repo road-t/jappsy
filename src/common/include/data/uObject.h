@@ -47,14 +47,6 @@
 		THIS.Object::operator =(object); \
 		return THIS; \
 	} \
-	inline BaseClassType(const RefClassType& object) { \
-		THIS.initialize(); \
-		THIS.setRef(&object); \
-	} \
-	virtual inline BaseClassType& operator =(const RefClassType& object) { \
-		THIS.setRef(&object); \
-		return THIS; \
-	} \
 	inline BaseClassType(const RefClassType* object) { \
 		THIS.initialize(); \
 		THIS.setRef(object); \
@@ -105,6 +97,78 @@
 		return THIS; \
 	}
 
+#define RefClassEx(BaseClassType, ParentClassType, RefClassType) \
+	virtual inline RefClassType* newRef() const throw(const char*) { \
+		RefClassType* o = new RefClassType(); \
+		if (o == NULL) throw eOutOfMemory; \
+		return o; \
+	} \
+	inline BaseClassType(const void* object) throw(const char*) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	inline BaseClassType(const Object& object) { \
+		THIS.initialize(); \
+		THIS.Object::operator =(object); \
+	} \
+	virtual inline BaseClassType& operator =(const void* object) throw(const char*) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	virtual inline BaseClassType& operator =(const Object& object) { \
+		THIS.Object::operator =(object); \
+		return THIS; \
+	} \
+	inline BaseClassType(const RefClassType* object) { \
+		THIS.initialize(); \
+		THIS.setRef(object); \
+	} \
+	virtual inline BaseClassType& operator =(const RefClassType* object) { \
+		THIS.setRef(object); \
+		return THIS; \
+	} \
+	inline BaseClassType() { \
+		THIS.initialize(); \
+	} \
+	virtual inline RefClassType& ref() const throw(const char*) { \
+		if (THIS._object == NULL) throw eNullPointer; \
+		return *(RefClassType*)(THIS._object); \
+	} \
+	inline BaseClassType(const ParentClassType* object) throw(const char*) { \
+		THIS.initialize(); \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+	} \
+	inline BaseClassType& operator =(const ParentClassType* object) throw(const char*) { \
+		if (object != NULL) { \
+			if ((*object)._object == NULL) { \
+				try { \
+					THIS.setRef((*object).newRef()); \
+				} catch (...) { \
+					THIS.setRef(NULL); \
+					delete object; \
+					throw; \
+				} \
+			} else { \
+				THIS.setRef((void*)((*object)._object)); \
+			} \
+			delete object; \
+		} \
+		return THIS; \
+	}
+
 #define RefTemplate(BaseClassType, TemplateClassType, RefClassType) \
 	virtual inline RefClassType<Type>* newRef() const throw(const char*) { \
 		RefClassType<Type>* o = new RefClassType<Type>(); \
@@ -125,14 +189,6 @@
 	} \
 	virtual inline TemplateClassType<Type>& operator =(const Object& object) { \
 		THIS.Object::operator =(object); \
-		return THIS; \
-	} \
-	inline BaseClassType(const RefClassType<Type>& object) { \
-		THIS.initialize(); \
-		THIS.setRef(&object); \
-	} \
-	virtual inline TemplateClassType<Type>& operator =(const RefClassType<Type>& object) { \
-		THIS.setRef(&object); \
 		return THIS; \
 	} \
 	inline BaseClassType(const RefClassType<Type>* object) { \
@@ -204,14 +260,6 @@
 		THIS.Object::operator =(object); \
 		return THIS; \
 	} \
-	inline BaseClassType(const RefClassType<K,V>& object) { \
-		THIS.initialize(); \
-		THIS.setRef(&object); \
-	} \
-	virtual inline TemplateClassType<K,V>& operator =(const RefClassType<K,V>& object) { \
-		THIS.setRef(&object); \
-		return THIS; \
-	} \
 	inline BaseClassType(const RefClassType<K,V>* object) { \
 		THIS.initialize(); \
 		THIS.setRef(object); \
@@ -281,14 +329,6 @@
 		THIS.Object::operator =(object); \
 		return THIS; \
 	} \
-	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
-		THIS.initialize(); \
-		THIS.setRef(&object); \
-	} \
-	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
-		THIS.setRef(&object); \
-		return THIS; \
-	} \
 	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__* object) { \
 		THIS.initialize(); \
 		THIS.setRef(object); \
@@ -356,14 +396,6 @@
 	} \
 	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Object& object) { \
 		THIS.Object::operator =(object); \
-		return THIS; \
-	} \
-	inline BaseClassType(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
-		THIS.initialize(); \
-		THIS.setRef(&object); \
-	} \
-	virtual inline TemplateClassType, ## __VA_ARGS__& operator =(const Ref ## TemplateClassType, ## __VA_ARGS__& object) { \
-		THIS.setRef(&object); \
 		return THIS; \
 	} \
 	inline BaseClassType() { \

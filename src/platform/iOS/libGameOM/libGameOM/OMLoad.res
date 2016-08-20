@@ -7,25 +7,27 @@ R"JAPPSYRAWSTRING(
             "square_fill":				"shaders/square_fill.jsh",
             "square_stroke":			"shaders/square_stroke.jsh",
             "square_texture":			"shaders/square_texture.jsh",
+/*
             "sprite":					"shaders/sprite.jsh",
             "particle":					"shaders/particle.jsh",
             "model":					"shaders/model.jsh",
-
-            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
+*/
+//            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
             "mobile_effect_sun1":					"shaders/mobile_effect_sun1.jsh",
-            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
+/*            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
             "mobile_effect_unknown":				"shaders/mobile_effect_unknown.jsh",
             "mobile_effect_unknown_star":			"shaders/mobile_effect_unknown_star.jsh",
             "mobile_effect_sun2":					"shaders/mobile_effect_sun2.jsh",
             "mobile_effect_moon2":					"shaders/mobile_effect_moon2.jsh",
             "mobile_effect_star1":					"shaders/mobile_effect_star1.jsh",
             "mobile_effect_star2":					"shaders/mobile_effect_star2.jsh",
+*/
         },
 
         "textures": {
-/*
             "null":						"models/null.jimg",
             "mramor.png":				"models/mramor.jimg",
+/*
             "metal.png":				"models/metal.jimg",
             "gold.png":					"models/gold.jimg",
             "cox":						"models/cox.jimg",
@@ -37,7 +39,7 @@ R"JAPPSYRAWSTRING(
             "buttons":					"images/buttons.jimg",
             "sprites":					"images/sprites.jimg",
 */
-            "mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
+            //"mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
             "mobile_tex_random":					"shaders/mobile_tex_random.jimg",
         },
 /*

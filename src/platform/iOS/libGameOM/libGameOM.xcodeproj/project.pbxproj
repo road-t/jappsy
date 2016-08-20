@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C340852D1D67D3EA007D4835 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C340852C1D67D3EA007D4835 /* GLKit.framework */; };
 		C34FD9A81D5BBB220022FF71 /* libGameOM.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9A71D5BBB220022FF71 /* libGameOM.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9B01D5BBB7F0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */; };
-		C34FD9C11D5BBC230022FF71 /* OMEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9BF1D5BBC230022FF71 /* OMEngine.cpp */; };
+		C34FD9C11D5BBC230022FF71 /* OMEngine.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9BF1D5BBC230022FF71 /* OMEngine.mm */; };
 		C34FD9C21D5BBC230022FF71 /* OMEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9C01D5BBC230022FF71 /* OMEngine.h */; };
 		C34FD9D31D5BC9830022FF71 /* OMView.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9D11D5BC9830022FF71 /* OMView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9D41D5BC9830022FF71 /* OMView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9D21D5BC9830022FF71 /* OMView.mm */; };
@@ -19,11 +20,12 @@
 		C34084F91D67936C007D4835 /* OMShaders.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMShaders.res; sourceTree = "<group>"; };
 		C34084FB1D679380007D4835 /* OMSprites.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMSprites.res; sourceTree = "<group>"; };
 		C34084FD1D6793A7007D4835 /* OMDrawings.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMDrawings.res; sourceTree = "<group>"; };
+		C340852C1D67D3EA007D4835 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		C34FD9A41D5BBB220022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libGameOM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C34FD9A71D5BBB220022FF71 /* libGameOM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libGameOM.h; sourceTree = "<group>"; };
 		C34FD9A91D5BBB220022FF71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
-		C34FD9BF1D5BBC230022FF71 /* OMEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OMEngine.cpp; sourceTree = "<group>"; };
+		C34FD9BF1D5BBC230022FF71 /* OMEngine.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMEngine.mm; sourceTree = "<group>"; };
 		C34FD9C01D5BBC230022FF71 /* OMEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMEngine.h; sourceTree = "<group>"; };
 		C34FD9D11D5BC9830022FF71 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMView.h; sourceTree = "<group>"; };
 		C34FD9D21D5BC9830022FF71 /* OMView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMView.mm; sourceTree = "<group>"; };
@@ -36,6 +38,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C34FD9B01D5BBB7F0022FF71 /* libJappsyEngine.framework in Frameworks */,
+				C340852D1D67D3EA007D4835 /* GLKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -46,6 +49,7 @@
 			isa = PBXGroup;
 			children = (
 				C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */,
+				C340852C1D67D3EA007D4835 /* GLKit.framework */,
 				C34FD9A61D5BBB220022FF71 /* libGameOM */,
 				C34FD9A51D5BBB220022FF71 /* Products */,
 			);
@@ -65,7 +69,7 @@
 				C34FD9A71D5BBB220022FF71 /* libGameOM.h */,
 				C34FD9A91D5BBB220022FF71 /* Info.plist */,
 				C34FD9C01D5BBC230022FF71 /* OMEngine.h */,
-				C34FD9BF1D5BBC230022FF71 /* OMEngine.cpp */,
+				C34FD9BF1D5BBC230022FF71 /* OMEngine.mm */,
 				C34FD9D11D5BC9830022FF71 /* OMView.h */,
 				C34FD9D21D5BC9830022FF71 /* OMView.mm */,
 				C3FFBAD01D61234D0099AD22 /* OMLoad.res */,
@@ -157,7 +161,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				C34FD9D41D5BC9830022FF71 /* OMView.mm in Sources */,
-				C34FD9C11D5BBC230022FF71 /* OMEngine.cpp in Sources */,
+				C34FD9C11D5BBC230022FF71 /* OMEngine.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

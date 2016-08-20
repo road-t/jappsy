@@ -64,8 +64,8 @@ GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer) throw(const char*
 	
 	NSLog(@"%s %s", glGetString(GL_RENDERER), glGetString(GL_VERSION));
 	
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	
 	//render();

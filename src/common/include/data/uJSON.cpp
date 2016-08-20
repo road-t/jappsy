@@ -3411,7 +3411,7 @@ extern "C" {
 				}
 				return true;
 			} else if (ch == '[') {
-				if (ctx->callbacks->onarray.onarray != NULL) {
+				if (ctx->callbacks->onobject.onarray != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
 					ctx->callbacks->onobject.onarray(ctx, key, ctx->callbacks->target);

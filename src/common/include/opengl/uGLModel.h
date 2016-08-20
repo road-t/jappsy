@@ -259,23 +259,71 @@ public:
 
 private:
 	// json parser callbacks
-	// root parser
-	static void onjson_root(struct json_context* ctx, void* target);
-	static void onjson_object_root_object(struct json_context* ctx, const char* key, void* target); // rootnode
-	static void onjson_object_root_array(struct json_context* ctx, const char* key, void* target); // meshes | materials
+	// root
+	static void onjson_root_start(struct json_context* ctx, void* target);
+	static void onjson_root_end(struct json_context* ctx, void* target, bool noerror);
+	static void onjson_root_object_start(struct json_context* ctx, const char* key, void* target);
+		// root.rootnode
+		static void onjson_rootnode_start(struct json_context* ctx, const char* key, void* target);
+		static void onjson_rootnode_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		static void onjson_node_string(struct json_context* ctx, const char* key, char* value, void* target);
+		static void onjson_node_array_start(struct json_context* ctx, const char* key, void* target);
+			// node.transformation
+			static void onjson_node_tranformation_start(struct json_context* ctx, const char* key, void* target);
+			static void onjson_node_transformation_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				// node.transformation[index]
+				static void onjson_node_transformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+			// node.children
+			static void onjson_node_children_start(struct json_context* ctx, const char* key, void* target);
+			static void onjson_node_children_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				// node.children[index]
+				static void onjson_node_start(struct json_context* ctx, const int index, void* target);
+				static void onjson_node_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+			// node.meshes
+			static void onjson_node_meshes_start(struct json_context* ctx, const char* key, void* target);
+			static void onjson_node_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				// node.meshes[index]
+				static void onjson_node_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+	static void onjson_root_array_start(struct json_context* ctx, const char* key, void* target);
+		// root.meshes
+		static void onjson_meshes_start(struct json_context* ctx, const char* key, void* target);
+		static void onjson_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+	
+			// root.meshes[index]
+			static void onjson_mesh_start(struct json_context* ctx, const int index, void* target);
+			static void onjson_mesh_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+			static void onjson_mesh_string(struct json_context* ctx, const char* key, char* value, void* target);
+			static void onjson_mesh_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
+			static void onjson_mesh_array_start(struct json_context* ctx, const char* key, void* target); // vertices | normals | texturecoords | faces
+	
+	
+		// root.materials
+		static void onjson_materials_start(struct json_context* ctx, const char* key, void* target);
+		static void onjson_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 
+	/*
 	// root.rootnode | node parser
-	static void onjson_object_node_string_name(struct json_context* ctx, const char* key, char* value, void* target); // node.name
-	static void onjson_object_node_array(struct json_context* ctx, const char* key, void* target); // node.transformation | node.children | node.meshes
-	static void onjson_array_tranformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.transformation[index]
-	static void onjson_array_children_object(struct json_context* ctx, const int index, void* target); // childnode
-	static void onjson_array_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.meshes[index]
+
+	// node.transformation
+	static void onjson_object_node_array_transformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.transformation[index]
+	static void onjson_object_node_array_transformation_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+
+	// node.children
+	static void onjson_object_node_array_children_object_start(struct json_context* ctx, const int index, void* target); // childnode
+	static void onjson_object_node_array_children_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+
+	// node.meshes
+	static void onjson_object_node_array_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.meshes[index]
+	static void onjson_object_node_array_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 	
 	// root.meshes parser
-	static void onjson_array_meshes_object(struct json_context* ctx, const int index, void* target); // mesh
+	static void onjson_array_meshes_object_start(struct json_context* ctx, const int index, void* target); // mesh
+	static void onjson_array_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 	
 	// root.materials parser
-	static void onjson_array_materials_object(struct json_context* ctx, const int index, void* target); // material
+	static void onjson_array_materials_object_start(struct json_context* ctx, const int index, void* target); // material
+	static void onjson_array_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+	 */
 	
 public: // Thread Safe
 	

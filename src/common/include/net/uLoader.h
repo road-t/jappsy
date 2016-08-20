@@ -146,7 +146,7 @@ private:
 	String group;
 	String subgroup;
 	
-	static void onjson_root(struct json_context* ctx, void* target);
+	static void onjson_root_start(struct json_context* ctx, void* target);
 	static void onjson_group(struct json_context* ctx, const char* key, void* target);
 	static void onjson_subgroup(struct json_context* ctx, const char* key, void* target);
 	static void onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target);

@@ -146,7 +146,7 @@ void RefLoader::run() {
 	checkUpdate(15);
 }
 
-void RefLoader::onjson_root(struct json_context* ctx, void* target) {
+void RefLoader::onjson_root_start(struct json_context* ctx, void* target) {
 	ctx->callbacks->onobject.onobjectstart = onjson_group;
 }
 
@@ -189,7 +189,7 @@ void RefLoader::load(const char* json) throw(const char*) {
 	struct json_callbacks callbacks;
 	ctx.callbacks = &callbacks;
 	json_clear_callbacks(&callbacks, this);
-	callbacks.onroot = onjson_root;
+	callbacks.onrootstart = onjson_root_start;
 	if (!json_call(&ctx, json)) {
 #ifdef DEBUG
 		json_debug_error(ctx, json);

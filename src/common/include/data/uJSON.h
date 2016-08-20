@@ -56,7 +56,7 @@ extern "C" {
 		typedef void (*array_start_callback)(struct json_context* ctx, const char* key, void* target);
 		typedef void (*array_end_callback)(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 		typedef void (*string_callback)(struct json_context* ctx, const char* key, char* value, void* target);
-		typedef void (*number_callback)(struct json_context* ctx, const char* key, struct json_number& number, void* target);
+		typedef void (*number_callback)(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
 		typedef void (*boolean_callback)(struct json_context* ctx, const char* key, bool value, void* target);
 		typedef void (*null_callback)(struct json_context* ctx, const char* key, void* target);
 		
@@ -91,11 +91,13 @@ extern "C" {
 	};
 	
 	struct json_callbacks {
-		typedef void (*root_callback)(struct json_context* ctx, void* target);
+		typedef void (*root_start_callback)(struct json_context* ctx, void* target);
+		typedef void (*root_end_callback)(struct json_context* ctx, void* target, bool noerror);
 		
 		void* target;
 		
-		root_callback onroot;
+		root_start_callback onrootstart;
+		root_end_callback onrootend;
 		struct json_object_callbacks onobject;
 		struct json_array_callbacks onarray;
 	};

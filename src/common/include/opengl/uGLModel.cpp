@@ -227,62 +227,369 @@ GLModel& GLModels::createModel(const String& key) throw(const char*) {
 
 //===============================
 
-struct ModelJsonParser {
-	GLModels* models;
+class ModelJsonParserNodeData {
+public:
+	String name;
+	Vector<GLfloat> transformation;
+	Vector<ModelJsonParserNodeData*> children;
+	Vector<GLuint> meshes;
+	
+	inline void releaseChildren() {
+		int32_t count = children.count();
+		if (count > 0) {
+			ModelJsonParserNodeData** items = children.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			children.clear();
+		}
+	}
+	
+	inline void release() {
+		transformation.clear();
+		releaseChildren();
+		meshes.clear();
+	}
+	
+	inline ModelJsonParserNodeData() {
+		transformation.growstep(16);
+	}
+	
+	inline ~ModelJsonParserNodeData() {
+		release();
+	}
 };
 
-struct ModelJsonParserNodeData {
+class ModelJsonParserMeshData {
+public:
+	String name;
+	GLuint materialindex;
+	Vector<GLfloat> vertices;
+	Vector<GLfloat> normals;
+	Vector<Vector<GLfloat>*> texturecoords;
+	Vector<GLfloat> faces;
+	
+	inline void releaseTexturecoords() {
+		int32_t count = texturecoords.count();
+		if (count > 0) {
+			Vector<GLfloat>** items = texturecoords.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			texturecoords.clear();
+		}
+	}
+	
+	inline void release() {
+		vertices.clear();
+		normals.clear();
+		releaseTexturecoords();
+		faces.clear();
+	}
+	
+	inline ~ModelJsonParserMeshData() {
+		releaseTexturecoords();
+	}
+};
+
+class ModelJsonParserMaterialData {
+public:
+	String name;
 	
 };
 
-void GLModels::onjson_root(struct json_context* ctx, void* target) {
-	ctx->callbacks->onobject.onobjectstart = onjson_object_root_object;
-	ctx->callbacks->onobject.onarraystart = onjson_object_root_array;
+class ModelJsonParser {
+public:
+	GLModels* models;
+	
+	ModelJsonParserNodeData* rootnode = NULL;
+	Vector<ModelJsonParserMeshData*> meshes;
+	Vector<ModelJsonParserMaterialData*> materials;
+	
+	inline void releaseRootNode() {
+		if (rootnode != NULL) {
+			memDelete(rootnode);
+			rootnode = NULL;
+		}
+	}
+	
+	inline void releaseMeshes() {
+		int32_t count = meshes.count();
+		if (count > 0) {
+			ModelJsonParserMeshData** items = meshes.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			meshes.clear();
+		}
+	}
+	
+	inline void releaseMaterials() {
+		int32_t count = materials.count();
+		if (count > 0) {
+			ModelJsonParserMaterialData** items = materials.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			meshes.clear();
+		}
+	}
+	
+	inline void release() {
+		releaseRootNode();
+		releaseMeshes();
+		releaseMaterials();
+	}
+	
+	inline ~ModelJsonParser() {
+		release();
+	}
+};
+
+#define ModelLog(fmt, ...) String::format(fmt, ## __VA_ARGS__).log()
+
+void GLModels::onjson_root_start(struct json_context* ctx, void* target) {
+	//ModelJsonParser* parser = (ModelJsonParser*)target;
+	ModelLog(L"Model Parser");
+	
+	ctx->callbacks->onobject.onobjectstart = onjson_root_object_start;
+	ctx->callbacks->onobject.onarraystart = onjson_root_array_start;
 }
 
-void GLModels::onjson_object_root_object(struct json_context* ctx, const char* key, void* target) {
-	struct ModelJsonParser* parser = (struct ModelJsonParser*)target;
+void GLModels::onjson_root_end(struct json_context* ctx, void* target, bool noerror) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
 
-	String::format(L"ModelParser: Object %s", key).log();
-	
+	if (!noerror) {
+		parser->release();
+	}
+}
+
+void GLModels::onjson_root_object_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParser* parser = (ModelJsonParser*)target;
+
 	json_clear_callbacks(ctx->callbacks, target);
 	if (strcmp(key, "rootnode") == 0) {
-		ctx->callbacks->onobject.onstring; // name
-		ctx->callbacks->onobject.onarraystart; // transformation | children
+		onjson_rootnode_start(ctx, key, target);
 	}
 }
 
-void GLModels::onjson_object_root_array(struct json_context* ctx, const char* key, void* target) {
-	struct ModelJsonParser* parser = (struct ModelJsonParser*)target;
+void GLModels::onjson_rootnode_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParser* parser = (ModelJsonParser*)target;
+	
+	ModelLog(L"model.rootnode");
+	ModelJsonParserNodeData* data = memNew(data, ModelJsonParserNodeData());
+	if (data == NULL)
+		throw eOutOfMemory;
+	
+	ctx->callbacks->target = data;
+	ctx->callbacks->onobject.onstring = onjson_node_string;
+	ctx->callbacks->onobject.onarraystart = onjson_node_array_start;
+	ctx->callbacks->onobject.onobjectend = onjson_rootnode_end;
+}
 
-	String::format(L"ModelParser: Array %s", key).log();
+void GLModels::onjson_rootnode_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	if ((noerror) && ((data->meshes.count() > 0) || (data->children.count() > 0))) {
+		ModelJsonParser* parser = (ModelJsonParser*)parenttarget;
+		parser->rootnode = data;
+	} else {
+		memDelete(data);
+	}
+}
 
+void GLModels::onjson_node_string(struct json_context* ctx, const char* key, char* value, void* target) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	if (strcmp(key, "name") == 0) {
+		ModelLog(L"node.name: %s", value);
+		
+		data->name = value;
+	}
+}
+
+void GLModels::onjson_node_array_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	json_clear_callbacks(ctx->callbacks, target);
+	if (strcmp(key, "transformation") == 0) {
+		onjson_node_tranformation_start(ctx, key, target);
+	} else if (strcmp(key, "children") == 0) {
+		onjson_node_children_start(ctx, key, target);
+	} else if (strcmp(key, "meshes") == 0) {
+		onjson_node_meshes_start(ctx, key, target);
+	}
+}
+
+void GLModels::onjson_node_tranformation_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	ModelLog(L"node.transformation");
+	
+	ctx->callbacks->onarray.onnumber = onjson_node_transformation_number;
+	ctx->callbacks->onobject.onarrayend = onjson_node_transformation_end;
+}
+
+void GLModels::onjson_node_transformation_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	if ((!noerror) || (data->transformation.count() != 16)) {
+		data->transformation.clear();
+	}
+}
+
+void GLModels::onjson_node_transformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+
+	if (number.is_float) {
+		data->transformation.push(number.v.f);
+	} else {
+		data->transformation.push(number.v.i);
+	}
+}
+
+void GLModels::onjson_node_children_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	ModelLog(L"node.children");
+	
+	ctx->callbacks->onarray.onobjectstart = onjson_node_start;
+	ctx->callbacks->onobject.onarrayend = onjson_node_children_end;
+}
+
+void GLModels::onjson_node_children_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	if (!noerror) {
+		data->releaseChildren();
+	}
+}
+
+void GLModels::onjson_node_start(struct json_context* ctx, const int index, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	ModelLog(L"node.children[%d]", index);
+	ModelJsonParserNodeData* data = memNew(data, ModelJsonParserNodeData());
+	if (data == NULL)
+		throw eOutOfMemory;
+	
+	ctx->callbacks->target = data;
+	ctx->callbacks->onobject.onstring = onjson_node_string; // name
+	ctx->callbacks->onobject.onarraystart = onjson_node_array_start; // transformation | children
+	ctx->callbacks->onarray.onobjectend = onjson_node_end;
+}
+
+void GLModels::onjson_node_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	if ((noerror) && ((data->meshes.count() > 0) || (data->children.count() > 0))) {
+		ModelJsonParserNodeData* parentdata = (ModelJsonParserNodeData*)parenttarget;
+		parentdata->children.push(data);
+	} else {
+		memDelete(data);
+	}
+}
+
+void GLModels::onjson_node_meshes_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	ModelLog(L"node.meshes");
+	
+	ctx->callbacks->onarray.onnumber = onjson_node_meshes_number;
+	ctx->callbacks->onobject.onarrayend = onjson_node_meshes_end;
+}
+
+void GLModels::onjson_node_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	if (!noerror) {
+		data->meshes.clear();
+	}
+}
+
+void GLModels::onjson_node_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target) {
+	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	if (number.is_float) {
+		data->meshes.push(number.v.f);
+	} else {
+		data->meshes.push(number.v.i);
+	}
+}
+
+void GLModels::onjson_root_array_start(struct json_context* ctx, const char* key, void* target) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+	
 	json_clear_callbacks(ctx->callbacks, target);
 	if (strcmp(key, "meshes") == 0) {
-		ctx->callbacks->onarray.onobjectstart; // meshobject
+		onjson_meshes_start(ctx, key, target);
 	} else if (strcmp(key, "materials") == 0) {
-		ctx->callbacks->onarray.onobjectstart; // materialobject
+		onjson_materials_start(ctx, key, target);
 	}
 }
 
-void GLModels::onjson_object_node_string_name(struct json_context* ctx, const char* key, char* value, void* target) {
-	// node.name
+void GLModels::onjson_meshes_start(struct json_context* ctx, const char* key, void* target) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+
+	ModelLog(L"model.meshes");
+	
+	ctx->callbacks->onarray.onobjectstart = onjson_mesh_start;
+	ctx->callbacks->onobject.onarrayend = onjson_meshes_end;
 }
 
-void GLModels::onjson_object_node_array(struct json_context* ctx, const char* key, void* target) {
-	// node.transformation | node.children | node.meshes
+void GLModels::onjson_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+	
+	if (!noerror) {
+		parser->releaseMeshes();
+	}
 }
 
-void GLModels::onjson_array_tranformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target) {
-	// node.transformation[index]
+void GLModels::onjson_mesh_start(struct json_context* ctx, const int index, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
+	
+	ModelLog(L"model.meshes[%d]", index);
+	ModelJsonParserMeshData* data = memNew(data, ModelJsonParserMeshData());
+	if (data == NULL)
+		throw eOutOfMemory;
+	
+	ctx->callbacks->target = data;
+	ctx->callbacks->onobject.onstring = onjson_mesh_string;
+	ctx->callbacks->onobject.onnumber = onjson_mesh_number;
+	ctx->callbacks->onobject.onarraystart = onjson_node_array_start;
+	ctx->callbacks->onarray.onobjectend = onjson_mesh_end;
 }
 
-void GLModels::onjson_array_children_object(struct json_context* ctx, const int index, void* target) {
-	// childnode
+void GLModels::onjson_mesh_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror) {
+	
 }
 
-void GLModels::onjson_array_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target) {
-	// node.meshes[index]
+void GLModels::onjson_mesh_string(struct json_context* ctx, const char* key, char* value, void* target) {
+	
+}
+
+void GLModels::onjson_mesh_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target) {
+
+}
+
+void GLModels::onjson_mesh_array_start(struct json_context* ctx, const char* key, void* target) {
+	// vertices | normals | texturecoords | faces
+}
+
+void GLModels::onjson_materials_start(struct json_context* ctx, const char* key, void* target) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+	
+	ModelLog(L"model.materials");
+	
+	//ctx->callbacks->onarray.onobjectstart; // materialobject
+	
+	ctx->callbacks->onobject.onarrayend = onjson_materials_end;
+}
+
+void GLModels::onjson_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+	
+	if (!noerror) {
+		parser->releaseMaterials();
+	}
 }
 
 GLModel& GLModels::createModel(const String& key, const char* json) throw(const char*) {
@@ -296,7 +603,7 @@ GLModel& GLModels::createModel(const String& key, const char* json) throw(const 
 	struct json_callbacks callbacks;
 	ctx.callbacks = &callbacks;
 	json_clear_callbacks(&callbacks, &target);
-	callbacks.onroot = onjson_root;
+	callbacks.onrootstart = onjson_root_start;
 	if (!json_call(&ctx, json)) {
 #ifdef DEBUG
 		json_debug_error(ctx, json);

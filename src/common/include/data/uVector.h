@@ -241,11 +241,16 @@ class Vector {
 private:
 	Type* m_items = NULL;
 	uint32_t m_count = 0;
+	uint32_t m_size = 0;
+	uint32_t m_step = 1;
 
 public:
 	inline Vector() {}
 	inline Vector(uint32_t count) throw(const char*) { resize(count); }
+	inline Vector(uint32_t count, uint32_t step) throw(const char*) { if (step != 0) m_step = step; resize(count); }
 	inline ~Vector() { resize(0); }
+	
+	inline void growstep(uint32_t step) { if (step != 0) m_step = step; }
 	
 	inline void resize(uint32_t count) throw(const char*) {
 		if (count == m_count)
@@ -258,11 +263,21 @@ public:
 			return;
 		}
 		
-		Type* newItems = memRealloc(Type, newItems, m_items, count * sizeof(Type));
-		if (newItems == NULL)
-			throw eOutOfMemory;
+		uint32_t newSize = count;
+		if (m_step > 1) {
+			newSize = count + m_step - 1;
+			newSize = newSize - (newSize % m_step);
+		}
 		
-		m_items = newItems;
+		if (m_size != newSize) {
+			Type* newItems = memRealloc(Type, newItems, m_items, newSize * sizeof(Type));
+			if (newItems == NULL)
+				throw eOutOfMemory;
+		
+			m_items = newItems;
+			m_size = newSize;
+		}
+		
 		m_count = count;
 	}
 	

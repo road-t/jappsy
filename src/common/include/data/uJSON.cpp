@@ -3667,11 +3667,17 @@ extern "C" {
 				ptr++;
 			} else if (ch == '{') {
 				if (ctx->callbacks != NULL) {
-					if (ctx->callbacks->onroot != NULL) {
-						ctx->callbacks->onroot(ctx, ctx->callbacks->target);
+					if (ctx->callbacks->onrootstart != NULL) {
+						ctx->callbacks->onrootstart(ctx, ctx->callbacks->target);
 					}
 				}
-				if (!json_call_object(ctx, ptrptr)) {
+				bool result = json_call_object(ctx, ptrptr);
+				if (ctx->callbacks != NULL) {
+					if (ctx->callbacks->onrootend != NULL) {
+						ctx->callbacks->onrootend(ctx, ctx->callbacks->target, result);
+					}
+				}
+				if (!result) {
 					return false;
 				}
 				while (json_next != '\0') {

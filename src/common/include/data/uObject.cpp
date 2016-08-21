@@ -44,7 +44,7 @@ const wchar_t TypeLinkedHashSet[] = L"LinkedHashSet::";
 const wchar_t TypeMap[] = L"Map::";
 const wchar_t TypeHashMap[] = L"HashMap::";
 const wchar_t TypeLinkedHashMap[] = L"LinkedHashMap::";
-const wchar_t TypeSparseArray[] = L"SparseArray::";
+const wchar_t TypeSparseArray[] = L"JSparseArray::";
 
 void CObject::_threadLock() const {
 	void* thread = CurrentThreadId();

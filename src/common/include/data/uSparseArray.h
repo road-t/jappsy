@@ -23,14 +23,14 @@
 #define SPARSEARRAY_BLOCK_SIZE	16
 
 template <typename Type>
-class RefSparseArray : public JRefObject {
+class JRefSparseArray : public JRefObject {
 protected:
-	struct RefSparseArrayItem {
+	struct JRefSparseArrayItem {
 		int32_t index;
 		Type* value;
 	};
 
-	RefSparseArrayItem* m_array;
+	JRefSparseArrayItem* m_array;
 	uint32_t m_count = 0;
 	uint32_t m_size = 0;
 	uint32_t m_initialSize = 0;
@@ -47,7 +47,7 @@ protected:
 		
 		uint32_t size = count - (count % SPARSEARRAY_BLOCK_SIZE) + SPARSEARRAY_BLOCK_SIZE;
 		if ((size > m_size) && (size >= m_initialSize)) {
-			RefSparseArrayItem* newArray = memRealloc(RefSparseArrayItem, newArray, m_array, size * sizeof(RefSparseArrayItem));
+			JRefSparseArrayItem* newArray = memRealloc(JRefSparseArrayItem, newArray, m_array, size * sizeof(JRefSparseArrayItem));
 			if (newArray) {
 				m_array = newArray;
 				m_size = size;
@@ -69,7 +69,7 @@ protected:
 		uint32_t size = count - (count % SPARSEARRAY_BLOCK_SIZE) + SPARSEARRAY_BLOCK_SIZE;
 		if (size < m_initialSize) size = m_initialSize;
 		if (size < m_size) {
-			RefSparseArrayItem* newArray = memRealloc(RefSparseArrayItem, newArray, m_array, size * sizeof(RefSparseArrayItem));
+			JRefSparseArrayItem* newArray = memRealloc(JRefSparseArrayItem, newArray, m_array, size * sizeof(JRefSparseArrayItem));
 			if (newArray) {
 				m_array = newArray;
 				m_size = size;
@@ -80,17 +80,17 @@ protected:
 
 public:
 	
-	inline RefSparseArray() {
+	inline JRefSparseArray() {
 		TYPE = TypeSparseArray;
 	}
 	
-	inline RefSparseArray(uint32_t initialCapacity) throw(const char*) {
+	inline JRefSparseArray(uint32_t initialCapacity) throw(const char*) {
 		TYPE = TypeSparseArray;
 		resize(initialCapacity);
 		m_initialSize = m_size;
 	}
 	
-	inline ~RefSparseArray() {
+	inline ~JRefSparseArray() {
 		if (m_array != NULL) {
 			for (int i = 0; i < m_count; i++) {
 				if (m_array[i].value != NULL) {
@@ -112,7 +112,7 @@ public:
 		}
 		insertIndex++;
 		if (insertIndex < m_count) {
-			memmove(&(m_array[insertIndex+1]), &(m_array[insertIndex]), (m_count - insertIndex) * sizeof(RefSparseArrayItem));
+			memmove(&(m_array[insertIndex+1]), &(m_array[insertIndex]), (m_count - insertIndex) * sizeof(JRefSparseArrayItem));
 		}
 
 		m_array[insertIndex].index = key;
@@ -202,7 +202,7 @@ public:
 				}
 				
 				if (index < (m_count-1)) {
-					memmove(&(m_array[index]), &(m_array[index+1]), (m_count - index - 1) * sizeof(RefSparseArrayItem));
+					memmove(&(m_array[index]), &(m_array[index+1]), (m_count - index - 1) * sizeof(JRefSparseArrayItem));
 				}
 				
 				count--;
@@ -222,7 +222,7 @@ public:
 			}
 			
 			if (index < (m_count-1)) {
-				memmove(&(m_array[index]), &(m_array[index+1]), (m_count - index - 1) * sizeof(RefSparseArrayItem));
+				memmove(&(m_array[index]), &(m_array[index+1]), (m_count - index - 1) * sizeof(JRefSparseArrayItem));
 			}
 			
 			m_count--;
@@ -243,7 +243,7 @@ public:
 				}
 			}
 			if ((index + size) < m_count) {
-				memmove(&(m_array[index]), &(m_array[index + size]), (m_count - index - size) * sizeof(RefSparseArrayItem));
+				memmove(&(m_array[index]), &(m_array[index + size]), (m_count - index - size) * sizeof(JRefSparseArrayItem));
 			}
 			for (int ofs = 0; ofs < size; ofs++) {
 				m_array[m_count - ofs - 1].value = NULL;
@@ -297,17 +297,17 @@ public:
 };
 
 template <typename Type>
-class SparseArray : public JObject {
+class JSparseArray : public JObject {
 public:
-	JRefTemplate(SparseArray, SparseArray, RefSparseArray)
+	JRefTemplate(JSparseArray, JSparseArray, JRefSparseArray)
 	
-	inline SparseArray() {
+	inline JSparseArray() {
 		THIS.initialize();
 	}
 	
-	inline SparseArray(uint32_t initialCapacity) {
+	inline JSparseArray(uint32_t initialCapacity) {
 		THIS.initialize();
-		RefSparseArray<Type>* o = new RefSparseArray<Type>(initialCapacity);
+		JRefSparseArray<Type>* o = new JRefSparseArray<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}

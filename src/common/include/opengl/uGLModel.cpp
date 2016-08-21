@@ -104,18 +104,18 @@ void RefGLMaterial::update() {
 	items[3] = opacity.value;
 	
 	Vec3SetV(items + 4, diffuse.color.v);
-	items[7] = (diffuse.texture == null) ? 0 : diffuse.texture.ref().blend;
+	items[7] = (diffuse.texture == null) ? 0 : diffuse.blend;
 	
 	Vec3SetV(items + 8, specular.color.v);
-	items[11] = (specular.texture == null) ? 0 : specular.texture.ref().blend;
+	items[11] = (specular.texture == null) ? 0 : specular.blend;
 	
 	Vec3SetV(items + 12, emissive.color.v);
-	items[15] = (emissive.texture == null) ? 0 : emissive.texture.ref().blend;
+	items[15] = (emissive.texture == null) ? 0 : emissive.blend;
 	
 	items[16] = shininess.value;
 	items[17] = shininess.percent;
 	items[18] = 0.0; // unused
-	items[19] = (opacity.texture == null) ? 0 : opacity.texture.ref().blend;
+	items[19] = (opacity.texture == null) ? 0 : opacity.blend;
 }
 
 //===============================
@@ -292,19 +292,13 @@ public:
 	}
 };
 
-class ModelJsonParserMaterialData {
-public:
-	String name;
-	
-};
-
 class ModelJsonParser {
 public:
 	GLModels* models;
 	
 	ModelJsonParserNodeData* rootnode = NULL;
 	Vector<ModelJsonParserMeshData*> meshes;
-	Vector<ModelJsonParserMaterialData*> materials;
+	Vector<GLMaterial*> materials;
 	
 	inline void releaseRootNode() {
 		if (rootnode != NULL) {
@@ -327,9 +321,9 @@ public:
 	inline void releaseMaterials() {
 		int32_t count = materials.count();
 		if (count > 0) {
-			ModelJsonParserMaterialData** items = materials.items();
+			GLMaterial** items = materials.items();
 			for (int i = 0; i < count; i++) {
-				memDelete(items[i]);
+				delete items[i];
 			}
 			meshes.clear();
 		}
@@ -344,6 +338,16 @@ public:
 	inline ~ModelJsonParser() {
 		release();
 	}
+};
+
+class ModelJsonParserMaterialData {
+public:
+	GLModels* models;
+	RefGLMaterial* material;
+	
+	String key;
+	GLuint semantic = 0;
+	Vector<GLfloat> value;
 };
 
 #define ModelLog(fmt, ...) String::format(fmt, ## __VA_ARGS__).log()
@@ -756,8 +760,7 @@ void GLModels::onjson_materials_start(struct json_context* ctx, const char* key,
 	
 	ModelLog(L"model.materials");
 	
-	//ctx->callbacks->onarray.onobjectstart; // materialobject
-	
+	ctx->callbacks->onarray.onobjectstart = onjson_material_start;
 	ctx->callbacks->onobject.onarrayend = onjson_materials_end;
 }
 
@@ -766,6 +769,194 @@ void GLModels::onjson_materials_end(struct json_context* ctx, const char* key, v
 	
 	if (!noerror) {
 		parser->releaseMaterials();
+	}
+}
+
+void GLModels::onjson_material_start(struct json_context* ctx, const int index, void* target) {
+	ModelJsonParser* parser = (ModelJsonParser*)target;
+	
+	ModelLog(L"model.materials[%d]", index);
+
+	ModelJsonParserMaterialData* data = memNew(data, ModelJsonParserMaterialData());
+	if (data == NULL)
+		throw eOutOfMemory;
+	
+	data->models = parser->models;
+	data->material = new RefGLMaterial();
+	
+	if (data->material == NULL)
+		throw eOutOfMemory;
+	
+	json_clear_callbacks(ctx->callbacks, data);
+	ctx->callbacks->onobject.onarraystart = onjson_material_array_start;
+	ctx->callbacks->onarray.onobjectend = onjson_material_end;
+}
+
+void GLModels::onjson_material_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	if (noerror) {
+		ModelJsonParser* parentdata = (ModelJsonParser*)parenttarget;
+
+		try {
+			GLMaterial* material = new GLMaterial(data->material);
+			parentdata->materials.push(material);
+		} catch (...) {
+			memDelete(data);
+			throw;
+		}
+	}
+	memDelete(data);
+}
+
+void GLModels::onjson_material_array_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserNodeData* data = (ModelJsonParserMaterialData*)target;
+	
+	json_clear_callbacks(ctx->callbacks, target);
+	if (strcmp(key, "properties") == 0) {
+		onjson_material_properties_start(ctx, key, target);
+	}
+}
+
+// material.properties
+void GLModels::onjson_material_properties_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	ModelLog(L"material.properties");
+	
+	ctx->callbacks->onarray.onobjectstart = onjson_material_property_start;
+	ctx->callbacks->onobject.onarrayend = onjson_material_properties_end;
+}
+
+void GLModels::onjson_material_properties_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+}
+
+// material.properties[index]
+void GLModels::onjson_material_property_start(struct json_context* ctx, const int index, void* target) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	ModelLog(L"material.properties[%d]", index);
+	
+	json_clear_callbacks(ctx->callbacks, target);
+	ctx->callbacks->onobject.onstring = onjson_material_property_string;
+	ctx->callbacks->onobject.onnumber = onjson_material_property_number;
+	ctx->callbacks->onobject.onarraystart = onjson_material_property_array_start;
+	ctx->callbacks->onarray.onobjectend = onjson_material_property_end;
+}
+
+void GLModels::onjson_material_property_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+}
+
+void GLModels::onjson_material_property_string(struct json_context* ctx, const char* key, char* value, void* target) {
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	if (strcmp(key, "key") == 0) {
+		data->key = value;
+		data->key.toLowerCase();
+	} else if (strcmp(key, "value") == 0) {
+		if ((data->semantic == 0) && (data->key.endsWith(L".name"))) {
+			data->material->name = value;
+		} else if (data->key.endsWith(L".file")) {
+			String file = value; file.toLowerCase();
+			switch (data->semantic) {
+				case 1: data->material->diffuse.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 2: data->material->specular.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 4: data->material->emissive.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 5: data->material->bump.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 7: data->material->shininess.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 8: data->material->opacity.texture = new GLMaterialTexture(data->models->context, file); break;
+				case 11: data->material->reflection.texture = new GLMaterialTexture(data->models->context, file); break;
+			}
+		}
+	}
+}
+
+void GLModels::onjson_material_property_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target) {
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+
+	if (strcmp(key, "semantic") == 0) {
+		if (number.is_float) {
+			data->semantic = number.v.f;
+		} else {
+			data->semantic = number.v.i;
+		}
+	} else if (strcmp(key, "value") == 0) {
+		GLfloat value = (number.is_float ? number.v.f : number.v.i);
+		if (data->semantic == 0) {
+			if (data->key.endsWith(L"shininess")) {
+				data->material->shininess.value = value;
+			} else if (data->key.endsWith(L"shinpercent")) {
+				data->material->shininess.percent = value;
+			} else if (data->key.endsWith(L"opacity")) {
+				data->material->opacity.value = value;
+			} else if (data->key.endsWith(L"bumpscaling")) {
+				data->material->bump.scale = value;
+			}
+		} else {
+			if (data->key.endsWith(L"blend")) {
+				switch (data->semantic) {
+					case 1: data->material->diffuse.blend = value; break;
+					case 2: data->material->specular.blend = value; break;
+					case 4: data->material->emissive.blend = value; break;
+					case 7: data->material->shininess.blend = value; break;
+					case 8: data->material->opacity.blend = value; break;
+				}
+			} else if (data->key.endsWith(L"mapmodeu")) {
+				// Default: 0
+			} else if (data->key.endsWith(L"mapmodev")) {
+				// Default: 0
+			}
+		}
+	}
+}
+void GLModels::onjson_material_property_array_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+
+	json_clear_callbacks(ctx->callbacks, target);
+	if (strcmp(key, "value") == 0) {
+		onjson_material_property_value_start(ctx, key, target);
+	}
+}
+
+void GLModels::onjson_material_property_value_start(struct json_context* ctx, const char* key, void* target) {
+	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	ctx->callbacks->onarray.onnumber = onjson_material_property_value_number;
+	ctx->callbacks->onobject.onarrayend = onjson_material_property_value_end;
+}
+
+void GLModels::onjson_material_property_value_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror) {
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	if (noerror) {
+		if (data->semantic == 0) {
+			if (data->value.count() >= 3) {
+				if (data->key.endsWith(L"ambient")) {
+					Vec3SetV(data->material->ambient.color.v, data->value.items());
+				} else if (data->key.endsWith(L"diffuse")) {
+					Vec3SetV(data->material->diffuse.color.v, data->value.items());
+				} else if (data->key.endsWith(L"specular")) {
+					Vec3SetV(data->material->specular.color.v, data->value.items());
+				} else if (data->key.endsWith(L"emissive")) {
+					Vec3SetV(data->material->emissive.color.v, data->value.items());
+				}
+			}
+		} else {
+			if (data->key.endsWith(L"uvtrafo")) {
+				// Default: [0,0,1,1,0]
+			}
+		}
+	}
+}
+
+void GLModels::onjson_material_property_value_number(struct json_context* ctx, const int index, const struct json_number& number, void* target) {
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	
+	if (number.is_float) {
+		data->value.push(number.v.f);
+	} else {
+		data->value.push(number.v.i);
 	}
 }
 

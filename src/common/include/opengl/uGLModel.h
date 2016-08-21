@@ -39,7 +39,6 @@ class RefGLMaterialTexture : public RefObject {
 public:
 	GLRender* context = NULL;
 	GLObjectData* texture = NULL;
-	GLfloat blend = 0.0;
 	GLuint texture1iv = 0;
 	
 	GLfloat x = 0.0;
@@ -81,7 +80,7 @@ public:
 //===============================
 
 class RefGLMaterial : public RefObject {
-private:
+public:
 	String name;
 	
 	// Ambient color is the color of an object where it is in shadow.
@@ -98,6 +97,7 @@ private:
 	struct {
 		Vec3 color = {1.0, 1.0, 1.0};
 		GLMaterialTexture texture;
+		GLfloat blend = 0.0;
 	} diffuse;
 	
 	// Specular color is the color of the light of a specular reflection.
@@ -106,6 +106,7 @@ private:
 	struct {
 		Vec3 color = {1.0, 1.0, 1.0};
 		GLMaterialTexture texture;
+		GLfloat blend = 0.0;
 	} specular;
 	
 	// Emissive color is the self-illumination color an object has.
@@ -113,6 +114,7 @@ private:
 	struct {
 		Vec3 color = {0.0, 0.0, 0.0};
 		GLMaterialTexture texture;
+		GLfloat blend = 0.0;
 	} emissive;
 	
 	// 3DSMax - (value) Glossiness, (percent) Specular Level, (texture alpha channel) Specular Level Blend
@@ -120,12 +122,14 @@ private:
 		GLfloat value = 50;
 		GLfloat percent = 1;
 		GLMaterialTexture texture;
+		GLfloat blend = 0.0;
 	} shininess;
 	
 	// 3DSMax - Opacity
 	struct {
 		GLfloat value = 1;
 		GLMaterialTexture texture;
+		GLfloat blend = 0.0;
 	} opacity;
 	
 	// 3DSMax - Bump
@@ -323,30 +327,23 @@ private:
 		// root.materials
 		static void onjson_materials_start(struct json_context* ctx, const char* key, void* target);
 		static void onjson_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-
-	/*
-	// root.rootnode | node parser
-
-	// node.transformation
-	static void onjson_object_node_array_transformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.transformation[index]
-	static void onjson_object_node_array_transformation_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-
-	// node.children
-	static void onjson_object_node_array_children_object_start(struct json_context* ctx, const int index, void* target); // childnode
-	static void onjson_object_node_array_children_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-
-	// node.meshes
-	static void onjson_object_node_array_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target); // node.meshes[index]
-	static void onjson_object_node_array_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-	
-	// root.meshes parser
-	static void onjson_array_meshes_object_start(struct json_context* ctx, const int index, void* target); // mesh
-	static void onjson_array_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-	
-	// root.materials parser
-	static void onjson_array_materials_object_start(struct json_context* ctx, const int index, void* target); // material
-	static void onjson_array_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-	 */
+			// root.materials[index]
+			static void onjson_material_start(struct json_context* ctx, const int index, void* target);
+			static void onjson_material_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+			static void onjson_material_array_start(struct json_context* ctx, const char* key, void* target);
+				// material.properties
+				static void onjson_material_properties_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_material_properties_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+					// material.properties[index]
+					static void onjson_material_property_start(struct json_context* ctx, const int index, void* target);
+					static void onjson_material_property_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+					static void onjson_material_property_string(struct json_context* ctx, const char* key, char* value, void* target);
+					static void onjson_material_property_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
+					static void onjson_material_property_array_start(struct json_context* ctx, const char* key, void* target);
+						// material.properties[index].value
+						static void onjson_material_property_value_start(struct json_context* ctx, const char* key, void* target);
+						static void onjson_material_property_value_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+						static void onjson_material_property_value_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
 	
 public: // Thread Safe
 	

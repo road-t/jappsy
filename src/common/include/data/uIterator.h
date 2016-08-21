@@ -20,18 +20,18 @@
 #include <data/uStack.h>
 
 template <typename Type>
-class RefIterator : public RefStack<Type> {
+class RefIterator : public JRefStack<Type> {
 public:
 	int32_t m_next = 0;
 	int32_t m_last = -1;
 	int32_t m_prev = -1;
 	
 public:
-	inline RefIterator() : RefStack<Type>() {
+	inline RefIterator() : JRefStack<Type>() {
 		THIS.TYPE = TypeIterator;
 	}
 	
-	inline RefIterator(uint32_t initialCapacity) throw(const char*) : RefStack<Type>(initialCapacity) {
+	inline RefIterator(uint32_t initialCapacity) throw(const char*) : JRefStack<Type>(initialCapacity) {
 		THIS.TYPE = TypeIterator;
 	}
 	
@@ -48,7 +48,7 @@ public:
 		((RefIterator*)this)->m_last = THIS.m_next;
 		((RefIterator*)this)->m_prev = THIS.m_next;
 		((RefIterator*)this)->m_next++;
-		return RefStack<Type>::peek(THIS.m_last);
+		return JRefStack<Type>::peek(THIS.m_last);
 	}
 	
 	virtual inline const Type remove() throw(const char*) {
@@ -61,7 +61,7 @@ public:
 				if (m_prev >= 0) m_prev--;
 			}
 			m_last = -1;
-			return RefStack<Type>::remove(index);
+			return JRefStack<Type>::remove(index);
 		}
 		throw eOutOfRange;
 	}

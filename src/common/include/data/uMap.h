@@ -46,25 +46,25 @@ public:
 	}
 	
 	virtual inline bool containsKey(const K& key) const {
-		return m_keys.ref().RefStack<K>::contains(key);
+		return m_keys.ref().JRefStack<K>::contains(key);
 	}
 	
 	virtual inline bool containsValue(const V& value) const {
-		return m_values.ref().RefStack<V>::contains(value);
+		return m_values.ref().JRefStack<V>::contains(value);
 	}
 	
 	virtual inline const V& get(const K& key) const throw(const char*) {
-		int32_t index = m_keys.ref().RefStack<K>::search(key);
+		int32_t index = m_keys.ref().JRefStack<K>::search(key);
 		if (index >= 0)
-			return m_values.ref().RefStack<V>::get(index);
+			return m_values.ref().JRefStack<V>::get(index);
 		throw eNotFound;
 	}
 	
 	virtual inline const V& opt(const K& key, const V& defaultValue) const {
-		int32_t index = m_keys.ref().RefStack<K>::search(key);
+		int32_t index = m_keys.ref().JRefStack<K>::search(key);
 		if (index >= 0) {
 			try {
-				return m_values.ref().RefStack<V>::get(index);
+				return m_values.ref().JRefStack<V>::get(index);
 			} catch (const char* e) {
 			}
 		}
@@ -72,7 +72,7 @@ public:
 	}
 	
 	virtual inline bool isEmpty() const {
-		return m_keys.ref().RefStack<K>::empty();
+		return m_keys.ref().JRefStack<K>::empty();
 	}
 	
 	virtual inline const Set<K>& keySet() const {
@@ -80,25 +80,25 @@ public:
 	}
 	
 	virtual inline V& put(const K& key, const V& value) throw(const char*) {
-		int32_t index = m_keys.ref().RefStack<K>::search(key);
+		int32_t index = m_keys.ref().JRefStack<K>::search(key);
 		if (index < 0) {
-			m_keys.ref().RefStack<K>::push(key);
-			return m_values.ref().RefStack<V>::push(value);
+			m_keys.ref().JRefStack<K>::push(key);
+			return m_values.ref().JRefStack<V>::push(value);
 		} else {
 			return m_values.ref().RefList<V>::set(index, value);
 		}
 	}
 	
 	virtual inline void remove(const K& key) throw(const char*) {
-		int32_t index = m_keys.ref().RefStack<K>::search(key);
+		int32_t index = m_keys.ref().JRefStack<K>::search(key);
 		if (index >= 0) {
-			m_keys.ref().RefStack<K>::remove(index);
-			m_values.ref().RefStack<V>::remove(index);
+			m_keys.ref().JRefStack<K>::remove(index);
+			m_values.ref().JRefStack<V>::remove(index);
 		}
 	}
 	
 	virtual inline int32_t size() const {
-		return m_keys.ref().RefStack<K>::size();
+		return m_keys.ref().JRefStack<K>::size();
 	}
 	
 	virtual inline const Collection<V>& values() const {

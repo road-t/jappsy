@@ -23,7 +23,7 @@
 #define STACK_BLOCK_SIZE	16
 
 template <typename Type>
-class RefStack : public JRefObject {
+class JRefStack : public JRefObject {
 public:
 	Type** m_stack = NULL;
 	uint32_t m_count = 0;
@@ -75,16 +75,16 @@ public:
 	}
 	
 public:
-	inline RefStack() {	TYPE = TypeStack; }
+	inline JRefStack() {	TYPE = TypeStack; }
 	
-	inline RefStack(uint32_t initialCapacity) throw(const char*) {
+	inline JRefStack(uint32_t initialCapacity) throw(const char*) {
 		TYPE = TypeStack;
 		resize(initialCapacity);
 		m_initialCapacity = initialCapacity;
 		m_initialSize = m_size;
 	}
 	
-	inline ~RefStack() {
+	inline ~JRefStack() {
 		if (m_stack != NULL) {
 			for (int i = 0; i < m_count; i++) {
 				if (m_stack[i] != NULL) {
@@ -305,7 +305,7 @@ public:
 template <typename Type>
 class JStack : public JObject {
 public:
-	JRefTemplate(JStack, JStack, RefStack)
+	JRefTemplate(JStack, JStack, JRefStack)
 
 	inline JStack() {
 		THIS.initialize();
@@ -313,7 +313,7 @@ public:
 	
 	inline JStack(uint32_t initialCapacity) throw(const char*) {
 		THIS.initialize();
-		RefStack<Type>* o = new RefStack<Type>(initialCapacity);
+		JRefStack<Type>* o = new JRefStack<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}

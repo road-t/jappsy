@@ -27,8 +27,8 @@ public:
 	inline RefSet(int initialCapacity) throw(const char*) : RefList<Type>(initialCapacity) { THIS.TYPE = TypeSet; }
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
-		if (!RefStack<Type>::contains(object)) {
-			RefStack<Type>::push(object);
+		if (!JRefStack<Type>::contains(object)) {
+			JRefStack<Type>::push(object);
 			return true;
 		}
 		return false;
@@ -77,15 +77,15 @@ public:
 	
 	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().add(object); }
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().addAll(collection); }
-	virtual inline void clear() throw(const char*) { THIS.ref().RefStack<Type>::clear(); }
-	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().RefStack<Type>::contains(value); }
+	virtual inline void clear() throw(const char*) { THIS.ref().JRefStack<Type>::clear(); }
+	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::containsAll(collection); }
-	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().RefStack<Type>::isEmpty(); }
+	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
 	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().RefCollection<Type>::remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::retainAll(collection); }
-	virtual inline int32_t size() const throw(const char*) { return THIS.ref().RefStack<Type>::size(); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().JRefStack<Type>::size(); }
 	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().RefCollection<Type>::toArray(); }
 	
 	static SynchronizedSet<Type> synchronizedSet(Set<Type>* newSet) {

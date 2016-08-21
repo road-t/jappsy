@@ -32,14 +32,14 @@ public:
 	}
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
-		RefStack<Type>::push(object);
+		JRefStack<Type>::push(object);
 		return true;
 	}
 	
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
 		Iterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
-			RefStack<Type>::push(it.next());
+			JRefStack<Type>::push(it.next());
 		}
 		return true;
 	}
@@ -47,7 +47,7 @@ public:
 	virtual inline bool containsAll(Collection<Type>& collection) {
 		Iterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
-			if (!RefStack<Type>::contains(it.next())) {
+			if (!JRefStack<Type>::contains(it.next())) {
 				return false;
 			}
 		}
@@ -65,9 +65,9 @@ public:
 	}
 	
 	virtual inline bool remove(const Type& value) throw(const char*) {
-		int32_t index = RefStack<Type>::search(value);
+		int32_t index = JRefStack<Type>::search(value);
 		if (index >= 0) {
-			RefStack<Type>::remove(index);
+			JRefStack<Type>::remove(index);
 			return true;
 		}
 		return false;
@@ -127,15 +127,15 @@ public:
 	
 	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().add(object); }
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().addAll(collection); }
-	virtual inline void clear() throw(const char*) { THIS.ref().RefStack<Type>::clear(); }
-	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().RefStack<Type>::contains(value); }
+	virtual inline void clear() throw(const char*) { THIS.ref().JRefStack<Type>::clear(); }
+	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
-	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().RefStack<Type>::isEmpty(); }
+	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
 	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }
-	virtual inline int32_t size() const throw(const char*) { return THIS.ref().RefStack<Type>::size(); }
+	virtual inline int32_t size() const throw(const char*) { return THIS.ref().JRefStack<Type>::size(); }
 	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().toArray(); }
 	
 	static SynchronizedCollection<Type> synchronizedCollection(Collection<Type>* newCollection) {
@@ -177,7 +177,7 @@ public:
 	virtual inline void clear() throw(const char*) {
 		synchronized(*this) {
 			try {
-				THIS.ref().RefStack<Type>::clear();
+				THIS.ref().JRefStack<Type>::clear();
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -189,7 +189,7 @@ public:
 	virtual inline bool contains(const Type& value) const throw(const char*) {
 		bool result;
 		synchronized(*this) {
-			result = THIS.ref().RefStack<Type>::contains(value);
+			result = THIS.ref().JRefStack<Type>::contains(value);
 			THIS.notifyAll();
 		}
 		return result;
@@ -212,7 +212,7 @@ public:
 	virtual inline bool isEmpty() const throw(const char*) {
 		bool result;
 		synchronized(*this) {
-			result = THIS.ref().RefStack<Type>::isEmpty();
+			result = THIS.ref().JRefStack<Type>::isEmpty();
 			THIS.notifyAll();
 		}
 		return result;
@@ -277,7 +277,7 @@ public:
 	virtual inline int32_t size() const throw(const char*) {
 		uint32_t result;
 		synchronized(*this) {
-			result = THIS.ref().RefStack<Type>::size();
+			result = THIS.ref().JRefStack<Type>::size();
 			THIS.notifyAll();
 		}
 		return result;

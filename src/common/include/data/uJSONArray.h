@@ -343,7 +343,7 @@ public:
 	}
 	
 	inline void remove(int index) throw(const char*) {
-		m_array.ref().RefStack<JObject>::remove(index);
+		m_array.ref().JRefStack<JObject>::remove(index);
 	}
 	
 	inline JString toJSON() const { return m_array.toJSON(); }

@@ -102,7 +102,7 @@ public:
 		((RefIterator<Type>*)this)->m_last = THIS.m_prev;
 		((RefIterator<Type>*)this)->m_next = THIS.m_prev;
 		((RefIterator<Type>*)this)->m_prev--;
-		return RefStack<Type>::peek(THIS.m_last);
+		return JRefStack<Type>::peek(THIS.m_last);
 	}
 	
 	virtual inline int32_t previousIndex() const {

@@ -107,6 +107,17 @@ extern "C" {
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 	};
 	
+	struct Vec3i {
+		GLshort i[3];
+		
+		inline Vec3i() { }
+		inline Vec3i(const GLshort i1, const GLshort i2, GLshort i3) { i[0] = i1; i[1] = i2; i[2] = i3; }
+		inline Vec3i(const GLshort i[3]) { this->i[0] = i[0]; this->i[1] = i[1]; this->i[2] = i[2]; }
+
+		inline GLshort& operator [](int index) { return i[index]; }
+		inline operator GLshort*() const { return (GLshort*)i; }
+	};
+	
 	struct Vec3 {
 		union {
 			struct {

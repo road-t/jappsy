@@ -24,7 +24,7 @@
 
 class GLRender;
 
-class RefGLEngine : public RefObject {
+class RefGLEngine : public JRefObject {
 protected:
 	GLRender* context;
 	
@@ -35,7 +35,7 @@ public:
 	
 	inline void shutdown() {}
 	
-	void setBasePath(const String& basePath);
+	void setBasePath(const JString& basePath);
 	void load(const char* json);
 	
 	void onRender();
@@ -44,15 +44,15 @@ public:
 
 	virtual void onFrame(GLRender* context) {}
 	virtual void onTouch(const wchar_t* event) {}
-	virtual void onFile(const String& url, const Object& object) {}
+	virtual void onFile(const JString& url, const JObject& object) {}
 	virtual void onStatus(const LoaderStatus& status) {}
 	virtual void onReady(const JSONObject& result) {}
-	virtual void onError(const String& error) {}
+	virtual void onError(const JString& error) {}
 };
 
-class GLEngine : public Object {
+class GLEngine : public JObject {
 public:
-	RefClass(GLEngine, RefGLEngine);
+	JRefClass(GLEngine, RefGLEngine);
 	
 	inline void release() throw(const char*) { THIS.ref().release(); }
 	

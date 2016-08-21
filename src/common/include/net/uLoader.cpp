@@ -58,7 +58,7 @@ void RefLoader::checkUpdate(int time) {
 	THIS.notifyAll();
 }
 
-void RefLoader::onUpdate(const Object& data) {
+void RefLoader::onUpdate(const JObject& data) {
 	(*(Loader*)(&data)).ref().update();
 }
 
@@ -80,7 +80,7 @@ void RefLoader::update() {
 		}
 		while (count > 0) {
 			File* info = &(lastDownload());
-			String ext = (*info).ref().ext;
+			JString ext = (*info).ref().ext;
 			
 			AtomicSet(&(status.update), true);
 			AtomicIncrement(&(status.left));
@@ -169,7 +169,7 @@ void RefLoader::onjson_subgroup(struct json_context* ctx, const char* key, void*
 void RefLoader::onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target) {
 	RefLoader* loader = (RefLoader*)target;
 	
-	String path = value;
+	JString path = value;
 	URI* uri = new URI((wchar_t*)path);
 	uri->absolutePath((wchar_t*)(loader->basePath));
 	
@@ -209,25 +209,25 @@ RefLoader::RefInfo::~RefInfo() {
 	delete loader;
 }
 
-bool RefLoader::onhttp_text(const String& url, Stream& stream, const Object& userData) {
+bool RefLoader::onhttp_text(const JString& url, Stream& stream, const JObject& userData) {
 	RefInfo* info = (RefInfo*)&(userData.ref());
 	return info->loader->ref().onText(info->info, stream);
 }
 
-bool RefLoader::onhttp_data(const String& url, Stream& stream, const Object& userData) {
+bool RefLoader::onhttp_data(const JString& url, Stream& stream, const JObject& userData) {
 	RefInfo* info = (RefInfo*)&(userData.ref());
 	return info->loader->ref().onData(info->info, stream);
 }
 
-void RefLoader::onhttp_error(const String& url, const String& error, const Object& userData) {
-	String err = String::format(L"Unable to load %ls - %ls", (wchar_t*)url, (wchar_t*)error);
+void RefLoader::onhttp_error(const JString& url, const JString& error, const JObject& userData) {
+	JString err = JString::format(L"Unable to load %ls - %ls", (wchar_t*)url, (wchar_t*)error);
 	err.log();
 
 	RefInfo* info = (RefInfo*)&(userData.ref());
 	info->loader->ref().onError(info->info, error);
 }
 
-bool RefLoader::onhttp_retry(const String& url, const Object& userData) {
+bool RefLoader::onhttp_retry(const JString& url, const JObject& userData) {
 	RefInfo* info = (RefInfo*)&(userData.ref());
 	return info->loader->ref().onRetry(info->info);
 }
@@ -236,7 +236,7 @@ bool RefLoader::onText(const File& info, Stream& stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
-	String ext = info.ref().ext;
+	JString ext = info.ref().ext;
 	if (ext.compareToIgnoreCase(L"vsh") == 0) {
 		try {
 			GLShader* shader = &(context->shaders->createVertexShader(info.ref().key, (char*)stream.getBuffer()));
@@ -270,7 +270,7 @@ bool RefLoader::onData(const File& info, Stream& stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
-	String ext = info.ref().ext;
+	JString ext = info.ref().ext;
 	if (ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
 			GLTexture* texture = &(GLReader::createTexture(context, info.ref().key, stream));
@@ -294,7 +294,7 @@ bool RefLoader::onData(const File& info, Stream& stream) {
 	return true;
 }
 
-void RefLoader::onError(const File& info, const String& error) {
+void RefLoader::onError(const File& info, const JString& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
 	lastError = info.ref().file;
@@ -307,7 +307,7 @@ bool RefLoader::onRetry(const File& info) {
 	return true;
 }
 
-void RefLoader::onLoad(const File& info, const Object& object) {
+void RefLoader::onLoad(const File& info, const JObject& object) {
 	__sync_synchronize();
 
 	JSONObject group;

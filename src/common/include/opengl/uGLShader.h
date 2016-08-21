@@ -26,7 +26,7 @@
 
 class GLRender;
 
-class RefGLShader : public RefObject {
+class RefGLShader : public JRefObject {
 public:
 	
 	GLRender* context = NULL;
@@ -46,9 +46,9 @@ public:
 	GLuint bind(GLint index, Vector<GLint>& uniforms);
 };
 
-class GLShader : public Object {
+class GLShader : public JObject {
 public:
-	RefClass(GLShader, RefGLShader)
+	JRefClass(GLShader, RefGLShader)
 	
 	inline bool checkReady() throw(const char*) { return THIS.ref().checkReady(); }
 	inline GLuint bind(GLint index, GLint uniform) throw(const char*) { return THIS.ref().bind(index, uniform); }
@@ -58,15 +58,15 @@ public:
 class GLShaders {
 private:
 	GLRender* context;
-	HashMap<String, GLShader> list;
+	HashMap<JString, GLShader> list;
 	
 public:
 	GLShaders(GLRender* context) throw(const char*);
 	~GLShaders();
 	
-	const Iterator<String> keys();
-	GLShader& get(const String& key) throw(const char*);
-	GLShader& createShader(const String& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
+	const Iterator<JString> keys();
+	GLShader& get(const JString& key) throw(const char*);
+	GLShader& createShader(const JString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	
 	GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);
 	GLuint createFragmentShader(const char* fragmentShaderSource) throw(const char*);
@@ -81,9 +81,9 @@ private: // Thread Safe
 	
 public: // Thread Safe
 
-	GLShader& createVertexShader(const String& key, const char* vertexShaderSource) throw(const char*);
-	GLShader& createFragmentShader(const String& key, const char* fragmentShaderSource) throw(const char*);
-	GLShader& createShader(const String& key, const String& vshReference, const String& fshReference) throw(const char*);
+	GLShader& createVertexShader(const JString& key, const char* vertexShaderSource) throw(const char*);
+	GLShader& createFragmentShader(const JString& key, const char* fragmentShaderSource) throw(const char*);
+	GLShader& createShader(const JString& key, const JString& vshReference, const JString& fshReference) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSHADER_H

@@ -36,18 +36,18 @@ struct LoaderStatus {
 	int error = 0;
 };
 
-class RefLoader : public RefObject {
+class RefLoader : public JRefObject {
 private:
-	class RefFile : public RefObject {
+	class RefFile : public JRefObject {
 	public:
-		String file;
-		String ext;
-		String key;
-		String group;
+		JString file;
+		JString ext;
+		JString key;
+		JString group;
 		
 		inline RefFile() {}
 		
-		inline RefFile(const String& file, const String& ext, const String& key, const String& group) {
+		inline RefFile(const JString& file, const JString& ext, const JString& key, const JString& group) {
 			THIS.file = file;
 			THIS.ext = ext;
 			THIS.key = key;
@@ -55,13 +55,13 @@ private:
 		}
 	};
 	
-	class File : public Object {
+	class File : public JObject {
 	public:
-		RefClass(File, RefFile);
+		JRefClass(File, RefFile);
 	};
 	
 public:
-	class RefInfo : public RefObject {
+	class RefInfo : public JRefObject {
 	public:
 		Loader* loader = NULL;
 		File info;
@@ -72,9 +72,9 @@ public:
 		~RefInfo();
 	};
 	
-	class Info : public Object {
+	class Info : public JObject {
 	public:
-		RefClass(Info, RefInfo);
+		JRefClass(Info, RefInfo);
 
 		inline Info(const RefLoader& loader, const RefFile& info) {
 			RefInfo* o = new RefInfo(loader, info);
@@ -85,17 +85,17 @@ public:
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const String& url, const Object& object, const Object userData);
-	typedef void (*onStatusCallback)(const LoaderStatus& status, const Object userData);
-	typedef void (*onReadyCallback)(const JSONObject& result, const Object userData);
-	typedef void (*onErrorCallback)(const String& error, const Object userData);
+	typedef void (*onFileCallback)(const JString& url, const JObject& object, const JObject userData);
+	typedef void (*onStatusCallback)(const LoaderStatus& status, const JObject userData);
+	typedef void (*onReadyCallback)(const JSONObject& result, const JObject userData);
+	typedef void (*onErrorCallback)(const JString& error, const JObject userData);
 
 	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
 	onReadyCallback onready = NULL;
 	onErrorCallback onerror = NULL;
 	
-	Object userData;
+	JObject userData;
 
 private:
 	// loader internal data
@@ -110,9 +110,9 @@ private:
 	struct LoaderStatus status;
 	volatile int32_t shutdown = 0;
 	volatile bool updating = false;
-	String lastError;
+	JString lastError;
 	
-	String cacheid;
+	JString cacheid;
 	
 	inline int hasDownloads() { return list.size(); }
 	
@@ -126,25 +126,25 @@ private:
 	
 	Handler handler;
 	void checkUpdate(int time);
-	static void onUpdate(const Object& data);
+	static void onUpdate(const JObject& data);
 	void update();
 	void run();
 	
-	static bool onhttp_text(const String& url, Stream& stream, const Object& userData);
-	static bool onhttp_data(const String& url, Stream& stream, const Object& userData);
-	static void onhttp_error(const String& url, const String& error, const Object& userData);
-	static bool onhttp_retry(const String& url, const Object& userData);
+	static bool onhttp_text(const JString& url, Stream& stream, const JObject& userData);
+	static bool onhttp_data(const JString& url, Stream& stream, const JObject& userData);
+	static void onhttp_error(const JString& url, const JString& error, const JObject& userData);
+	static bool onhttp_retry(const JString& url, const JObject& userData);
 	
 	bool onText(const File& info, Stream& stream);
 	bool onData(const File& info, Stream& stream);
-	void onLoad(const File& info, const Object& object);
-	void onError(const File& info, const String& error);
+	void onLoad(const File& info, const JObject& object);
+	void onError(const File& info, const JString& error);
 	bool onRetry(const File& info);
 	
 private:
 	// json parser callbacks and data
-	String group;
-	String subgroup;
+	JString group;
+	JString subgroup;
 	
 	static void onjson_root_start(struct json_context* ctx, void* target);
 	static void onjson_group(struct json_context* ctx, const char* key, void* target);
@@ -156,7 +156,7 @@ private:
 	
 public:
 	
-	String basePath;
+	JString basePath;
 
 	inline void initialize() {
 		result = new JSONObject();
@@ -165,7 +165,7 @@ public:
 	}
 
 	inline RefLoader() { throw eInvalidParams; }
-	inline RefLoader(GLRender* context, Object& userData) { initialize(); THIS.context = context; THIS.userData = userData; }
+	inline RefLoader(GLRender* context, JObject& userData) { initialize(); THIS.context = context; THIS.userData = userData; }
 	~RefLoader();
 	
 	void setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror);
@@ -173,11 +173,11 @@ public:
 	void release();
 };
 
-class Loader : public Object {
+class Loader : public JObject {
 public:
-	RefClass(Loader, RefLoader);
+	JRefClass(Loader, RefLoader);
 	
-	inline Loader(GLRender* context, Object& userData) {
+	inline Loader(GLRender* context, JObject& userData) {
 		RefLoader* o = new RefLoader(context, userData);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);

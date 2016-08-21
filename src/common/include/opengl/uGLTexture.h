@@ -24,7 +24,7 @@
 
 class GLRender;
 
-class RefGLTexture : public RefObject {
+class RefGLTexture : public JRefObject {
 public:
 	GLRender* context = NULL;
 	Vector<GLuint> handles;
@@ -39,28 +39,30 @@ public:
 	GLuint bind(GLint index, GLint uniform = -1);
 };
 
-class GLTexture : public Object {
+class GLTexture : public JObject {
 public:
 	constexpr static int NONE = 0;
 	constexpr static int SMOOTH = 1;
 	constexpr static int REPEAT = 2;
 	
-	RefClass(GLTexture, RefGLTexture)
+	JRefClass(GLTexture, RefGLTexture)
 };
 
 class GLTextures {
 private:
 	GLRender* context;
-	HashMap<String, GLTexture> list;
+	HashMap<JString, GLTexture> list;
 	GLTexture defaultTexture;
 	
 public:
+	GLuint defaultTextureHandle = 0;
+
 	GLTextures(GLRender* context) throw(const char*);
 	~GLTextures();
 	
-	GLTexture& get(const String& key) throw(const char*);
-	GLTexture& createSolidTexture(const String& key, const Vec4& rgba4fv) throw(const char*);
-	GLTexture& createTexture(const String& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	GLTexture& get(const JString& key) throw(const char*);
+	GLTexture& createSolidTexture(const JString& key, const Vec4& rgba4fv) throw(const char*);
+	GLTexture& createTexture(const JString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	
 	GLuint createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*);
 	void releaseTextureHandle(GLuint handle);

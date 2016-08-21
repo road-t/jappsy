@@ -20,7 +20,7 @@
 #include <platform.h>
 #include <data/uObject.h>
 
-class RefStream : public RefObject {
+class RefStream : public JRefObject {
 private:
 	bool m_allocated = false;
 	uint8_t* m_buffer = NULL;
@@ -75,9 +75,9 @@ public:
 	int32_t skip(uint32_t length);
 };
 
-class Stream : public Object {
+class Stream : public JObject {
 public:
-	RefClass(Stream, RefStream);
+	JRefClass(Stream, RefStream);
 	
 	inline Stream(const wchar_t* data) throw(const char*) {
 		RefStream* o = new RefStream(data);

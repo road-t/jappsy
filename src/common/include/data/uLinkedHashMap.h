@@ -22,7 +22,7 @@
 template <typename K, typename V>
 class RefLinkedHashMap : public RefMap<K,V> {
 protected:
-	class LinkedHashMapItem : public RefObject {
+	class LinkedHashMapItem : public JRefObject {
 	public:
 		RefMap<K,LinkedHashMapItem>* m_parent = NULL;
 		K* m_key = NULL;
@@ -71,7 +71,7 @@ protected:
 	uint32_t m_count = 0;
 	
 	inline RefMap<K,LinkedHashMapItem>* createMap(const K& key) throw(const char*) {
-		uint32_t hash = Object::hashCode(key);
+		uint32_t hash = JObject::hashCode(key);
 		if (m_map == NULL) {
 			m_map = memAlloc(MapPtr*, m_map, 256 * sizeof(MapPtr*));
 			if (m_map == NULL) throw eOutOfMemory;
@@ -108,7 +108,7 @@ protected:
 	
 	inline RefMap<K,LinkedHashMapItem>* findMap(const K& key) const {
 		if (m_map != NULL) {
-			uint32_t hash = Object::hashCode(key);
+			uint32_t hash = JObject::hashCode(key);
 			Map<K,LinkedHashMapItem> **m1 = m_map[hash & 0xFF];
 			if (m1 != NULL) {
 				hash >>= 8;
@@ -134,7 +134,7 @@ protected:
 				for (int i = list->m_count-1; i >= 0; i--) {
 					if (list->m_stack[i] != NULL) {
 						if (*(list->m_stack[i]) == value) return true;
-					} else if (Object::isNull(value)) {
+					} else if (JObject::isNull(value)) {
 						return true;
 					}
 				}
@@ -349,7 +349,7 @@ public:
 template <typename K, typename V>
 class LinkedHashMap : public Map<K,V> {
 public:
-	RefTemplate2(LinkedHashMap, LinkedHashMap, RefLinkedHashMap)
+	JRefTemplate2(LinkedHashMap, LinkedHashMap, RefLinkedHashMap)
 	
 	inline LinkedHashMap() {
 		THIS.initialize();

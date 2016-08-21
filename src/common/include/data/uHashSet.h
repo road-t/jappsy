@@ -27,7 +27,7 @@ protected:
 	uint32_t m_count = 0;
 	
 	inline Set<Type>* createSet(const Type& object) throw(const char*) {
-		uint32_t hash = Object::hashCode(object);
+		uint32_t hash = JObject::hashCode(object);
 		if (m_set == NULL) {
 			m_set = memAlloc(Set<Type> **, m_set, 256 * sizeof(Set<Type> **));
 			if (m_set == NULL) throw eOutOfMemory;
@@ -64,7 +64,7 @@ protected:
 	
 	inline Set<Type>* findSet(const Type& object) const {
 		if (m_set != NULL) {
-			uint32_t hash = Object::hashCode(object);
+			uint32_t hash = JObject::hashCode(object);
 			Set<Type> **s1 = m_set[hash & 0xFF];
 			if (s1 != NULL) {
 				hash >>= 8;
@@ -243,7 +243,7 @@ public:
 template <typename Type>
 class HashSet : public Set<Type> {
 public:
-	RefTemplate(HashSet, HashSet, RefHashSet)
+	JRefTemplate(HashSet, HashSet, RefHashSet)
 	
 	inline HashSet() {
 		THIS.initialize();

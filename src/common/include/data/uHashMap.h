@@ -27,7 +27,7 @@ protected:
 	uint32_t m_count = 0;
 	
 	inline RefMap<K,V>* createMap(const K& key) throw(const char*) {
-		uint32_t hash = Object::hashCode(key);
+		uint32_t hash = JObject::hashCode(key);
 		if (m_map == NULL) {
 			m_map = memAlloc(MapPtr*, m_map, 256 * sizeof(MapPtr*));
 			if (m_map == NULL) throw eOutOfMemory;
@@ -64,7 +64,7 @@ protected:
 	
 	inline RefMap<K,V>* findMap(const K& key) const {
 		if (m_map != NULL) {
-			uint32_t hash = Object::hashCode(key);
+			uint32_t hash = JObject::hashCode(key);
 			Map<K,V> **m1 = m_map[hash & 0xFF];
 			if (m1 != NULL) {
 				hash >>= 8;
@@ -245,7 +245,7 @@ public:
 template <typename K, typename V>
 class HashMap : public Map<K,V> {
 public:
-	RefTemplate2(HashMap, HashMap, RefHashMap)
+	JRefTemplate2(HashMap, HashMap, RefHashMap)
 	
 	inline HashMap() {
 		THIS.initialize();

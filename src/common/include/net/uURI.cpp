@@ -342,9 +342,9 @@ URI::~URI() {
 	}
 }
 
-const String& URI::scheme() {
+const JString& URI::scheme() {
 	if (_scheme == NULL) {
-		_scheme = memNew(_scheme, String());
+		_scheme = memNew(_scheme, JString());
 		if (m_scheme != NULL) {
 			_scheme->concat(m_scheme);
 			_scheme->concat(L"://");
@@ -353,9 +353,9 @@ const String& URI::scheme() {
 	return *_scheme;
 }
 
-const String& URI::server() {
+const JString& URI::server() {
 	if (_server == NULL) {
-		_server = memNew(_server, String());
+		_server = memNew(_server, JString());
 		if ((m_user != NULL) || (m_password != NULL)) {
 			if (m_user != NULL) {
 				_server->concat(m_user);
@@ -378,9 +378,9 @@ const String& URI::server() {
 }
 
 
-const String& URI::fullPath() {
+const JString& URI::fullPath() {
 	if (_fullPath == NULL) {
-		_fullPath = memNew(_fullPath, String());
+		_fullPath = memNew(_fullPath, JString());
 		_fullPath->concat(scheme());
 		_fullPath->concat(server());
 		if (m_path != NULL) {
@@ -401,16 +401,16 @@ const String& URI::fullPath() {
 	return *_fullPath;
 }
 
-const String& URI::absolutePath(const wchar_t* basePath) {
+const JString& URI::absolutePath(const wchar_t* basePath) {
 	if ((_absolutePath == NULL) || (basePath != NULL)) {
 		if (_absolutePath != NULL) {
 			memDelete(_absolutePath);
 			_absolutePath = NULL;
 		}
-		_absolutePath = memNew(_absolutePath, String());
+		_absolutePath = memNew(_absolutePath, JString());
 		
 		if ((m_scheme == NULL) || (m_host == NULL)) {
-			String path;
+			JString path;
 			if (m_path != NULL) {
 				if (m_path[0] == L'/') {
 					path = (m_path + 1);
@@ -447,9 +447,9 @@ const String& URI::absolutePath(const wchar_t* basePath) {
 	return *_absolutePath;
 }
 
-const String& URI::uri() {
+const JString& URI::uri() {
 	if (_uri == NULL) {
-		_uri = memNew(_uri, String());
+		_uri = memNew(_uri, JString());
 		_uri->concat(absolutePath());
 		_uri->concat(L"/");
 		if (m_file != NULL) {

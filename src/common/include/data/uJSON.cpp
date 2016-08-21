@@ -3827,7 +3827,7 @@ extern "C" {
 }
 #endif
 
-String JSON::encode(const String& value) throw(const char*) {
+JString JSON::encode(const JString& value) throw(const char*) {
 	// TODO: encode JSON string
 	return value;
 }

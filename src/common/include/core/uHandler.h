@@ -24,21 +24,21 @@ extern const wchar_t TypeHandler[];
 
 class Handler;
 
-class RefHandler : public RefObject {
+class RefHandler : public JRefObject {
 public:
-	typedef void (*Callback)(const Object& userData);
+	typedef void (*Callback)(const JObject& userData);
 	
 private:
-	class HandlerCallback : public RefObject {
+	class HandlerCallback : public JRefObject {
 	public:
 		volatile Callback callback;
 		volatile int32_t delay;
-		Object userData;
+		JObject userData;
 		
 		volatile int32_t shutdown = 0;
 		
 		inline HandlerCallback() throw(const char*) { throw eInvalidParams; }
-		HandlerCallback(Callback callback, int delay, const Object& userData);
+		HandlerCallback(Callback callback, int delay, const JObject& userData);
 	};
 
 private:
@@ -59,20 +59,20 @@ public:
 	static void onthread(Handler* handler, void* runnerid);
 	static void onrun(Handler* handler, void* runnerid);
 
-	void* postDelayed(Callback callback, int delay, const Object& userData);
-	void* post(Callback callback, const Object& userData);
+	void* postDelayed(Callback callback, int delay, const JObject& userData);
+	void* post(Callback callback, const JObject& userData);
 	void removeCallbacks(Callback callback);
 	void removeRunner(void* runnerid);
 	
 	void release();
 };
 
-class Handler : public Object {
+class Handler : public JObject {
 public:
-	RefClass(Handler, RefHandler);
+	JRefClass(Handler, RefHandler);
 	
-	inline void* postDelayed(RefHandler::Callback callback, int delay, const Object& userData = null) throw(const char*) { return THIS.ref().postDelayed(callback, delay, userData); }
-	inline void* post(RefHandler::Callback callback, const Object& userData = null) throw(const char*) { return THIS.ref().post(callback, userData); }
+	inline void* postDelayed(RefHandler::Callback callback, int delay, const JObject& userData = null) throw(const char*) { return THIS.ref().postDelayed(callback, delay, userData); }
+	inline void* post(RefHandler::Callback callback, const JObject& userData = null) throw(const char*) { return THIS.ref().post(callback, userData); }
 	inline void removeCallbacks(RefHandler::Callback callback) throw(const char*) { THIS.ref().removeCallbacks(callback); }
 	inline void removeRunner(void* runnerid) throw(const char*) { THIS.ref().removeRunner(runnerid); }
 	

@@ -208,7 +208,7 @@ GLuint RefGLShader::bind(GLint index, Vector<GLint>& uniforms) {
 
 GLShaders::GLShaders(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLShader>();
+	list = new HashMap<JString, GLShader>();
 }
 
 GLShaders::~GLShaders() {
@@ -216,15 +216,15 @@ GLShaders::~GLShaders() {
 	context = NULL;
 }
 
-const Iterator<String> GLShaders::keys() {
+const Iterator<JString> GLShaders::keys() {
 	return list.keySet().iterator();
 }
 
-GLShader& GLShaders::get(const String& key) throw(const char*) {
+GLShader& GLShaders::get(const JString& key) throw(const char*) {
 	return (GLShader&)list.get(key);
 }
 
-GLShader& GLShaders::createShader(const String& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
+GLShader& GLShaders::createShader(const JString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	try {
 		list.remove(key);
 		return list.put(key, new RefGLShader(context, vsh, fsh, program, textures));
@@ -249,7 +249,7 @@ GLuint GLShaders::createVertexShader(const char* vertexShaderSource) throw(const
 		if (logLen > 0) {
 			GLchar* log = memAlloc(GLchar, log, logLen + 1);
 			glGetShaderInfoLog(vertexShader, logLen, &logLen, log);
-			String::format(L"OpenGL Vertex Shader Log:\r\n%s", (char*)log).log();
+			JString::format(L"OpenGL Vertex Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
 		}
 #endif
@@ -276,7 +276,7 @@ GLuint GLShaders::createFragmentShader(const char* fragmentShaderSource) throw(c
 		if (logLen > 0) {
 			GLchar* log = memAlloc(GLchar, log, logLen + 1);
 			glGetShaderInfoLog(fragmentShader, logLen, &logLen, log);
-			String::format(L"OpenGL Fragment Shader Log:\r\n%s", (char*)log).log();
+			JString::format(L"OpenGL Fragment Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
 		}
 #endif
@@ -308,7 +308,7 @@ GLuint GLShaders::createProgram(GLuint vertexShader, GLuint fragmentShader) thro
 		if (logLen > 0) {
 			GLchar* log = memAlloc(GLchar, log, logLen + 1);
 			glGetProgramInfoLog(program, logLen, &logLen, log);
-			String::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
+			JString::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
 			memFree(log);
 		}
 #endif
@@ -397,7 +397,7 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 	}
 }
 
-GLShader& GLShaders::createVertexShader(const String& key, const char* vertexShaderSource) throw(const char*) {
+GLShader& GLShaders::createVertexShader(const JString& key, const char* vertexShaderSource) throw(const char*) {
 	struct CreateShaderDataThreadData thread;
 	thread.context = context;
 	thread.key = (wchar_t*)key;
@@ -406,7 +406,7 @@ GLShader& GLShaders::createVertexShader(const String& key, const char* vertexSha
 	return *(GLShader*)MainThreadSync(CreateVertexShaderCallback, &thread);
 }
 
-GLShader& GLShaders::createFragmentShader(const String& key, const char* fragmentShaderSource) throw(const char*) {
+GLShader& GLShaders::createFragmentShader(const JString& key, const char* fragmentShaderSource) throw(const char*) {
 	struct CreateShaderDataThreadData thread;
 	thread.context = context;
 	thread.key = (wchar_t*)key;
@@ -415,7 +415,7 @@ GLShader& GLShaders::createFragmentShader(const String& key, const char* fragmen
 	return *(GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
 }
 
-GLShader& GLShaders::createShader(const String& key, const String& vshReference, const String& fshReference) throw(const char*) {
+GLShader& GLShaders::createShader(const JString& key, const JString& vshReference, const JString& fshReference) throw(const char*) {
 	GLObjectData* vsh = NULL;
 	GLObjectData* fsh = NULL;
 	Vector<GLObjectData*> textures;

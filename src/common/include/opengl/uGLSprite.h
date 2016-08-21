@@ -23,7 +23,7 @@
 
 class GLRender;
 
-class RefGLSprite : public RefObject {
+class RefGLSprite : public JRefObject {
 public:
 	GLRender* context = NULL;
 	
@@ -32,15 +32,15 @@ public:
 	~RefGLSprite();
 };
 
-class GLSprite : public Object {
+class GLSprite : public JObject {
 public:
-	RefClass(GLSprite, RefGLSprite)
+	JRefClass(GLSprite, RefGLSprite)
 };
 
 class GLSprites {
 private:
 	GLRender* context;
-	HashMap<String, GLSprite> list;
+	HashMap<JString, GLSprite> list;
 	
 public:
 	GLSprites(GLRender* context) throw(const char*);

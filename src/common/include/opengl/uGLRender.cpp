@@ -279,7 +279,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 	}
 }
 
-void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key) {
+void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key) {
 	GLCamera cam = THIS.cameras->gui;
 	cam.update();
 	GLfloat* projection16fv = cam.ref().projection16fv.v;
@@ -309,7 +309,7 @@ void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const
 	cleanup(index);
 }
 
-void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime) {
+void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime) {
 	GLCamera cam = THIS.cameras->gui;
 	cam.update();
 	GLfloat* projection16fv = cam.ref().projection16fv.v;
@@ -350,7 +350,7 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 	glDisable(GL_BLEND);
 }
 
-void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime) {
+void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime) {
 	GLCamera cam = THIS.cameras->gui;
 	cam.update();
 	GLfloat* projection16fv = cam.ref().projection16fv.v;
@@ -395,27 +395,27 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 }
 
 bool GLRender::createShaders(JSONObject shaders) {
-	Iterator<String> keys;
+	Iterator<JString> keys;
  
 	keys = shaders.keys();
 	while (keys.hasNext()) {
-		String key = keys.next();
+		JString key = keys.next();
 		JSONArray data = shaders.getJSONArray(key);
-		String vsh = data.optString(0);
-		String fsh = data.optString(1);
+		JString vsh = data.optString(0);
+		JString fsh = data.optString(1);
 		THIS.shaders->createShader(key, vsh, fsh);
 	}
 
 	keys = THIS.shaders->keys();
 	while (keys.hasNext()) {
-		String key = keys.next();
+		JString key = keys.next();
 		if (!THIS.shaders->get(key).checkReady()) {
 			return false;
 		}
 	}
 	keys.reset();
 	while (keys.hasNext()) {
-		String key = keys.next();
+		JString key = keys.next();
 		GLShader shader = THIS.shaders->get(key);
 		GLuint program = shader.ref().program;
 		
@@ -498,9 +498,9 @@ bool GLRender::createShaders(JSONObject shaders) {
 }
 
 void GLRender::createModels(JSONObject models) {
-	Iterator<String> keys = models.keys();
+	Iterator<JString> keys = models.keys();
 	while (keys.hasNext()) {
-		String key = keys.next();
+		JString key = keys.next();
 		Stream stream = models.get(key);
 		THIS.models->createModel(key, (const char*)(stream.getBuffer()));
 	}

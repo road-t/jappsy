@@ -82,9 +82,9 @@ public:
 };
 
 template <typename Type>
-class Iterator : public Stack<Type> {
+class Iterator : public JStack<Type> {
 public:
-	RefTemplate(Iterator, Iterator, RefIterator)
+	JRefTemplate(Iterator, Iterator, RefIterator)
 
 	inline Iterator() {
 		THIS.initialize();

@@ -23,7 +23,7 @@
 
 class GLRender;
 
-class RefGLParticle : public RefObject {
+class RefGLParticle : public JRefObject {
 public:
 	GLRender* context = NULL;
 	
@@ -32,15 +32,15 @@ public:
 	~RefGLParticle();
 };
 
-class GLParticle : public Object {
+class GLParticle : public JObject {
 public:
-	RefClass(GLParticle, RefGLParticle)
+	JRefClass(GLParticle, RefGLParticle)
 };
 
 class GLParticles {
 private:
 	GLRender* context;
-	HashMap<String, GLParticle> list;
+	HashMap<JString, GLParticle> list;
 	
 public:
 	GLParticles(GLRender* context) throw(const char*);

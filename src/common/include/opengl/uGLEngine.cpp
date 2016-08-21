@@ -17,32 +17,32 @@
 #include "uGLEngine.h"
 #include <opengl/uGLRender.h>
 
-void onFrameCallback(GLRender* context, Object& userData) {
+void onFrameCallback(GLRender* context, JObject& userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onFrame(context);
 }
 
-void onTouchCallback(const wchar_t* event, Object& userData) {
+void onTouchCallback(const wchar_t* event, JObject& userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onTouch(event);
 }
 
-void onFileCallback(const String& url, const Object& object, Object userData) {
+void onFileCallback(const JString& url, const JObject& object, JObject userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onFile(url, object);
 }
 
-void onStatusCallback(const LoaderStatus& status, Object userData) {
+void onStatusCallback(const LoaderStatus& status, JObject userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onStatus(status);
 }
 
-void onReadyCallback(const JSONObject& result, Object userData) {
+void onReadyCallback(const JSONObject& result, JObject userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onReady(result);
 }
 
-void onErrorCallback(const String& error, Object userData) {
+void onErrorCallback(const JString& error, JObject userData) {
 	GLEngine* engine = (GLEngine*)(&userData);
 	engine->ref().onError(error);
 }
@@ -63,7 +63,7 @@ void RefGLEngine::release() {
 	}
 }
 
-void RefGLEngine::setBasePath(const String& basePath) {
+void RefGLEngine::setBasePath(const JString& basePath) {
 	context->loader.ref().basePath = basePath;
 }
 

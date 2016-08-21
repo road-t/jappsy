@@ -45,16 +45,16 @@ void OMEngine::onTouch(const wchar_t* event) {
     
 }
 
-void OMEngine::onFile(const String& url, const Object& object) {
-    String::format(L"FILE: %ls", (wchar_t*)url).log();
+void OMEngine::onFile(const JString& url, const JObject& object) {
+    JString::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 
 void OMEngine::onStatus(const LoaderStatus& status) {
-    String::format(L"STATUS: %d / %d", status.count, status.total).log();
+    JString::format(L"STATUS: %d / %d", status.count, status.total).log();
 }
 
 void OMEngine::onReady(const JSONObject& result) {
-    String::format(L"READY!").log();
+    JString::format(L"READY!").log();
     
     JSONObject fallback = new JSONObject();
     
@@ -76,11 +76,17 @@ void OMEngine::onReady(const JSONObject& result) {
     ready = true;
 }
 
-void OMEngine::onError(const String& error) {
-    String::format(L"ERROR: %ls", (wchar_t*)error).log();
+void OMEngine::onError(const JString& error) {
+    JString::format(L"ERROR: %ls", (wchar_t*)error).log();
 }
 
+#include <data/uStack.h>
+
 OMEngine::OMEngine() {
+    CStack<int> stack;
+    stack.push(1);
+    stack.pop();
+    
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;

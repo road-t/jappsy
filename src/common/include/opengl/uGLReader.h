@@ -38,17 +38,17 @@ public:
 	
 	constexpr static int VGZCHUNK = 0x475A2E56;	// GZip Vertex Shader Data Chunk
 	constexpr static int VSHCHUNK = 0x48532E56;	// Raw Vertex Shader Data Chunk
-	constexpr static int VRFCHUNK = 0x46522E56;	// String Reference Chunk to Vertex Shader
+	constexpr static int VRFCHUNK = 0x46522E56;	// JString Reference Chunk to Vertex Shader
 	constexpr static int FGZCHUNK = 0x475A2E46;	// GZip Font Data Chunk | GZip Frame Shader Data Chunk
 	constexpr static int FSHCHUNK = 0x48532E46;	// Raw Frame Shader Data Chunk
-	constexpr static int FRFCHUNK = 0x46522E46;	// String Reference Chunk to Frame Shader
+	constexpr static int FRFCHUNK = 0x46522E46;	// JString Reference Chunk to Frame Shader
 	constexpr static int IHDCHUNK = 0x44482E49;	// Jappsy Image Head Chunk
-	constexpr static int IRFCHUNK = 0x46522E49;	// String Reference Chunk to Image
+	constexpr static int IRFCHUNK = 0x46522E49;	// JString Reference Chunk to Image
 	
 	constexpr static int JENDCHUNK = 0x444E454A;	// Jappsy End Chunk
 	
-	static GLTexture& createTexture(GLRender* ctx, const String& key, Stream& stream) throw(const char*);
-	static GLShader& createShader(GLRender* ctx, const String& key, Stream& stream) throw(const char*);
+	static GLTexture& createTexture(GLRender* ctx, const JString& key, Stream& stream) throw(const char*);
+	static GLShader& createShader(GLRender* ctx, const JString& key, Stream& stream) throw(const char*);
 	
 private:
 	static void* CreateTextureHandleCallback(void* threadData);

@@ -34,25 +34,25 @@ private:
 	wchar_t* m_query;
 	wchar_t* m_anchor;
 	
-	String* _scheme;
-	String* _server;
-	String* _fullPath;
-	String* _absolutePath;
-	String* _uri;
+	JString* _scheme;
+	JString* _server;
+	JString* _fullPath;
+	JString* _absolutePath;
+	JString* _uri;
 	
-	const String& scheme();
-	const String& server();
+	const JString& scheme();
+	const JString& server();
 public:
 	static const wchar_t* basePath;
 	
 	URI(const wchar_t* uri);
 	~URI();
 	
-	const String& fullPath();
-	const String& absolutePath(const wchar_t* basePath);
-	inline const String& absolutePath() { return absolutePath(NULL); }
-	const String& uri();
-	inline const String ext() { return m_ext; }
+	const JString& fullPath();
+	const JString& absolutePath(const wchar_t* basePath);
+	inline const JString& absolutePath() { return absolutePath(NULL); }
+	const JString& uri();
+	inline const JString ext() { return m_ext; }
 };
 
 #endif //JAPPSY_UURI_H

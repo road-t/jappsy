@@ -129,7 +129,7 @@ public:
 				if (THIS.m_stack[i] != NULL) {
 					if (*(THIS.m_stack[i]) == value) foundIndex = i;
 				} else {
-					if (Object::isNull(value)) foundIndex = i;
+					if (JObject::isNull(value)) foundIndex = i;
 				}
 			}
 		}
@@ -178,7 +178,7 @@ public:
 		return list;
 	}
 	
-	// defined in Stack<Type>
+	// defined in JStack<Type>
 	// inline void clear();
 	// inline bool contains(Type* value) const;
 	// inline Type* get(int32_t index) const;
@@ -194,7 +194,7 @@ class SynchronizedList;
 template <typename Type>
 class List : public Collection<Type> {
 public:
-	RefTemplate(List, List, RefList)
+	JRefTemplate(List, List, RefList)
 	
 	inline List() {
 		THIS.initialize();
@@ -237,7 +237,7 @@ public:
 template <typename Type>
 class ArrayList : public List<Type> {
 public:
-	RefTemplate(ArrayList, List, RefList)
+	JRefTemplate(ArrayList, List, RefList)
 
 	inline ArrayList() {
 		THIS.initialize();
@@ -247,7 +247,7 @@ public:
 template <typename Type>
 class SynchronizedList : public List<Type> {
 public:
-	RefTemplate(SynchronizedList, List, RefList)
+	JRefTemplate(SynchronizedList, List, RefList)
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		synchronized(*this) {

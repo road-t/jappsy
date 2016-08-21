@@ -136,7 +136,7 @@ public:
 template <typename Type>
 class ListIterator : public Iterator<Type> {
 public:
-	RefTemplate(ListIterator, ListIterator, RefListIterator)
+	JRefTemplate(ListIterator, ListIterator, RefListIterator)
 	
 	inline ListIterator() {
 		THIS.initialize();

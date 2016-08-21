@@ -20,7 +20,7 @@
 #include <opengl/uGLRender.h>
 #include <math.h>
 
-RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback, Object& userData) {
+RefGLTouchScreen::RefGLTouchScreen(GLRender* context, onTouchCallback callback, JObject& userData) {
 	THIS.context = context;
 	onTouch = callback;
 	THIS.userData = userData;
@@ -77,7 +77,7 @@ void RefGLTouchScreen::clickEvent(const wchar_t* name, float x, float y, float w
 	// TODO: this.clickList.push({ x: x, y: y, w: w, h: h, name: name, callback: callback });
 }
 
-void onTouchTimeout(const Object& userData) {
+void onTouchTimeout(const JObject& userData) {
 	(*((GLTouchScreen*)&(userData))).ref().onTimeout();
 }
 

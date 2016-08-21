@@ -43,8 +43,8 @@ public:
 		return result;
 	}
 
-	virtual inline String toJSON() const {
-		String json = L"[";
+	virtual inline JString toJSON() const {
+		JString json = L"[";
 		Iterator<Type> it = THIS.iterator();
 		bool first = true;
 		while (it.hasNext()) {
@@ -62,7 +62,7 @@ class SynchronizedSet;
 template <typename Type>
 class Set : public List<Type> {
 public:
-	RefTemplate(Set, Set, RefSet)
+	JRefTemplate(Set, Set, RefSet)
 	
 	inline Set() {
 		THIS.initialize();
@@ -96,7 +96,7 @@ public:
 template <typename Type>
 class SynchronizedSet : public Set<Type> {
 public:
-	RefTemplate(SynchronizedSet, Set, RefSet)
+	JRefTemplate(SynchronizedSet, Set, RefSet)
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		bool result;

@@ -20,7 +20,7 @@
 #include <data/uObject.h>
 
 template <typename Type>
-class RefAtomic : public RefObject {
+class RefAtomic : public JRefObject {
 private:
 	Type* m_value;
 
@@ -71,7 +71,7 @@ public:
 };
 
 template <typename Type>
-class AtomicReference : public Object {
+class AtomicReference : public JObject {
 public:
 	virtual inline RefAtomic<Type>* newRef() const throw(const char*) {
 		RefAtomic<Type>* o = new RefAtomic<Type>();
@@ -112,16 +112,16 @@ public:
 	inline bool compareAndSet(const Type& compareValue, const Type& newValue) throw(const char*) {  return THIS.ref().compareAndSet(compareValue, newValue); }
 };
 
-class AtomicObject : public Object {
+class AtomicObject : public JObject {
 public:
-	virtual inline RefAtomic<Object>* newRef() const throw(const char*) {
-		RefAtomic<Object>* o = new RefAtomic<Object>();
+	virtual inline RefAtomic<JObject>* newRef() const throw(const char*) {
+		RefAtomic<JObject>* o = new RefAtomic<JObject>();
 		if (o == NULL) throw eOutOfMemory;
 		return o;
 	}
 	inline AtomicObject() { }
 	inline AtomicObject(const void* object) throw(const char*) { THIS.setRef(newRef()); }
-	inline AtomicObject(const Object& initialValue) throw(const char*) { THIS.setRef(newRef()); THIS.ref().set(initialValue); }
+	inline AtomicObject(const JObject& initialValue) throw(const char*) { THIS.setRef(newRef()); THIS.ref().set(initialValue); }
 	inline AtomicObject(const AtomicObject* object) throw(const char*) {
 		if (object != NULL) {
 			if (object->_object == NULL) {
@@ -141,14 +141,14 @@ public:
 		THIS.setRef((void*)(object._object));
 		return *this;
 	}
-	virtual inline RefAtomic<Object>& ref() const throw(const char*) {
-		return *((RefAtomic<Object>*)(THIS._object));
+	virtual inline RefAtomic<JObject>& ref() const throw(const char*) {
+		return *((RefAtomic<JObject>*)(THIS._object));
 	}
 	
-	inline Object get() throw(const char*) { return THIS.ref().get(); }
-	inline void set(const Object& newValue) throw(const char*) { THIS.ref().set(newValue); }
-	inline Object getAndSet(const Object& newValue) throw(const char*) { return THIS.ref().getAndSet(newValue); }
-	inline bool compareAndSet(const Object& compareValue, const Object& newValue) throw(const char*) { return THIS.ref().compareAndSet(compareValue, newValue); }
+	inline JObject get() throw(const char*) { return THIS.ref().get(); }
+	inline void set(const JObject& newValue) throw(const char*) { THIS.ref().set(newValue); }
+	inline JObject getAndSet(const JObject& newValue) throw(const char*) { return THIS.ref().getAndSet(newValue); }
+	inline bool compareAndSet(const JObject& compareValue, const JObject& newValue) throw(const char*) { return THIS.ref().compareAndSet(compareValue, newValue); }
 };
 
 typedef AtomicReference<bool>       AtomicBoolean;

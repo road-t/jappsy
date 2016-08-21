@@ -37,7 +37,7 @@
 
 class GLSpriteShader : public GLShader {
 public:
-	RefClassEx(GLSpriteShader, GLShader, RefGLShader);
+	JRefClassEx(GLSpriteShader, GLShader, RefGLShader);
 	
 	GLuint program = 0;
 	
@@ -53,7 +53,7 @@ public:
 
 class GLParticleShader : public GLShader {
 public:
-	RefClassEx(GLParticleShader, GLShader, RefGLShader);
+	JRefClassEx(GLParticleShader, GLShader, RefGLShader);
 	
 	GLuint program = 0;
 	
@@ -74,7 +74,7 @@ public:
 
 class GLModelShader : public GLShader {
 public:
-	RefClassEx(GLModelShader, GLShader, RefGLShader);
+	JRefClassEx(GLModelShader, GLShader, RefGLShader);
 
 	GLuint program = 0;
 	
@@ -97,7 +97,7 @@ public:
 
 class GLSquareFillShader : public GLShader {
 public:
-	RefClassEx(GLSquareFillShader, GLShader, RefGLShader);
+	JRefClassEx(GLSquareFillShader, GLShader, RefGLShader);
 	
 	GLuint program = 0;
 	
@@ -108,7 +108,7 @@ public:
 
 class GLSquareStrokeShader : public GLShader {
 public:
-	RefClassEx(GLSquareStrokeShader, GLShader, RefGLShader);
+	JRefClassEx(GLSquareStrokeShader, GLShader, RefGLShader);
 	
 	GLuint program = 0;
 	
@@ -121,7 +121,7 @@ public:
 
 class GLSquareTextureShader : public GLShader {
 public:
-	RefClassEx(GLSquareTextureShader, GLShader, RefGLShader);
+	JRefClassEx(GLSquareTextureShader, GLShader, RefGLShader);
 	
 	GLuint program = 0;
 	
@@ -194,9 +194,9 @@ public:
 	void fillDepth();
 	
 	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint);
-	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key);
-	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime);
-	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const String& key, GLfloat localTime, GLfloat worldTime);
+	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key);
+	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime);
+	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime);
 	
 	bool createShaders(JSONObject shaders);
 	void createModels(JSONObject models);

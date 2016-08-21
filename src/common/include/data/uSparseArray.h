@@ -23,7 +23,7 @@
 #define SPARSEARRAY_BLOCK_SIZE	16
 
 template <typename Type>
-class RefSparseArray : public RefObject {
+class RefSparseArray : public JRefObject {
 protected:
 	struct RefSparseArrayItem {
 		int32_t index;
@@ -282,8 +282,8 @@ public:
 		throw eOutOfRange;
 	}
 	
-	virtual inline String toJSON() const {
-		String json = L"{";
+	virtual inline JString toJSON() const {
+		JString json = L"{";
 		for (int i = 0; i < m_count; i++) {
 			if (i != 0) json += L",";
 			json += L"\"";
@@ -297,9 +297,9 @@ public:
 };
 
 template <typename Type>
-class SparseArray : public Object {
+class SparseArray : public JObject {
 public:
-	RefTemplate(SparseArray, SparseArray, RefSparseArray)
+	JRefTemplate(SparseArray, SparseArray, RefSparseArray)
 	
 	inline SparseArray() {
 		THIS.initialize();

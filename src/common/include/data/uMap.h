@@ -21,7 +21,7 @@
 #include <data/uJSON.h>
 
 template <typename K, typename V>
-class RefMap : public RefObject {
+class RefMap : public JRefObject {
 public:
 	Set<K> m_keys;
 	List<V> m_values;
@@ -105,8 +105,8 @@ public:
 		return *((Collection<V>*)&m_values);
 	}
 	
-	virtual inline String toJSON() const {
-		String json = L"{";
+	virtual inline JString toJSON() const {
+		JString json = L"{";
 		Iterator<K> itKey = THIS.keySet().iterator();
 		Iterator<V> itVal = THIS.values().iterator();
 		bool first = true;
@@ -125,9 +125,9 @@ template <typename K, typename V>
 class SynchronizedMap;
 
 template <typename K, typename V>
-class Map : public Object {
+class Map : public JObject {
 public:
-	RefTemplate2(Map, Map, RefMap)
+	JRefTemplate2(Map, Map, RefMap)
 	
 	inline Map() {
 		THIS.initialize();
@@ -162,7 +162,7 @@ public:
 template <typename K, typename V>
 class SynchronizedMap : public Map<K,V> {
 public:
-	RefTemplate2(SynchronizedMap, Map, RefMap)
+	JRefTemplate2(SynchronizedMap, Map, RefMap)
 	
 	virtual inline void clear() throw(const char*) {
 		synchronized(*this) {

@@ -26,7 +26,7 @@ class GLRender;
 
 class GLFrame {
 public:
-	typedef void (*onFrameCallback)(GLRender* context, Object& userData);
+	typedef void (*onFrameCallback)(GLRender* context, JObject& userData);
 	
 	GLEngine engine;
 	GLRender* context;
@@ -40,9 +40,9 @@ public:
 	uint32_t fps;
 	
 	onFrameCallback onFrame;
-	Object userData;
+	JObject userData;
 	
-	GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, Object& userData);
+	GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, JObject& userData);
 	~GLFrame();
 	
 	void loop();

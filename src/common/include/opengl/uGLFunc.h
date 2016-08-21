@@ -23,7 +23,7 @@
 
 class GLRender;
 
-class RefGLFunc : public RefObject {
+class RefGLFunc : public JRefObject {
 public:
 	GLRender* context = NULL;
 	
@@ -32,15 +32,15 @@ public:
 	~RefGLFunc();
 };
 
-class GLFunc : public Object {
+class GLFunc : public JObject {
 public:
-	RefClass(GLFunc, RefGLFunc)
+	JRefClass(GLFunc, RefGLFunc)
 };
 
 class GLFuncs {
 private:
 	GLRender* context;
-	HashMap<String, GLFunc> list;
+	HashMap<JString, GLFunc> list;
 	
 public:
 	GLFuncs(GLRender* context) throw(const char*);

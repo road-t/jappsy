@@ -25,14 +25,14 @@ class GLRender;
 
 enum GLObjectDataType { NONE, STRING, TEXTURES, SHADER };
 
-class GLObjectData : public RefObject {
+class GLObjectData : public JRefObject {
 private:
 	GLRender* m_context = NULL;
 	
 	GLObjectDataType m_type = GLObjectDataType::NONE;
 	bool m_reference = false;
 	
-	String m_target;
+	JString m_target;
 	Vector<GLuint> m_handles;
 	
 public:
@@ -40,12 +40,12 @@ public:
 	inline GLObjectData(GLRender* context) { THIS.m_context = context; }
 	~GLObjectData();
 	
-	GLObjectData& setTarget(const String& target);
+	GLObjectData& setTarget(const JString& target);
 	GLObjectData& setTextures(const Vector<GLuint>& handles, bool reference);
 	GLObjectData& setShader(const GLuint handle, bool reference);
 	
 	inline bool isReference() { return m_type == GLObjectDataType::STRING; }
-	inline const String& getTarget() { return m_target; }
+	inline const JString& getTarget() { return m_target; }
 	inline GLuint getShader() { return m_handles[0]; }
 	inline Vector<GLuint>& getTextures() { return m_handles; }
 };

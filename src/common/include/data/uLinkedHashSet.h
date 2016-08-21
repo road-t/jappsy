@@ -22,7 +22,7 @@
 template <typename Type>
 class RefLinkedHashSet : public RefSet<Type> {
 protected:
-	class LinkedHashSetItem : public RefObject {
+	class LinkedHashSetItem : public JRefObject {
 	public:
 		RefSet<LinkedHashSetItem>* m_parent = NULL;
 		
@@ -67,7 +67,7 @@ protected:
 	uint32_t m_count = 0;
 	
 	inline RefSet<LinkedHashSetItem>* createSet(const Type& object) throw(const char*) {
-		uint32_t hash = Object::hashCode(object);
+		uint32_t hash = JObject::hashCode(object);
 		if (m_set == NULL) {
 			m_set = memAlloc(Set<LinkedHashSetItem> **, m_set, 256 * sizeof(Set<LinkedHashSetItem> **));
 			if (m_set == NULL) throw eOutOfMemory;
@@ -104,7 +104,7 @@ protected:
 	
 	inline RefSet<LinkedHashSetItem>* findSet(const Type& object) const {
 		if (m_set != NULL) {
-			uint32_t hash = Object::hashCode(object);
+			uint32_t hash = JObject::hashCode(object);
 			Set<LinkedHashSetItem> **s1 = m_set[hash & 0xFF];
 			if (s1 != NULL) {
 				hash >>= 8;
@@ -325,7 +325,7 @@ public:
 template <typename Type>
 class LinkedHashSet : public Set<Type> {
 public:
-	RefTemplate(LinkedHashSet, LinkedHashSet, RefLinkedHashSet)
+	JRefTemplate(LinkedHashSet, LinkedHashSet, RefLinkedHashSet)
 	
 	inline LinkedHashSet() {
 		THIS.initialize();

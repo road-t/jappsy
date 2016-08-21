@@ -23,8 +23,9 @@
 #include <opengl/uGLAlignX.h>
 #include <opengl/uGLAlignY.h>
 #include <data/uVector.h>
+#include <data/uObject.h>
 
-class GLPaint {
+class GLPaint : public JRefObject {
 public:
 	GLfloat m_scale;
 	bool m_antialias;

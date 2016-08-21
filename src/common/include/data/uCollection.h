@@ -99,7 +99,7 @@ public:
 		return (const Type**)(THIS.m_stack);
 	}
 	
-	// defined in Stack<Type>
+	// defined in JStack<Type>
 	// inline void clear();
 	// inline bool contains(Type* value) const;
 	// inline bool isEmpty() const;
@@ -112,7 +112,7 @@ class SynchronizedCollection;
 template <typename Type>
 class Collection : public ListIterator<Type> {
 public:
-	RefTemplate(Collection, Collection, RefCollection)
+	JRefTemplate(Collection, Collection, RefCollection)
 	
 	inline Collection() {
 		THIS.initialize();
@@ -146,7 +146,7 @@ public:
 template <typename Type>
 class SynchronizedCollection : public Collection<Type> {
 public:
-	RefTemplate(SynchronizedCollection, Collection, RefCollection)
+	JRefTemplate(SynchronizedCollection, Collection, RefCollection)
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		synchronized(*this) {

@@ -20,7 +20,7 @@
 #include <data/uJSON.h>
 
 const wchar_t TypeNull[] = L"Undefined::";
-const wchar_t TypeObject[] = L"Object::";
+const wchar_t TypeObject[] = L"JObject::";
 const wchar_t TypeNumber[] = L"Number::";
 const wchar_t TypeBoolean[] = L"Number::Boolean::";
 const wchar_t TypeByte[] = L"Number::Byte::";
@@ -29,11 +29,11 @@ const wchar_t TypeInt[] = L"Number::Int::";
 const wchar_t TypeLong[] = L"Number::Long::";
 const wchar_t TypeFloat[] = L"Number::Float::";
 const wchar_t TypeDouble[] = L"Number::Double::";
-const wchar_t TypeString[] = L"String::";
+const wchar_t TypeString[] = L"JString::";
 const wchar_t TypeJSONObject[] = L"JSONObject::";
 const wchar_t TypeJSONArray[] = L"JSONArray::";
 const wchar_t TypeAtomicObject[] = L"Atomic::";
-const wchar_t TypeStack[] = L"Stack::";
+const wchar_t TypeStack[] = L"JStack::";
 const wchar_t TypeIterator[] = L"Iterator::";
 const wchar_t TypeListIterator[] = L"ListIterator::";
 const wchar_t TypeCollection[] = L"Collection::";
@@ -46,14 +46,14 @@ const wchar_t TypeHashMap[] = L"HashMap::";
 const wchar_t TypeLinkedHashMap[] = L"LinkedHashMap::";
 const wchar_t TypeSparseArray[] = L"SparseArray::";
 
-void RefObject::_threadLock() const {
+void CObject::_threadLock() const {
 	void* thread = CurrentThreadId();
-
+	
 	do {
 		_spinLock();
 		if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
 			(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
-			AtomicIncrement(&(((RefObject*)this)->_lockCount));
+			AtomicIncrement(&(((CObject*)this)->_lockCount));
 			_spinUnlock();
 			break;
 		}
@@ -62,13 +62,13 @@ void RefObject::_threadLock() const {
 	} while (true);
 }
 
-bool RefObject::_threadLockTry() const {
+bool CObject::_threadLockTry() const {
 	void* thread = CurrentThreadId();
 	
 	_spinLock();
 	if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
 		(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
-		AtomicIncrement(&(((RefObject*)this)->_lockCount));
+		AtomicIncrement(&(((CObject*)this)->_lockCount));
 		_spinUnlock();
 		return true;
 	}
@@ -76,7 +76,7 @@ bool RefObject::_threadLockTry() const {
 	return false;
 }
 
-void RefObject::_threadUnlock() const {
+void CObject::_threadUnlock() const {
 	void* thread = CurrentThreadId();
 	
 	_spinLock();
@@ -86,27 +86,67 @@ void RefObject::_threadUnlock() const {
 	_spinUnlock();
 }
 
-bool RefObject::equals(const Object& object) const {
+void JRefObject::_threadLock() const {
+	void* thread = CurrentThreadId();
+
+	do {
+		_spinLock();
+		if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
+			(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
+			AtomicIncrement(&(((JRefObject*)this)->_lockCount));
+			_spinUnlock();
+			break;
+		}
+		_spinUnlock();
+		sleep(0);
+	} while (true);
+}
+
+bool JRefObject::_threadLockTry() const {
+	void* thread = CurrentThreadId();
+	
+	_spinLock();
+	if ((AtomicCompareExchangePtr((void**)&_thread, thread, NULL) == NULL) ||
+		(AtomicCompareExchangePtr((void**)&_thread, thread, thread) == thread)) {
+		AtomicIncrement(&(((JRefObject*)this)->_lockCount));
+		_spinUnlock();
+		return true;
+	}
+	_spinUnlock();
+	return false;
+}
+
+void JRefObject::_threadUnlock() const {
+	void* thread = CurrentThreadId();
+	
+	_spinLock();
+	if (AtomicDecrement((volatile int32_t*)&_lockCount) == 1) {
+		AtomicCompareExchangePtr((void**)&_thread, NULL, thread);
+	}
+	_spinUnlock();
+}
+
+bool JRefObject::equals(const JObject& object) const {
 	return ((void*)this == (void*)(object._object));
 }
 
-bool RefObject::equals(const void* object) const {
+bool JRefObject::equals(const void* object) const {
 	return (this == object);
 }
 
-String RefObject::toString() const {
-	return String::format(L"0x%08X", (int)(uint64_t)this);
+JString JRefObject::toString() const {
+	return JString::format(L"0x%08X", (int)(uint64_t)this);
 }
 
-String RefObject::toJSON() const {
+JString JRefObject::toJSON() const {
 	return L"{}";
 }
 
-String RefObject::getClass() const {
+JString JRefObject::getClass() const {
 	return TYPE;
 }
 
-bool RefObject::wait(int milis, int nanos) const {
+bool JRefObject::wait(int milis, int nanos) const {
 	int usec = 0;
 	int64_t start = 0;
 	
@@ -128,7 +168,7 @@ bool RefObject::wait(int milis, int nanos) const {
 	} while (true);
 }
 
-bool RefObject::wait(int milis) const {
+bool JRefObject::wait(int milis) const {
 	int64_t start = 0;
 	
 	do {
@@ -148,21 +188,21 @@ bool RefObject::wait(int milis) const {
 	} while (true);
 }
 
-String Object::getClass() const {
+JString JObject::getClass() const {
 	if (_object == NULL)
 		return TypeNull;
 
 	return THIS.ref().getClass();
 }
 
-String Object::toString() const {
+JString JObject::toString() const {
 	if (_object == NULL)
 		return NULL;
 	
 	return THIS.ref().toString();
 }
 
-String Object::toJSON() const {
+JString JObject::toJSON() const {
 	if (_object == NULL)
 		return L"null";
 	
@@ -170,16 +210,16 @@ String Object::toJSON() const {
 }
 
 
-Object::Object(const void* object) throw(const char*) {
+JObject::JObject(const void* object) throw(const char*) {
 	initialize();
-	Object* o = (Object*)object;
-	RefObject* newObject;
+	JObject* o = (JObject*)object;
+	JRefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (RefObject*)(o->_object);
+			newObject = (JRefObject*)(o->_object);
 		} else {
 			try {
-				newObject = new RefObject();
+				newObject = new JRefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
@@ -202,9 +242,9 @@ Object::Object(const void* object) throw(const char*) {
 	}
 }
 
-void Object::setRef(const void* object) {
-	RefObject* newObject = (RefObject*)object;
-	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+void JObject::setRef(const void* object) {
+	JRefObject* newObject = (JRefObject*)object;
+	JRefObject* prevObject = (JRefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -217,15 +257,15 @@ void Object::setRef(const void* object) {
 	}
 }
 
-Object& Object::operator =(const void* object) throw(const char*) {
-	Object* o = (Object*)object;
-	RefObject* newObject;
+JObject& JObject::operator =(const void* object) throw(const char*) {
+	JObject* o = (JObject*)object;
+	JRefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (RefObject*)(o->_object);
+			newObject = (JRefObject*)(o->_object);
 		} else {
 			try {
-				newObject = new RefObject();
+				newObject = new JRefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
@@ -238,7 +278,7 @@ Object& Object::operator =(const void* object) throw(const char*) {
 	} else {
 		newObject = NULL;
 	}
-	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	JRefObject* prevObject = (JRefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -255,16 +295,16 @@ Object& Object::operator =(const void* object) throw(const char*) {
 	return *this;
 }
 
-Object::Object(const Object* object) throw(const char*) {
+JObject::JObject(const JObject* object) throw(const char*) {
 	initialize();
-	Object* o = (Object*)object;
-	RefObject* newObject;
+	JObject* o = (JObject*)object;
+	JRefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (RefObject*)(o->_object);
+			newObject = (JRefObject*)(o->_object);
 		} else {
 			try {
-				newObject = new RefObject();
+				newObject = new JRefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
@@ -287,32 +327,32 @@ Object::Object(const Object* object) throw(const char*) {
 	}
 }
 
-Object::Object(const RefObject* object) throw(const char*) {
+JObject::JObject(const JRefObject* object) throw(const char*) {
 	initialize();
-	RefObject* newObject = (RefObject*)object;
+	JRefObject* newObject = (JRefObject*)object;
 	AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (newObject != NULL)
 		AtomicIncrement(&(newObject->_retainCount));
 }
 
-Object::Object(const Object& object) {
+JObject::JObject(const JObject& object) {
 	initialize();
-	RefObject* newObject = (RefObject*)(object._object);
+	JRefObject* newObject = (JRefObject*)(object._object);
 	AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (newObject != NULL) {
 		AtomicIncrement(&(newObject->_retainCount));
 	}
 }
 
-Object& Object::operator =(const Object* object) throw(const char*) {
-	Object* o = (Object*)object;
-	RefObject* newObject;
+JObject& JObject::operator =(const JObject* object) throw(const char*) {
+	JObject* o = (JObject*)object;
+	JRefObject* newObject;
 	if (o != NULL) {
 		if (o->_object != NULL) {
-			newObject = (RefObject*)(o->_object);
+			newObject = (JRefObject*)(o->_object);
 		} else {
 			try {
-				newObject = new RefObject();
+				newObject = new JRefObject();
 				if (newObject == NULL)
 					throw eOutOfMemory;
 			} catch (...) {
@@ -325,7 +365,7 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 	} else {
 		newObject = NULL;
 	}
-	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+	JRefObject* prevObject = (JRefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -343,14 +383,14 @@ Object& Object::operator =(const Object* object) throw(const char*) {
 	return *this;
 }
 
-Object& Object::operator =(const RefObject* object) throw(const char*) {
+JObject& JObject::operator =(const JRefObject* object) throw(const char*) {
 	THIS.setRef(object);
 	return *this;
 }
 
-Object& Object::operator =(const Object& object) {
-	RefObject* newObject = (RefObject*)(object._object);
-	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
+JObject& JObject::operator =(const JObject& object) {
+	JRefObject* newObject = (JRefObject*)(object._object);
+	JRefObject* prevObject = (JRefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)newObject);
 	if (prevObject != newObject) {
 		if (prevObject != NULL) {
 			if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
@@ -365,8 +405,8 @@ Object& Object::operator =(const Object& object) {
 	return *this;
 }
 
-Object::~Object() {
-	RefObject* prevObject = (RefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
+JObject::~JObject() {
+	JRefObject* prevObject = (JRefObject*)AtomicExchangePtr((void* volatile*)&_object, (void*)NULL);
 	if (prevObject != NULL) {
 		if (AtomicDecrement(&(prevObject->_retainCount)) == 1) {
 			prevObject->finalize();
@@ -375,15 +415,15 @@ Object::~Object() {
 	}
 }
 
-bool Object::isNull(const RefString& string) {
+bool JObject::isNull(const CString& string) {
 	return (wchar_t*)string == NULL;
 }
 
-bool Object::isNull(const RefString* string) {
+bool JObject::isNull(const CString* string) {
 	return (string == NULL) ? true : ((wchar_t*)(*string) == NULL);
 }
 
-uint32_t Object::hashCode(const wchar_t* string) throw(const char*) {
+uint32_t JObject::hashCode(const wchar_t* string) throw(const char*) {
 	if (string == NULL)
 		return 0;
 	
@@ -392,7 +432,7 @@ uint32_t Object::hashCode(const wchar_t* string) throw(const char*) {
 	return mmcrc32(0xFFFFFFFF, (void*)string, size);
 }
 
-uint32_t Object::hashCode(const char* string) throw(const char*) {
+uint32_t JObject::hashCode(const char* string) throw(const char*) {
 	if (string == NULL)
 		return 0;
 	
@@ -400,8 +440,8 @@ uint32_t Object::hashCode(const char* string) throw(const char*) {
 	return mmcrc32(0xFFFFFFFF, (void*)string, size);
 }
 	
-void Object::log() const {
-	String json = JSON::stringify(*this);
+void JObject::log() const {
+	JString json = JSON::stringify(*this);
 	wchar_t* wstr = (wchar_t*)json;
 	if (wstr == NULL)
 		return;

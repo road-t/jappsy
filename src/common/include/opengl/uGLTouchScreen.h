@@ -27,7 +27,7 @@ class GLRender;
 
 class GLTouchEvent {
 public:
-	typedef bool (*Callback)(const wchar_t* event, Object& userData);
+	typedef bool (*Callback)(const wchar_t* event, JObject& userData);
 
 	float x;
 	float y;
@@ -37,16 +37,16 @@ public:
 	Callback onEvent;
 };
 
-class RefGLTouchScreen : public RefObject {
+class RefGLTouchScreen : public JRefObject {
 public:
-	typedef void (*onTouchCallback)(const wchar_t* event, Object& userData);
+	typedef void (*onTouchCallback)(const wchar_t* event, JObject& userData);
 
 private:
 	Handler handler = new Handler();
 	
 	GLRender* context;
 	onTouchCallback onTouch;
-	Object userData;
+	JObject userData;
 
 	GLfloat recordDistance;
 	GLfloat minimalDistance;
@@ -84,7 +84,7 @@ private:
 	void record(float x, float y);
 public:
 	RefGLTouchScreen() throw(const char*) { throw eInvalidParams; }
-	RefGLTouchScreen(GLRender* context, onTouchCallback callback, Object& userData);
+	RefGLTouchScreen(GLRender* context, onTouchCallback callback, JObject& userData);
 	~RefGLTouchScreen();
 	
 	void release();
@@ -105,11 +105,11 @@ public:
 	void onMouseMove(MotionEvent* event);
 };
 
-class GLTouchScreen : public Object {
+class GLTouchScreen : public JObject {
 public:
-	RefClass(GLTouchScreen, RefGLTouchScreen);
+	JRefClass(GLTouchScreen, RefGLTouchScreen);
 	
-	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback, Object& userData) {
+	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback, JObject& userData) {
 		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback, userData);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);

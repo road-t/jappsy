@@ -19,11 +19,12 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
+#include <data/uString.h>
 #include <data/uHashMap.h>
 
 class GLRender;
 
-class RefGLObject : public RefObject {
+class RefGLObject : public JRefObject {
 public:
 	GLRender* context = NULL;
 	
@@ -32,22 +33,22 @@ public:
 	~RefGLObject();
 };
 
-class GLObject : public Object {
+class GLObject : public JObject {
 public:
-	RefClass(GLObject, RefGLObject)
+	JRefClass(GLObject, RefGLObject)
 };
 
 class GLObjects {
 private:
 	GLRender* context;
-	HashMap<String, GLObject> list;
+	HashMap<JString, GLObject> list;
 	
 public:
 	GLObjects(GLRender* context) throw(const char*);
 	~GLObjects();
 	
-	GLObject& get(const wchar_t* key) throw(const char*);
-	GLObject& create(const wchar_t* key) throw(const char*);
+	GLObject& get(const JString& key) throw(const char*);
+	GLObject& create(const JString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLOBJECT_H

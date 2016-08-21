@@ -24,7 +24,7 @@
 
 class GLRender;
 
-class RefGLCamera : public RefObject {
+class RefGLCamera : public JRefObject {
 public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
@@ -64,9 +64,9 @@ public:
 	bool update();
 };
 
-class GLCamera : public Object {
+class GLCamera : public JObject {
 public:
-	RefClass(GLCamera, RefGLCamera);
+	JRefClass(GLCamera, RefGLCamera);
 	
 	inline RefGLCamera& invalidate() throw(const char*) { return THIS.ref().invalidate(); }
 	inline RefGLCamera& size(GLfloat width, GLfloat height) throw(const char*) { return THIS.ref().size(width, height); }
@@ -84,7 +84,7 @@ public:
 class GLCameras {
 private:
 	GLRender* context;
-	HashMap<String, GLCamera> list;
+	HashMap<JString, GLCamera> list;
 	
 public:
 	GLCamera gui;

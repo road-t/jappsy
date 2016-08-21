@@ -74,7 +74,7 @@ static Vec4 defaultTextureColor = { 0, 0, 0, 0 };
 
 GLTextures::GLTextures(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLTexture>();
+	list = new HashMap<JString, GLTexture>();
 	defaultTexture = createSolidTexture(L"null", defaultTextureColor);
 }
 
@@ -84,11 +84,11 @@ GLTextures::~GLTextures() {
 	context = NULL;
 }
 
-GLTexture& GLTextures::get(const String& key) throw(const char*) {
+GLTexture& GLTextures::get(const JString& key) throw(const char*) {
 	return (GLTexture&)list.get(key);
 }
 
-GLTexture& GLTextures::createSolidTexture(const String& key, const Vec4& rgba4fv) throw(const char*) {
+GLTexture& GLTextures::createSolidTexture(const JString& key, const Vec4& rgba4fv) throw(const char*) {
 	GLuint handle;
 	glGenTextures(1, &handle);
 	CheckGLError();
@@ -114,6 +114,7 @@ GLTexture& GLTextures::createSolidTexture(const String& key, const Vec4& rgba4fv
 		GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, 1, 1)));
 		if (key.equals(L"null")) {
 			defaultTexture = *texture;
+			defaultTextureHandle = handles[0];
 		}
 		return *texture;
 	} catch (...) {
@@ -122,11 +123,12 @@ GLTexture& GLTextures::createSolidTexture(const String& key, const Vec4& rgba4fv
 	}
 }
 
-GLTexture& GLTextures::createTexture(const String& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+GLTexture& GLTextures::createTexture(const JString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	list.remove(key);
 	GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, width, height)));
 	if (key.equals(L"null")) {
 		defaultTexture = *texture;
+		defaultTextureHandle = handles[0];
 	}
 	return *texture;
 }

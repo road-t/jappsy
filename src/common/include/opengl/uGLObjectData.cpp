@@ -37,7 +37,7 @@ GLObjectData::~GLObjectData() {
 	m_type = GLObjectDataType::NONE;
 }
 
-GLObjectData& GLObjectData::setTarget(const String& target) {
+GLObjectData& GLObjectData::setTarget(const JString& target) {
 	m_target = target;
 	m_handles.clear();
 	m_reference = false;

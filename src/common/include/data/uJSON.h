@@ -211,58 +211,58 @@ extern "C" {
 
 class JSON {
 private:
-	inline static String key(const String& value) throw(const char*) {
+	inline static JString key(const JString& value) throw(const char*) {
 		if ((value.length > 0) && (value[0] == L'\"'))
 			return value;
 
-		return String(L"\"").concat(value).concat(L"\"");
+		return JString(L"\"").concat(value).concat(L"\"");
 	}
 	
 	
 public:
-	static String encode(const String& value) throw(const char*);
+	static JString encode(const JString& value) throw(const char*);
 	
-	inline static String keyify(const RefObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
-	inline static String keyify(const Object& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
-	inline static String keyify(const RefObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
-	inline static String keyify(const Object* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
-	inline static String keyify(const void* ptr) throw(const char*) { return JSON::key(JSON::encode(L"null")); }
-	inline static String keyify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static String keyify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static String keyify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static String keyify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static String keyify(const bool value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const int8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const uint8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const int16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const uint16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const int32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const uint32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const int64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static String keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const JRefObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
+	inline static JString keyify(const JObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
+	inline static JString keyify(const JRefObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
+	inline static JString keyify(const JObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
+	inline static JString keyify(const void* ptr) throw(const char*) { return JSON::key(JSON::encode(L"null")); }
+	inline static JString keyify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static JString keyify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static JString keyify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static JString keyify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static JString keyify(const bool value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const int8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const uint8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const int16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const uint16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const int32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const uint32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const int64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static JString keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
 	
-	inline static String stringify(const RefObject& object) throw(const char*) { return object.toJSON(); }
-	inline static String stringify(const Object& object) throw(const char*) { return object.toJSON(); }
-	inline static String stringify(const RefObject* object) throw(const char*) { return object->toJSON(); }
-	inline static String stringify(const Object* object) throw(const char*) { return object->toJSON(); }
-	inline static String stringify(const void* ptr) throw(const char*) { return L"null"; }
-	inline static String stringify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static String stringify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static String stringify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static String stringify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static String stringify(const bool value) throw(const char*) { return value; }
-	inline static String stringify(const int8_t value) throw(const char*) { return value; }
-	inline static String stringify(const uint8_t value) throw(const char*) { return value; }
-	inline static String stringify(const int16_t value) throw(const char*) { return value; }
-	inline static String stringify(const uint16_t value) throw(const char*) { return value; }
-	inline static String stringify(const int32_t value) throw(const char*) { return value; }
-	inline static String stringify(const uint32_t value) throw(const char*) { return value; }
-	inline static String stringify(const int64_t value) throw(const char*) { return value; }
-	inline static String stringify(const uint64_t value) throw(const char*) { return value; }
-	inline static String stringify(const float value) throw(const char*) { return value; }
-	inline static String stringify(const double value) throw(const char*) { return value; }
+	inline static JString stringify(const JRefObject& object) throw(const char*) { return object.toJSON(); }
+	inline static JString stringify(const JObject& object) throw(const char*) { return object.toJSON(); }
+	inline static JString stringify(const JRefObject* object) throw(const char*) { return object->toJSON(); }
+	inline static JString stringify(const JObject* object) throw(const char*) { return object->toJSON(); }
+	inline static JString stringify(const void* ptr) throw(const char*) { return L"null"; }
+	inline static JString stringify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static JString stringify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static JString stringify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static JString stringify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static JString stringify(const bool value) throw(const char*) { return value; }
+	inline static JString stringify(const int8_t value) throw(const char*) { return value; }
+	inline static JString stringify(const uint8_t value) throw(const char*) { return value; }
+	inline static JString stringify(const int16_t value) throw(const char*) { return value; }
+	inline static JString stringify(const uint16_t value) throw(const char*) { return value; }
+	inline static JString stringify(const int32_t value) throw(const char*) { return value; }
+	inline static JString stringify(const uint32_t value) throw(const char*) { return value; }
+	inline static JString stringify(const int64_t value) throw(const char*) { return value; }
+	inline static JString stringify(const uint64_t value) throw(const char*) { return value; }
+	inline static JString stringify(const float value) throw(const char*) { return value; }
+	inline static JString stringify(const double value) throw(const char*) { return value; }
 };
 
 #endif

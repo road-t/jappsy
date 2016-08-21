@@ -23,10 +23,10 @@
 
 #include <opengl/uGLRender.h>
 
-void defaultOnFrame(GLRender* context, Object& userData) {
+void defaultOnFrame(GLRender* context, JObject& userData) {
 }
 
-GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, Object& userData) {
+GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, JObject& userData) {
 	THIS.engine = engine;
 	THIS.context = context;
 	

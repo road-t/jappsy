@@ -79,7 +79,7 @@ void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLTexture& GLReader::createTexture(GLRender* ctx, const String& key, Stream& stream) throw(const char*) {
+GLTexture& GLReader::createTexture(GLRender* ctx, const JString& key, Stream& stream) throw(const char*) {
 	stream.setPosition(0);
 	uint32_t head = (uint32_t)stream.readInt();
 	if ((head == GLReader::SDFFHEAD) || (head == GLReader::SDFIHEAD) || (head == GLReader::JIMGHEAD)) {
@@ -269,7 +269,7 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLShader& GLReader::createShader(GLRender* ctx, const String& key, Stream& stream) throw(const char*) {
+GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stream) throw(const char*) {
 	stream.setPosition(0);
 	uint32_t head = (uint32_t)stream.readInt();
 	if (head == GLReader::JSHDHEAD) {

@@ -17,9 +17,13 @@
 #include "uGLScene.h"
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
+#include <opengl/uGLLight.h>
+#include <opengl/uGLObject.h>
 
 RefGLScene::RefGLScene(GLRender* context) {
 	THIS.context = context;
+
+	//lights = new GLLights(this);
 }
 
 RefGLScene::~RefGLScene() {
@@ -28,7 +32,7 @@ RefGLScene::~RefGLScene() {
 
 GLScenes::GLScenes(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLScene>();
+	list = new HashMap<JString, GLScene>();
 }
 
 GLScenes::~GLScenes() {
@@ -36,16 +40,14 @@ GLScenes::~GLScenes() {
 	context = NULL;
 }
 
-GLScene& GLScenes::get(const wchar_t* key) throw(const char*) {
+GLScene& GLScenes::get(const JString& key) throw(const char*) {
 	return (GLScene&)list.get(key);
 }
 
-GLScene& GLScenes::create(const wchar_t* key) throw(const char*) {
+GLScene& GLScenes::create(const JString& key) throw(const char*) {
 	try {
 		list.remove(key);
 		GLScene* shader = &(list.put(key, new RefGLScene(context)));
-		if (wcscmp(key, L"null") == 0) {
-		}
 		return *shader;
 	} catch (...) {
 		throw;

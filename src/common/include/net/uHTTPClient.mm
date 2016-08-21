@@ -18,8 +18,8 @@
 
 class HTTPRequest {
 public:
-	String url = null;
-	Object userData = null;
+	JString url = null;
+	JObject userData = null;
 	bool threaded = false;
 	int retry = 0;
 	int timeout = 30;
@@ -118,7 +118,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 				volatile void* dataResult = NULL;
 				volatile int64_t dataSize = 0;
 				volatile OSSpinLock ready = 0;
-				String dataError = 0;
+				JString dataError = 0;
 				OSSpinLockLock((OSSpinLock*)&(ready));
 				
 				do {
@@ -172,7 +172,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 	OSSpinLock* ready = (OSSpinLock*)([valReady pointerValue]);
 	
 	NSValue* valError = [threadData objectAtIndex:4];
-	String* dataError = (String*)([valError pointerValue]);
+	JString* dataError = (JString*)([valError pointerValue]);
 	
 	@autoreleasepool {
 		__sync_synchronize();
@@ -256,7 +256,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 
 #endif
 
-void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
+void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -278,7 +278,7 @@ void HTTPClient::Request(const String& url, bool threaded, int retry, int timeou
 #endif
 }
 
-void HTTPClient::Request(const String& url, bool threaded, int retry, int timeout, const Object& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
+void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeout, const JObject& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;

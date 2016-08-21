@@ -28,7 +28,7 @@ RefGLObject::~RefGLObject() {
 
 GLObjects::GLObjects(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLObject>();
+	list = new HashMap<JString, GLObject>();
 }
 
 GLObjects::~GLObjects() {
@@ -36,16 +36,14 @@ GLObjects::~GLObjects() {
 	context = NULL;
 }
 
-GLObject& GLObjects::get(const wchar_t* key) throw(const char*) {
+GLObject& GLObjects::get(const JString& key) throw(const char*) {
 	return (GLObject&)list.get(key);
 }
 
-GLObject& GLObjects::create(const wchar_t* key) throw(const char*) {
+GLObject& GLObjects::create(const JString& key) throw(const char*) {
 	try {
 		list.remove(key);
 		GLObject* shader = &(list.put(key, new RefGLObject(context)));
-		if (wcscmp(key, L"null") == 0) {
-		}
 		return *shader;
 	} catch (...) {
 		throw;

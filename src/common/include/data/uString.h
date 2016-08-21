@@ -257,7 +257,7 @@ extern "C" {
 	#include <cipher/uCrc.h>
 	#include <data/uObject.h>
 
-	class RefString;
+	class CString;
 #if !defined(__OBJC__)
 	class NSString;
 	class NSNumber;
@@ -272,24 +272,24 @@ extern "C" {
 		#endif
 	#endif
 
-	class String;
+	class JString;
 	
-	class RefString : public RefObject {
+	class CString : public JRefObject {
 	private:
-		friend uint32_t getStringLength(const String& self);
-		friend uint32_t setStringLength(String& self, uint32_t length) throw(const char*);
-		friend uint32_t getRefStringLength(const RefString& self);
-		friend uint32_t setRefStringLength(RefString& self, uint32_t length) throw(const char*);
-		friend String getSubString(String& self, int start, int end);
+		friend uint32_t getStringLength(const JString& self);
+		friend uint32_t setStringLength(JString& self, uint32_t length) throw(const char*);
+		friend uint32_t getRefStringLength(const CString& self);
+		friend uint32_t setRefStringLength(CString& self, uint32_t length) throw(const char*);
+		friend JString getSubString(JString& self, int start, int end);
 
 		void initialize();
 		inline void release();
 
 		// UTF16 encoded null terminated string pointer
 		wchar_t* m_data = NULL;
-		// String characters count without null character
+		// JString characters count without null character
 		uint32_t m_length = 0;
-		// String memory size with null character
+		// JString memory size with null character
 		uint32_t m_size = 0;
 		// Aligned string buffer memory size
 		uint32_t m_memorySize = 0;
@@ -314,109 +314,109 @@ extern "C" {
 		static long double wtod(const wchar_t* data, uint32_t len, uint32_t type);
 
 	public:
-		inline RefString() { initialize(); }
-		explicit RefString(const void* string) throw(const char*);
+		inline CString() { initialize(); }
+		explicit CString(const void* string) throw(const char*);
 
-		RefString(const RefString& string) throw(const char*);
+		CString(const CString& string) throw(const char*);
 #if defined(__IOS__)
-		RefString(const NSString* string) throw(const char*); // eOutOfMemory
+		CString(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
-		RefString(const char* string) throw(const char*); // eOutOfMemory
-		explicit RefString(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
-		RefString(const wchar_t* string) throw(const char*); // eOutOfMemory
-		explicit RefString(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
-		explicit RefString(const char character) throw(const char*); // eOutOfMemory
-		explicit RefString(const wchar_t character) throw(const char*); // eOutOfMemory
-		explicit RefString(bool value) throw(const char*); // eOutOfMemory
-		RefString(int8_t value) throw(const char*); // eOutOfMemory
-		RefString(uint8_t value) throw(const char*); // eOutOfMemory
-		RefString(int16_t value) throw(const char*); // eOutOfMemory
-		RefString(uint16_t value) throw(const char*); // eOutOfMemory
-		RefString(int32_t value) throw(const char*); // eOutOfMemory
-		RefString(uint32_t value) throw(const char*); // eOutOfMemory
-		RefString(int64_t value) throw(const char*); // eOutOfMemory
-		RefString(uint64_t value) throw(const char*); // eOutOfMemory
-		RefString(float value) throw(const char*); // eOutOfMemory
-		RefString(double value) throw(const char*); // eOutOfMemory
+		CString(const char* string) throw(const char*); // eOutOfMemory
+		explicit CString(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
+		CString(const wchar_t* string) throw(const char*); // eOutOfMemory
+		explicit CString(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
+		explicit CString(const char character) throw(const char*); // eOutOfMemory
+		explicit CString(const wchar_t character) throw(const char*); // eOutOfMemory
+		explicit CString(bool value) throw(const char*); // eOutOfMemory
+		CString(int8_t value) throw(const char*); // eOutOfMemory
+		CString(uint8_t value) throw(const char*); // eOutOfMemory
+		CString(int16_t value) throw(const char*); // eOutOfMemory
+		CString(uint16_t value) throw(const char*); // eOutOfMemory
+		CString(int32_t value) throw(const char*); // eOutOfMemory
+		CString(uint32_t value) throw(const char*); // eOutOfMemory
+		CString(int64_t value) throw(const char*); // eOutOfMemory
+		CString(uint64_t value) throw(const char*); // eOutOfMemory
+		CString(float value) throw(const char*); // eOutOfMemory
+		CString(double value) throw(const char*); // eOutOfMemory
 
-		~RefString();
+		~CString();
 
-		Property<RefString, uint32_t> length;
+		Property<CString, uint32_t> length;
 
-		RefString& operator =(const void* string) throw(const char*); // eOutOfMemory
-		RefString& operator =(const RefString& string) throw(const char*); // eOutOfMemory
+		CString& operator =(const void* string) throw(const char*); // eOutOfMemory
+		CString& operator =(const CString& string) throw(const char*); // eOutOfMemory
 		#if defined(__IOS__)
-			RefString& operator =(const NSString* string) throw(const char*); // eOutOfMemory
+			CString& operator =(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif
-		RefString& operator =(const char* string) throw(const char*); // eOutOfMemory
-		RefString& operator =(const wchar_t* string) throw(const char*); // eOutOfMemory
-		RefString& operator =(const char character) throw(const char*); // eOutOfMemory
-		RefString& operator =(const wchar_t character) throw(const char*); // eOutOfMemory
-		RefString& operator =(bool value) throw(const char*); // eOutOfMemory
-		RefString& operator =(int8_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(uint8_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(int16_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(uint16_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(int32_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(uint32_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(int64_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(uint64_t value) throw(const char*); // eOutOfMemory
-		RefString& operator =(float value) throw(const char*); // eOutOfMemory
-		RefString& operator =(double value) throw(const char*); // eOutOfMemory
+		CString& operator =(const char* string) throw(const char*); // eOutOfMemory
+		CString& operator =(const wchar_t* string) throw(const char*); // eOutOfMemory
+		CString& operator =(const char character) throw(const char*); // eOutOfMemory
+		CString& operator =(const wchar_t character) throw(const char*); // eOutOfMemory
+		CString& operator =(bool value) throw(const char*); // eOutOfMemory
+		CString& operator =(int8_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(uint8_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(int16_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(uint16_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(int32_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(uint32_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(int64_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(uint64_t value) throw(const char*); // eOutOfMemory
+		CString& operator =(float value) throw(const char*); // eOutOfMemory
+		CString& operator =(double value) throw(const char*); // eOutOfMemory
 
-		static inline RefString valueOf(char value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(wchar_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(bool value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(int8_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(uint8_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(int16_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(uint16_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(int32_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(uint32_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(int64_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(uint64_t value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(float value) throw(const char*) { return RefString(value); } // eOutOfMemory
-		static inline RefString valueOf(double value) throw(const char*) { return RefString(value); } // eOutOfMemory
+		static inline CString valueOf(char value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(wchar_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(bool value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(int8_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(uint8_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(int16_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(uint16_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(int32_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(uint32_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(int64_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(uint64_t value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(float value) throw(const char*) { return CString(value); } // eOutOfMemory
+		static inline CString valueOf(double value) throw(const char*) { return CString(value); } // eOutOfMemory
 
-		RefString& concat(const RefString& string) throw(const char*); // eOutOfMemory
+		CString& concat(const CString& string) throw(const char*); // eOutOfMemory
 		#if defined(__IOS__)
-			RefString& concat(const NSString* string) throw(const char*); // eOutOfMemory
+			CString& concat(const NSString* string) throw(const char*); // eOutOfMemory
 		#endif
-		RefString& concat(const char* string) throw(const char*); // eOutOfMemory
-		RefString& concat(const wchar_t* string) throw(const char*); // eOutOfMemory
-		RefString& concat(const char character) throw(const char*); // eOutOfMemory
-		RefString& concat(const wchar_t character) throw(const char*); // eOutOfMemory
-		RefString& concat(const bool value) throw(const char*); // eOutOfMemory
-		RefString& concat(const int8_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const uint8_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const int16_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const uint16_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const int32_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const uint32_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const int64_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const uint64_t value) throw(const char*); // eOutOfMemory
-		RefString& concat(const float value) throw(const char*); // eOutOfMemory
-		RefString& concat(const double value) throw(const char*); // eOutOfMemory
+		CString& concat(const char* string) throw(const char*); // eOutOfMemory
+		CString& concat(const wchar_t* string) throw(const char*); // eOutOfMemory
+		CString& concat(const char character) throw(const char*); // eOutOfMemory
+		CString& concat(const wchar_t character) throw(const char*); // eOutOfMemory
+		CString& concat(const bool value) throw(const char*); // eOutOfMemory
+		CString& concat(const int8_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const uint8_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const int16_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const uint16_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const int32_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const uint32_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const int64_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const uint64_t value) throw(const char*); // eOutOfMemory
+		CString& concat(const float value) throw(const char*); // eOutOfMemory
+		CString& concat(const double value) throw(const char*); // eOutOfMemory
 
-		inline RefString& operator +=(const RefString& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline CString& operator +=(const CString& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 		#if defined(__IOS__)
-			inline RefString& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+			inline CString& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 		#endif
-		inline RefString& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
-		inline RefString& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
-		inline RefString& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
-		inline RefString& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
-		inline RefString& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline RefString& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline CString& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline CString& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline CString& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline CString& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline CString& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
 
 		#if defined(__IOS__)
 			operator NSString*() const;
@@ -437,118 +437,118 @@ extern "C" {
 		inline double operator +() const { return THIS.operator double(); }
 		inline double operator -() const { return -(THIS.operator double()); }
 
-		friend inline RefString operator +(const RefString& src1, const RefString& src2) { return RefString(src1).concat(src2);	}
+		friend inline CString operator +(const CString& src1, const CString& src2) { return CString(src1).concat(src2);	}
 		
-		bool equals(const RefString& string) const;
-		bool equals(const String& string) const;
+		bool equals(const CString& string) const;
+		bool equals(const JString& string) const;
 		bool equals(const wchar_t* string) const;
 		bool equals(const char* string) const;
 
-		inline bool operator ==(const RefString& string) const { return THIS.equals(string); }
-		inline bool operator ==(const String& string) const { return THIS.equals(string); }
+		inline bool operator ==(const CString& string) const { return THIS.equals(string); }
+		inline bool operator ==(const JString& string) const { return THIS.equals(string); }
 		inline bool operator ==(const wchar_t* string) const { return THIS.equals(string); }
 		inline bool operator ==(const char* string) const { return THIS.equals(string); }
 
-		inline bool operator !=(const RefString& string) const { return !(THIS.equals(string)); }
-		inline bool operator !=(const String& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const CString& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const JString& string) const { return !(THIS.equals(string)); }
 		inline bool operator !=(const wchar_t* string) const { return !(THIS.equals(string)); }
 		inline bool operator !=(const char* string) const { return !(THIS.equals(string)); }
 
-		int compareTo(const RefString& string) const;
-		int compareTo(const String& string) const;
+		int compareTo(const CString& string) const;
+		int compareTo(const JString& string) const;
 		int compareTo(const wchar_t* string) const;
 
-		inline bool operator <(const RefString& string) const { return (THIS.compareTo(string) < 0); }
-		inline bool operator <(const String& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const CString& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const JString& string) const { return (THIS.compareTo(string) < 0); }
 		inline bool operator <(const wchar_t* string) const { return (THIS.compareTo(string) < 0); }
-		inline bool operator >(const RefString& string) const { return (THIS.compareTo(string) > 0); }
-		inline bool operator >(const String& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const CString& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const JString& string) const { return (THIS.compareTo(string) > 0); }
 		inline bool operator >(const wchar_t* string) const { return (THIS.compareTo(string) > 0); }
-		inline bool operator <=(const RefString& string) const { return (THIS.compareTo(string) <= 0); }
-		inline bool operator <=(const String& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const CString& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const JString& string) const { return (THIS.compareTo(string) <= 0); }
 		inline bool operator <=(const wchar_t* string) const { return (THIS.compareTo(string) <= 0); }
-		inline bool operator >=(const RefString& string) const { return (THIS.compareTo(string) >= 0); }
-		inline bool operator >=(const String& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const CString& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const JString& string) const { return (THIS.compareTo(string) >= 0); }
 		inline bool operator >=(const wchar_t* string) const { return (THIS.compareTo(string) >= 0); }
 
-		RefString& toLowerCase();
-		RefString& toUpperCase();
+		CString& toLowerCase();
+		CString& toUpperCase();
 
-		bool equalsIgnoreCase(const RefString& string) const;
-		bool equalsIgnoreCase(const String& string) const;
+		bool equalsIgnoreCase(const CString& string) const;
+		bool equalsIgnoreCase(const JString& string) const;
 		bool equalsIgnoreCase(const wchar_t* string) const;
 
-		int compareToIgnoreCase(const RefString& string) const;
-		int compareToIgnoreCase(const String& string) const;
+		int compareToIgnoreCase(const CString& string) const;
+		int compareToIgnoreCase(const JString& string) const;
 		int compareToIgnoreCase(const wchar_t* string) const;
 
-		bool startsWith(const RefString& string, uint32_t start = 0) const;
-		bool startsWith(const String& string, uint32_t start = 0) const;
+		bool startsWith(const CString& string, uint32_t start = 0) const;
+		bool startsWith(const JString& string, uint32_t start = 0) const;
 		bool startsWith(const wchar_t* string, uint32_t start = 0) const;
 
-		bool endsWith(const RefString& string) const;
-		bool endsWith(const String& string) const;
+		bool endsWith(const CString& string) const;
+		bool endsWith(const JString& string) const;
 		bool endsWith(const wchar_t* string) const;
 
 		int indexOf(wchar_t character) const;
-		int indexOf(const RefString& string) const;
-		int indexOf(const String& string) const;
+		int indexOf(const CString& string) const;
+		int indexOf(const JString& string) const;
 		int indexOf(const wchar_t* string) const;
 
 		int lastIndexOf(wchar_t character) const;
-		int lastIndexOf(const RefString& string) const;
-		int lastIndexOf(const String& string) const;
+		int lastIndexOf(const CString& string) const;
+		int lastIndexOf(const JString& string) const;
 		int lastIndexOf(const wchar_t* string) const;
 
-		RefString substring(int start, int end = -1) const;
+		CString substring(int start, int end = -1) const;
 
-		RefString replace(const RefString& target, const RefString& replacement) const;
-		RefString replace(const String& target, const String& replacement) const;
-		RefString replace(const wchar_t* target, const wchar_t* replacement) const;
+		CString replace(const CString& target, const CString& replacement) const;
+		CString replace(const JString& target, const JString& replacement) const;
+		CString replace(const wchar_t* target, const wchar_t* replacement) const;
 
 		wchar_t& operator [](int index) const throw(const char*); //eOutOfRange
 		wchar_t charAt(int index) const throw(const char*); //eOutOfRange
 
-		String toString() const;
-		String toJSON() const;
+		JString toString() const;
+		JString toJSON() const;
 		inline uint32_t hashCode() const { return (m_data == NULL) ? 0 : mmcrc32(0xFFFFFFFF, m_data, m_size); }
 
 #if defined(__IOS__)
-		bool matches(const RefString& regularExpression) const;
-		bool matches(const String& regularExpression) const;
-		bool regionMatches(bool ignoreCase, int thisStart, const RefString& string, int start, int length) const;
-		bool regionMatches(bool ignoreCase, int thisStart, const String& string, int start, int length) const;
-		bool regionMatches(int thisStart, const RefString& string, int start, int length) const;
-		bool regionMatches(int thisStart, const String& string, int start, int length) const;
+		bool matches(const CString& regularExpression) const;
+		bool matches(const JString& regularExpression) const;
+		bool regionMatches(bool ignoreCase, int thisStart, const CString& string, int start, int length) const;
+		bool regionMatches(bool ignoreCase, int thisStart, const JString& string, int start, int length) const;
+		bool regionMatches(int thisStart, const CString& string, int start, int length) const;
+		bool regionMatches(int thisStart, const JString& string, int start, int length) const;
 		
-		String replaceAll(const RefString& regularExpression, const RefString& replacement) const;
-		String replaceAll(const String& regularExpression, const String& replacement) const;
-		String replaceFirst(const RefString& regularExpression, const RefString& replacement) const;
-		String replaceFirst(const String& regularExpression, const String& replacement) const;
+		JString replaceAll(const CString& regularExpression, const CString& replacement) const;
+		JString replaceAll(const JString& regularExpression, const JString& replacement) const;
+		JString replaceFirst(const CString& regularExpression, const CString& replacement) const;
+		JString replaceFirst(const JString& regularExpression, const JString& replacement) const;
 
-		//List<String> split(const String& regularExpression, uint32_t limit = 0) const;
+		//List<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
 #else
-	#warning Cross platform String not complete
+	#warning Cross platform JString not complete
 #endif
 		
-		RefString& trim();
+		CString& trim();
 		
 		int vswprintf(const wchar_t* format, va_list arglist);
 		
-		static RefString format(const RefString& string, ...);
-		static RefString format(const String& string, ...);
-		static RefString format(const wchar_t* string, ...);
+		static CString format(const CString& string, ...);
+		static CString format(const JString& string, ...);
+		static CString format(const wchar_t* string, ...);
 		
-		RefString md5() const throw(const char*); // eOutOfMemory
+		CString md5() const throw(const char*); // eOutOfMemory
 	};
 
 	class Number;
 	
-	class String : public Object {
+	class JString : public JObject {
 	private:
-		friend uint32_t getStringLength(const String& self);
-		friend uint32_t setStringLength(String& self, uint32_t length) throw(const char*);
-		friend String getSubString(String& self, int start, int end);
+		friend uint32_t getStringLength(const JString& self);
+		friend uint32_t setStringLength(JString& self, uint32_t length) throw(const char*);
+		friend JString getSubString(JString& self, int start, int end);
 
 		void initialize();
 		void release();
@@ -556,117 +556,117 @@ extern "C" {
 		void setSize(uint32_t size) throw(const char*);
 		void setLength(uint32_t length) throw(const char*);
 	public:
-		RefClass(String, RefString)
+		JRefClass(JString, CString)
 
 		/**
 		 * Create copy of string
 		 * @param string  source string
 		 * @throws eOutOfMemory
 		 */
-		String(const String& string) throw(const char*); // eOutOfMemory
-		String(const RefString& string) throw(const char*); //eOutOfMemory
+		JString(const JString& string) throw(const char*); // eOutOfMemory
+		JString(const CString& string) throw(const char*); //eOutOfMemory
 #if defined(__IOS__)
-		String(const NSString* string) throw(const char*); // eOutOfMemory
+		JString(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
-		String(const char* string) throw(const char*); // eOutOfMemory
-		explicit String(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
-		String(const wchar_t* string) throw(const char*); // eOutOfMemory
-		explicit String(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
-		explicit String(const char character) throw(const char*); // eOutOfMemory
-		explicit String(const wchar_t character) throw(const char*); // eOutOfMemory
-		explicit String(bool value) throw(const char*); // eOutOfMemory
-		String(int8_t value) throw(const char*); // eOutOfMemory
-		String(uint8_t value) throw(const char*); // eOutOfMemory
-		String(int16_t value) throw(const char*); // eOutOfMemory
-		String(uint16_t value) throw(const char*); // eOutOfMemory
-		String(int32_t value) throw(const char*); // eOutOfMemory
-		String(uint32_t value) throw(const char*); // eOutOfMemory
-		String(int64_t value) throw(const char*); // eOutOfMemory
-		String(uint64_t value) throw(const char*); // eOutOfMemory
-		String(float value) throw(const char*); // eOutOfMemory
-		String(double value) throw(const char*); // eOutOfMemory
+		JString(const char* string) throw(const char*); // eOutOfMemory
+		explicit JString(const char* string, uint32_t size) throw(const char*); // eOutOfMemory
+		JString(const wchar_t* string) throw(const char*); // eOutOfMemory
+		explicit JString(const wchar_t* string, uint32_t length) throw(const char*); // eOutOfMemory
+		explicit JString(const char character) throw(const char*); // eOutOfMemory
+		explicit JString(const wchar_t character) throw(const char*); // eOutOfMemory
+		explicit JString(bool value) throw(const char*); // eOutOfMemory
+		JString(int8_t value) throw(const char*); // eOutOfMemory
+		JString(uint8_t value) throw(const char*); // eOutOfMemory
+		JString(int16_t value) throw(const char*); // eOutOfMemory
+		JString(uint16_t value) throw(const char*); // eOutOfMemory
+		JString(int32_t value) throw(const char*); // eOutOfMemory
+		JString(uint32_t value) throw(const char*); // eOutOfMemory
+		JString(int64_t value) throw(const char*); // eOutOfMemory
+		JString(uint64_t value) throw(const char*); // eOutOfMemory
+		JString(float value) throw(const char*); // eOutOfMemory
+		JString(double value) throw(const char*); // eOutOfMemory
 		
-		String(const Number& number);
+		JString(const Number& number);
 #if defined (__IOS__)
-		String(const NSNumber *number);
+		JString(const NSNumber *number);
 #endif
 
-		Property<String, uint32_t> length;
+		Property<JString, uint32_t> length;
 		
-		String& operator =(const String& string) throw(const char*); // eOutOfMemory
-		String& operator =(const RefString& string) throw(const char*); // eOutOfMemory
+		JString& operator =(const JString& string) throw(const char*); // eOutOfMemory
+		JString& operator =(const CString& string) throw(const char*); // eOutOfMemory
 #if defined(__IOS__)
-		String& operator =(const NSString* string) throw(const char*); // eOutOfMemory
+		JString& operator =(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
-		String& operator =(const char* string) throw(const char*); // eOutOfMemory
-		String& operator =(const wchar_t* string) throw(const char*); // eOutOfMemory
-		String& operator =(const char character) throw(const char*); // eOutOfMemory
-		String& operator =(const wchar_t character) throw(const char*); // eOutOfMemory
-		String& operator =(bool value) throw(const char*); // eOutOfMemory
-		String& operator =(int8_t value) throw(const char*); // eOutOfMemory
-		String& operator =(uint8_t value) throw(const char*); // eOutOfMemory
-		String& operator =(int16_t value) throw(const char*); // eOutOfMemory
-		String& operator =(uint16_t value) throw(const char*); // eOutOfMemory
-		String& operator =(int32_t value) throw(const char*); // eOutOfMemory
-		String& operator =(uint32_t value) throw(const char*); // eOutOfMemory
-		String& operator =(int64_t value) throw(const char*); // eOutOfMemory
-		String& operator =(uint64_t value) throw(const char*); // eOutOfMemory
-		String& operator =(float value) throw(const char*); // eOutOfMemory
-		String& operator =(double value) throw(const char*); // eOutOfMemory
+		JString& operator =(const char* string) throw(const char*); // eOutOfMemory
+		JString& operator =(const wchar_t* string) throw(const char*); // eOutOfMemory
+		JString& operator =(const char character) throw(const char*); // eOutOfMemory
+		JString& operator =(const wchar_t character) throw(const char*); // eOutOfMemory
+		JString& operator =(bool value) throw(const char*); // eOutOfMemory
+		JString& operator =(int8_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(uint8_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(int16_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(uint16_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(int32_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(uint32_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(int64_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(uint64_t value) throw(const char*); // eOutOfMemory
+		JString& operator =(float value) throw(const char*); // eOutOfMemory
+		JString& operator =(double value) throw(const char*); // eOutOfMemory
 		
-		static inline String valueOf(char value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(wchar_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(bool value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(int8_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(uint8_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(int16_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(uint16_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(int32_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(uint32_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(int64_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(uint64_t value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(float value) throw(const char*) { return String(value); } // eOutOfMemory
-		static inline String valueOf(double value) throw(const char*) { return String(value); } // eOutOfMemory
+		static inline JString valueOf(char value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(wchar_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(bool value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(int8_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(uint8_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(int16_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(uint16_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(int32_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(uint32_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(int64_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(uint64_t value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(float value) throw(const char*) { return JString(value); } // eOutOfMemory
+		static inline JString valueOf(double value) throw(const char*) { return JString(value); } // eOutOfMemory
 		
-		String& concat(const String& string) throw(const char*); // eOutOfMemory
+		JString& concat(const JString& string) throw(const char*); // eOutOfMemory
 #if defined(__IOS__)
-		String& concat(const NSString* string) throw(const char*); // eOutOfMemory
+		JString& concat(const NSString* string) throw(const char*); // eOutOfMemory
 #endif
-		String& concat(const char* string) throw(const char*); // eOutOfMemory
-		String& concat(const wchar_t* string) throw(const char*); // eOutOfMemory
-		String& concat(const char character) throw(const char*); // eOutOfMemory
-		String& concat(const wchar_t character) throw(const char*); // eOutOfMemory
-		String& concat(const bool value) throw(const char*); // eOutOfMemory
-		String& concat(const int8_t value) throw(const char*); // eOutOfMemory
-		String& concat(const uint8_t value) throw(const char*); // eOutOfMemory
-		String& concat(const int16_t value) throw(const char*); // eOutOfMemory
-		String& concat(const uint16_t value) throw(const char*); // eOutOfMemory
-		String& concat(const int32_t value) throw(const char*); // eOutOfMemory
-		String& concat(const uint32_t value) throw(const char*); // eOutOfMemory
-		String& concat(const int64_t value) throw(const char*); // eOutOfMemory
-		String& concat(const uint64_t value) throw(const char*); // eOutOfMemory
-		String& concat(const float value) throw(const char*); // eOutOfMemory
-		String& concat(const double value) throw(const char*); // eOutOfMemory
+		JString& concat(const char* string) throw(const char*); // eOutOfMemory
+		JString& concat(const wchar_t* string) throw(const char*); // eOutOfMemory
+		JString& concat(const char character) throw(const char*); // eOutOfMemory
+		JString& concat(const wchar_t character) throw(const char*); // eOutOfMemory
+		JString& concat(const bool value) throw(const char*); // eOutOfMemory
+		JString& concat(const int8_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const uint8_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const int16_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const uint16_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const int32_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const uint32_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const int64_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const uint64_t value) throw(const char*); // eOutOfMemory
+		JString& concat(const float value) throw(const char*); // eOutOfMemory
+		JString& concat(const double value) throw(const char*); // eOutOfMemory
 		
-		inline String& operator +=(const String& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline JString& operator +=(const JString& string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 #if defined(__IOS__)
-		inline String& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline JString& operator +=(const NSString* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
 #endif
-		inline String& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
-		inline String& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
-		inline String& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
-		inline String& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
-		inline String& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
-		inline String& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(const char* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline JString& operator +=(const wchar_t* string) throw(const char*) { return THIS.concat(string); }; // eOutOfMemory
+		inline JString& operator +=(const char character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline JString& operator +=(const wchar_t character) throw(const char*) { return THIS.concat(character); }; // eOutOfMemory
+		inline JString& operator +=(bool value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(int8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(uint8_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(int16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(uint16_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(int32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(uint32_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(int64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(uint64_t value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(float value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
+		inline JString& operator +=(double value) throw(const char*) { return THIS.concat(value); }; // eOutOfMemory
 		
 #if defined(__IOS__)
 		operator NSString*() const;
@@ -687,106 +687,106 @@ extern "C" {
 		inline double operator +() const { return THIS.operator double(); }
 		inline double operator -() const { return -(THIS.operator double()); }
 		
-		friend inline String operator +(const String& src1, const String& src2) { return String(src1).concat(src2);	}
+		friend inline JString operator +(const JString& src1, const JString& src2) { return JString(src1).concat(src2);	}
 		
-		inline bool operator ==(const void* src) const { return ((Object*)this)->operator==(src); }
-		inline bool operator !=(const void* src) const { return ((Object*)this)->operator!=(src); }
+		inline bool operator ==(const void* src) const { return ((JObject*)this)->operator==(src); }
+		inline bool operator !=(const void* src) const { return ((JObject*)this)->operator!=(src); }
 
-		bool equals(const String& string) const;
-		bool equals(const RefString& string) const;
+		bool equals(const JString& string) const;
+		bool equals(const CString& string) const;
 		bool equals(const wchar_t* string) const;
 		bool equals(const char* string) const;
 
-		inline bool operator ==(const RefString& string) const { return THIS.equals(string); }
-		inline bool operator ==(const String& string) const { return THIS.equals(string); }
+		inline bool operator ==(const CString& string) const { return THIS.equals(string); }
+		inline bool operator ==(const JString& string) const { return THIS.equals(string); }
 		inline bool operator ==(const wchar_t* string) const { return THIS.equals(string); }
 		inline bool operator ==(const char* string) const { return THIS.equals(string); }
 		
-		inline bool operator !=(const RefString& string) const { return !(THIS.equals(string)); }
-		inline bool operator !=(const String& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const CString& string) const { return !(THIS.equals(string)); }
+		inline bool operator !=(const JString& string) const { return !(THIS.equals(string)); }
 		inline bool operator !=(const wchar_t* string) const { return !(THIS.equals(string)); }
 		inline bool operator !=(const char* string) const { return !(THIS.equals(string)); }
 		
-		int compareTo(const RefString& string) const;
-		int compareTo(const String& string) const;
+		int compareTo(const CString& string) const;
+		int compareTo(const JString& string) const;
 		int compareTo(const wchar_t* string) const;
 
-		inline bool operator <(const RefString& string) const { return (THIS.compareTo(string) < 0); }
-		inline bool operator <(const String& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const CString& string) const { return (THIS.compareTo(string) < 0); }
+		inline bool operator <(const JString& string) const { return (THIS.compareTo(string) < 0); }
 		inline bool operator <(const wchar_t* string) const { return (THIS.compareTo(string) < 0); }
-		inline bool operator >(const RefString& string) const { return (THIS.compareTo(string) > 0); }
-		inline bool operator >(const String& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const CString& string) const { return (THIS.compareTo(string) > 0); }
+		inline bool operator >(const JString& string) const { return (THIS.compareTo(string) > 0); }
 		inline bool operator >(const wchar_t* string) const { return (THIS.compareTo(string) > 0); }
-		inline bool operator <=(const RefString& string) const { return (THIS.compareTo(string) <= 0); }
-		inline bool operator <=(const String& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const CString& string) const { return (THIS.compareTo(string) <= 0); }
+		inline bool operator <=(const JString& string) const { return (THIS.compareTo(string) <= 0); }
 		inline bool operator <=(const wchar_t* string) const { return (THIS.compareTo(string) <= 0); }
-		inline bool operator >=(const RefString& string) const { return (THIS.compareTo(string) >= 0); }
-		inline bool operator >=(const String& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const CString& string) const { return (THIS.compareTo(string) >= 0); }
+		inline bool operator >=(const JString& string) const { return (THIS.compareTo(string) >= 0); }
 		inline bool operator >=(const wchar_t* string) const { return (THIS.compareTo(string) >= 0); }
 
-		String& toLowerCase();
-		String& toUpperCase();
+		JString& toLowerCase();
+		JString& toUpperCase();
 		
-		bool equalsIgnoreCase(const RefString& string) const;
-		bool equalsIgnoreCase(const String& string) const;
+		bool equalsIgnoreCase(const CString& string) const;
+		bool equalsIgnoreCase(const JString& string) const;
 		bool equalsIgnoreCase(const wchar_t* string) const;
 		
-		int compareToIgnoreCase(const RefString& string) const;
-		int compareToIgnoreCase(const String& string) const;
+		int compareToIgnoreCase(const CString& string) const;
+		int compareToIgnoreCase(const JString& string) const;
 		int compareToIgnoreCase(const wchar_t* string) const;
 
-		bool startsWith(const RefString& string, uint32_t start = 0) const;
-		bool startsWith(const String& string, uint32_t start = 0) const;
+		bool startsWith(const CString& string, uint32_t start = 0) const;
+		bool startsWith(const JString& string, uint32_t start = 0) const;
 		bool startsWith(const wchar_t* string, uint32_t start = 0) const;
 		
-		bool endsWith(const RefString& string) const;
-		bool endsWith(const String& string) const;
+		bool endsWith(const CString& string) const;
+		bool endsWith(const JString& string) const;
 		bool endsWith(const wchar_t* string) const;
 
 		int indexOf(wchar_t character) const;
-		int indexOf(const RefString& string) const;
-		int indexOf(const String& string) const;
+		int indexOf(const CString& string) const;
+		int indexOf(const JString& string) const;
 		int indexOf(const wchar_t* string) const;
 		
 		int lastIndexOf(wchar_t character) const;
-		int lastIndexOf(const RefString& string) const;
-		int lastIndexOf(const String& string) const;
+		int lastIndexOf(const CString& string) const;
+		int lastIndexOf(const JString& string) const;
 		int lastIndexOf(const wchar_t* string) const;
 
-		inline String substring(int start, int end = -1) const { return getSubString(*(String*)this, start, end); }
+		inline JString substring(int start, int end = -1) const { return getSubString(*(JString*)this, start, end); }
 		
-		String replace(const RefString& target, const RefString& replacement) const;
-		String replace(const String& target, const String& replacement) const;
-		String replace(const wchar_t* target, const wchar_t* replacement) const;
+		JString replace(const CString& target, const CString& replacement) const;
+		JString replace(const JString& target, const JString& replacement) const;
+		JString replace(const wchar_t* target, const wchar_t* replacement) const;
 
 		wchar_t& operator [](int index) const throw(const char*); //eOutOfRange
 		wchar_t charAt(int index) const throw(const char*); //eOutOfRange
 	
 #if defined(__IOS__)
-		bool matches(const RefString& regularExpression) const;
-		bool matches(const String& regularExpression) const;
-		bool regionMatches(bool ignoreCase, int thisStart, const RefString& string, int start, int length) const;
-		bool regionMatches(bool ignoreCase, int thisStart, const String& string, int start, int length) const;
-		bool regionMatches(int thisStart, const RefString& string, int start, int length) const;
-		bool regionMatches(int thisStart, const String& string, int start, int length) const;
+		bool matches(const CString& regularExpression) const;
+		bool matches(const JString& regularExpression) const;
+		bool regionMatches(bool ignoreCase, int thisStart, const CString& string, int start, int length) const;
+		bool regionMatches(bool ignoreCase, int thisStart, const JString& string, int start, int length) const;
+		bool regionMatches(int thisStart, const CString& string, int start, int length) const;
+		bool regionMatches(int thisStart, const JString& string, int start, int length) const;
 		
-		String replaceAll(const RefString& regularExpression, const RefString& replacement) const;
-		String replaceAll(const String& regularExpression, const String& replacement) const;
-		String replaceFirst(const RefString& regularExpression, const RefString& replacement) const;
-		String replaceFirst(const String& regularExpression, const String& replacement) const;
+		JString replaceAll(const CString& regularExpression, const CString& replacement) const;
+		JString replaceAll(const JString& regularExpression, const JString& replacement) const;
+		JString replaceFirst(const CString& regularExpression, const CString& replacement) const;
+		JString replaceFirst(const JString& regularExpression, const JString& replacement) const;
 		
-		//List<String> split(const String& regularExpression, uint32_t limit = 0) const;
+		//List<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
 #else
-	#warning Cross platform String not complete
+	#warning Cross platform JString not complete
 #endif
 		
-		String& trim();
+		JString& trim();
 	
-		static String format(const RefString& string, ...);
-		static String format(const String& string, ...);
-		static String format(const wchar_t* string, ...);
+		static JString format(const CString& string, ...);
+		static JString format(const JString& string, ...);
+		static JString format(const wchar_t* string, ...);
 
-		String md5() const throw(const char*); // eOutOfMemory
+		JString md5() const throw(const char*); // eOutOfMemory
 	};
 
 #endif

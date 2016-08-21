@@ -25,32 +25,32 @@
 class JSONArray;
 class JSONObject;
 
-class RefJSONArray : public RefObject {
+class RefJSONArray : public JRefObject {
 public:
-	List<Object> m_array = new ArrayList<Object>();
+	List<JObject> m_array = new ArrayList<JObject>();
 	
 	inline RefJSONArray() { TYPE = TypeJSONArray; }
 	
 	inline ~RefJSONArray() { }
 	
-	inline Object& get(int index) const throw(const char*) {
+	inline JObject& get(int index) const throw(const char*) {
 		try {
-			return *(Object*)&(m_array.get(index));
+			return *(JObject*)&(m_array.get(index));
 		} catch (...) {
 			throw eOutOfRange;
 		}
 	}
 	
-	inline Object& opt(int index, Object& fallback) const {
+	inline JObject& opt(int index, JObject& fallback) const {
 		try {
-			return *(Object*)&(m_array.get(index));
+			return *(JObject*)&(m_array.get(index));
 		} catch (...) {
 			return fallback;
 		}
 	}
 	
 	inline JSONArray& getJSONArray(int index) const throw(const char*) {
-		Object *o = (Object*)&(m_array.get(index));
+		JObject *o = (JObject*)&(m_array.get(index));
 		if (o->_object == NULL) {
 			throw eNullPointer;
 		} else if ((*o).ref().TYPE == TypeJSONArray) {
@@ -61,7 +61,7 @@ public:
 	}
 	
 	inline JSONObject& getJSONObject(int index) const throw(const char*) {
-		Object *o = (Object*)&(m_array.get(index));
+		JObject *o = (JObject*)&(m_array.get(index));
 		if (o->_object == NULL) {
 			throw eNullPointer;
 		} else if ((*o).ref().TYPE == TypeJSONObject) {
@@ -88,11 +88,11 @@ public:
 	}
 
 	inline bool getBoolean(int index) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(index));
+		JObject* o = (JObject*)&(THIS.get(index));
 		if (o->_object == NULL) {
 			return false;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator bool();
+			return ((JString*)o)->operator bool();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue();
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -121,11 +121,11 @@ public:
 	}
 	
 	inline int32_t getInt(int index) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(index));
+		JObject* o = (JObject*)&(THIS.get(index));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator int32_t();
+			return ((JString*)o)->operator int32_t();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -154,11 +154,11 @@ public:
 	}
 	
 	inline int64_t getLong(int index) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(index));
+		JObject* o = (JObject*)&(THIS.get(index));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator int64_t();
+			return ((JString*)o)->operator int64_t();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -187,11 +187,11 @@ public:
 	}
 	
 	inline double getDouble(int index) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(index));
+		JObject* o = (JObject*)&(THIS.get(index));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator double();
+			return ((JString*)o)->operator double();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -219,12 +219,12 @@ public:
 		}
 	}
 	
-	inline const String getString(int index) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(index));
+	inline const JString getString(int index) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(index));
 		if (o->_object == NULL) {
-			return String();
+			return JString();
 		} else if ((*o).ref().TYPE == TypeString) {
-			return *((String*)o);
+			return *((JString*)o);
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->toString();
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -244,7 +244,7 @@ public:
 		}
 	}
 	
-	inline const String optString(int index, const String& fallback = null) const {
+	inline const JString optString(int index, const JString& fallback = null) const {
 		try {
 			return THIS.getString(index);
 		} catch (...) {
@@ -254,7 +254,7 @@ public:
 	
 	inline bool isNull(int index) const throw(const char*) {
 		try {
-			Object* o = (Object*)&(THIS.get(index));
+			JObject* o = (JObject*)&(THIS.get(index));
 			return (o->_object == NULL);
 		} catch (...) {
 			throw eOutOfRange;
@@ -283,21 +283,21 @@ public:
 		return *this;
 	}
 	
-	inline RefJSONArray& put(const String& value) throw(const char*) {
-		m_array.push(String(value));
+	inline RefJSONArray& put(const JString& value) throw(const char*) {
+		m_array.push(JString(value));
 		return *this;
 	}
 	
-	inline RefJSONArray& put(const Object& value) throw(const char*) {
+	inline RefJSONArray& put(const JObject& value) throw(const char*) {
 		m_array.push(value);
 		return *this;
 	}
 	
-	inline RefJSONArray& put(int index, const Object& value) throw(const char*) {
+	inline RefJSONArray& put(int index, const JObject& value) throw(const char*) {
 		int size = m_array.size();
 		if (size <= index) {
 			while (size < index) {
-				m_array.push(Object());
+				m_array.push(JObject());
 				size++;
 			}
 			m_array.push(value);
@@ -328,33 +328,33 @@ public:
 		return put(index, Double(value));
 	}
 	
-	inline RefJSONArray& put(int index, const String& value) {
+	inline RefJSONArray& put(int index, const JString& value) {
 		int size = m_array.size();
 		if (size <= index) {
 			while (size < index) {
-				m_array.push(Object());
+				m_array.push(JObject());
 				size++;
 			}
 			m_array.push(value);
 		} else {
-			m_array.set(index, String(value));
+			m_array.set(index, JString(value));
 		}
 		return *this;
 	}
 	
 	inline void remove(int index) throw(const char*) {
-		m_array.ref().RefStack<Object>::remove(index);
+		m_array.ref().RefStack<JObject>::remove(index);
 	}
 	
-	inline String toJSON() const { return m_array.toJSON(); }
+	inline JString toJSON() const { return m_array.toJSON(); }
 };
 
-class JSONArray : public Object {
+class JSONArray : public JObject {
 public:
-	RefClass(JSONArray, RefJSONArray)
+	JRefClass(JSONArray, RefJSONArray)
 	
-	inline Object& get(int index) const throw(const char*) { return THIS.ref().get(index); }
-	inline Object& opt(int index, Object& fallback) const { return THIS.ref().opt(index, fallback); }
+	inline JObject& get(int index) const throw(const char*) { return THIS.ref().get(index); }
+	inline JObject& opt(int index, JObject& fallback) const { return THIS.ref().opt(index, fallback); }
 	inline JSONArray& getJSONArray(int index) const throw(const char*) { return THIS.ref().getJSONArray(index); }
 	inline JSONObject& getJSONObject(int index) const throw(const char*) { return THIS.ref().getJSONObject(index); }
 	inline JSONArray& optJSONArray(int index, JSONArray& fallback) const { return THIS.ref().optJSONArray(index, fallback); }
@@ -367,22 +367,22 @@ public:
 	inline int64_t optLong(int index, int64_t fallback = 0) const { return THIS.ref().optLong(index, fallback); }
 	inline double getDouble(int index) const throw(const char*) { return THIS.ref().getDouble(index); }
 	inline double optDouble(int index, double fallback = NAN) const { return THIS.ref().optDouble(index, fallback); }
-	inline const String getString(int index) const throw(const char*) { return THIS.ref().getString(index); }
-	inline const String optString(int index, const String& fallback = null) const { return THIS.ref().optString(index, fallback); }
+	inline const JString getString(int index) const throw(const char*) { return THIS.ref().getString(index); }
+	inline const JString optString(int index, const JString& fallback = null) const { return THIS.ref().optString(index, fallback); }
 	inline bool isNull(int index) const throw(const char*) { return THIS.ref().isNull(index); }
 	inline int length() const { return THIS.ref().length(); }
 	inline RefJSONArray& put(bool value) throw(const char*) { return THIS.ref().put(value); }
 	inline RefJSONArray& put(int32_t value) throw(const char*) { return THIS.ref().put(value); }
 	inline RefJSONArray& put(int64_t value) throw(const char*) { return THIS.ref().put(value); }
 	inline RefJSONArray& put(double value) throw(const char*) { return THIS.ref().put(value); }
-	inline RefJSONArray& put(const String& value) throw(const char*) { return THIS.ref().put(value); }
-	inline RefJSONArray& put(const Object& value) throw(const char*) { return THIS.ref().put(value); }
-	inline RefJSONArray& put(int index, const Object& value) throw(const char*) { return THIS.ref().put(index, value); }
+	inline RefJSONArray& put(const JString& value) throw(const char*) { return THIS.ref().put(value); }
+	inline RefJSONArray& put(const JObject& value) throw(const char*) { return THIS.ref().put(value); }
+	inline RefJSONArray& put(int index, const JObject& value) throw(const char*) { return THIS.ref().put(index, value); }
 	inline RefJSONArray& put(int index, bool value) throw(const char*) { return THIS.ref().put(index, value); }
 	inline RefJSONArray& put(int index, int32_t value) throw(const char*) { return THIS.ref().put(index, value); }
 	inline RefJSONArray& put(int index, int64_t value) throw(const char*) { return THIS.ref().put(index, value); }
 	inline RefJSONArray& put(int index, double value) throw(const char*) { return THIS.ref().put(index, value); }
-	inline RefJSONArray& put(int index, const String& value) throw(const char*) { return THIS.ref().put(index, value); }
+	inline RefJSONArray& put(int index, const JString& value) throw(const char*) { return THIS.ref().put(index, value); }
 	inline void remove(int index) throw(const char*) { THIS.ref().remove(index); }
 };
 

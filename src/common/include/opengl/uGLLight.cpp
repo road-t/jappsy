@@ -15,38 +15,86 @@
  */
 
 #include "uGLLight.h"
-#include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLLight::RefGLLight(GLRender* context) {
-	THIS.context = context;
+RefGLLight::RefGLLight(GLScene& scene) {
+	THIS.scene = scene;
 }
 
 RefGLLight::~RefGLLight() {
-	THIS.context = NULL;
+	THIS.scene = null;
 }
 
-GLLights::GLLights(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new HashMap<String, GLLight>();
+RefGLLight& RefGLLight::omni(const Vec3& position, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
+	THIS.position.set(position);
+	THIS.target.set(0.0);
+	THIS.color.set(color);
+	THIS.intensivity = intensivity;
+	THIS.hotspot = radius;
+	THIS.falloff = falloff;
+	THIS.fixed = fixed;
+	THIS.style = GLLightStyle::OMNI;
+	THIS.invalid = true;
+	return *this;
+}
+
+RefGLLight& RefGLLight::spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat angle, const GLfloat falloff, const bool fixed) {
+	THIS.position.set(position);
+	THIS.target.set(target);
+	THIS.color.set(color);
+	THIS.intensivity = intensivity;
+	THIS.hotspot = angle;
+	THIS.falloff = falloff;
+	THIS.fixed = fixed;
+	THIS.style = GLLightStyle::SPOT;
+	THIS.invalid = true;
+	return *this;
+}
+
+RefGLLight& RefGLLight::direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
+	THIS.position.set(position);
+	THIS.target.set(target);
+	THIS.color.set(color);
+	THIS.intensivity = intensivity;
+	THIS.hotspot = radius;
+	THIS.falloff = falloff;
+	THIS.fixed = fixed;
+	THIS.style = GLLightStyle::DIRECT;
+	THIS.invalid = true;
+	return *this;
+}
+
+void RefGLLight::update() {
+	if (invalid) {
+		if (fixed) {
+			position3fv.set(position);
+			target3fv.set(target);
+		} else {
+			position3fv.transform(position, scene.ref().camera.ref().view16fv);
+		}
+	}
+}
+
+
+GLLights::GLLights(RefGLScene* scene) throw(const char*) {
+	THIS.scene = scene;
+	list = new HashMap<JString, GLLight>();
 }
 
 GLLights::~GLLights() {
 	list = null;
-	context = NULL;
+	scene = null;
 }
 
-GLLight& GLLights::get(const wchar_t* key) throw(const char*) {
+GLLight& GLLights::get(const JString& key) throw(const char*) {
 	return (GLLight&)list.get(key);
 }
 
-GLLight& GLLights::create(const wchar_t* key) throw(const char*) {
+GLLight& GLLights::create(const JString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLLight* shader = &(list.put(key, new RefGLLight(context)));
-		if (wcscmp(key, L"null") == 0) {
-		}
-		return *shader;
+		GLLight* light = &(list.put(key, new RefGLLight(scene)));
+		return *light;
 	} catch (...) {
 		throw;
 	}

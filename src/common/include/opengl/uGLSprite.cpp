@@ -28,7 +28,7 @@ RefGLSprite::~RefGLSprite() {
 
 GLSprites::GLSprites(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLSprite>();
+	list = new HashMap<JString, GLSprite>();
 }
 
 GLSprites::~GLSprites() {

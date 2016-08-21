@@ -34,7 +34,7 @@ void json_parse_to_object(RefJSONObject* object, const struct json_node* n) thro
 			if (j != NULL) {
 				switch (j->type) {
 					case json_type_null:
-						object->put(key, Object());
+						object->put(key, JObject());
 						break;
 					
 					case json_type_object: {
@@ -52,7 +52,7 @@ void json_parse_to_object(RefJSONObject* object, const struct json_node* n) thro
 					}
 						
 					case json_type_string:
-						object->put(key, String(j->value.s));
+						object->put(key, JString(j->value.s));
 						break;
 						
 					case json_type_number:
@@ -85,7 +85,7 @@ void json_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(c
 			if (j != NULL) {
 				switch (j->type) {
 					case json_type_null:
-						array->put(Object());
+						array->put(JObject());
 						break;
 						
 					case json_type_object: {
@@ -103,7 +103,7 @@ void json_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(c
 					}
 						
 					case json_type_string:
-						array->put(String(j->value.s));
+						array->put(JString(j->value.s));
 						break;
 						
 					case json_type_number:
@@ -139,7 +139,7 @@ void jsonw_parse_to_object(RefJSONObject* object, const struct json_node* n) thr
 			if (j != NULL) {
 				switch (j->type) {
 					case json_type_null:
-						object->put(key, Object());
+						object->put(key, JObject());
 						break;
 						
 					case json_type_object: {
@@ -157,7 +157,7 @@ void jsonw_parse_to_object(RefJSONObject* object, const struct json_node* n) thr
 					}
 						
 					case json_type_string:
-						object->put(key, String(j->value.ws));
+						object->put(key, JString(j->value.ws));
 						break;
 						
 					case json_type_number:
@@ -190,7 +190,7 @@ void jsonw_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(
 			if (j != NULL) {
 				switch (j->type) {
 					case json_type_null:
-						array->put(Object());
+						array->put(JObject());
 						break;
 						
 					case json_type_object: {
@@ -208,7 +208,7 @@ void jsonw_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(
 					}
 						
 					case json_type_string:
-						array->put(String(j->value.ws));
+						array->put(JString(j->value.ws));
 						break;
 						
 					case json_type_number:
@@ -228,7 +228,7 @@ void jsonw_parse_to_array(RefJSONArray* array, const struct json_node* n) throw(
 	}
 }
 
-RefJSONObject::RefJSONObject(const String& json) throw(const char*) {
+RefJSONObject::RefJSONObject(const JString& json) throw(const char*) {
 	initialize();
 
 	if (json._object == NULL)
@@ -300,7 +300,7 @@ RefJSONObject::RefJSONObject(const char* json) throw(const char*) {
 	}
 }
 
-const String RefJSONObject::toString(int indentSpaces) const throw(const char*) {
+const JString RefJSONObject::toString(int indentSpaces) const throw(const char*) {
 	// TODO: json to string
 	return L"";
 }

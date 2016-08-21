@@ -34,10 +34,10 @@ public:
     
     void onFrame(GLRender* context);
     void onTouch(const wchar_t* event);
-    void onFile(const String& url, const Object& object);
+    void onFile(const JString& url, const JObject& object);
     void onStatus(const LoaderStatus& status);
     void onReady(const JSONObject& result);
-    void onError(const String& error);
+    void onError(const JString& error);
 };
 
 #endif //OMENGINE_H

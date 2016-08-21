@@ -21,10 +21,10 @@
 
 const wchar_t TypeHandler[] = L"Handler::";
 
-RefHandler::HandlerCallback::HandlerCallback(Callback callback, int delay, const Object& userData) {
+RefHandler::HandlerCallback::HandlerCallback(Callback callback, int delay, const JObject& userData) {
 	THIS.callback = callback;
 	THIS.delay = delay;
-	THIS.userData = new Object(userData);
+	THIS.userData = new JObject(userData);
 }
 
 #define HANDLER_QUEUE_BLOCK_SIZE	16
@@ -122,7 +122,7 @@ void* RefHandler_threadRun(void* data) {
 	return NULL;
 }
 
-void* RefHandler::postDelayed(Callback callback, int delay, const Object& userData) {
+void* RefHandler::postDelayed(Callback callback, int delay, const JObject& userData) {
 	THIS.wait();
 	if (AtomicGet(&shutdown) == 0) {
 		HandlerCallback* runner = memNew(runner, HandlerCallback(callback, delay, userData));
@@ -144,7 +144,7 @@ void* RefHandler::postDelayed(Callback callback, int delay, const Object& userDa
 	return NULL;
 }
 
-void* RefHandler::post(Callback callback, const Object& userData) {
+void* RefHandler::post(Callback callback, const JObject& userData) {
 	THIS.wait();
 	if (AtomicGet(&shutdown) == 0) {
 		HandlerCallback* runner = memNew(runner, HandlerCallback(callback, 0, userData));

@@ -19,35 +19,63 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
+#include <data/uString.h>
 #include <data/uHashMap.h>
+#include <opengl/uGLScene.h>
+#include <data/uVector.h>
+#include <data/uJSONObject.h>
 
-class GLRender;
+enum GLLightStyle { OMNI, SPOT, DIRECT };
 
-class RefGLLight : public RefObject {
+class RefGLLight : public JRefObject {
+private:
+	GLScene scene;
+	JString key;
+	Vec3 position = {0.0, 0.0, -1.0};
+	Vec3 target = {0.0, 0.0, 0.0};
+	Vec3 color = {1.0, 1.0, 1.0};
+	GLfloat intensivity = 1.0;
+	GLfloat hotspot = 0;
+	GLfloat falloff = 0;
+	bool fixed = false;
+	GLLightStyle style = GLLightStyle::DIRECT;
+	bool active = true;
+	bool invalid = true;
+	
 public:
-	GLRender* context = NULL;
+	Vec3 position3fv;
+	Vec3 target3fv;
+	Mat4 light16fv;
 	
 	inline RefGLLight() { throw eInvalidParams; }
-	RefGLLight(GLRender* context);
+	RefGLLight(GLScene& scene);
 	~RefGLLight();
+	
+	inline RefGLLight& invalidate() { invalid = true; return *this; }
+
+	RefGLLight& omni(const Vec3& position, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	RefGLLight& spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat angle = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	RefGLLight& direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	
+	void update();
 };
 
-class GLLight : public Object {
+class GLLight : public JObject {
 public:
-	RefClass(GLLight, RefGLLight)
+	JRefClass(GLLight, RefGLLight)
 };
 
 class GLLights {
 private:
-	GLRender* context;
-	HashMap<String, GLLight> list;
+	GLScene scene;
+	HashMap<JString, GLLight> list;
 	
 public:
-	GLLights(GLRender* context) throw(const char*);
+	GLLights(RefGLScene* scene) throw(const char*);
 	~GLLights();
 	
-	GLLight& get(const wchar_t* key) throw(const char*);
-	GLLight& create(const wchar_t* key) throw(const char*);
+	GLLight& get(const JString& key) throw(const char*);
+	GLLight& create(const JString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLLIGHT_H

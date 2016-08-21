@@ -21,37 +21,37 @@
 #include <data/uJSONArray.h>
 #include <data/uHashMap.h>
 
-class RefJSONObject : public RefObject {
+class RefJSONObject : public JRefObject {
 public:
-	HashMap<String, Object> m_object;
+	HashMap<JString, JObject> m_object;
 
 	inline void initialize() {
 		TYPE = TypeJSONObject;
-		m_object = new HashMap<String, Object>();
+		m_object = new HashMap<JString, JObject>();
 	}
 
 	inline RefJSONObject() { initialize(); }
 	
-	RefJSONObject(const String& json) throw(const char*);
+	RefJSONObject(const JString& json) throw(const char*);
 	RefJSONObject(const wchar_t* json) throw(const char*);
 	RefJSONObject(const char* json) throw(const char*);
 	
 	inline ~RefJSONObject() { }
 	
-	inline Object& get(const String& name) const throw(const char*) {
-		return *(Object*)&(m_object.get(name));
+	inline JObject& get(const JString& name) const throw(const char*) {
+		return *(JObject*)&(m_object.get(name));
 	}
 	
-	inline Object& opt(const String& name, Object& fallback) const {
+	inline JObject& opt(const JString& name, JObject& fallback) const {
 		try {
-			return *(Object*)&(m_object.get(name));
+			return *(JObject*)&(m_object.get(name));
 		} catch (...) {
 			return fallback;
 		}
 	}
 	
-	inline JSONArray& getJSONArray(const String& name) const throw(const char*) {
-		Object *o = (Object*)&(THIS.get(name));
+	inline JSONArray& getJSONArray(const JString& name) const throw(const char*) {
+		JObject *o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			throw eNullPointer;
 		} else if ((*o).ref().TYPE == TypeJSONArray) {
@@ -61,8 +61,8 @@ public:
 		}
 	}
 	
-	inline JSONObject& getJSONObject(const String& name) const throw(const char*) {
-		Object *o = (Object*)&(THIS.get(name));
+	inline JSONObject& getJSONObject(const JString& name) const throw(const char*) {
+		JObject *o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			throw eNullPointer;
 		} else if ((*o).ref().TYPE == TypeJSONObject) {
@@ -72,7 +72,7 @@ public:
 		}
 	}
 	
-	inline JSONArray& optJSONArray(const String& name, JSONArray& fallback) const {
+	inline JSONArray& optJSONArray(const JString& name, JSONArray& fallback) const {
 		try {
 			return THIS.getJSONArray(name);
 		} catch (...) {
@@ -80,7 +80,7 @@ public:
 		}
 	}
 	
-	inline JSONObject& optJSONObject(const String& name, JSONObject& fallback) const {
+	inline JSONObject& optJSONObject(const JString& name, JSONObject& fallback) const {
 		try {
 			return THIS.getJSONObject(name);
 		} catch (...) {
@@ -88,12 +88,12 @@ public:
 		}
 	}
 	
-	inline bool getBoolean(const String& name) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(name));
+	inline bool getBoolean(const JString& name) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			return false;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator bool();
+			return ((JString*)o)->operator bool();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue();
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -113,7 +113,7 @@ public:
 		}
 	}
 	
-	inline bool optBoolean(const String& name, bool fallback = false) const {
+	inline bool optBoolean(const JString& name, bool fallback = false) const {
 		try {
 			return THIS.getBoolean(name);
 		} catch (...) {
@@ -121,12 +121,12 @@ public:
 		}
 	}
 	
-	inline int32_t getInt(const String& name) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(name));
+	inline int32_t getInt(const JString& name) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator int32_t();
+			return ((JString*)o)->operator int32_t();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -146,7 +146,7 @@ public:
 		}
 	}
 	
-	inline int32_t optInt(const String& name, int fallback = 0) const {
+	inline int32_t optInt(const JString& name, int fallback = 0) const {
 		try {
 			return THIS.getInt(name);
 		} catch (...) {
@@ -154,12 +154,12 @@ public:
 		}
 	}
 	
-	inline int64_t getLong(const String& name) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(name));
+	inline int64_t getLong(const JString& name) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator int64_t();
+			return ((JString*)o)->operator int64_t();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -179,7 +179,7 @@ public:
 		}
 	}
 	
-	inline int64_t optLong(const String& name, int64_t fallback = 0) const {
+	inline int64_t optLong(const JString& name, int64_t fallback = 0) const {
 		try {
 			return THIS.getLong(name);
 		} catch (...) {
@@ -187,12 +187,12 @@ public:
 		}
 	}
 	
-	inline double getDouble(const String& name) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(name));
+	inline double getDouble(const JString& name) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
 			return 0;
 		} else if ((*o).ref().TYPE == TypeString) {
-			return ((String*)o)->operator double();
+			return ((JString*)o)->operator double();
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->boolValue() ? 1 : 0;
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -212,7 +212,7 @@ public:
 		}
 	}
 	
-	inline double optDouble(const String& name, double fallback = NAN) const {
+	inline double optDouble(const JString& name, double fallback = NAN) const {
 		try {
 			return THIS.getDouble(name);
 		} catch (...) {
@@ -220,12 +220,12 @@ public:
 		}
 	}
 	
-	inline String getString(const String& name) const throw(const char*) {
-		Object* o = (Object*)&(THIS.get(name));
+	inline JString getString(const JString& name) const throw(const char*) {
+		JObject* o = (JObject*)&(THIS.get(name));
 		if (o->_object == NULL) {
-			return String();
+			return JString();
 		} else if ((*o).ref().TYPE == TypeString) {
-			return *((String*)o);
+			return *((JString*)o);
 		} else if ((*o).ref().TYPE == TypeBoolean) {
 			return ((Java::Boolean*)o)->toString();
 		} else if ((*o).ref().TYPE == TypeByte) {
@@ -245,7 +245,7 @@ public:
 		}
 	}
 	
-	inline String optString(const String& name, const String& fallback = null) const {
+	inline JString optString(const JString& name, const JString& fallback = null) const {
 		try {
 			return THIS.getString(name);
 		} catch (...) {
@@ -253,74 +253,74 @@ public:
 		}
 	}
 	
-	inline bool has(const String& name) const {
+	inline bool has(const JString& name) const {
 		return m_object.containsKey(name);
 	}
 	
-	inline bool isNull(const String& name) const throw(const char*) {
+	inline bool isNull(const JString& name) const throw(const char*) {
 		try {
-			Object* o = (Object*)&(THIS.get(name));
+			JObject* o = (JObject*)&(THIS.get(name));
 			return (o->_object == NULL);
 		} catch (...) {
 			throw eOutOfRange;
 		}
 	}
 	
-	inline const Iterator<String> keys() const { return m_object.keySet().iterator(); }
+	inline const Iterator<JString> keys() const { return m_object.keySet().iterator(); }
 	
 	inline int length() const { return m_object.size(); }
 
-	inline RefJSONObject& put(const String& name, const Object& object) throw(const char*) {
+	inline RefJSONObject& put(const JString& name, const JObject& object) throw(const char*) {
 		m_object.put(name, object);
 		return *this;
 	}
 	
-	inline RefJSONObject& put(const String& name, bool value) throw(const char*) {
+	inline RefJSONObject& put(const JString& name, bool value) throw(const char*) {
 		m_object.put(name, Java::Boolean(value));
 		return *this;
 	}
 	
-	inline RefJSONObject& put(const String& name, int32_t value) throw(const char*) {
+	inline RefJSONObject& put(const JString& name, int32_t value) throw(const char*) {
 		m_object.put(name, Integer(value));
 		return *this;
 	}
 	
-	inline RefJSONObject& put(const String& name, int64_t value) throw(const char*) {
+	inline RefJSONObject& put(const JString& name, int64_t value) throw(const char*) {
 		m_object.put(name, Long(value));
 		return *this;
 	}
 	
-	inline RefJSONObject& put(const String& name, double value) throw(const char*) {
+	inline RefJSONObject& put(const JString& name, double value) throw(const char*) {
 		m_object.put(name, Double(value));
 		return *this;
 	}
 	
-	inline RefJSONObject& put(const String& name, const String& value) throw(const char*) {
-		m_object.put(name, String(value));
+	inline RefJSONObject& put(const JString& name, const JString& value) throw(const char*) {
+		m_object.put(name, JString(value));
 		return *this;
 	}
 	
-	inline RefJSONObject& putOpt(const String& name, const Object& value) {
+	inline RefJSONObject& putOpt(const JString& name, const JObject& value) {
 		if (value != null) {
 			m_object.put(name, value);
 		}
 		return *this;
 	}
 	
-	inline void remove(const String& name) throw(const char*) {
+	inline void remove(const JString& name) throw(const char*) {
 		m_object.remove(name);
 	}
 	
-	const String toString(int indentSpaces = 0) const throw(const char*);
+	const JString toString(int indentSpaces = 0) const throw(const char*);
 
-	inline String toJSON() const { return m_object.toJSON(); }
+	inline JString toJSON() const { return m_object.toJSON(); }
 };
 
-class JSONObject : public Object {
+class JSONObject : public JObject {
 public:
-	RefClass(JSONObject, RefJSONObject)
+	JRefClass(JSONObject, RefJSONObject)
 	
-	inline JSONObject(const String& json) throw(const char*) {
+	inline JSONObject(const JString& json) throw(const char*) {
 		RefJSONObject* o = new RefJSONObject(json);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
@@ -338,35 +338,35 @@ public:
 		THIS.setRef(o);
 	}
 
-	inline Object& get(const String& name) const throw(const char*) { return THIS.ref().get(name); }
-	inline Object& opt(const String& name, Object& fallback) const throw(const char*) { return THIS.ref().opt(name, fallback); }
-	inline JSONArray& getJSONArray(const String& name) const throw(const char*) { return THIS.ref().getJSONArray(name); }
-	inline JSONObject& getJSONObject(const String& name) const throw(const char*) { return THIS.ref().getJSONObject(name); }
-	inline JSONArray& optJSONArray(const String& name, JSONArray& fallback) const throw(const char*) { return THIS.ref().optJSONArray(name, fallback); }
-	inline JSONObject& optJSONObject(const String& name, JSONObject& fallback) const throw(const char*) { return THIS.ref().optJSONObject(name, fallback); }
-	inline bool getBoolean(const String& name) const throw(const char*) { return THIS.ref().getBoolean(name); }
-	inline bool optBoolean(const String& name, bool fallback = false) const throw(const char*) { return THIS.ref().optBoolean(name, fallback); }
-	inline int32_t getInt(const String& name) const throw(const char*) { return THIS.ref().getInt(name); }
-	inline int32_t optInt(const String& name, int fallback = 0) const throw(const char*) { return THIS.ref().optInt(name, fallback); }
-	inline int64_t getLong(const String& name) const throw(const char*) { return THIS.ref().getLong(name); }
-	inline int64_t optLong(const String& name, int64_t fallback = 0) const throw(const char*) { return THIS.ref().optLong(name, fallback); }
-	inline double getDouble(const String& name) const throw(const char*) { return THIS.ref().getDouble(name); }
-	inline double optDouble(const String& name, double fallback = NAN) const throw(const char*) { return THIS.ref().optDouble(name, fallback); }
-	inline const String getString(const String& name) const throw(const char*) { return THIS.ref().getString(name); }
-	inline const String optString(const String& name, const String& fallback = null) const throw(const char*) { return THIS.ref().optString(name, fallback); }
-	inline bool has(const String& name) const throw(const char*) { return THIS.ref().has(name); }
-	inline bool isNull(const String& name) const throw(const char*) { return THIS.ref().isNull(name); }
-	inline const Iterator<String> keys() const throw(const char*) { return THIS.ref().keys(); }
+	inline JObject& get(const JString& name) const throw(const char*) { return THIS.ref().get(name); }
+	inline JObject& opt(const JString& name, JObject& fallback) const throw(const char*) { return THIS.ref().opt(name, fallback); }
+	inline JSONArray& getJSONArray(const JString& name) const throw(const char*) { return THIS.ref().getJSONArray(name); }
+	inline JSONObject& getJSONObject(const JString& name) const throw(const char*) { return THIS.ref().getJSONObject(name); }
+	inline JSONArray& optJSONArray(const JString& name, JSONArray& fallback) const throw(const char*) { return THIS.ref().optJSONArray(name, fallback); }
+	inline JSONObject& optJSONObject(const JString& name, JSONObject& fallback) const throw(const char*) { return THIS.ref().optJSONObject(name, fallback); }
+	inline bool getBoolean(const JString& name) const throw(const char*) { return THIS.ref().getBoolean(name); }
+	inline bool optBoolean(const JString& name, bool fallback = false) const throw(const char*) { return THIS.ref().optBoolean(name, fallback); }
+	inline int32_t getInt(const JString& name) const throw(const char*) { return THIS.ref().getInt(name); }
+	inline int32_t optInt(const JString& name, int fallback = 0) const throw(const char*) { return THIS.ref().optInt(name, fallback); }
+	inline int64_t getLong(const JString& name) const throw(const char*) { return THIS.ref().getLong(name); }
+	inline int64_t optLong(const JString& name, int64_t fallback = 0) const throw(const char*) { return THIS.ref().optLong(name, fallback); }
+	inline double getDouble(const JString& name) const throw(const char*) { return THIS.ref().getDouble(name); }
+	inline double optDouble(const JString& name, double fallback = NAN) const throw(const char*) { return THIS.ref().optDouble(name, fallback); }
+	inline const JString getString(const JString& name) const throw(const char*) { return THIS.ref().getString(name); }
+	inline const JString optString(const JString& name, const JString& fallback = null) const throw(const char*) { return THIS.ref().optString(name, fallback); }
+	inline bool has(const JString& name) const throw(const char*) { return THIS.ref().has(name); }
+	inline bool isNull(const JString& name) const throw(const char*) { return THIS.ref().isNull(name); }
+	inline const Iterator<JString> keys() const throw(const char*) { return THIS.ref().keys(); }
 	inline int length() const throw(const char*) { return THIS.ref().length(); }
-	inline RefJSONObject& put(const String& name, const Object& value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& put(const String& name, bool value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& put(const String& name, int32_t value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& put(const String& name, int64_t value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& put(const String& name, double value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& put(const String& name, const String& value) throw(const char*) { return THIS.ref().put(name, value); }
-	inline RefJSONObject& putOpt(const String& name, const Object& value) throw(const char*) { return THIS.ref().putOpt(name, value); }
-	inline void remove(const String& name) throw(const char*) { THIS.ref().remove(name); }
-	const String toString(int indentSpaces = 0) const throw(const char*) { return THIS.ref().toString(); }
+	inline RefJSONObject& put(const JString& name, const JObject& value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& put(const JString& name, bool value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& put(const JString& name, int32_t value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& put(const JString& name, int64_t value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& put(const JString& name, double value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& put(const JString& name, const JString& value) throw(const char*) { return THIS.ref().put(name, value); }
+	inline RefJSONObject& putOpt(const JString& name, const JObject& value) throw(const char*) { return THIS.ref().putOpt(name, value); }
+	inline void remove(const JString& name) throw(const char*) { THIS.ref().remove(name); }
+	const JString toString(int indentSpaces = 0) const throw(const char*) { return THIS.ref().toString(); }
 };
 
 #endif //JAPPSY_UJSONOBJECT_H

@@ -1,0 +1,1 @@
+port GLModel.createCoin from JavaScript

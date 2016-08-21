@@ -297,9 +297,9 @@ public:
 	CList<V>* m_values;
 	
 public:
-	void (*m_onrelease)(K& key, V& value) = NULL;
+	void (*m_onrelease)(const K& key, V& value) = NULL;
 	
-	inline CMap(void (*onrelease)(K& key, V& value) = NULL) throw(const char*) {
+	inline CMap(void (*onrelease)(const K& key, V& value) = NULL) throw(const char*) {
 		m_onrelease = onrelease;
 		m_keys = new CSet<K>();
 		m_values = new CList<V>();
@@ -314,8 +314,8 @@ public:
 	virtual inline void clear() throw(const char*) {
 		if (m_onrelease != NULL) {
 			int32_t count = m_keys->count();
-			K* keys = m_keys->items();
-			V* values = m_values->items();
+			const K* keys = m_keys->items();
+			V* values = (V*)(m_values->items());
 			for (int i = 0; i < count; i++) {
 				m_onrelease(keys[i], values[i]);
 			}
@@ -363,7 +363,7 @@ public:
 			m_keys->CStack<K>::push(key);
 			return m_values->CStack<V>::push(value);
 		} else {
-			if (m_onrelease != NULL) m_onrelease(key, m_values->CStack<V>::get(index));
+			if (m_onrelease != NULL) m_onrelease(key, *((V*)&(m_values->CStack<V>::get(index))));
 			return m_values->CList<V>::set(index, value);
 		}
 	}
@@ -371,7 +371,7 @@ public:
 	virtual inline void remove(const K& key) throw(const char*) {
 		int32_t index = m_keys->CStack<K>::search(key);
 		if (index >= 0) {
-			if (m_onrelease != NULL) m_onrelease(key, m_values->CStack<V>::get(index));
+			if (m_onrelease != NULL) m_onrelease(key, *((V*)&(m_values->CStack<V>::get(index))));
 			m_keys->CStack<K>::remove(index);
 			m_values->CStack<V>::remove(index);
 		}

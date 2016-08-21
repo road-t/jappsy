@@ -266,7 +266,7 @@ public:
 		}
 	}
 	
-	inline const Iterator<JString> keys() const { return m_object.keySet().iterator(); }
+	inline const JIterator<JString> keys() const { return m_object.keySet().iterator(); }
 	
 	inline int length() const { return m_object.size(); }
 
@@ -356,7 +356,7 @@ public:
 	inline const JString optString(const JString& name, const JString& fallback = null) const throw(const char*) { return THIS.ref().optString(name, fallback); }
 	inline bool has(const JString& name) const throw(const char*) { return THIS.ref().has(name); }
 	inline bool isNull(const JString& name) const throw(const char*) { return THIS.ref().isNull(name); }
-	inline const Iterator<JString> keys() const throw(const char*) { return THIS.ref().keys(); }
+	inline const JIterator<JString> keys() const throw(const char*) { return THIS.ref().keys(); }
 	inline int length() const throw(const char*) { return THIS.ref().length(); }
 	inline RefJSONObject& put(const JString& name, const JObject& value) throw(const char*) { return THIS.ref().put(name, value); }
 	inline RefJSONObject& put(const JString& name, bool value) throw(const char*) { return THIS.ref().put(name, value); }

@@ -216,7 +216,7 @@ GLShaders::~GLShaders() {
 	context = NULL;
 }
 
-const Iterator<JString> GLShaders::keys() {
+const JIterator<JString> GLShaders::keys() {
 	return list.keySet().iterator();
 }
 

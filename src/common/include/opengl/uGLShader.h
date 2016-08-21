@@ -64,7 +64,7 @@ public:
 	GLShaders(GLRender* context) throw(const char*);
 	~GLShaders();
 	
-	const Iterator<JString> keys();
+	const JIterator<JString> keys();
 	GLShader& get(const JString& key) throw(const char*);
 	GLShader& createShader(const JString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	

@@ -20,18 +20,18 @@
 #include <data/uStack.h>
 
 template <typename Type>
-class RefIterator : public JRefStack<Type> {
+class JRefIterator : public JRefStack<Type> {
 public:
 	int32_t m_next = 0;
 	int32_t m_last = -1;
 	int32_t m_prev = -1;
 	
 public:
-	inline RefIterator() : JRefStack<Type>() {
+	inline JRefIterator() : JRefStack<Type>() {
 		THIS.TYPE = TypeIterator;
 	}
 	
-	inline RefIterator(uint32_t initialCapacity) throw(const char*) : JRefStack<Type>(initialCapacity) {
+	inline JRefIterator(uint32_t initialCapacity) throw(const char*) : JRefStack<Type>(initialCapacity) {
 		THIS.TYPE = TypeIterator;
 	}
 	
@@ -41,13 +41,13 @@ public:
 	
 	virtual inline const Type& next() const throw(const char*) {
 		if (m_next >= THIS.m_count) {
-			((RefIterator*)this)->m_last = THIS.m_count;
+			((JRefIterator*)this)->m_last = THIS.m_count;
 			throw eOutOfRange;
 		}
 		
-		((RefIterator*)this)->m_last = THIS.m_next;
-		((RefIterator*)this)->m_prev = THIS.m_next;
-		((RefIterator*)this)->m_next++;
+		((JRefIterator*)this)->m_last = THIS.m_next;
+		((JRefIterator*)this)->m_prev = THIS.m_next;
+		((JRefIterator*)this)->m_next++;
 		return JRefStack<Type>::peek(THIS.m_last);
 	}
 	
@@ -67,32 +67,32 @@ public:
 	}
 	
 	virtual inline void reset(uint32_t index = 0) const {
-		((RefIterator*)this)->m_last = -1;
+		((JRefIterator*)this)->m_last = -1;
 		if ((index >= 0) && (index < THIS.m_count)) {
-			((RefIterator*)this)->m_next = index;
-			((RefIterator*)this)->m_prev = index - 1;
+			((JRefIterator*)this)->m_next = index;
+			((JRefIterator*)this)->m_prev = index - 1;
 		} else if (index >= THIS.m_count) {
-			((RefIterator*)this)->m_next = THIS.m_count;
-			((RefIterator*)this)->m_prev = THIS.m_count - 1;
+			((JRefIterator*)this)->m_next = THIS.m_count;
+			((JRefIterator*)this)->m_prev = THIS.m_count - 1;
 		} else {
-			((RefIterator*)this)->m_next = 0;
-			((RefIterator*)this)->m_prev = -1;
+			((JRefIterator*)this)->m_next = 0;
+			((JRefIterator*)this)->m_prev = -1;
 		}
 	}
 };
 
 template <typename Type>
-class Iterator : public JStack<Type> {
+class JIterator : public JStack<Type> {
 public:
-	JRefTemplate(Iterator, Iterator, RefIterator)
+	JRefTemplate(JIterator, JIterator, JRefIterator)
 
-	inline Iterator() {
+	inline JIterator() {
 		THIS.initialize();
 	}
 	
-	inline Iterator(uint32_t initialCapacity) throw(const char*) {
+	inline JIterator(uint32_t initialCapacity) throw(const char*) {
 		THIS.initialize();
-		RefIterator<Type>* o = new RefIterator<Type>(initialCapacity);
+		JRefIterator<Type>* o = new JRefIterator<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}
@@ -101,6 +101,63 @@ public:
 	virtual inline const Type& next() const throw(const char*) { return THIS.ref().next(); }
 	virtual inline const Type remove() throw(const char*) { return THIS.ref().remove(); }
 	virtual inline void reset(uint32_t index = 0) const throw(const char*) { THIS.ref().reset(index); }
+};
+
+template <typename Type>
+class CIterator : public CStack<Type> {
+public:
+	int32_t m_next = 0;
+	int32_t m_last = -1;
+	int32_t m_prev = -1;
+	
+public:
+	inline CIterator(void (*onrelease)(Type& value) = NULL) : CStack<Type>(onrelease) { }
+	inline CIterator(uint32_t initialCapacity, void (*onrelease)(Type& value) = NULL) throw(const char*) : CStack<Type>(initialCapacity, onrelease) { }
+	
+	virtual inline bool hasNext() const {
+		return (m_next < THIS.m_count);
+	}
+	
+	virtual inline const Type& next() const throw(const char*) {
+		if (m_next >= THIS.m_count) {
+			((CIterator*)this)->m_last = THIS.m_count;
+			throw eOutOfRange;
+		}
+		
+		((CIterator*)this)->m_last = THIS.m_next;
+		((CIterator*)this)->m_prev = THIS.m_next;
+		((CIterator*)this)->m_next++;
+		return CStack<Type>::peek(THIS.m_last);
+	}
+	
+	virtual inline const Type remove() throw(const char*) {
+		if (m_last >= 0) {
+			int32_t index = m_last;
+			if (m_last < m_next) {
+				m_next--;
+			}
+			if (m_prev <= m_last) {
+				if (m_prev >= 0) m_prev--;
+			}
+			m_last = -1;
+			return CStack<Type>::remove(index);
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline void reset(uint32_t index = 0) const {
+		((CIterator*)this)->m_last = -1;
+		if ((index >= 0) && (index < THIS.m_count)) {
+			((CIterator*)this)->m_next = index;
+			((CIterator*)this)->m_prev = index - 1;
+		} else if (index >= THIS.m_count) {
+			((CIterator*)this)->m_next = THIS.m_count;
+			((CIterator*)this)->m_prev = THIS.m_count - 1;
+		} else {
+			((CIterator*)this)->m_next = 0;
+			((CIterator*)this)->m_prev = -1;
+		}
+	}
 };
 
 #endif //JAPPSY_UITERATOR_H

@@ -149,12 +149,12 @@ GLModelMesh& RefGLModelNode::insertMesh(const GLModelMesh& mesh) throw(const cha
 
 void RefGLModelNode::render(GLRender* context, GLModel& model) const {
 	if (nodes.size() > 0) {
-		Iterator<GLModelNode> it = nodes.iterator();
+		JIterator<GLModelNode> it = nodes.iterator();
 		while (it.hasNext()) {
 			it.next().render(context, model);
 		}
 	} else if (meshes.size() > 0) {
-		Iterator<GLModelMesh> it = meshes.iterator();
+		JIterator<GLModelMesh> it = meshes.iterator();
 		while (it.hasNext()) {
 			it.next().render(context, model);
 		}

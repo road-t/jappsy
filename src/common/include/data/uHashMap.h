@@ -169,7 +169,7 @@ public:
 							Map<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								Set<K> m2set = m2->keySet();
-								Iterator<K> m2it = m2set.iterator();
+								JIterator<K> m2it = m2set.iterator();
 								while (m2it.hasNext()) {
 									m_tempSet.ref().push(m2it.next());
 								}
@@ -228,7 +228,7 @@ public:
 							Map<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								Collection<V> m2col = m2->values();
-								Iterator<V> m2it = m2col.iterator();
+								JIterator<V> m2it = m2col.iterator();
 								while (m2it.hasNext()) {
 									m_tempValues.ref().push(m2it.next());
 								}

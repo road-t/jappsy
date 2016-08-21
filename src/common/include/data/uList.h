@@ -87,7 +87,7 @@ public:
 			int size = collection.size();
 			if (size > 0) {
 				if (THIS.m_initialCapacity > 0) {
-					ListIterator<Type> it = collection.ref().listIterator(size - 1);
+					JListIterator<Type> it = collection.ref().listIterator(size - 1);
 					while (it.hasPrevious()) {
 						add(index, it.previous());
 					}
@@ -98,7 +98,7 @@ public:
 						memmove(THIS.m_stack + index + size, THIS.m_stack + index, (THIS.m_count - index) * sizeof(Type*));
 					
 					try {
-						Iterator<Type> it = collection.iterator();
+						JIterator<Type> it = collection.iterator();
 						while (it.hasNext()) {
 							Type* item = new Type(it.next());
 							if (item == NULL) throw eOutOfMemory;
@@ -136,9 +136,9 @@ public:
 		return foundIndex;
 	}
 	
-	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const {
-		RefIterator<Type>::reset(index);
-		return new ListIterator<Type>(this);
+	virtual inline const JListIterator<Type> listIterator(int32_t index = 0) const {
+		JRefIterator<Type>::reset(index);
+		return new JListIterator<Type>(this);
 	}
 	
 	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) {
@@ -217,9 +217,9 @@ public:
 	virtual inline const Type& get(int32_t index) const throw(const char*) { return THIS.ref().JRefStack<Type>::get(index); }
 	virtual inline int32_t indexOf(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::indexOf(value); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
-	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
+	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
 	virtual inline int32_t lastIndexOf(const Type& value) const throw(const char*) { return THIS.ref().lastIndexOf(value); }
-	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const throw(const char*) { return THIS.ref().listIterator(index); }
+	virtual inline const JListIterator<Type> listIterator(int32_t index = 0) const throw(const char*) { return THIS.ref().listIterator(index); }
 	virtual inline const Type remove(int32_t index) throw(const char*) { return THIS.ref().JRefStack<Type>::remove(index); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().RefCollection<Type>::remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::removeAll(collection); }
@@ -368,8 +368,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const Iterator<Type> iterator() const throw(const char*) {
-		Iterator<Type> result;
+	virtual inline const JIterator<Type> iterator() const throw(const char*) {
+		JIterator<Type> result;
 		synchronized(*this) {
 			try {
 				result = THIS.ref().RefCollection<Type>::iterator();
@@ -391,8 +391,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const throw(const char*) {
-		ListIterator<Type> result;
+	virtual inline const JListIterator<Type> listIterator(int32_t index = 0) const throw(const char*) {
+		JListIterator<Type> result;
 		synchronized(*this) {
 			try {
 				result = THIS.ref().listIterator(index);

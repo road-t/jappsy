@@ -36,7 +36,7 @@ public:
 	
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
 		bool result = false;
-		Iterator<Type> it = collection.iterator();
+		JIterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
 			result |= add(it.next());
 		}
@@ -45,7 +45,7 @@ public:
 
 	virtual inline JString toJSON() const {
 		JString json = L"[";
-		Iterator<Type> it = THIS.iterator();
+		JIterator<Type> it = THIS.iterator();
 		bool first = true;
 		while (it.hasNext()) {
 			if (first) first = false; else json += L",";
@@ -81,7 +81,7 @@ public:
 	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::containsAll(collection); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
-	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
+	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().RefCollection<Type>::remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::retainAll(collection); }
@@ -170,8 +170,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const Iterator<Type> iterator() const throw(const char*) {
-		Iterator<Type> result;
+	virtual inline const JIterator<Type> iterator() const throw(const char*) {
+		JIterator<Type> result;
 		synchronized(*this) {
 			try {
 				result = THIS.ref().iterator();

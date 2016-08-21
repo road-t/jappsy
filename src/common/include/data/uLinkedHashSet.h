@@ -161,7 +161,7 @@ protected:
 		return NULL;
 	}
 	
-	Iterator<Type> m_tempIt = new Iterator<Type>();
+	JIterator<Type> m_tempIt = new JIterator<Type>();
 	
 public:
 	
@@ -221,7 +221,7 @@ public:
 	
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
 		bool result = false;
-		Iterator<Type> it = collection->iterator();
+		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
 			result |= add(it->next());
 		}
@@ -234,7 +234,7 @@ public:
 	}
 	
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) {
-		Iterator<Type> it = collection->iterator();
+		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
 			if (!contains(it->next())) {
 				return false;
@@ -247,7 +247,7 @@ public:
 		return (m_count == 0);
 	}
 	
-	virtual inline const Iterator<Type> iterator() const throw(const char*) {
+	virtual inline const JIterator<Type> iterator() const throw(const char*) {
 		m_tempIt->clear();
 		LinkedHashSetItem* item = m_first;
 		while (item != NULL) {
@@ -282,7 +282,7 @@ public:
 	
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) {
 		bool result = false;
-		Iterator<Type> it = collection->iterator();
+		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
 			result |= remove(it->next());
 		}
@@ -337,7 +337,7 @@ public:
 	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
-	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
+	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }

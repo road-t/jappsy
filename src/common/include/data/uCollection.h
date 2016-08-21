@@ -23,11 +23,11 @@ template <typename Type>
 class Collection;
 
 template <typename Type>
-class RefCollection : public RefListIterator<Type> {
+class RefCollection : public JRefListIterator<Type> {
 public:
-	inline RefCollection() : RefListIterator<Type>() { THIS.TYPE = TypeCollection; }
+	inline RefCollection() : JRefListIterator<Type>() { THIS.TYPE = TypeCollection; }
 	
-	inline RefCollection(int initialCapacity) throw(const char*) : RefListIterator<Type>(initialCapacity) {
+	inline RefCollection(int initialCapacity) throw(const char*) : JRefListIterator<Type>(initialCapacity) {
 		THIS.TYPE = TypeCollection;
 	}
 	
@@ -37,7 +37,7 @@ public:
 	}
 	
 	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
-		Iterator<Type> it = collection.iterator();
+		JIterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
 			JRefStack<Type>::push(it.next());
 		}
@@ -45,7 +45,7 @@ public:
 	}
 	
 	virtual inline bool containsAll(Collection<Type>& collection) {
-		Iterator<Type> it = collection.iterator();
+		JIterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
 			if (!JRefStack<Type>::contains(it.next())) {
 				return false;
@@ -54,14 +54,14 @@ public:
 		return true;
 	}
 	
-	virtual inline const Iterator<Type> iterator() const {
-		RefIterator<Type>::reset(0);
-		return new Iterator<Type>(this);
+	virtual inline const JIterator<Type> iterator() const {
+		JRefIterator<Type>::reset(0);
+		return new JIterator<Type>(this);
 	}
 	
-	virtual inline const ListIterator<Type> listIterator(int32_t index = 0) const {
-		RefIterator<Type>::reset(index);
-		return new ListIterator<Type>(this);
+	virtual inline const JListIterator<Type> listIterator(int32_t index = 0) const {
+		JRefIterator<Type>::reset(index);
+		return new JListIterator<Type>(this);
 	}
 	
 	virtual inline bool remove(const Type& value) throw(const char*) {
@@ -75,7 +75,7 @@ public:
 	
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) {
 		bool result = false;
-		Iterator<Type> it = collection.iterator();
+		JIterator<Type> it = collection.iterator();
 		while (it.hasNext()) {
 			result |= remove(it.next());
 		}
@@ -84,7 +84,7 @@ public:
 	
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) {
 		bool result = false;
-		Iterator<Type> it = iterator();
+		JIterator<Type> it = iterator();
 		while (it.hasNext()) {
 			Type o = it.next();
 			if (!collection.contains(o)) {
@@ -110,7 +110,7 @@ template <typename Type>
 class SynchronizedCollection;
 
 template <typename Type>
-class Collection : public ListIterator<Type> {
+class Collection : public JListIterator<Type> {
 public:
 	JRefTemplate(Collection, Collection, RefCollection)
 	
@@ -131,7 +131,7 @@ public:
 	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::contains(value); }
 	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
-	virtual inline const Iterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
+	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().remove(value); }
 	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
 	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }
@@ -218,8 +218,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const Iterator<Type> iterator() const throw(const char*) {
-		Iterator<Type> result;
+	virtual inline const JIterator<Type> iterator() const throw(const char*) {
+		JIterator<Type> result;
 		synchronized(*this) {
 			try {
 				result = THIS.ref().iterator();

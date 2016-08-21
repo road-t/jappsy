@@ -81,11 +81,17 @@ void OMEngine::onError(const JString& error) {
 }
 
 #include <data/uStack.h>
+#include <data/uIterator.h>
+#include <data/uListIterator.h>
 
 OMEngine::OMEngine() {
     CStack<int> stack;
     stack.push(1);
     stack.pop();
+    CIterator<int> it;
+    it.push(1);
+    CListIterator<int> lit;
+    lit.push(1);
     
     const char *sOMLoadRes =
         #include "OMLoad.res"

@@ -332,16 +332,14 @@ public:
 template <typename Type>
 class CStack : public CObject {
 public:
-	typedef void (*CStackCallback)(Type& value);
-
 	Type* m_stack = NULL;
 	uint32_t m_count = 0;
 	uint32_t m_size = 0;
 	uint32_t m_initialCapacity = 0;
 	uint32_t m_initialSize = 0;
-	CStackCallback m_onrelease = NULL;
+	void (*m_onrelease)(Type& value) = NULL;
 	
-	virtual inline void foreach(CStackCallback callback) {
+	virtual inline void foreach(void (*callback)(Type& value)) {
 		for (int i = 0; i < m_count; i++) {
 			callback(m_stack[i]);
 		}
@@ -385,9 +383,9 @@ public:
 	}
 	
 public:
-	inline CStack(CStackCallback onrelease = NULL) { m_onrelease = onrelease; }
+	inline CStack(void (*onrelease)(Type& value) = NULL) { m_onrelease = onrelease; }
 	
-	inline CStack(uint32_t initialCapacity, CStackCallback onrelease = NULL) throw(const char*) {
+	inline CStack(uint32_t initialCapacity, void (*onrelease)(Type& value) = NULL) throw(const char*) {
 		m_onrelease = onrelease;
 		resize(initialCapacity);
 		m_initialCapacity = initialCapacity;
@@ -398,9 +396,7 @@ public:
 		if (m_stack != NULL) {
 			if (m_onrelease != NULL) {
 				for (int i = 0; i < m_count; i++) {
-					if (m_stack[i] != NULL) {
-						m_onrelease(m_stack[i]);
-					}
+					m_onrelease(m_stack[i]);
 				}
 			}
 			memFree(m_stack);

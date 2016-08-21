@@ -20,13 +20,13 @@
 #include <data/uIterator.h>
 
 template <typename Type>
-class RefListIterator : public RefIterator<Type> {
+class JRefListIterator : public JRefIterator<Type> {
 public:
-	inline RefListIterator() : RefIterator<Type>() {
+	inline JRefListIterator() : JRefIterator<Type>() {
 		THIS.TYPE = TypeListIterator;
 	}
 	
-	inline RefListIterator(uint32_t initialCapacity) throw(const char*) : RefIterator<Type>(initialCapacity) {
+	inline JRefListIterator(uint32_t initialCapacity) throw(const char*) : JRefIterator<Type>(initialCapacity) {
 		THIS.TYPE = TypeListIterator;
 	}
 	
@@ -95,13 +95,13 @@ public:
 	
 	virtual inline const Type& previous() const throw(const char*) {
 		if (THIS.m_prev < 0) {
-			((RefIterator<Type>*)this)->m_last = -1;
+			((JRefIterator<Type>*)this)->m_last = -1;
 			throw eOutOfRange;
 		}
 		
-		((RefIterator<Type>*)this)->m_last = THIS.m_prev;
-		((RefIterator<Type>*)this)->m_next = THIS.m_prev;
-		((RefIterator<Type>*)this)->m_prev--;
+		((JRefIterator<Type>*)this)->m_last = THIS.m_prev;
+		((JRefIterator<Type>*)this)->m_next = THIS.m_prev;
+		((JRefIterator<Type>*)this)->m_prev--;
 		return JRefStack<Type>::peek(THIS.m_last);
 	}
 	
@@ -134,30 +134,104 @@ public:
 };
 
 template <typename Type>
-class ListIterator : public Iterator<Type> {
+class JListIterator : public JIterator<Type> {
 public:
-	JRefTemplate(ListIterator, ListIterator, RefListIterator)
+	JRefTemplate(JListIterator, JListIterator, JRefListIterator)
 	
-	inline ListIterator() {
+	inline JListIterator() {
 		THIS.initialize();
 	}
 	
-	inline ListIterator(uint32_t initialCapacity) throw(const char*) {
+	inline JListIterator(uint32_t initialCapacity) throw(const char*) {
 		THIS.initialize();
-		RefListIterator<Type>* o = new RefListIterator<Type>(initialCapacity);
+		JRefListIterator<Type>* o = new JRefListIterator<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}
 	
 	virtual inline bool add(const Type& value) throw(const char*) { return THIS.ref().add(value); }
-	virtual inline bool hasNext() const throw(const char*) { return THIS.ref().RefIterator<Type>::hasNext(); }
+	virtual inline bool hasNext() const throw(const char*) { return THIS.ref().JRefIterator<Type>::hasNext(); }
 	virtual inline bool hasPrevious() const throw(const char*) { return THIS.ref().hasPrevious(); }
-	virtual inline const Type& next() const throw(const char*) { return THIS.ref().RefIterator<Type>::next(); }
+	virtual inline const Type& next() const throw(const char*) { return THIS.ref().JRefIterator<Type>::next(); }
 	virtual inline int32_t nextIndex() const throw(const char*) { return THIS.ref().nextIndex(); }
 	virtual inline const Type& previous() const throw(const char*) { return THIS.ref().previous(); }
 	virtual inline int32_t previousIndex() const throw(const char*) { return THIS.ref().previousIndex(); }
-	virtual inline const Type remove() throw(const char*) { return THIS.ref().RefIterator<Type>::remove(); }
+	virtual inline const Type remove() throw(const char*) { return THIS.ref().JRefIterator<Type>::remove(); }
 	virtual inline Type& set(const Type& value) throw(const char*) { return THIS.ref().set(value); }
+};
+
+template <typename Type>
+class CListIterator : public CIterator<Type> {
+public:
+	inline CListIterator(void (*onrelease)(Type& value) = NULL) : CIterator<Type>(onrelease) { }
+	inline CListIterator(uint32_t initialCapacity, void (*onrelease)(Type& value) = NULL) throw(const char*) : CIterator<Type>(initialCapacity, onrelease) { }
+	
+	virtual inline bool add(const Type& value) throw(const char*) {
+		int32_t index = THIS.m_next;
+		if ((index >= 0) && (index <= THIS.m_count)) {
+			if ((THIS.m_count > 0) && (THIS.m_initialCapacity > 0) && (THIS.m_count >= THIS.m_initialCapacity)) {
+				if (index > 0) {
+					if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[0]);
+					if (index > 1) memmove(THIS.m_stack, THIS.m_stack + 1, (index - 1) * sizeof(Type));
+					index--;
+					THIS.m_stack[index] = value;
+				} else {
+					if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[THIS.m_count - 1]);
+					if (THIS.m_count > 1) memmove(THIS.m_stack + 1, THIS.m_stack, (THIS.m_count - 1) * sizeof(Type));
+					THIS.m_stack[0] = value;
+				}
+			} else {
+				THIS.resize(THIS.m_count + 1);
+				if (index < THIS.m_count) memmove(THIS.m_stack + index + 1, THIS.m_stack + index, (THIS.m_count - index) * sizeof(Type));
+					
+				THIS.m_count++;
+				THIS.m_next++;
+				THIS.m_stack[index] = value;
+			}
+		} else
+			throw eOutOfRange;
+		
+		return true;
+	}
+	
+	virtual inline bool hasPrevious() const {
+		return (THIS.m_prev >= 0);
+	}
+	
+	virtual inline int32_t nextIndex() const {
+		if (THIS.m_next >= THIS.m_count)
+			return THIS.m_count;
+		
+		return THIS.m_next;
+	}
+	
+	virtual inline const Type& previous() const throw(const char*) {
+		if (THIS.m_prev < 0) {
+			((CIterator<Type>*)this)->m_last = -1;
+			throw eOutOfRange;
+		}
+		
+		((CIterator<Type>*)this)->m_last = THIS.m_prev;
+		((CIterator<Type>*)this)->m_next = THIS.m_prev;
+		((CIterator<Type>*)this)->m_prev--;
+		return CStack<Type>::peek(THIS.m_last);
+	}
+	
+	virtual inline int32_t previousIndex() const {
+		if (THIS.m_prev < 0)
+			return -1;
+		
+		return THIS.m_prev;
+	}
+	
+	virtual inline Type& set(const Type& value) throw(const char*) {
+		int32_t index = THIS.m_last;
+		if ((index >= 0) && (index < THIS.m_count)) {
+			if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[index]);
+			return THIS.m_stack[index] = value;
+		} else
+			throw eOutOfRange;
+	}
 };
 
 #endif //JAPPSY_ULISTITERATOR_H

@@ -395,7 +395,7 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 }
 
 bool GLRender::createShaders(JSONObject shaders) {
-	Iterator<JString> keys;
+	JIterator<JString> keys;
  
 	keys = shaders.keys();
 	while (keys.hasNext()) {
@@ -498,7 +498,7 @@ bool GLRender::createShaders(JSONObject shaders) {
 }
 
 void GLRender::createModels(JSONObject models) {
-	Iterator<JString> keys = models.keys();
+	JIterator<JString> keys = models.keys();
 	while (keys.hasNext()) {
 		JString key = keys.next();
 		Stream stream = models.get(key);

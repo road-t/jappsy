@@ -107,8 +107,8 @@ public:
 	
 	virtual inline JString toJSON() const {
 		JString json = L"{";
-		Iterator<K> itKey = THIS.keySet().iterator();
-		Iterator<V> itVal = THIS.values().iterator();
+		JIterator<K> itKey = THIS.keySet().iterator();
+		JIterator<V> itVal = THIS.values().iterator();
 		bool first = true;
 		while (itKey.hasNext()) {
 			if (first) first = false; else json += L",";

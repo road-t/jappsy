@@ -23,11 +23,11 @@
 
 class RefJSONObject : public JRefObject {
 public:
-	HashMap<JString, JObject> m_object;
+	JHashMap<JString, JObject> m_object;
 
 	inline void initialize() {
 		TYPE = TypeJSONObject;
-		m_object = new HashMap<JString, JObject>();
+		m_object = new JHashMap<JString, JObject>();
 	}
 
 	inline RefJSONObject() { initialize(); }

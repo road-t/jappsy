@@ -57,7 +57,7 @@ public:
 class GLScenes {
 private:
 	GLRender* context;
-	HashMap<JString, GLScene> list;
+	JHashMap<JString, GLScene> list;
 	
 public:
 	GLScenes(GLRender* context) throw(const char*);

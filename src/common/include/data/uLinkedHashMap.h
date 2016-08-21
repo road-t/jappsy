@@ -20,26 +20,26 @@
 #include <data/uMap.h>
 
 template <typename K, typename V>
-class RefLinkedHashMap : public RefMap<K,V> {
+class JRefLinkedHashMap : public JRefMap<K,V> {
 protected:
-	class LinkedHashMapItem : public JRefObject {
+	class JLinkedHashMapItem : public JRefObject {
 	public:
-		RefMap<K,LinkedHashMapItem>* m_parent = NULL;
+		JRefMap<K,JLinkedHashMapItem>* m_parent = NULL;
 		K* m_key = NULL;
 		
-		LinkedHashMapItem* m_prevItem = NULL;
-		LinkedHashMapItem* m_nextItem = NULL;
+		JLinkedHashMapItem* m_prevItem = NULL;
+		JLinkedHashMapItem* m_nextItem = NULL;
 		
 		V m_value;
 		
-		inline LinkedHashMapItem() {
+		inline JLinkedHashMapItem() {
 		}
 		
-		inline LinkedHashMapItem(const void* value) {
+		inline JLinkedHashMapItem(const void* value) {
 			m_value = V(value);
 		}
 		
-		inline LinkedHashMapItem(const V& value) {
+		inline JLinkedHashMapItem(const V& value) {
 			m_value = value;
 		}
 		
@@ -51,33 +51,33 @@ protected:
 			return m_value != value;
 		}
 		
-		inline bool operator==(const LinkedHashMapItem& value) const {
+		inline bool operator==(const JLinkedHashMapItem& value) const {
 			return m_value == value.m_value;
 		}
 		
-		inline bool operator!=(const LinkedHashMapItem& value) const {
+		inline bool operator!=(const JLinkedHashMapItem& value) const {
 			return m_value != value.m_value;
 		}
 	};
 	
 protected:
-	typedef Map<K,LinkedHashMapItem>* MapPtr;
+	typedef JMap<K,JLinkedHashMapItem>* MapPtr;
 	
-	Map<K,LinkedHashMapItem>*** m_map = NULL;
+	JMap<K,JLinkedHashMapItem>*** m_map = NULL;
 	
-	LinkedHashMapItem* m_first = NULL;
-	LinkedHashMapItem* m_last = NULL;
+	JLinkedHashMapItem* m_first = NULL;
+	JLinkedHashMapItem* m_last = NULL;
 	
 	uint32_t m_count = 0;
 	
-	inline RefMap<K,LinkedHashMapItem>* createMap(const K& key) throw(const char*) {
+	inline JRefMap<K,JLinkedHashMapItem>* createMap(const K& key) throw(const char*) {
 		uint32_t hash = JObject::hashCode(key);
 		if (m_map == NULL) {
 			m_map = memAlloc(MapPtr*, m_map, 256 * sizeof(MapPtr*));
 			if (m_map == NULL) throw eOutOfMemory;
 		}
 		
-		Map<K,LinkedHashMapItem> **m1 = m_map[hash & 0xFF];
+		JMap<K,JLinkedHashMapItem> **m1 = m_map[hash & 0xFF];
 		if (m1 == NULL) {
 			m1 = memAlloc(MapPtr, m1, 256 * sizeof(MapPtr));
 			if (m1 == NULL) throw eOutOfMemory;
@@ -85,13 +85,13 @@ protected:
 		}
 
 		hash >>= 8;
-		Map<K,LinkedHashMapItem> *m2 = m1[hash & 0xFF];
+		JMap<K,JLinkedHashMapItem> *m2 = m1[hash & 0xFF];
 		if (m2 == NULL) {
-			RefMap<K,LinkedHashMapItem> *m3 = NULL;
+			JRefMap<K,JLinkedHashMapItem> *m3 = NULL;
 			try {
-				m2 = new Map<K,LinkedHashMapItem>();
+				m2 = new JMap<K,JLinkedHashMapItem>();
 				if (m2 == NULL) throw eOutOfMemory;
-				m3 = new RefMap<K,LinkedHashMapItem>();
+				m3 = new JRefMap<K,JLinkedHashMapItem>();
 				if (m3 == NULL) throw eOutOfMemory;
 			} catch (...) {
 				if (m2 != NULL) {
@@ -103,33 +103,33 @@ protected:
 			m1[hash & 0xFF] = m2;
 		}
 
-		return (RefMap<K,LinkedHashMapItem>*)(m2->_object);
+		return (JRefMap<K,JLinkedHashMapItem>*)(m2->_object);
 	}
 	
-	inline RefMap<K,LinkedHashMapItem>* findMap(const K& key) const {
+	inline JRefMap<K,JLinkedHashMapItem>* findMap(const K& key) const {
 		if (m_map != NULL) {
 			uint32_t hash = JObject::hashCode(key);
-			Map<K,LinkedHashMapItem> **m1 = m_map[hash & 0xFF];
+			JMap<K,JLinkedHashMapItem> **m1 = m_map[hash & 0xFF];
 			if (m1 != NULL) {
 				hash >>= 8;
-				Map<K,LinkedHashMapItem> *m2 = m1[hash & 0xFF];
+				JMap<K,JLinkedHashMapItem> *m2 = m1[hash & 0xFF];
 				if (m2 != NULL)
-					return (RefMap<K,LinkedHashMapItem>*)(m2->_object);
+					return (JRefMap<K,JLinkedHashMapItem>*)(m2->_object);
 			}
 		}
 		return NULL;
 	}
 	
-	inline bool containsKey(RefMap<K,LinkedHashMapItem> *map, const K& key) const {
+	inline bool containsKey(JRefMap<K,JLinkedHashMapItem> *map, const K& key) const {
 		if (map != NULL) {
 			return map->containsKey(key);
 		}
 		return false;
 	}
 	
-	inline bool containsValue(RefMap<K,LinkedHashMapItem> *map, const V& value) const {
+	inline bool containsValue(JRefMap<K,JLinkedHashMapItem> *map, const V& value) const {
 		if (map != NULL) {
-			RefList<LinkedHashMapItem> *list = (RefList<LinkedHashMapItem>*)(map->m_values._object);
+			JRefList<JLinkedHashMapItem> *list = (JRefList<JLinkedHashMapItem>*)(map->m_values._object);
 			if (list->m_count > 0) {
 				for (int i = list->m_count-1; i >= 0; i--) {
 					if (list->m_stack[i] != NULL) {
@@ -143,7 +143,7 @@ protected:
 		return false;
 	}
 	
-	inline void removeKey(RefSet<K> *set, int32_t index) {
+	inline void removeKey(JRefSet<K> *set, int32_t index) {
 		set->m_count--;
 		K* key = set->m_stack[index];
 		if ((set->m_count > 0) && (index < set->m_count)) {
@@ -153,24 +153,24 @@ protected:
 		delete key;
 	}
 	
-	inline LinkedHashMapItem* releaseValue(RefList<LinkedHashMapItem> *list, int32_t index) {
+	inline JLinkedHashMapItem* releaseValue(JRefList<JLinkedHashMapItem> *list, int32_t index) {
 		list->m_count--;
-		LinkedHashMapItem* object = list->m_stack[index];
+		JLinkedHashMapItem* object = list->m_stack[index];
 		if ((list->m_count > 0) && (index < list->m_count)) {
-			memmove(list->m_stack + index, list->m_stack + index + 1, (list->m_count - index) * sizeof(LinkedHashMapItem*));
+			memmove(list->m_stack + index, list->m_stack + index + 1, (list->m_count - index) * sizeof(JLinkedHashMapItem*));
 		}
 		list->m_stack[list->m_count] = NULL;
 		return object;
 	}
 
-	Set<K> m_tempSet = new Set<K>();
+	JSet<K> m_tempSet = new JSet<K>();
 	JCollection<V> m_tempValues = new JCollection<V>();
 	
 public:
 	
-	inline RefLinkedHashMap() { THIS.TYPE = TypeLinkedHashMap; }
+	inline JRefLinkedHashMap() { THIS.TYPE = TypeLinkedHashMap; }
 	
-	inline ~RefLinkedHashMap() {
+	inline ~JRefLinkedHashMap() {
 		clear();
 	}
 	
@@ -178,11 +178,11 @@ public:
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,LinkedHashMapItem> **m1 = m_map[i];
+					JMap<K,JLinkedHashMapItem> **m1 = m_map[i];
 					if (m1 != NULL) {
 						for (int j = 0; j < 256; j++) {
 							if (m1[j] != NULL) {
-								Map<K,LinkedHashMapItem> *m2 = m1[j];
+								JMap<K,JLinkedHashMapItem> *m2 = m1[j];
 								if (m2 != NULL) {
 									delete m2;
 									m1[j] = NULL;
@@ -202,7 +202,7 @@ public:
 	}
 	
 	virtual inline bool containsKey(const K& key) const {
-		RefMap<K,LinkedHashMapItem> *map = findMap(key);
+		JRefMap<K,JLinkedHashMapItem> *map = findMap(key);
 		return containsKey(map, key);
 	}
 	
@@ -210,12 +210,12 @@ public:
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,LinkedHashMapItem> **m1 = m_map[i];
+					JMap<K,JLinkedHashMapItem> **m1 = m_map[i];
 					for (int j = 0; j < 256; j++) {
 						if (m1[j] != NULL) {
-							Map<K,LinkedHashMapItem> *m2 = m1[j];
+							JMap<K,JLinkedHashMapItem> *m2 = m1[j];
 							if (m2 != NULL) {
-								if (containsValue((RefMap<K,LinkedHashMapItem>*)(m2->_object), value)) return true;
+								if (containsValue((JRefMap<K,JLinkedHashMapItem>*)(m2->_object), value)) return true;
 							}
 						}
 					}
@@ -226,12 +226,12 @@ public:
 	}
 	
 	virtual inline const V& get(const K& key) const throw(const char*) {
-		RefMap<K,LinkedHashMapItem> *map = findMap(key);
+		JRefMap<K,JLinkedHashMapItem> *map = findMap(key);
 		if (map != NULL) {
 			int32_t index = map->m_keys->search(key);
 			if (index >= 0) {
-				RefList<LinkedHashMapItem> *list = (RefList<LinkedHashMapItem>*)(map->m_values._object);
-				LinkedHashMapItem* item = list->m_stack[index];
+				JRefList<JLinkedHashMapItem> *list = (JRefList<JLinkedHashMapItem>*)(map->m_values._object);
+				JLinkedHashMapItem* item = list->m_stack[index];
 				if (item != NULL) {
 					return item->m_value;
 				}
@@ -241,12 +241,12 @@ public:
 	}
 	
 	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) {
-		RefMap<K,LinkedHashMapItem> *map = findMap(key);
+		JRefMap<K,JLinkedHashMapItem> *map = findMap(key);
 		if (map != NULL) {
 			int32_t index = map->m_keys->search(key);
 			if (index >= 0) {
-				RefList<LinkedHashMapItem> *list = (RefList<LinkedHashMapItem>*)(map->m_values._object);
-				LinkedHashMapItem* item = list->m_stack[index];
+				JRefList<JLinkedHashMapItem> *list = (JRefList<JLinkedHashMapItem>*)(map->m_values._object);
+				JLinkedHashMapItem* item = list->m_stack[index];
 				if (item != NULL) {
 					return item->m_value;
 				}
@@ -259,9 +259,9 @@ public:
 		return (m_count == 0);
 	}
 	
-	virtual inline const Set<K>& keySet() const throw(const char*) {
+	virtual inline const JSet<K>& keySet() const throw(const char*) {
 		m_tempSet->clear();
-		LinkedHashMapItem* item = m_first;
+		JLinkedHashMapItem* item = m_first;
 		while (item != NULL) {
 			m_tempSet->push(*(item->m_key));
 			item = item->m_nextItem;
@@ -270,13 +270,13 @@ public:
 	}
 	
 	virtual inline V& put(const K& key, const V& value) throw(const char*) {
-		RefMap<K,LinkedHashMapItem> *map = createMap(key);
+		JRefMap<K,JLinkedHashMapItem> *map = createMap(key);
 
-		RefSet<K> *set = (RefSet<K>*)(map->m_keys._object);
-		RefList<LinkedHashMapItem> *list = (RefList<LinkedHashMapItem>*)(map->m_values._object);
+		JRefSet<K> *set = (JRefSet<K>*)(map->m_keys._object);
+		JRefList<JLinkedHashMapItem> *list = (JRefList<JLinkedHashMapItem>*)(map->m_values._object);
 
 		K* itemKey;
-		LinkedHashMapItem* item;
+		JLinkedHashMapItem* item;
 		int32_t index = set->search(key);
 		if (index < 0) {
 			itemKey = &(set->push(key));
@@ -301,15 +301,15 @@ public:
 	}
 	
 	virtual inline void remove(const K& key) throw(const char*) {
-		RefMap<K,LinkedHashMapItem> *map = findMap(key);
+		JRefMap<K,JLinkedHashMapItem> *map = findMap(key);
 		if (map != NULL) {
-			RefSet<K> *set = (RefSet<K>*)(map->m_keys._object);
-			RefList<LinkedHashMapItem> *list = (RefList<LinkedHashMapItem>*)(map->m_values._object);
+			JRefSet<K> *set = (JRefSet<K>*)(map->m_keys._object);
+			JRefList<JLinkedHashMapItem> *list = (JRefList<JLinkedHashMapItem>*)(map->m_values._object);
 			if ((set != NULL) && (list != NULL)) {
 				int32_t index = set->search(key);
 				if (index >= 0) {
 					removeKey(set, index);
-					LinkedHashMapItem* item = releaseValue(list, index);
+					JLinkedHashMapItem* item = releaseValue(list, index);
 					if (item != NULL) {
 						if (item->m_prevItem != NULL) {
 							item->m_prevItem->m_nextItem = item->m_nextItem;
@@ -337,7 +337,7 @@ public:
 	
 	virtual inline const JCollection<V>& values() const throw(const char*) {
 		m_tempValues->clear();
-		LinkedHashMapItem* item = m_first;
+		JLinkedHashMapItem* item = m_first;
 		while (item != NULL) {
 			m_tempValues->push(item->m_value);
 			item = item->m_nextItem;
@@ -347,11 +347,11 @@ public:
 };
 
 template <typename K, typename V>
-class LinkedHashMap : public Map<K,V> {
+class JLinkedHashMap : public JMap<K,V> {
 public:
-	JRefTemplate2(LinkedHashMap, LinkedHashMap, RefLinkedHashMap)
+	JRefTemplate2(JLinkedHashMap, JLinkedHashMap, JRefLinkedHashMap)
 	
-	inline LinkedHashMap() {
+	inline JLinkedHashMap() {
 		THIS.initialize();
 	}
 	
@@ -362,7 +362,7 @@ public:
 	virtual inline const V& get(const K& key) const throw(const char*) { return THIS.ref().get(key); }
 	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
-	virtual inline const Set<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
+	virtual inline const JSet<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
 	virtual inline V& put(const K& key, const V& value) throw(const char*) { return THIS.ref().put(key, value); }
 	// putAll
 	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }

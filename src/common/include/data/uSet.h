@@ -21,10 +21,10 @@
 #include <data/uJSON.h>
 
 template <typename Type>
-class RefSet : public RefList<Type> {
+class JRefSet : public JRefList<Type> {
 public:
-	inline RefSet() : RefList<Type>() { THIS.TYPE = TypeSet; }
-	inline RefSet(int initialCapacity) throw(const char*) : RefList<Type>(initialCapacity) { THIS.TYPE = TypeSet; }
+	inline JRefSet() : JRefList<Type>() { THIS.TYPE = TypeSet; }
+	inline JRefSet(int initialCapacity) throw(const char*) : JRefList<Type>(initialCapacity) { THIS.TYPE = TypeSet; }
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		if (!JRefStack<Type>::contains(object)) {
@@ -57,20 +57,20 @@ public:
 };
 
 template <typename Type>
-class SynchronizedSet;
+class JSynchronizedSet;
 
 template <typename Type>
-class Set : public List<Type> {
+class JSet : public JList<Type> {
 public:
-	JRefTemplate(Set, Set, RefSet)
+	JRefTemplate(JSet, JSet, JRefSet)
 	
-	inline Set() {
+	inline JSet() {
 		THIS.initialize();
 	}
 	
-	inline Set(uint32_t initialCapacity) throw(const char*) {
+	inline JSet(uint32_t initialCapacity) throw(const char*) {
 		THIS.initialize();
-		RefSet<Type>* o = new RefSet<Type>(initialCapacity);
+		JRefSet<Type>* o = new JRefSet<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}
@@ -88,15 +88,15 @@ public:
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().JRefStack<Type>::size(); }
 	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().JRefCollection<Type>::toArray(); }
 	
-	static SynchronizedSet<Type> synchronizedSet(Set<Type>* newSet) {
-		return SynchronizedSet<Type>(newSet);
+	static JSynchronizedSet<Type> synchronizedSet(JSet<Type>* newSet) {
+		return JSynchronizedSet<Type>(newSet);
 	}
 };
 
 template <typename Type>
-class SynchronizedSet : public Set<Type> {
+class JSynchronizedSet : public JSet<Type> {
 public:
-	JRefTemplate(SynchronizedSet, Set, RefSet)
+	JRefTemplate(JSynchronizedSet, JSet, JRefSet)
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		bool result;

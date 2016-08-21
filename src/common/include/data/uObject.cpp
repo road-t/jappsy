@@ -37,13 +37,13 @@ const wchar_t TypeStack[] = L"JStack::";
 const wchar_t TypeIterator[] = L"JIterator::";
 const wchar_t TypeListIterator[] = L"JListIterator::";
 const wchar_t TypeCollection[] = L"JCollection::";
-const wchar_t TypeList[] = L"List::";
-const wchar_t TypeSet[] = L"Set::";
-const wchar_t TypeHashSet[] = L"HashSet::";
-const wchar_t TypeLinkedHashSet[] = L"LinkedHashSet::";
-const wchar_t TypeMap[] = L"Map::";
-const wchar_t TypeHashMap[] = L"HashMap::";
-const wchar_t TypeLinkedHashMap[] = L"LinkedHashMap::";
+const wchar_t TypeList[] = L"JList::";
+const wchar_t TypeSet[] = L"JSet::";
+const wchar_t TypeHashSet[] = L"JHashSet::";
+const wchar_t TypeLinkedHashSet[] = L"JLinkedHashSet::";
+const wchar_t TypeMap[] = L"JMap::";
+const wchar_t TypeHashMap[] = L"JHashMap::";
+const wchar_t TypeLinkedHashMap[] = L"JLinkedHashMap::";
 const wchar_t TypeSparseArray[] = L"JSparseArray::";
 
 void CObject::_threadLock() const {

@@ -28,7 +28,7 @@ RefGLObject::~RefGLObject() {
 
 GLObjects::GLObjects(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLObject>();
+	list = new JHashMap<JString, GLObject>();
 }
 
 GLObjects::~GLObjects() {

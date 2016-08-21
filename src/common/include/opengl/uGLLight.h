@@ -68,7 +68,7 @@ public:
 class GLLights {
 private:
 	GLScene scene;
-	HashMap<JString, GLLight> list;
+	JHashMap<JString, GLLight> list;
 	
 public:
 	GLLights(RefGLScene* scene) throw(const char*);

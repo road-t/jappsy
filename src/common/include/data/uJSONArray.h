@@ -27,7 +27,7 @@ class JSONObject;
 
 class RefJSONArray : public JRefObject {
 public:
-	List<JObject> m_array = new ArrayList<JObject>();
+	JList<JObject> m_array = new JArrayList<JObject>();
 	
 	inline RefJSONArray() { TYPE = TypeJSONArray; }
 	

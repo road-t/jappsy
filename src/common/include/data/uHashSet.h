@@ -20,34 +20,34 @@
 #include <data/uSet.h>
 
 template <typename Type>
-class RefHashSet : public RefSet<Type> {
+class JRefHashSet : public JRefSet<Type> {
 protected:
-	Set<Type>*** m_set = NULL;
+	JSet<Type>*** m_set = NULL;
 	
 	uint32_t m_count = 0;
 	
-	inline Set<Type>* createSet(const Type& object) throw(const char*) {
+	inline JSet<Type>* createSet(const Type& object) throw(const char*) {
 		uint32_t hash = JObject::hashCode(object);
 		if (m_set == NULL) {
-			m_set = memAlloc(Set<Type> **, m_set, 256 * sizeof(Set<Type> **));
+			m_set = memAlloc(JSet<Type> **, m_set, 256 * sizeof(JSet<Type> **));
 			if (m_set == NULL) throw eOutOfMemory;
 		}
 
-		Set<Type> **s1 = m_set[hash & 0xFF];
+		JSet<Type> **s1 = m_set[hash & 0xFF];
 		if (s1 == NULL) {
-			s1 = memAlloc(Set<Type> *, s1, 256 * sizeof(Set<Type> *));
+			s1 = memAlloc(JSet<Type> *, s1, 256 * sizeof(JSet<Type> *));
 			if (s1 == NULL) throw eOutOfMemory;
 			m_set[hash & 0xFF] = s1;
 		}
 
 		hash >>= 8;
-		Set<Type> *s2 = s1[hash & 0xFF];
+		JSet<Type> *s2 = s1[hash & 0xFF];
 		if (s2 == NULL) {
-			RefSet<Type> *s3 = NULL;
+			JRefSet<Type> *s3 = NULL;
 			try {
-				s2 = new Set<Type>();
+				s2 = new JSet<Type>();
 				if (s2 == NULL) throw eOutOfMemory;
-				s3 = new RefSet<Type>();
+				s3 = new JRefSet<Type>();
 				if (s3 == NULL) throw eOutOfMemory;
 			} catch (...) {
 				if (s2 != NULL) {
@@ -62,13 +62,13 @@ protected:
 		return s2;
 	}
 	
-	inline Set<Type>* findSet(const Type& object) const {
+	inline JSet<Type>* findSet(const Type& object) const {
 		if (m_set != NULL) {
 			uint32_t hash = JObject::hashCode(object);
-			Set<Type> **s1 = m_set[hash & 0xFF];
+			JSet<Type> **s1 = m_set[hash & 0xFF];
 			if (s1 != NULL) {
 				hash >>= 8;
-				Set<Type> *s2 = s1[hash & 0xFF];
+				JSet<Type> *s2 = s1[hash & 0xFF];
 				return s2;
 			}
 		}
@@ -80,9 +80,9 @@ protected:
 	
 public:
 
-	inline RefHashSet() { THIS.TYPE = TypeHashSet; }
+	inline JRefHashSet() { THIS.TYPE = TypeHashSet; }
 	
-	inline ~RefHashSet() {
+	inline ~JRefHashSet() {
 		clear();
 	}
 	
@@ -90,11 +90,11 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					Set<Type> **s1 = m_set[i];
+					JSet<Type> **s1 = m_set[i];
 					if (s1 != NULL) {
 						for (int j = 0; j < 256; j++) {
 							if (s1[j] != NULL) {
-								Set<Type> *s2 = s1[j];
+								JSet<Type> *s2 = s1[j];
 								if (s2 != NULL) {
 									delete s2;
 									s1[j] = NULL;
@@ -112,7 +112,7 @@ public:
 	}
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
-		Set<Type> *set = createSet(object);
+		JSet<Type> *set = createSet(object);
 		if (set != NULL) {
 			if (!set->contains(object)) {
 				m_count++;
@@ -133,7 +133,7 @@ public:
 	}
 	
 	virtual inline bool contains(const Type& object) const {
-		Set<Type> *set = findSet(object);
+		JSet<Type> *set = findSet(object);
 		if (set != NULL) {
 			return set->contains(object);
 		}
@@ -159,10 +159,10 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					Set<Type> **s1 = m_set[i];
+					JSet<Type> **s1 = m_set[i];
 					for (int j = 0; j < 256; j++) {
 						if (s1[j] != NULL) {
-							Set<Type> *s2 = s1[j];
+							JSet<Type> *s2 = s1[j];
 							if (s2 != NULL) {
 								JIterator<Type> s2it = s2->iterator();
 								while (s2it->hasNext()) {
@@ -179,7 +179,7 @@ public:
 	}
 	
 	virtual inline bool remove(const Type& object) throw(const char*) {
-		Set<Type> *set = findSet(object);
+		JSet<Type> *set = findSet(object);
 		if (set != NULL) {
 			try {
 				if (set->remove(object)) {
@@ -211,10 +211,10 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					Set<Type> **s1 = m_set[i];
+					JSet<Type> **s1 = m_set[i];
 					for (int j = 0; j < 256; j++) {
 						if (s1[j] != NULL) {
-							Set<Type> *s2 = s1[j];
+							JSet<Type> *s2 = s1[j];
 							if (s2 != NULL) {
 								JIterator<Type> it = s2->iterator();
 								while (it->hasNext()) {
@@ -241,11 +241,11 @@ public:
 };
 
 template <typename Type>
-class HashSet : public Set<Type> {
+class JHashSet : public JSet<Type> {
 public:
-	JRefTemplate(HashSet, HashSet, RefHashSet)
+	JRefTemplate(JHashSet, JHashSet, JRefHashSet)
 	
-	inline HashSet() {
+	inline JHashSet() {
 		THIS.initialize();
 	}
 	

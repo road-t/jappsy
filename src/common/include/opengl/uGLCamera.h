@@ -84,7 +84,7 @@ public:
 class GLCameras {
 private:
 	GLRender* context;
-	HashMap<JString, GLCamera> list;
+	JHashMap<JString, GLCamera> list;
 	
 public:
 	GLCamera gui;

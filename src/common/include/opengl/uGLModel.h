@@ -315,8 +315,8 @@ public:
 	JString name;
 	Mat4 transformation;
 	
-	List<GLModelNode> nodes = null;
-	List<GLModelMesh> meshes = null;
+	JList<GLModelNode> nodes = null;
+	JList<GLModelMesh> meshes = null;
 	
 	inline RefGLModelNode() { Mat4Identity(transformation.v); }
 	inline RefGLModelNode(const JString& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
@@ -385,7 +385,7 @@ public:
 class RefGLModel : public JRefObject {
 public:
 	GLRender* context = NULL;
-	List<GLMaterial> materials;
+	JList<GLMaterial> materials;
 	GLModelNode rootnode;
 	
 	inline RefGLModel() { throw eInvalidParams; }
@@ -413,7 +413,7 @@ public:
 class GLModels {
 private:
 	GLRender* context;
-	HashMap<JString, GLModel> list;
+	JHashMap<JString, GLModel> list;
 	
 public:
 	GLModels(GLRender* context) throw(const char*);

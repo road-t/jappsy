@@ -208,7 +208,7 @@ GLuint RefGLShader::bind(GLint index, Vector<GLint>& uniforms) {
 
 GLShaders::GLShaders(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLShader>();
+	list = new JHashMap<JString, GLShader>();
 }
 
 GLShaders::~GLShaders() {

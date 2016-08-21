@@ -20,24 +20,24 @@
 #include <data/uSet.h>
 
 template <typename Type>
-class RefLinkedHashSet : public RefSet<Type> {
+class JRefLinkedHashSet : public JRefSet<Type> {
 protected:
-	class LinkedHashSetItem : public JRefObject {
+	class JLinkedHashSetItem : public JRefObject {
 	public:
-		RefSet<LinkedHashSetItem>* m_parent = NULL;
+		JRefSet<JLinkedHashSetItem>* m_parent = NULL;
 		
-		LinkedHashSetItem* m_prevItem = NULL;
-		LinkedHashSetItem* m_nextItem = NULL;
+		JLinkedHashSetItem* m_prevItem = NULL;
+		JLinkedHashSetItem* m_nextItem = NULL;
 		Type m_value;
 		
-		inline LinkedHashSetItem() {
+		inline JLinkedHashSetItem() {
 		}
 		
-		inline LinkedHashSetItem(const void* value) {
+		inline JLinkedHashSetItem(const void* value) {
 			m_value = value;
 		}
 		
-		inline LinkedHashSetItem(const Type& value) {
+		inline JLinkedHashSetItem(const Type& value) {
 			m_value = value;
 		}
 		
@@ -49,45 +49,45 @@ protected:
 			return m_value != value;
 		}
 		
-		inline bool operator==(const LinkedHashSetItem& value) const {
+		inline bool operator==(const JLinkedHashSetItem& value) const {
 			return m_value == value.m_value;
 		}
 		
-		inline bool operator!=(const LinkedHashSetItem& value) const {
+		inline bool operator!=(const JLinkedHashSetItem& value) const {
 			return m_value != value.m_value;
 		}
 	};
 	
 protected:
-	Set<LinkedHashSetItem>*** m_set = NULL;
+	JSet<JLinkedHashSetItem>*** m_set = NULL;
 	
-	LinkedHashSetItem* m_first = NULL;
-	LinkedHashSetItem* m_last = NULL;
+	JLinkedHashSetItem* m_first = NULL;
+	JLinkedHashSetItem* m_last = NULL;
 	
 	uint32_t m_count = 0;
 	
-	inline RefSet<LinkedHashSetItem>* createSet(const Type& object) throw(const char*) {
+	inline JRefSet<JLinkedHashSetItem>* createSet(const Type& object) throw(const char*) {
 		uint32_t hash = JObject::hashCode(object);
 		if (m_set == NULL) {
-			m_set = memAlloc(Set<LinkedHashSetItem> **, m_set, 256 * sizeof(Set<LinkedHashSetItem> **));
+			m_set = memAlloc(JSet<JLinkedHashSetItem> **, m_set, 256 * sizeof(JSet<JLinkedHashSetItem> **));
 			if (m_set == NULL) throw eOutOfMemory;
 		}
 
-		Set<LinkedHashSetItem> **s1 = m_set[hash & 0xFF];
+		JSet<JLinkedHashSetItem> **s1 = m_set[hash & 0xFF];
 		if (s1 == NULL) {
-			s1 = memAlloc(Set<LinkedHashSetItem> *, s1, 256 * sizeof(Set<LinkedHashSetItem> *));
+			s1 = memAlloc(JSet<JLinkedHashSetItem> *, s1, 256 * sizeof(JSet<JLinkedHashSetItem> *));
 			if (s1 == NULL) throw eOutOfMemory;
 			m_set[hash & 0xFF] = s1;
 		}
 
 		hash >>= 8;
-		Set<LinkedHashSetItem> *s2 = s1[hash & 0xFF];
+		JSet<JLinkedHashSetItem> *s2 = s1[hash & 0xFF];
 		if (s2 == NULL) {
-			RefSet<LinkedHashSetItem> *s3 = NULL;
+			JRefSet<JLinkedHashSetItem> *s3 = NULL;
 			try {
-				s2 = new Set<LinkedHashSetItem>();
+				s2 = new JSet<JLinkedHashSetItem>();
 				if (s2 == NULL) throw eOutOfMemory;
-				s3 = new RefSet<LinkedHashSetItem>();
+				s3 = new JRefSet<JLinkedHashSetItem>();
 				if (s3 == NULL) throw eOutOfMemory;
 			} catch (...) {
 				if (s2 != NULL) {
@@ -99,23 +99,23 @@ protected:
 			s1[hash & 0xFF] = s2;
 		}
 
-		return (RefSet<LinkedHashSetItem>*)(s2->_object);
+		return (JRefSet<JLinkedHashSetItem>*)(s2->_object);
 	}
 	
-	inline RefSet<LinkedHashSetItem>* findSet(const Type& object) const {
+	inline JRefSet<JLinkedHashSetItem>* findSet(const Type& object) const {
 		if (m_set != NULL) {
 			uint32_t hash = JObject::hashCode(object);
-			Set<LinkedHashSetItem> **s1 = m_set[hash & 0xFF];
+			JSet<JLinkedHashSetItem> **s1 = m_set[hash & 0xFF];
 			if (s1 != NULL) {
 				hash >>= 8;
-				Set<LinkedHashSetItem> *s2 = s1[hash & 0xFF];
-				return (RefSet<LinkedHashSetItem>*)(s2->_object);
+				JSet<JLinkedHashSetItem> *s2 = s1[hash & 0xFF];
+				return (JRefSet<JLinkedHashSetItem>*)(s2->_object);
 			}
 		}
 		return NULL;
 	}
 
-	inline bool contains(RefSet<LinkedHashSetItem> *set, const Type& object) const {
+	inline bool contains(JRefSet<JLinkedHashSetItem> *set, const Type& object) const {
 		if (set != NULL) {
 			if (set->m_count > 0) {
 				for (int i = set->m_count-1; i >= 0; i--) {
@@ -130,7 +130,7 @@ protected:
 		return false;
 	}
 	
-	inline int32_t search(RefSet<LinkedHashSetItem> *set, const Type& value) const {
+	inline int32_t search(JRefSet<JLinkedHashSetItem> *set, const Type& value) const {
 		if (set != NULL) {
 			if (set->m_count > 0) {
 				for (int i = set->m_count-1; i >= 0; i--) {
@@ -145,14 +145,14 @@ protected:
 		return -1;
 	}
 	
-	inline LinkedHashSetItem* release(RefSet<LinkedHashSetItem> *set, const Type& value) {
+	inline JLinkedHashSetItem* release(JRefSet<JLinkedHashSetItem> *set, const Type& value) {
 		if (set != NULL) {
 			int32_t index = search(set, value);
 			if (index >= 0) {
 				set->m_count--;
-				LinkedHashSetItem* object = set->m_stack[index];
+				JLinkedHashSetItem* object = set->m_stack[index];
 				if ((set->m_count > 0) && (index < set->m_count)) {
-					memmove(set->m_stack + index, set->m_stack + index + 1, (set->m_count - index) * sizeof(LinkedHashSetItem*));
+					memmove(set->m_stack + index, set->m_stack + index + 1, (set->m_count - index) * sizeof(JLinkedHashSetItem*));
 				}
 				set->m_stack[set->m_count] = NULL;
 				return object;
@@ -165,9 +165,9 @@ protected:
 	
 public:
 	
-	inline RefLinkedHashSet() { THIS.TYPE = TypeLinkedHashSet; }
+	inline JRefLinkedHashSet() { THIS.TYPE = TypeLinkedHashSet; }
 	
-	inline ~RefLinkedHashSet() {
+	inline ~JRefLinkedHashSet() {
 		clear();
 	}
 	
@@ -175,11 +175,11 @@ public:
 		if (m_set != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_set[i] != NULL) {
-					Set<LinkedHashSetItem> **s1 = m_set[i];
+					JSet<JLinkedHashSetItem> **s1 = m_set[i];
 					if (s1 != NULL) {
 						for (int j = 0; j < 256; j++) {
 							if (s1[j] != NULL) {
-								Set<LinkedHashSetItem> *s2 = s1[j];
+								JSet<JLinkedHashSetItem> *s2 = s1[j];
 								if (s2 != NULL) {
 									delete s2;
 									s1[j] = NULL;
@@ -199,10 +199,10 @@ public:
 	}
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
-		RefSet<LinkedHashSetItem> *set = createSet(object);
+		JRefSet<JLinkedHashSetItem> *set = createSet(object);
 		if (set != NULL) {
 			if (!contains(set, object)) {
-				LinkedHashSetItem* item = &(set->push(object));
+				JLinkedHashSetItem* item = &(set->push(object));
 				item->m_parent = set;
 				item->m_prevItem = m_last;
 				
@@ -229,7 +229,7 @@ public:
 	}
 	
 	virtual inline bool contains(const Type& object) const {
-		RefSet<LinkedHashSetItem> *set = findSet(object);
+		JRefSet<JLinkedHashSetItem> *set = findSet(object);
 		return contains(set, object);
 	}
 	
@@ -249,7 +249,7 @@ public:
 	
 	virtual inline const JIterator<Type> iterator() const throw(const char*) {
 		m_tempIt->clear();
-		LinkedHashSetItem* item = m_first;
+		JLinkedHashSetItem* item = m_first;
 		while (item != NULL) {
 			m_tempIt->push(item->m_value);
 			item = item->m_nextItem;
@@ -259,9 +259,9 @@ public:
 	}
 	
 	virtual inline bool remove(const Type& object) throw(const char*) {
-		RefSet<LinkedHashSetItem> *set = findSet(object);
+		JRefSet<JLinkedHashSetItem> *set = findSet(object);
 		if (set != NULL) {
-			LinkedHashSetItem* item = release(set, object);
+			JLinkedHashSetItem* item = release(set, object);
 			if (item != NULL) {
 				if (item->m_prevItem != NULL)
 					item->m_prevItem->m_nextItem = item->m_nextItem;
@@ -292,11 +292,11 @@ public:
 	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) {
 		bool result = false;
 		
-		LinkedHashSetItem* it = m_first;
+		JLinkedHashSetItem* it = m_first;
 		while (it != NULL) {
 			if (!collection->contains(it->m_value)) {
-				RefSet<LinkedHashSetItem> *set = it->m_parent;
-				LinkedHashSetItem* item = release(set, it->m_value);
+				JRefSet<JLinkedHashSetItem> *set = it->m_parent;
+				JLinkedHashSetItem* item = release(set, it->m_value);
 				if (item != NULL) {
 					if (item->m_prevItem != NULL)
 						item->m_prevItem->m_nextItem = item->m_nextItem;
@@ -323,11 +323,11 @@ public:
 };
 
 template <typename Type>
-class LinkedHashSet : public Set<Type> {
+class JLinkedHashSet : public JSet<Type> {
 public:
-	JRefTemplate(LinkedHashSet, LinkedHashSet, RefLinkedHashSet)
+	JRefTemplate(JLinkedHashSet, JLinkedHashSet, JRefLinkedHashSet)
 	
-	inline LinkedHashSet() {
+	inline JLinkedHashSet() {
 		THIS.initialize();
 	}
 	

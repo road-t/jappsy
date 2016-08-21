@@ -51,7 +51,7 @@ public:
 class GLTextures {
 private:
 	GLRender* context;
-	HashMap<JString, GLTexture> list;
+	JHashMap<JString, GLTexture> list;
 	GLTexture defaultTexture;
 	
 public:

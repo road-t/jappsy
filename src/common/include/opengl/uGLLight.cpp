@@ -78,7 +78,7 @@ void RefGLLight::update() {
 
 GLLights::GLLights(RefGLScene* scene) throw(const char*) {
 	THIS.scene = scene;
-	list = new HashMap<JString, GLLight>();
+	list = new JHashMap<JString, GLLight>();
 }
 
 GLLights::~GLLights() {

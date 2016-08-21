@@ -40,7 +40,7 @@ public:
 class GLParticles {
 private:
 	GLRender* context;
-	HashMap<JString, GLParticle> list;
+	JHashMap<JString, GLParticle> list;
 	
 public:
 	GLParticles(GLRender* context) throw(const char*);

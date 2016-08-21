@@ -106,7 +106,7 @@ private:
 #endif
 	
 	JSONObject result;
-	List<File> list;
+	JList<File> list;
 	struct LoaderStatus status;
 	volatile int32_t shutdown = 0;
 	volatile bool updating = false;
@@ -160,7 +160,7 @@ public:
 
 	inline void initialize() {
 		result = new JSONObject();
-		list = new List<File>();
+		list = new JList<File>();
 		handler = new Handler();
 	}
 

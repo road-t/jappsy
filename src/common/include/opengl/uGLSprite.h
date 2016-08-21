@@ -40,7 +40,7 @@ public:
 class GLSprites {
 private:
 	GLRender* context;
-	HashMap<JString, GLSprite> list;
+	JHashMap<JString, GLSprite> list;
 	
 public:
 	GLSprites(GLRender* context) throw(const char*);

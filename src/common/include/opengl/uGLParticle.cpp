@@ -28,7 +28,7 @@ RefGLParticle::~RefGLParticle() {
 
 GLParticles::GLParticles(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLParticle>();
+	list = new JHashMap<JString, GLParticle>();
 }
 
 GLParticles::~GLParticles() {

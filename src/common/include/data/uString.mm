@@ -3961,8 +3961,8 @@ JString JString::replaceFirst(const JString& regularExpression, const JString& r
 }
 
 /*
-List<JString> CString::split(const JString& regularExpression, uint32_t limit = 0) const {
- List<JString> list = new ArrayList<JString>();
+JList<JString> CString::split(const JString& regularExpression, uint32_t limit = 0) const {
+ JList<JString> list = new JArrayList<JString>();
  if ((regularExpression._object == nil) || (((CString*)regularExpression._object)->strLength == 0)) {
  list.add(*this);
  return list;

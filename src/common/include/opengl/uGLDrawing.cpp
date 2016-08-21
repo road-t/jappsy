@@ -28,7 +28,7 @@ RefGLDrawing::~RefGLDrawing() {
 
 GLDrawings::GLDrawings(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLDrawing>();
+	list = new JHashMap<JString, GLDrawing>();
 }
 
 GLDrawings::~GLDrawings() {

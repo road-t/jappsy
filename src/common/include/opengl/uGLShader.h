@@ -58,7 +58,7 @@ public:
 class GLShaders {
 private:
 	GLRender* context;
-	HashMap<JString, GLShader> list;
+	JHashMap<JString, GLShader> list;
 	
 public:
 	GLShaders(GLRender* context) throw(const char*);

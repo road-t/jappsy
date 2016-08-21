@@ -40,7 +40,7 @@ public:
 class GLDrawings {
 private:
 	GLRender* context;
-	HashMap<JString, GLDrawing> list;
+	JHashMap<JString, GLDrawing> list;
 	
 public:
 	GLDrawings(GLRender* context) throw(const char*);

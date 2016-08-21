@@ -21,23 +21,23 @@
 #include <data/uJSON.h>
 
 template <typename K, typename V>
-class RefMap : public JRefObject {
+class JRefMap : public JRefObject {
 public:
-	Set<K> m_keys;
-	List<V> m_values;
+	JSet<K> m_keys;
+	JList<V> m_values;
 	
 public:
 	
-	inline RefMap() throw(const char*) {
+	inline JRefMap() throw(const char*) {
 		TYPE = TypeMap;
-		m_keys = new Set<K>();
-		m_values = new List<V>();
+		m_keys = new JSet<K>();
+		m_values = new JList<V>();
 	}
 	
-	inline RefMap(int initialCapacity) throw(const char*) {
+	inline JRefMap(int initialCapacity) throw(const char*) {
 		TYPE = TypeMap;
-		m_keys = new Set<K>(initialCapacity);
-		m_values = new List<V>(initialCapacity);
+		m_keys = new JSet<K>(initialCapacity);
+		m_values = new JList<V>(initialCapacity);
 	}
 	
 	virtual inline void clear() throw(const char*) {
@@ -75,7 +75,7 @@ public:
 		return m_keys.ref().JRefStack<K>::empty();
 	}
 	
-	virtual inline const Set<K>& keySet() const {
+	virtual inline const JSet<K>& keySet() const {
 		return m_keys;
 	}
 	
@@ -85,7 +85,7 @@ public:
 			m_keys.ref().JRefStack<K>::push(key);
 			return m_values.ref().JRefStack<V>::push(value);
 		} else {
-			return m_values.ref().RefList<V>::set(index, value);
+			return m_values.ref().JRefList<V>::set(index, value);
 		}
 	}
 	
@@ -122,20 +122,20 @@ public:
 };
 
 template <typename K, typename V>
-class SynchronizedMap;
+class JSynchronizedMap;
 
 template <typename K, typename V>
-class Map : public JObject {
+class JMap : public JObject {
 public:
-	JRefTemplate2(Map, Map, RefMap)
+	JRefTemplate2(JMap, JMap, JRefMap)
 	
-	inline Map() {
+	inline JMap() {
 		THIS.initialize();
 	}
 	
-	inline Map(uint32_t initialCapacity) {
+	inline JMap(uint32_t initialCapacity) {
 		THIS.initialize();
-		RefMap<K,V>* o = new RefMap<K,V>(initialCapacity);
+		JRefMap<K,V>* o = new JRefMap<K,V>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}
@@ -147,22 +147,22 @@ public:
 	virtual inline const V& get(const K& key) const throw(const char*) { return THIS.ref().get(key); }
 	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
-	virtual inline const Set<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
+	virtual inline const JSet<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
 	virtual inline V& put(const K& key, const V& value) throw(const char*) { return THIS.ref().put(key, value); }
 	// putAll
 	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
 	virtual inline const JCollection<V>& values() const throw(const char*) { return THIS.ref().values(); }
 	
-	static SynchronizedMap<K,V> synchronizedMap(Map<K,V>* newMap) {
-		return SynchronizedMap<K,V>(newMap);
+	static JSynchronizedMap<K,V> synchronizedMap(JMap<K,V>* newMap) {
+		return JSynchronizedMap<K,V>(newMap);
 	}
 };
 
 template <typename K, typename V>
-class SynchronizedMap : public Map<K,V> {
+class JSynchronizedMap : public JMap<K,V> {
 public:
-	JRefTemplate2(SynchronizedMap, Map, RefMap)
+	JRefTemplate2(JSynchronizedMap, JMap, JRefMap)
 	
 	virtual inline void clear() throw(const char*) {
 		synchronized(*this) {
@@ -231,8 +231,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const Set<K>& keySet() const throw(const char*) {
-		const Set<K>* result;
+	virtual inline const JSet<K>& keySet() const throw(const char*) {
+		const JSet<K>* result;
 		synchronized(*this) {
 			result = &(THIS.ref().keySet());
 			THIS.notifyAll();

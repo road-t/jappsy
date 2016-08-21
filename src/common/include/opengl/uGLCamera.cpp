@@ -138,7 +138,7 @@ bool RefGLCamera::update() {
 
 GLCameras::GLCameras(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLCamera>();
+	list = new JHashMap<JString, GLCamera>();
 	gui = null;
 }
 

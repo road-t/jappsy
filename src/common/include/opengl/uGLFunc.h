@@ -40,7 +40,7 @@ public:
 class GLFuncs {
 private:
 	GLRender* context;
-	HashMap<JString, GLFunc> list;
+	JHashMap<JString, GLFunc> list;
 	
 public:
 	GLFuncs(GLRender* context) throw(const char*);

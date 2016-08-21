@@ -20,20 +20,20 @@
 #include <data/uMap.h>
 
 template <typename K, typename V>
-class RefHashMap : public RefMap<K,V> {
+class JRefHashMap : public JRefMap<K,V> {
 protected:
-	typedef Map<K,V>* MapPtr;
-	Map<K,V>*** m_map = NULL;
+	typedef JMap<K,V>* MapPtr;
+	JMap<K,V>*** m_map = NULL;
 	uint32_t m_count = 0;
 	
-	inline RefMap<K,V>* createMap(const K& key) throw(const char*) {
+	inline JRefMap<K,V>* createMap(const K& key) throw(const char*) {
 		uint32_t hash = JObject::hashCode(key);
 		if (m_map == NULL) {
 			m_map = memAlloc(MapPtr*, m_map, 256 * sizeof(MapPtr*));
 			if (m_map == NULL) throw eOutOfMemory;
 		}
 
-		Map<K,V> **m1 = m_map[hash & 0xFF];
+		JMap<K,V> **m1 = m_map[hash & 0xFF];
 		if (m1 == NULL) {
 			m1 = memAlloc(MapPtr, m1, 256 * sizeof(MapPtr));
 			if (m_map == NULL) throw eOutOfMemory;
@@ -41,13 +41,13 @@ protected:
 		}
 
 		hash >>= 8;
-		Map<K,V> *m2 = m1[hash & 0xFF];
+		JMap<K,V> *m2 = m1[hash & 0xFF];
 		if (m2 == NULL) {
-			RefMap<K,V> *m3 = NULL;
+			JRefMap<K,V> *m3 = NULL;
 			try {
-				m2 = new Map<K,V>();
+				m2 = new JMap<K,V>();
 				if (m2 == NULL) throw eOutOfMemory;
-				m3 = new RefMap<K,V>();
+				m3 = new JRefMap<K,V>();
 				if (m3 == NULL) throw eOutOfMemory;
 			} catch (...) {
 				if (m2 != NULL) {
@@ -59,31 +59,31 @@ protected:
 			m1[hash & 0xFF] = m2;
 		}
 
-		return (RefMap<K,V>*)(m2->_object);
+		return (JRefMap<K,V>*)(m2->_object);
 	}
 	
-	inline RefMap<K,V>* findMap(const K& key) const {
+	inline JRefMap<K,V>* findMap(const K& key) const {
 		if (m_map != NULL) {
 			uint32_t hash = JObject::hashCode(key);
-			Map<K,V> **m1 = m_map[hash & 0xFF];
+			JMap<K,V> **m1 = m_map[hash & 0xFF];
 			if (m1 != NULL) {
 				hash >>= 8;
-				Map<K,V> *m2 = m1[hash & 0xFF];
+				JMap<K,V> *m2 = m1[hash & 0xFF];
 				if (m2 != NULL)
-					return (RefMap<K,V>*)(m2->_object);
+					return (JRefMap<K,V>*)(m2->_object);
 			}
 		}
 		return NULL;
 	}
 	
-	Set<K> m_tempSet = new Set<K>();
+	JSet<K> m_tempSet = new JSet<K>();
 	JCollection<V> m_tempValues = new JCollection<V>();
 	
 public:
 	
-	inline RefHashMap() { THIS.TYPE = TypeHashMap; }
+	inline JRefHashMap() { THIS.TYPE = TypeHashMap; }
 	
-	inline ~RefHashMap() {
+	inline ~JRefHashMap() {
 		clear();
 	}
 	
@@ -91,11 +91,11 @@ public:
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,V> **m1 = m_map[i];
+					JMap<K,V> **m1 = m_map[i];
 					if (m1 != NULL) {
 						for (int j = 0; j < 256; j++) {
 							if (m1[j] != NULL) {
-								Map<K,V> *m2 = m1[j];
+								JMap<K,V> *m2 = m1[j];
 								if (m2 != NULL) {
 									delete m2;
 									m1[j] = NULL;
@@ -113,7 +113,7 @@ public:
 	}
 	
 	virtual inline bool containsKey(const K& key) const {
-		RefMap<K,V> *map = findMap(key);
+		JRefMap<K,V> *map = findMap(key);
 		if (map != NULL) {
 			return map->containsKey(key);
 		}
@@ -124,10 +124,10 @@ public:
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,V> **m1 = m_map[i];
+					JMap<K,V> **m1 = m_map[i];
 					for (int j = 0; j < 256; j++) {
 						if (m1[j] != NULL) {
-							Map<K,V> *m2 = m1[j];
+							JMap<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								if (m2->containsValue(value)) return true;
 							}
@@ -140,14 +140,14 @@ public:
 	}
 	
 	virtual inline const V& get(const K& key) const throw(const char*) {
-		RefMap<K,V> *map = findMap(key);
+		JRefMap<K,V> *map = findMap(key);
 		if (map != NULL)
 			return map->get(key);
 		throw eNotFound;
 	}
 	
 	virtual inline const V& opt(const K& key, const V& defaultValue) const {
-		RefMap<K,V> *map = findMap(key);
+		JRefMap<K,V> *map = findMap(key);
 		if (map != NULL)
 			return map->opt(key, defaultValue);
 		return defaultValue;
@@ -158,17 +158,17 @@ public:
 	}
 	
 	
-	virtual inline const Set<K>& keySet() const throw(const char*) {
+	virtual inline const JSet<K>& keySet() const throw(const char*) {
 		m_tempSet.ref().clear();
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,V> **m1 = m_map[i];
+					JMap<K,V> **m1 = m_map[i];
 					for (int j = 0; j < 256; j++) {
 						if (m1[j] != NULL) {
-							Map<K,V> *m2 = m1[j];
+							JMap<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
-								Set<K> m2set = m2->keySet();
+								JSet<K> m2set = m2->keySet();
 								JIterator<K> m2it = m2set.iterator();
 								while (m2it.hasNext()) {
 									m_tempSet.ref().push(m2it.next());
@@ -183,7 +183,7 @@ public:
 	}
 	
 	virtual inline V& put(const K& key, const V& value) throw(const char*) {
-		RefMap<K,V> *map = createMap(key);
+		JRefMap<K,V> *map = createMap(key);
 		int prevSize = map->size();
 		try {
 			V* result = &(map->put(key, value));
@@ -198,7 +198,7 @@ public:
 	}
 	
 	virtual inline void remove(const K& key) throw(const char*) {
-		RefMap<K,V> *map = findMap(key);
+		JRefMap<K,V> *map = findMap(key);
 		if (map != NULL) {
 			int prevSize = map->size();
 			try {
@@ -222,10 +222,10 @@ public:
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
 				if (m_map[i] != NULL) {
-					Map<K,V> **m1 = m_map[i];
+					JMap<K,V> **m1 = m_map[i];
 					for (int j = 0; j < 256; j++) {
 						if (m1[j] != NULL) {
-							Map<K,V> *m2 = m1[j];
+							JMap<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
 								JCollection<V> m2col = m2->values();
 								JIterator<V> m2it = m2col.iterator();
@@ -243,11 +243,11 @@ public:
 };
 
 template <typename K, typename V>
-class HashMap : public Map<K,V> {
+class JHashMap : public JMap<K,V> {
 public:
-	JRefTemplate2(HashMap, HashMap, RefHashMap)
+	JRefTemplate2(JHashMap, JHashMap, JRefHashMap)
 	
-	inline HashMap() {
+	inline JHashMap() {
 		THIS.initialize();
 	}
 	
@@ -258,7 +258,7 @@ public:
 	virtual inline const V& get(const K& key) const throw(const char*) { return THIS.ref().get(key); }
 	virtual inline const V& opt(const K& key, const V& defaultValue) const throw(const char*) { return THIS.ref().opt(key, defaultValue); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
-	virtual inline const Set<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
+	virtual inline const JSet<K>& keySet() const throw(const char*) { return THIS.ref().keySet(); }
 	virtual inline V& put(const K& key, const V& value) throw(const char*) { return THIS.ref().put(key, value); }
 	// putAll
 	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }

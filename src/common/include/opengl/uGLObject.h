@@ -41,7 +41,7 @@ public:
 class GLObjects {
 private:
 	GLRender* context;
-	HashMap<JString, GLObject> list;
+	JHashMap<JString, GLObject> list;
 	
 public:
 	GLObjects(GLRender* context) throw(const char*);

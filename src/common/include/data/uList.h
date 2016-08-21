@@ -20,14 +20,14 @@
 #include <data/uCollection.h>
 
 template <typename Type>
-class List;
+class JList;
 
 template <typename Type>
-class RefList : public JRefCollection<Type> {
+class JRefList : public JRefCollection<Type> {
 public:
-	inline RefList() : JRefCollection<Type>() { THIS.TYPE = TypeList; }
+	inline JRefList() : JRefCollection<Type>() { THIS.TYPE = TypeList; }
 	
-	inline RefList(int initialCapacity) throw(const char*) : JRefCollection<Type>(initialCapacity) {
+	inline JRefList(int initialCapacity) throw(const char*) : JRefCollection<Type>(initialCapacity) {
 		THIS.TYPE = TypeList;
 	}
 	
@@ -161,11 +161,11 @@ public:
 			throw eOutOfRange;
 	}
 	
-	virtual inline List<Type> subList(int32_t start, int32_t end) throw(const char*) {
+	virtual inline JList<Type> subList(int32_t start, int32_t end) throw(const char*) {
 		if (start >= THIS.m_count)
-			return List<Type>(null);
+			return JList<Type>(null);
 		
-		List<Type> list;
+		JList<Type> list;
 		if (start < 0) start = THIS.m_count + start;
 		if (start < 0) start = 0;
 		if (end < 0) end = THIS.m_count + end; else if (end > THIS.m_count) end = THIS.m_count;
@@ -189,20 +189,20 @@ public:
 };
 
 template <typename Type>
-class SynchronizedList;
+class JSynchronizedList;
 
 template <typename Type>
-class List : public JCollection<Type> {
+class JList : public JCollection<Type> {
 public:
-	JRefTemplate(List, List, RefList)
+	JRefTemplate(JList, JList, JRefList)
 	
-	inline List() {
+	inline JList() {
 		THIS.initialize();
 	}
 	
-	inline List(uint32_t initialCapacity) {
+	inline JList(uint32_t initialCapacity) {
 		THIS.initialize();
-		RefList<Type>* o = new RefList<Type>(initialCapacity);
+		JRefList<Type>* o = new JRefList<Type>(initialCapacity);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
 	}
@@ -226,28 +226,28 @@ public:
 	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().JRefCollection<Type>::retainAll(collection); }
 	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) { return THIS.ref().set(index, value); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().JRefStack<Type>::size(); }
-	virtual inline List<Type> subList(int32_t start, int32_t end) throw(const char*) { return THIS.ref().subList(start, end); }
+	virtual inline JList<Type> subList(int32_t start, int32_t end) throw(const char*) { return THIS.ref().subList(start, end); }
 	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().JRefCollection<Type>::toArray(); }
 	
-	static SynchronizedList<Type> synchronizedList(List<Type>* newList) {
-		return SynchronizedList<Type>(newList);
+	static JSynchronizedList<Type> synchronizedList(JList<Type>* newList) {
+		return JSynchronizedList<Type>(newList);
 	}
 };
 
 template <typename Type>
-class ArrayList : public List<Type> {
+class JArrayList : public JList<Type> {
 public:
-	JRefTemplate(ArrayList, List, RefList)
+	JRefTemplate(JArrayList, JList, JRefList)
 
-	inline ArrayList() {
+	inline JArrayList() {
 		THIS.initialize();
 	}
 };
 
 template <typename Type>
-class SynchronizedList : public List<Type> {
+class JSynchronizedList : public JList<Type> {
 public:
-	JRefTemplate(SynchronizedList, List, RefList)
+	JRefTemplate(JSynchronizedList, JList, JRefList)
 	
 	virtual inline bool add(const Type& object) throw(const char*) {
 		synchronized(*this) {
@@ -484,8 +484,8 @@ public:
 		return result;
 	}
 	
-	virtual inline List<Type> subList(int32_t start, int32_t end) throw(const char*) {
-		List<Type> result;
+	virtual inline JList<Type> subList(int32_t start, int32_t end) throw(const char*) {
+		JList<Type> result;
 		synchronized(*this) {
 			try {
 				result = THIS.ref().subList(start, end);
@@ -505,6 +505,108 @@ public:
 			THIS.notifyAll();
 		}
 		return result;
+	}
+};
+
+template <typename Type>
+class CList : public CCollection<Type> {
+public:
+	inline CList(void (*onrelease)(Type& value) = NULL) : CCollection<Type>(onrelease) { }
+	inline CList(int initialCapacity, void (*onrelease)(Type& value) = NULL) throw(const char*) : CCollection<Type>(initialCapacity, onrelease) { }
+	
+	virtual inline bool add(int32_t index, const Type& object) throw(const char*) {
+		if ((index >= 0) && (index <= THIS.m_count)) {
+			if ((THIS.m_count > 0) && (THIS.m_initialCapacity > 0) && (THIS.m_count >= THIS.m_initialCapacity)) {
+				if (index > 0) {
+					if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[0]);
+					if (index > 1) memmove(THIS.m_stack, THIS.m_stack + 1, (index - 1) * sizeof(Type));
+				
+					index--;
+					THIS.m_stack[index] = object;
+				} else {
+					if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[THIS.m_count - 1]);
+					if (THIS.m_count > 1) memmove(THIS.m_stack + 1, THIS.m_stack, (THIS.m_count - 1) * sizeof(Type));
+						
+					THIS.m_stack[0] = object;
+				}
+			} else {
+				THIS.resize(THIS.m_count + 1);
+				
+				if (index < THIS.m_count) memmove(THIS.m_stack + index + 1, THIS.m_stack + index, (THIS.m_count - index) * sizeof(Type));
+					
+				THIS.m_count++;
+				THIS.m_stack[index] = object;
+			}
+		}
+		return true;
+	}
+	
+	virtual inline bool addAll(int32_t index, CCollection<Type>& collection) throw(const char*) {
+		if ((index >= 0) && (index <= THIS.m_count)) {
+			int size = collection.size();
+			if (size > 0) {
+				if (THIS.m_initialCapacity > 0) {
+					int32_t count = collection.count();
+					const Type* items = collection.items();
+					for (int i = count - 1; i >= 0; i--) {
+						add(index, items[i]);
+					}
+				} else {
+					THIS.resize(THIS.m_count + size);
+					
+					if (index < THIS.m_count) memmove(THIS.m_stack + index + size, THIS.m_stack + index, (THIS.m_count - index) * sizeof(Type));
+
+					memcpy(THIS.m_stack + index, collection.items(), size * sizeof(Type));
+					THIS.m_count += size;
+				}
+			}
+		} else
+			throw eOutOfRange;
+		
+		return true;
+	}
+	
+	virtual inline int32_t lastIndexOf(const Type& value) const {
+		int32_t foundIndex = -1;
+		if (THIS.m_count > 0) {
+			for (int32_t i = THIS.m_count-1; i >= 0; i--) {
+				if (THIS.m_stack[i] == value) foundIndex = i;
+			}
+		}
+		return foundIndex;
+	}
+	
+	virtual inline const CListIterator<Type>& listIterator(int32_t index = 0) const {
+		CIterator<Type>::reset(index);
+		return CListIterator<Type>(*this);
+	}
+	
+	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) {
+		if ((index >= 0) && (index < THIS.m_count)) {
+			if (THIS.m_onrelease != NULL) THIS.m_onrelease(THIS.m_stack[index]);
+			return THIS.m_stack[index] = value;
+		} else
+			throw eOutOfRange;
+	}
+	
+	virtual inline CList<Type>* subList(int32_t start, int32_t end) throw(const char*) {
+		if (start >= THIS.m_count)
+			return NULL;
+			
+		CList<Type>* list = new CList<Type>();
+		if (list == NULL)
+			throw eOutOfMemory;
+		
+		if (start < 0) start = THIS.m_count + start;
+		if (start < 0) start = 0;
+		if (end < 0) end = THIS.m_count + end; else if (end > THIS.m_count) end = THIS.m_count;
+		if (end < 0) end = 0;
+		if (start != end) {
+			list->resize(end - start);
+			list->m_count = (end - start);
+			memcpy((Type*)(list->items()), THIS.items(), (end - start) * sizeof(Type));
+		}
+		return list;
 	}
 };
 

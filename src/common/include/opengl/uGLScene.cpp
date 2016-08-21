@@ -32,7 +32,7 @@ RefGLScene::~RefGLScene() {
 
 GLScenes::GLScenes(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLScene>();
+	list = new JHashMap<JString, GLScene>();
 }
 
 GLScenes::~GLScenes() {

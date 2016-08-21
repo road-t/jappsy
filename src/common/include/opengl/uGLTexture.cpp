@@ -74,7 +74,7 @@ static Vec4 defaultTextureColor = { 0, 0, 0, 0 };
 
 GLTextures::GLTextures(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLTexture>();
+	list = new JHashMap<JString, GLTexture>();
 	defaultTexture = createSolidTexture(L"null", defaultTextureColor);
 }
 

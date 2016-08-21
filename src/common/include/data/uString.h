@@ -526,7 +526,7 @@ extern "C" {
 		JString replaceFirst(const CString& regularExpression, const CString& replacement) const;
 		JString replaceFirst(const JString& regularExpression, const JString& replacement) const;
 
-		//List<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
+		//JList<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
 #else
 	#warning Cross platform JString not complete
 #endif
@@ -775,7 +775,7 @@ extern "C" {
 		JString replaceFirst(const CString& regularExpression, const CString& replacement) const;
 		JString replaceFirst(const JString& regularExpression, const JString& replacement) const;
 		
-		//List<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
+		//JList<JString> split(const JString& regularExpression, uint32_t limit = 0) const;
 #else
 	#warning Cross platform JString not complete
 #endif

@@ -130,7 +130,7 @@ RefGLModelNode::~RefGLModelNode() {
 GLModelNode& RefGLModelNode::insertNode(const GLModelNode& node) throw(const char*) {
 	if (meshes == null) {
 		if (nodes == null) {
-			nodes = new List<GLModelNode>();
+			nodes = new JList<GLModelNode>();
 		}
 		return nodes.push(node);
 	}
@@ -140,7 +140,7 @@ GLModelNode& RefGLModelNode::insertNode(const GLModelNode& node) throw(const cha
 GLModelMesh& RefGLModelNode::insertMesh(const GLModelMesh& mesh) throw(const char*) {
 	if (nodes == null) {
 		if (meshes == null) {
-			meshes = new List<GLModelMesh>();
+			meshes = new JList<GLModelMesh>();
 		}
 		return meshes.push(mesh);
 	}
@@ -258,7 +258,7 @@ GLuint RefGLModel::insertMaterial(GLMaterial& material) {
 
 GLModels::GLModels(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLModel>();
+	list = new JHashMap<JString, GLModel>();
 }
 
 GLModels::~GLModels() {

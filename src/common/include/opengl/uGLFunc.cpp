@@ -28,7 +28,7 @@ RefGLFunc::~RefGLFunc() {
 
 GLFuncs::GLFuncs(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<JString, GLFunc>();
+	list = new JHashMap<JString, GLFunc>();
 }
 
 GLFuncs::~GLFuncs() {

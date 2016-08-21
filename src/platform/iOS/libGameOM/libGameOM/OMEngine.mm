@@ -83,6 +83,7 @@ void OMEngine::onError(const JString& error) {
 #include <data/uStack.h>
 #include <data/uIterator.h>
 #include <data/uListIterator.h>
+#include <data/uCollection.h>
 
 OMEngine::OMEngine() {
     CStack<int> stack;
@@ -92,6 +93,8 @@ OMEngine::OMEngine() {
     it.push(1);
     CListIterator<int> lit;
     lit.push(1);
+    CCollection<GLfloat*> col;
+    col.push(NULL);
     
     const char *sOMLoadRes =
         #include "OMLoad.res"

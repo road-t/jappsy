@@ -23,11 +23,11 @@ template <typename Type>
 class List;
 
 template <typename Type>
-class RefList : public RefCollection<Type> {
+class RefList : public JRefCollection<Type> {
 public:
-	inline RefList() : RefCollection<Type>() { THIS.TYPE = TypeList; }
+	inline RefList() : JRefCollection<Type>() { THIS.TYPE = TypeList; }
 	
-	inline RefList(int initialCapacity) throw(const char*) : RefCollection<Type>(initialCapacity) {
+	inline RefList(int initialCapacity) throw(const char*) : JRefCollection<Type>(initialCapacity) {
 		THIS.TYPE = TypeList;
 	}
 	
@@ -82,7 +82,7 @@ public:
 		return true;
 	}
 	
-	virtual inline bool addAll(int32_t index, Collection<Type>& collection) throw(const char*) {
+	virtual inline bool addAll(int32_t index, JCollection<Type>& collection) throw(const char*) {
 		if ((index >= 0) && (index <= THIS.m_count)) {
 			int size = collection.size();
 			if (size > 0) {
@@ -192,7 +192,7 @@ template <typename Type>
 class SynchronizedList;
 
 template <typename Type>
-class List : public Collection<Type> {
+class List : public JCollection<Type> {
 public:
 	JRefTemplate(List, List, RefList)
 	
@@ -207,27 +207,27 @@ public:
 		THIS.setRef(o);
 	}
 	
-	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().RefCollection<Type>::add(object); }
+	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().JRefCollection<Type>::add(object); }
 	virtual inline bool add(int32_t index, const Type& object) throw(const char*) { return THIS.ref().add(index, object); }
-	virtual inline bool addAll(Collection<Type> collection) throw(const char*) { return THIS.ref().RefCollection<Type>::addAll(collection); }
-	virtual inline bool addAll(int32_t index, Collection<Type>& collection) throw(const char*) { return THIS.ref().addAll(index, collection); }
+	virtual inline bool addAll(JCollection<Type> collection) throw(const char*) { return THIS.ref().JRefCollection<Type>::addAll(collection); }
+	virtual inline bool addAll(int32_t index, JCollection<Type>& collection) throw(const char*) { return THIS.ref().addAll(index, collection); }
 	virtual inline void clear() throw(const char*) { THIS.ref().JRefStack<Type>::clear(); }
 	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::contains(value); }
-	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::containsAll(collection); }
+	virtual inline bool containsAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().JRefCollection<Type>::containsAll(collection); }
 	virtual inline const Type& get(int32_t index) const throw(const char*) { return THIS.ref().JRefStack<Type>::get(index); }
 	virtual inline int32_t indexOf(const Type& value) const throw(const char*) { return THIS.ref().JRefStack<Type>::indexOf(value); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().JRefStack<Type>::isEmpty(); }
-	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().RefCollection<Type>::iterator(); }
+	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().JRefCollection<Type>::iterator(); }
 	virtual inline int32_t lastIndexOf(const Type& value) const throw(const char*) { return THIS.ref().lastIndexOf(value); }
 	virtual inline const JListIterator<Type> listIterator(int32_t index = 0) const throw(const char*) { return THIS.ref().listIterator(index); }
 	virtual inline const Type remove(int32_t index) throw(const char*) { return THIS.ref().JRefStack<Type>::remove(index); }
-	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().RefCollection<Type>::remove(value); }
-	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::removeAll(collection); }
-	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().RefCollection<Type>::retainAll(collection); }
+	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().JRefCollection<Type>::remove(value); }
+	virtual inline bool removeAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().JRefCollection<Type>::removeAll(collection); }
+	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().JRefCollection<Type>::retainAll(collection); }
 	virtual inline Type& set(int32_t index, const Type& value) throw(const char*) { return THIS.ref().set(index, value); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().JRefStack<Type>::size(); }
 	virtual inline List<Type> subList(int32_t start, int32_t end) throw(const char*) { return THIS.ref().subList(start, end); }
-	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().RefCollection<Type>::toArray(); }
+	virtual inline const Type** toArray() const throw(const char*) { return THIS.ref().JRefCollection<Type>::toArray(); }
 	
 	static SynchronizedList<Type> synchronizedList(List<Type>* newList) {
 		return SynchronizedList<Type>(newList);
@@ -252,7 +252,7 @@ public:
 	virtual inline bool add(const Type& object) throw(const char*) {
 		synchronized(*this) {
 			try {
-				THIS.ref().RefCollection<Type>::add(object);
+				THIS.ref().JRefCollection<Type>::add(object);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -275,10 +275,10 @@ public:
 		return true;
 	}
 	
-	virtual inline bool addAll(Collection<Type> collection) throw(const char*) {
+	virtual inline bool addAll(JCollection<Type> collection) throw(const char*) {
 		synchronized(*this) {
 			try {
-				THIS.ref().RefCollection<Type>::addAll(collection);
+				THIS.ref().JRefCollection<Type>::addAll(collection);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -288,7 +288,7 @@ public:
 		return true;
 	}
 	
-	virtual inline bool addAll(int32_t index, Collection<Type>& collection) throw(const char*) {
+	virtual inline bool addAll(int32_t index, JCollection<Type>& collection) throw(const char*) {
 		synchronized(*this) {
 			try {
 				THIS.ref().addAll(index, collection);
@@ -322,11 +322,11 @@ public:
 		return result;
 	}
 	
-	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool containsAll(JCollection<Type>& collection) throw(const char*) {
 		bool result;
 		synchronized(*this) {
 			try {
-				result = THIS.ref().RefCollection<Type>::containsAll(collection);
+				result = THIS.ref().JRefCollection<Type>::containsAll(collection);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -372,7 +372,7 @@ public:
 		JIterator<Type> result;
 		synchronized(*this) {
 			try {
-				result = THIS.ref().RefCollection<Type>::iterator();
+				result = THIS.ref().JRefCollection<Type>::iterator();
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -423,7 +423,7 @@ public:
 		bool result;
 		synchronized(*this) {
 			try {
-				result = THIS.ref().RefCollection<Type>::remove(value);
+				result = THIS.ref().JRefCollection<Type>::remove(value);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -433,11 +433,11 @@ public:
 		return result;
 	}
 	
-	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool removeAll(JCollection<Type>& collection) throw(const char*) {
 		bool result;
 		synchronized(*this) {
 			try {
-				result = THIS.ref().RefCollection<Type>::removeAll(collection);
+				result = THIS.ref().JRefCollection<Type>::removeAll(collection);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -447,11 +447,11 @@ public:
 		return result;
 	}
 	
-	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) {
 		bool result;
 		synchronized(*this) {
 			try {
-				result = THIS.ref().RefCollection<Type>::retainAll(collection);
+				result = THIS.ref().JRefCollection<Type>::retainAll(collection);
 			} catch (...) {
 				THIS.notifyAll();
 				throw;
@@ -501,7 +501,7 @@ public:
 	virtual inline const Type** toArray() const throw(const char*) {
 		const Type** result;
 		synchronized(*this) {
-			result = THIS.ref().RefCollection<Type>::toArray();
+			result = THIS.ref().JRefCollection<Type>::toArray();
 			THIS.notifyAll();
 		}
 		return result;

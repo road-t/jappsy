@@ -77,7 +77,7 @@ protected:
 	}
 	
 	Set<K> m_tempSet = new Set<K>();
-	Collection<V> m_tempValues = new Collection<V>();
+	JCollection<V> m_tempValues = new JCollection<V>();
 	
 public:
 	
@@ -217,7 +217,7 @@ public:
 		return m_count;
 	}
 	
-	virtual inline const Collection<V>& values() const throw(const char*) {
+	virtual inline const JCollection<V>& values() const throw(const char*) {
 		m_tempValues.ref().clear();
 		if (m_map != NULL) {
 			for (int i = 0; i < 256; i++) {
@@ -227,7 +227,7 @@ public:
 						if (m1[j] != NULL) {
 							Map<K,V> *m2 = m1[j];
 							if (m2 != NULL) {
-								Collection<V> m2col = m2->values();
+								JCollection<V> m2col = m2->values();
 								JIterator<V> m2it = m2col.iterator();
 								while (m2it.hasNext()) {
 									m_tempValues.ref().push(m2it.next());
@@ -263,7 +263,7 @@ public:
 	// putAll
 	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
-	virtual inline const Collection<V>& values() const throw(const char*) { return THIS.ref().values(); }
+	virtual inline const JCollection<V>& values() const throw(const char*) { return THIS.ref().values(); }
 };
 
 #endif //JAPPSY_UHASHMAP_H

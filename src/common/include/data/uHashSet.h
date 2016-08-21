@@ -123,7 +123,7 @@ public:
 		return false;
 	}
 	
-	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool addAll(JCollection<Type>& collection) throw(const char*) {
 		bool result = false;
 		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
@@ -140,7 +140,7 @@ public:
 		return false;
 	}
 	
-	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool containsAll(JCollection<Type>& collection) throw(const char*) {
 		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
 			if (!contains(it->next())) {
@@ -196,7 +196,7 @@ public:
 		return false;
 	}
 	
-	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool removeAll(JCollection<Type>& collection) throw(const char*) {
 		bool result = false;
 		JIterator<Type> it = collection->iterator();
 		while (it->hasNext()) {
@@ -205,7 +205,7 @@ public:
 		return result;
 	}
 	
-	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) {
+	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) {
 		bool result = false;
 		
 		if (m_set != NULL) {
@@ -250,15 +250,15 @@ public:
 	}
 	
 	virtual inline bool add(const Type& object) throw(const char*) { return THIS.ref().add(object); }
-	virtual inline bool addAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().addAll(collection); }
+	virtual inline bool addAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().addAll(collection); }
 	virtual inline void clear() throw(const char*) { THIS.ref().clear(); }
 	virtual inline bool contains(const Type& value) const throw(const char*) { return THIS.ref().contains(value); }
-	virtual inline bool containsAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
+	virtual inline bool containsAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().containsAll(collection); }
 	virtual inline bool isEmpty() const throw(const char*) { return THIS.ref().isEmpty(); }
 	virtual inline const JIterator<Type> iterator() const throw(const char*) { return THIS.ref().iterator(); }
 	virtual inline bool remove(const Type& value) throw(const char*) { return THIS.ref().remove(value); }
-	virtual inline bool removeAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
-	virtual inline bool retainAll(Collection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }
+	virtual inline bool removeAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().removeAll(collection); }
+	virtual inline bool retainAll(JCollection<Type>& collection) throw(const char*) { return THIS.ref().retainAll(collection); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
 };
 

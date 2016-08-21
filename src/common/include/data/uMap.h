@@ -101,8 +101,8 @@ public:
 		return m_keys.ref().JRefStack<K>::size();
 	}
 	
-	virtual inline const Collection<V>& values() const {
-		return *((Collection<V>*)&m_values);
+	virtual inline const JCollection<V>& values() const {
+		return *((JCollection<V>*)&m_values);
 	}
 	
 	virtual inline JString toJSON() const {
@@ -152,7 +152,7 @@ public:
 	// putAll
 	virtual inline void remove(const K& key) throw(const char*) { THIS.ref().remove(key); }
 	virtual inline int32_t size() const throw(const char*) { return THIS.ref().size(); }
-	virtual inline const Collection<V>& values() const throw(const char*) { return THIS.ref().values(); }
+	virtual inline const JCollection<V>& values() const throw(const char*) { return THIS.ref().values(); }
 	
 	static SynchronizedMap<K,V> synchronizedMap(Map<K,V>* newMap) {
 		return SynchronizedMap<K,V>(newMap);
@@ -275,8 +275,8 @@ public:
 		return result;
 	}
 	
-	virtual inline const Collection<V>& values() const throw(const char*) {
-		const Collection<V>* result;
+	virtual inline const JCollection<V>& values() const throw(const char*) {
+		const JCollection<V>* result;
 		synchronized(*this) {
 			try {
 				result = &(THIS.ref().values());

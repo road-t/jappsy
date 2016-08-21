@@ -339,6 +339,8 @@ public:
 	uint32_t m_initialSize = 0;
 	void (*m_onrelease)(Type& value) = NULL;
 	
+	virtual inline const Type* items() const { return m_stack; }
+	
 	virtual inline void foreach(void (*callback)(Type& value)) {
 		for (int i = 0; i < m_count; i++) {
 			callback(m_stack[i]);

@@ -540,4 +540,32 @@ public:
 	}
 };
 
+template <>
+bool CStack<const wchar_t*>::contains(const wchar_t *const & value) const;
+template <>
+int32_t CStack<const wchar_t*>::search(const wchar_t *const & value) const;
+template <>
+int32_t CStack<const wchar_t*>::indexOf(const wchar_t *const & value) const;
+
+template <>
+bool CStack<wchar_t*>::contains(wchar_t *const & value) const;
+template <>
+int32_t CStack<wchar_t*>::search(wchar_t *const & value) const;
+template <>
+int32_t CStack<wchar_t*>::indexOf(wchar_t *const & value) const;
+
+template <>
+bool CStack<const char*>::contains(const char *const & value) const;
+template <>
+int32_t CStack<const char*>::search(const char *const & value) const;
+template <>
+int32_t CStack<const char*>::indexOf(const char *const & value) const;
+
+template <>
+bool CStack<char*>::contains(char *const & value) const;
+template <>
+int32_t CStack<char*>::search(char *const & value) const;
+template <>
+int32_t CStack<char*>::indexOf(char *const & value) const;
+
 #endif //JAPPSY_USTACK_H

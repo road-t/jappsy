@@ -67,6 +67,7 @@
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C350705D1D6A717200722351 /* uStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C350705C1D6A717200722351 /* uStack.cpp */; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
 		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
 		C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B11D6540AA00C1D154 /* uGLReader.cpp */; };
@@ -180,6 +181,7 @@
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C350705A1D6A420400722351 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO.txt; sourceTree = "<group>"; };
+		C350705C1D6A717200722351 /* uStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uStack.cpp; sourceTree = "<group>"; };
 		C35272071D551BBE00F41198 /* uOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uOpenGL.h; sourceTree = "<group>"; };
 		C35272091D551E9F00F41198 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C35900B11D6540AA00C1D154 /* uGLReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLReader.cpp; sourceTree = "<group>"; };
@@ -320,6 +322,7 @@
 				C3FFBACB1D6104910099AD22 /* uJSONObject.h */,
 				C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */,
 				C3A4B4B61D5EB5D60039DD09 /* uStack.h */,
+				C350705C1D6A717200722351 /* uStack.cpp */,
 				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
 				C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */,
 				C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */,
@@ -621,6 +624,7 @@
 				C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
 				C35900D11D6542C700C1D154 /* uGLObject.cpp in Sources */,
 				C33F48821D674A1500DD03A5 /* uCrc.cpp in Sources */,
+				C350705D1D6A717200722351 /* uStack.cpp in Sources */,
 				C30577FA1D54BA9C00171EFC /* uError.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

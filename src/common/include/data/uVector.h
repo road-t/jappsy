@@ -84,6 +84,29 @@ extern "C" {
 	struct Vec4;
 	struct Mat4;
 	
+	struct Vec2 {
+		union {
+			struct {
+				GLfloat x;
+				GLfloat y;
+			};
+			
+			struct {
+				GLfloat s;
+				GLfloat t;
+			};
+			
+			GLfloat v[2];
+		};
+		
+		inline Vec2() { }
+		inline Vec2(const GLfloat x, const GLfloat y) { v[0] = x; v[1] = y; }
+		inline Vec2(const GLfloat v[2]) { this->v[0] = v[0]; this->v[1] = v[1]; }
+
+		inline GLfloat& operator [](int index) { return v[index]; }
+		inline operator GLfloat*() const { return (GLfloat*)v; }
+	};
+	
 	struct Vec3 {
 		union {
 			struct {
@@ -96,6 +119,12 @@ extern "C" {
 				GLfloat x;
 				GLfloat y;
 				GLfloat z;
+			};
+			
+			struct {
+				GLfloat s;
+				GLfloat t;
+				GLfloat p;
 			};
 			
 			GLfloat v[3];
@@ -160,6 +189,13 @@ extern "C" {
 				GLfloat y;
 				GLfloat z;
 				GLfloat w;
+			};
+			
+			struct {
+				GLfloat s;
+				GLfloat t;
+				GLfloat p;
+				GLfloat q;
 			};
 			
 			GLfloat v[4];

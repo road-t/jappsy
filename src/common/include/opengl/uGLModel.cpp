@@ -17,6 +17,7 @@
 #include "uGLModel.h"
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
+#include <core/uSystem.h>
 
 RefGLMaterialTexture::~RefGLMaterialTexture() {
 	if (texture != NULL) {
@@ -28,7 +29,7 @@ RefGLMaterialTexture::~RefGLMaterialTexture() {
 	context = NULL;
 }
 
-RefGLMaterialTexture::RefGLMaterialTexture(GLRender* context, const String& textureReference) throw(const char*) {
+RefGLMaterialTexture::RefGLMaterialTexture(GLRender* context, const JString& textureReference) throw(const char*) {
 	texture1iv = 0;
 
 	if (textureReference == null) {
@@ -75,17 +76,17 @@ RefGLMaterial::RefGLMaterial() {
 	name = L"NONAME";
 }
 
-RefGLMaterial::RefGLMaterial(const String& name) {
+RefGLMaterial::RefGLMaterial(const JString& name) {
 	THIS.name = name;
 }
 
-RefGLMaterial::RefGLMaterial(const String& name, const GLMaterialTexture& texture) {
+RefGLMaterial::RefGLMaterial(const JString& name, const GLMaterialTexture& texture) {
 	THIS.name = name;
 	
 	diffuse.texture = texture;
 }
 
-void RefGLMaterial::release() {
+RefGLMaterial::~RefGLMaterial() {
 	name = null;
 	diffuse.texture = null;
 	specular.texture = null;
@@ -120,26 +121,10 @@ void RefGLMaterial::update() {
 
 //===============================
 
-void RefGLModelNode::release() {
+RefGLModelNode::~RefGLModelNode() {
 	name = null;
-	
-	if (nodes != null) {
-		Iterator<GLModelNode> it = nodes.iterator();
-		while (it.hasNext()) {
-			(*(GLModelNode*)&(it.next())).release();
-		}
-		nodes.clear();
-		nodes = null;
-	}
-	
-	if (meshes != null) {
-		Iterator<GLModelMesh> it = meshes.iterator();
-		while (it.hasNext()) {
-			(*(GLModelMesh*)&(it.next())).release();
-		}
-		meshes.clear();
-		meshes = null;
-	}
+	nodes = null;
+	meshes = null;
 }
 
 GLModelNode& RefGLModelNode::insertNode(const GLModelNode& node) throw(const char*) {
@@ -162,7 +147,21 @@ GLModelMesh& RefGLModelNode::insertMesh(const GLModelMesh& mesh) throw(const cha
 	throw eInvalidParams;
 }
 
-void RefGLModelMesh::release() {
+void RefGLModelNode::render(GLRender* context, GLModel& model) const {
+	if (nodes.size() > 0) {
+		Iterator<GLModelNode> it = nodes.iterator();
+		while (it.hasNext()) {
+			it.next().render(context, model);
+		}
+	} else if (meshes.size() > 0) {
+		Iterator<GLModelMesh> it = meshes.iterator();
+		while (it.hasNext()) {
+			it.next().render(context, model);
+		}
+	}
+}
+
+RefGLModelMesh::~RefGLModelMesh() {
 	name = null;
 	material = 0;
 	
@@ -189,6 +188,47 @@ void RefGLModelMesh::release() {
 	indexes = 0;
 }
 
+void RefGLModelMesh::render(GLRender* context, GLModel& model) const {
+	context->shaderModel;
+	
+	const RefGLMaterial* mat = &(model.ref().materials.get(material).ref());
+	glUniform4fv(context->shaderModel.uColors, mat->colors4fv.count() / 4, mat->colors4fv.items());
+	
+	glBindBuffer(GL_ARRAY_BUFFER, vertices);
+	glVertexAttribPointer(context->shaderModel.aVertexPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, texturecoords);
+	glVertexAttribPointer(context->shaderModel.aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glBindBuffer(GL_ARRAY_BUFFER, normals);
+	glVertexAttribPointer(context->shaderModel.aVertexNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	
+	glActiveTexture(GL_TEXTURE0);
+	if (mat->diffuse.texture != null) {
+		glBindTexture(GL_TEXTURE_2D, mat->diffuse.texture.ref().texture1iv);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
+	}
+	glActiveTexture(GL_TEXTURE1);
+	if (mat->specular.texture != null) {
+		glBindTexture(GL_TEXTURE_2D, mat->specular.texture.ref().texture1iv);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
+	}
+	glActiveTexture(GL_TEXTURE2);
+	if (mat->emissive.texture != null) {
+		glBindTexture(GL_TEXTURE_2D, mat->emissive.texture.ref().texture1iv);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
+	}
+	
+	static GLint modelTextureIndexes[3] = {0, 1, 2};
+	glUniform1iv(context->shaderModel.uTexture, 3, modelTextureIndexes);
+	
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexes);
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0);
+}
+
 //===============================
 
 RefGLModel::RefGLModel(GLRender* context) {
@@ -196,12 +236,29 @@ RefGLModel::RefGLModel(GLRender* context) {
 }
 
 RefGLModel::~RefGLModel() {
-	THIS.context = NULL;
+	context = NULL;
+	materials = null;
+	rootnode = null;
 }
+
+GLuint RefGLModel::createMaterial(const JString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap) {
+	GLMaterialTexture texture = new GLMaterialTexture(context, key);
+	texture.ref().setUVMap(x, y, w, h, uvmap);
+	GLMaterial material = new GLMaterial(key, texture);
+	material.update();
+	return materials.indexOf(materials.push(material));
+}
+
+GLuint RefGLModel::insertMaterial(GLMaterial& material) {
+	material.update();
+	return materials.indexOf(materials.push(material));
+}
+
+//===============================
 
 GLModels::GLModels(GLRender* context) throw(const char*) {
 	THIS.context = context;
-	list = new HashMap<String, GLModel>();
+	list = new HashMap<JString, GLModel>();
 }
 
 GLModels::~GLModels() {
@@ -209,17 +266,15 @@ GLModels::~GLModels() {
 	context = NULL;
 }
 
-GLModel& GLModels::get(const String& key) throw(const char*) {
+GLModel& GLModels::get(const JString& key) throw(const char*) {
 	return (GLModel&)list.get(key);
 }
 
-GLModel& GLModels::createModel(const String& key) throw(const char*) {
+GLModel& GLModels::createModel(const JString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLModel* shader = &(list.put(key, new RefGLModel(context)));
-		//		if (wcscmp(key, L"null") == 0) {
-		//		}
-		return *shader;
+		GLModel* model = &(list.put(key, new RefGLModel(context)));
+		return *model;
 	} catch (...) {
 		throw;
 	}
@@ -227,130 +282,7 @@ GLModel& GLModels::createModel(const String& key) throw(const char*) {
 
 //===============================
 
-class ModelJsonParserNodeData {
-public:
-	String name;
-	Vector<GLfloat> transformation;
-	Vector<ModelJsonParserNodeData*> children;
-	Vector<GLuint> meshes;
-	
-	inline void releaseChildren() {
-		int32_t count = children.count();
-		if (count > 0) {
-			ModelJsonParserNodeData** items = children.items();
-			for (int i = 0; i < count; i++) {
-				memDelete(items[i]);
-			}
-			children.clear();
-		}
-	}
-	
-	inline void release() {
-		transformation.clear();
-		releaseChildren();
-		meshes.clear();
-	}
-	
-	inline ModelJsonParserNodeData() {
-		transformation.growstep(16);
-	}
-	
-	inline ~ModelJsonParserNodeData() {
-		release();
-	}
-};
-
-class ModelJsonParserMeshData {
-public:
-	String name;
-	GLuint materialindex;
-	Vector<GLfloat> vertices;
-	Vector<GLfloat> normals;
-	Vector<Vector<GLfloat>*> texturecoords;
-	Vector<GLfloat> faces;
-	
-	inline void releaseTexturecoords() {
-		int32_t count = texturecoords.count();
-		if (count > 0) {
-			Vector<GLfloat>** items = texturecoords.items();
-			for (int i = 0; i < count; i++) {
-				memDelete(items[i]);
-			}
-			texturecoords.clear();
-		}
-	}
-	
-	inline void release() {
-		vertices.clear();
-		normals.clear();
-		releaseTexturecoords();
-		faces.clear();
-	}
-	
-	inline ~ModelJsonParserMeshData() {
-		releaseTexturecoords();
-	}
-};
-
-class ModelJsonParser {
-public:
-	GLModels* models;
-	
-	ModelJsonParserNodeData* rootnode = NULL;
-	Vector<ModelJsonParserMeshData*> meshes;
-	Vector<GLMaterial*> materials;
-	
-	inline void releaseRootNode() {
-		if (rootnode != NULL) {
-			memDelete(rootnode);
-			rootnode = NULL;
-		}
-	}
-	
-	inline void releaseMeshes() {
-		int32_t count = meshes.count();
-		if (count > 0) {
-			ModelJsonParserMeshData** items = meshes.items();
-			for (int i = 0; i < count; i++) {
-				memDelete(items[i]);
-			}
-			meshes.clear();
-		}
-	}
-	
-	inline void releaseMaterials() {
-		int32_t count = materials.count();
-		if (count > 0) {
-			GLMaterial** items = materials.items();
-			for (int i = 0; i < count; i++) {
-				delete items[i];
-			}
-			meshes.clear();
-		}
-	}
-	
-	inline void release() {
-		releaseRootNode();
-		releaseMeshes();
-		releaseMaterials();
-	}
-	
-	inline ~ModelJsonParser() {
-		release();
-	}
-};
-
-class ModelJsonParserMaterialData {
-public:
-	GLModels* models;
-	RefGLMaterial* material;
-	
-	String key;
-	GLuint semantic = 0;
-	Vector<GLfloat> value;
-};
-
-#define ModelLog(fmt, ...) String::format(fmt, ## __VA_ARGS__).log()
+#define ModelLog(fmt, ...) JString::format(fmt, ## __VA_ARGS__).log()
 
 void GLModels::onjson_root_start(struct json_context* ctx, void* target) {
 	//ModelJsonParser* parser = (ModelJsonParser*)target;
@@ -859,7 +791,7 @@ void GLModels::onjson_material_property_string(struct json_context* ctx, const c
 		if ((data->semantic == 0) && (data->key.endsWith(L".name"))) {
 			data->material->name = value;
 		} else if (data->key.endsWith(L".file")) {
-			String file = value; file.toLowerCase();
+			JString file = value; file.toLowerCase();
 			switch (data->semantic) {
 				case 1: data->material->diffuse.texture = new GLMaterialTexture(data->models->context, file); break;
 				case 2: data->material->specular.texture = new GLMaterialTexture(data->models->context, file); break;
@@ -960,12 +892,14 @@ void GLModels::onjson_material_property_value_number(struct json_context* ctx, c
 	}
 }
 
-GLModel& GLModels::createModel(const String& key, const char* json) throw(const char*) {
+GLModel& GLModels::createModel(const JString& key, const char* json) throw(const char*) {
 	if (json == NULL)
 		throw eNullPointer;
 	
-	struct ModelJsonParser target;
+	// Парсим JSON во временный обьект
+	ModelJsonParser target;
 	target.models = this;
+	target.key = key;
 	
 	struct json_context ctx;
 	struct json_callbacks callbacks;
@@ -979,5 +913,235 @@ GLModel& GLModels::createModel(const String& key, const char* json) throw(const 
 		throw eConvert;
 	}
 	
-	throw eOK;
+	// Проверка данных
+	int32_t meshes = target.meshes.count();
+	int32_t materials = target.materials.count();
+	if ((target.rootnode == NULL) || (meshes == 0) || (materials == 0)) {
+		target. release();
+		throw eInvalidFormat;
+	}
+
+	// Проверка наличия обьектов с координатами
+	Vector<ModelJsonParserNodeData*> nodestack;
+	ModelJsonParserNodeData* node = target.rootnode;
+	int32_t used = 0;
+	while (node != NULL) {
+		int32_t count = node->meshes.count();
+		if (count > 0) {
+			GLuint* items = node->meshes.items();
+			for (int i = 0; i < count; i++) {
+				if (items[i] < meshes) {
+					ModelJsonParserMeshData* mesh = target.meshes.get(items[i]);
+					if ((mesh->vertices.count() > 0) && (mesh->faces.count() > 0)) {
+						used++;
+					}
+				} else {
+					target.release();
+					throw eInvalidFormat;
+				}
+			}
+		}
+		count = node->children.count();
+		if (count > 0) {
+			ModelJsonParserNodeData** items = node->children.items();
+			for (int i = 0; i < count; i++) {
+				nodestack.push(items[i]);
+			}
+		}
+		try {
+			node = nodestack.pop();
+		} catch (...) {
+			node = NULL;
+		}
+	}
+	
+	if (used == 0) {
+		target.release();
+		throw eInvalidFormat;
+	}
+	
+	// Проверка используемых материалов
+	ModelJsonParserMeshData** items = target.meshes.items();
+	for (int i = 0; i < meshes; i++) {
+		if (items[i]->materialindex >= materials) {
+			target.release();
+			throw eInvalidFormat;
+		}
+	}
+	
+	// Все проверки пройдены - создаем GLModel
+	GLModel* model = NULL;
+	try {
+		model = (GLModel*)MainThreadSync(CreateJsonModelCallback, &target);
+	} catch (...) {
+		target.release();
+		throw;
+	}
+	
+	target.release();
+	return *model;
 }
+
+void* GLModels::CreateJsonModelCallback(void* threadData) {
+	ModelJsonParser* parser = (ModelJsonParser*)threadData;
+	
+	GLModel* model = NULL;
+	try {
+		model = &(parser->models->createModel(parser->key));
+		model->ref().parseJson(parser);
+	} catch (...) {
+		throw;
+	}
+	
+	return model;
+}
+
+void RefGLModel::parseJson(ModelJsonParser* parser) throw(const char*) {
+	Mat4 rootmat; rootmat.identity();
+	try {
+		rootnode = new GLModelNode();
+		rootnode.ref().parseJson(parser->rootnode, parser->meshes, rootmat);
+	} catch (...) {
+		rootnode = null;
+	}
+}
+
+void RefGLModelNode::parseJson(ModelJsonParserNodeData* node, Vector<ModelJsonParserMeshData*>& meshes, Mat4& rootmat) {
+	name = node->name;
+	Mat4Transpose(transformation.v, node->transformation.items());
+	
+	Mat4 matV; matV.multiply(rootmat, transformation);
+	
+	int32_t childrenCount = node->children.count();
+	if (childrenCount > 0) {
+		ModelJsonParserNodeData** items = node->children.items();
+		for (int i = 0; i < childrenCount; i++) {
+			GLModelNode* childNode = new GLModelNode();
+			if (childNode == NULL)
+				throw eOutOfMemory;
+			
+			try {
+				childNode->ref().parseJson(items[i], meshes, matV);
+				insertNode(*childNode);
+			} catch (...) {
+				delete childNode;
+			}
+		}
+		return;
+	}
+	
+	int32_t meshesCount = node->meshes.count();
+	if (meshesCount > 0) {
+		Mat4 matN; matN.inverse(matV).transpose();
+		
+		GLuint* items = node->meshes.items();
+		for (int i = 0; i < meshesCount; i++) {
+			GLModelMesh* modelMesh = new GLModelMesh();
+			if (modelMesh == NULL)
+				throw eOutOfMemory;
+			
+			try {
+				modelMesh->ref().parseJson(meshes.get(items[i]), matN, matV);
+				insertMesh(*modelMesh);
+			} catch (...) {
+				delete modelMesh;
+			}
+		}
+	}
+}
+
+void RefGLModelMesh::parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& matV) {
+	GLuint vertexBuffer = 0;
+	GLuint normalsBuffer = 0;
+	GLuint textureBuffer = 0;
+	GLuint indexBuffer = 0;
+	
+	try {
+		glGenBuffers(1, &vertexBuffer);
+		CheckGLError();
+		{
+			int32_t vsrcCount = mesh->vertices.count();
+			GLfloat* vsrc = mesh->vertices.items();
+			GLfloat* vdst = memAlloc(GLfloat, vdst, vsrcCount * sizeof(GLfloat));
+			if (vdst == NULL)
+				throw eOutOfMemory;
+			
+			for (int i = 0; i < vsrcCount; i += 3) {
+				Vec3Transform(vdst + i, vsrc + i, matV.v);
+				Vec3Multiply(vdst + i, vdst + i, 2.54); // convert inches into mm
+			}
+			
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, vsrcCount * sizeof(GLfloat), vdst, GL_STATIC_DRAW);
+			try {
+				CheckGLError();
+			} catch (...) {
+				memFree(vdst);
+				throw;
+			}
+		}
+		
+		glGenBuffers(1, &normalsBuffer);
+		CheckGLError();
+		{
+			int32_t vsrcCount = mesh->normals.count();
+			GLfloat* vsrc = mesh->normals.items();
+			GLfloat* vdst = memAlloc(GLfloat, vdst, vsrcCount * sizeof(GLfloat));
+			if (vdst == NULL)
+				throw eOutOfMemory;
+			
+			for (int i = 0; i < vsrcCount; i += 3) {
+				Vec3Transform(vdst + i, vsrc + i, matN.v);
+			}
+			
+			glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+			glBufferData(GL_ARRAY_BUFFER, vsrcCount * sizeof(GLfloat), vdst, GL_STATIC_DRAW);
+			try {
+				CheckGLError();
+			} catch (...) {
+				memFree(vdst);
+				throw;
+			}
+		}
+		
+		glGenBuffers(1, &textureBuffer);
+		CheckGLError();
+		{
+			Vector<GLfloat>* coords = mesh->texturecoords.get(0);
+			
+			glBindBuffer(GL_ARRAY_BUFFER, textureBuffer);
+			glBufferData(GL_ARRAY_BUFFER, coords->count() * sizeof(GLfloat), coords->items(), GL_STATIC_DRAW);
+			CheckGLError();
+		}
+		
+		glGenBuffers(1, &indexBuffer);
+		CheckGLError();
+		{
+			indexCount = mesh->faces.count();
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(GLshort), mesh->faces.items(), GL_STATIC_DRAW);
+		}
+	} catch (...) {
+		if (vertexBuffer != 0) {
+			glDeleteBuffers(1, &vertexBuffer);
+		}
+		if (normalsBuffer != 0) {
+			glDeleteBuffers(1, &normalsBuffer);
+		}
+		if (textureBuffer != 0) {
+			glDeleteBuffers(1, &textureBuffer);
+		}
+		if (indexBuffer != 0) {
+			glDeleteBuffers(1, &indexBuffer);
+		}
+		throw;
+	}
+	
+	name = mesh->name;
+	material = mesh->materialindex;
+	vertices = vertexBuffer;
+	normals = normalsBuffer;
+	texturecoords = textureBuffer;
+	indexes = indexBuffer;
+}
+

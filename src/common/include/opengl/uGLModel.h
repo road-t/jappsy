@@ -24,6 +24,7 @@
 #include <data/uVector.h>
 #include <data/uList.h>
 #include <opengl/uGLObjectData.h>
+#include <opengl/uGLObject.h>
 
 class GLRender;
 
@@ -35,7 +36,7 @@ enum GLTextureMapping {
 	UVMAP_SPHERE = 4
 };
 
-class RefGLMaterialTexture : public RefObject {
+class RefGLMaterialTexture : public JRefObject {
 public:
 	GLRender* context = NULL;
 	GLObjectData* texture = NULL;
@@ -49,7 +50,7 @@ public:
 	GLTextureMapping uvmap = GLTextureMapping::UVMAP_DEFAULT;
 	
 	inline RefGLMaterialTexture() { throw eInvalidParams; }
-	RefGLMaterialTexture(GLRender* context, const String& textureReference) throw(const char*);
+	RefGLMaterialTexture(GLRender* context, const JString& textureReference) throw(const char*);
 	~RefGLMaterialTexture();
 	
 	inline RefGLMaterialTexture& setUVMap(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLTextureMapping uvmap) {
@@ -64,11 +65,11 @@ public:
 	bool checkReady();
 };
 
-class GLMaterialTexture : public Object {
+class GLMaterialTexture : public JObject {
 public:
-	RefClass(GLMaterialTexture, RefGLMaterialTexture);
+	JRefClass(GLMaterialTexture, RefGLMaterialTexture);
 	
-	inline GLMaterialTexture(GLRender* context, const String& textureReference) throw(const char*) {
+	inline GLMaterialTexture(GLRender* context, const JString& textureReference) throw(const char*) {
 		RefGLMaterialTexture* o = new RefGLMaterialTexture(context, textureReference);
 		if (o == NULL) throw eOutOfMemory;
 		THIS.setRef(o);
@@ -79,9 +80,9 @@ public:
 
 //===============================
 
-class RefGLMaterial : public RefObject {
+class RefGLMaterial : public JRefObject {
 public:
-	String name;
+	JString name;
 	
 	// Ambient color is the color of an object where it is in shadow.
 	// This color is what the object reflects when illuminated by ambient light rather than direct light.
@@ -149,55 +150,199 @@ public:
 	Vector<GLfloat> colors4fv;
 	
 	RefGLMaterial();
-	RefGLMaterial(const String& name);
-	RefGLMaterial(const String& name, const GLMaterialTexture& texture);
-	
-	void release();
+	RefGLMaterial(const JString& name);
+	RefGLMaterial(const JString& name, const GLMaterialTexture& texture);
+	~RefGLMaterial();
+
 	void update();
 };
 
-class GLMaterial : public Object {
+class GLMaterial : public JObject {
 public:
-	RefClass(GLMaterial, RefGLMaterial);
+	JRefClass(GLMaterial, RefGLMaterial);
 	
-	inline void release() throw(const char*) { THIS.ref().release(); }
+	inline GLMaterial(const JString& name) throw(const char*) {
+		RefGLMaterial* o = new RefGLMaterial(name);
+		if (o == NULL) throw eOutOfMemory;
+		THIS.setRef(o);
+	}
+	
+	inline GLMaterial(const JString& name, const GLMaterialTexture& texture) throw(const char*) {
+		RefGLMaterial* o = new RefGLMaterial(name, texture);
+		if (o == NULL) throw eOutOfMemory;
+		THIS.setRef(o);
+	}
+	
 	inline void update() throw(const char*) { THIS.ref().update(); }
+};
+
+//===============================
+
+class GLModels;
+
+class ModelJsonParserNodeData {
+public:
+	JString name;
+	Vector<GLfloat> transformation;
+	Vector<ModelJsonParserNodeData*> children;
+	Vector<GLuint> meshes;
+	
+	inline void releaseChildren() {
+		int32_t count = children.count();
+		if (count > 0) {
+			ModelJsonParserNodeData** items = children.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			children.clear();
+		}
+	}
+	
+	inline void release() {
+		transformation.clear();
+		releaseChildren();
+		meshes.clear();
+	}
+	
+	inline ModelJsonParserNodeData() {
+		transformation.growstep(16);
+	}
+	
+	inline ~ModelJsonParserNodeData() {
+		release();
+	}
+};
+
+class ModelJsonParserMeshData {
+public:
+	JString name;
+	GLuint materialindex;
+	Vector<GLfloat> vertices;
+	Vector<GLfloat> normals;
+	Vector<Vector<GLfloat>*> texturecoords;
+	Vector<GLshort> faces;
+	
+	inline void releaseTexturecoords() {
+		int32_t count = texturecoords.count();
+		if (count > 0) {
+			Vector<GLfloat>** items = texturecoords.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			texturecoords.clear();
+		}
+	}
+	
+	inline void release() {
+		vertices.clear();
+		normals.clear();
+		releaseTexturecoords();
+		faces.clear();
+	}
+	
+	inline ~ModelJsonParserMeshData() {
+		releaseTexturecoords();
+	}
+};
+
+class ModelJsonParserMaterialData {
+public:
+	GLModels* models;
+	RefGLMaterial* material;
+	
+	JString key;
+	GLuint semantic = 0;
+	Vector<GLfloat> value;
+};
+
+class ModelJsonParser {
+public:
+	GLModels* models;
+	JString key;
+	
+	ModelJsonParserNodeData* rootnode = NULL;
+	Vector<ModelJsonParserMeshData*> meshes;
+	Vector<GLMaterial*> materials;
+	
+	inline void releaseRootNode() {
+		if (rootnode != NULL) {
+			memDelete(rootnode);
+			rootnode = NULL;
+		}
+	}
+	
+	inline void releaseMeshes() {
+		int32_t count = meshes.count();
+		if (count > 0) {
+			ModelJsonParserMeshData** items = meshes.items();
+			for (int i = 0; i < count; i++) {
+				memDelete(items[i]);
+			}
+			meshes.clear();
+		}
+	}
+	
+	inline void releaseMaterials() {
+		int32_t count = materials.count();
+		if (count > 0) {
+			GLMaterial** items = materials.items();
+			for (int i = 0; i < count; i++) {
+				delete items[i];
+			}
+			meshes.clear();
+		}
+	}
+	
+	inline void release() {
+		releaseRootNode();
+		releaseMeshes();
+		releaseMaterials();
+	}
+	
+	inline ~ModelJsonParser() {
+		release();
+	}
 };
 
 //===============================
 
 class GLModelNode;
 class GLModelMesh;
+class GLModel;
 
-class RefGLModelNode : public RefObject {
+class RefGLModelNode : public JRefObject {
 public:
-	String name;
+	JString name;
 	Mat4 transformation;
 	
 	List<GLModelNode> nodes = null;
 	List<GLModelMesh> meshes = null;
 	
 	inline RefGLModelNode() { Mat4Identity(transformation.v); }
-	inline RefGLModelNode(const String& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
+	inline RefGLModelNode(const JString& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
+	~RefGLModelNode();
 	
 	GLModelNode& insertNode(const GLModelNode& node) throw(const char*);
 	GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*);
 	
-	void release();
+	void parseJson(ModelJsonParserNodeData* node, Vector<ModelJsonParserMeshData*>& meshes, Mat4& rootmat);
+	
+	void render(GLRender* context, GLModel& model) const;
 };
 
-class GLModelNode : public Object {
+class GLModelNode : public JObject {
 public:
-	RefClass(GLModelNode, RefGLModelNode);
+	JRefClass(GLModelNode, RefGLModelNode);
 
-	inline void release() throw(const char*) { THIS.ref().release(); }
 	inline GLModelNode& insertNode(const GLModelNode& node) throw(const char*) { return THIS.ref().insertNode(node); }
 	inline GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*) { return THIS.ref().insertMesh(mesh); }
+	
+	inline void render(GLRender* context, GLModel& model) const throw(const char*) { THIS.ref().render(context, model); }
 };
 
-class RefGLModelMesh : public RefObject {
+class RefGLModelMesh : public JRefObject {
 public:
-	String name;
+	JString name;
 	GLuint material;
 	GLuint vertices;
 	GLuint normals;
@@ -211,7 +356,7 @@ public:
 		vertices = normals = texturecoords = indexes = indexCount = 0;
 	}
 	
-	inline RefGLModelMesh(const String& name, GLuint materialIndex, GLuint vertexBuffer, GLuint normalsBuffer, GLuint textureBuffer, GLuint indexBuffer, GLuint indexCount) {
+	inline RefGLModelMesh(const JString& name, GLuint materialIndex, GLuint vertexBuffer, GLuint normalsBuffer, GLuint textureBuffer, GLuint indexBuffer, GLuint indexCount) {
 		THIS.name = name;
 		THIS.material = materialIndex;
 		THIS.vertices = vertexBuffer;
@@ -221,19 +366,23 @@ public:
 		THIS.indexCount = indexCount;
 	}
 	
-	void release();
+	~RefGLModelMesh();
+	
+	void parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& matV);
+	
+	void render(GLRender* context, GLModel& model) const;
 };
 
-class GLModelMesh : public Object {
+class GLModelMesh : public JObject {
 public:
-	RefClass(GLModelMesh, RefGLModelMesh);
+	JRefClass(GLModelMesh, RefGLModelMesh);
 
-	inline void release() throw(const char*) { THIS.ref().release(); }
+	inline void render(GLRender* context, GLModel& model) const throw(const char*) { THIS.ref().render(context, model); }
 };
 
 //===============================
 
-class RefGLModel : public RefObject {
+class RefGLModel : public JRefObject {
 public:
 	GLRender* context = NULL;
 	List<GLMaterial> materials;
@@ -242,24 +391,36 @@ public:
 	inline RefGLModel() { throw eInvalidParams; }
 	RefGLModel(GLRender* context);
 	~RefGLModel();
+	
+	GLuint createMaterial(const JString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap);
+	GLuint insertMaterial(GLMaterial& material);
+	
+	void parseJson(ModelJsonParser* parser) throw(const char*);
+	
+	void render(const GLObject& object);
 };
 
-class GLModel : public Object {
+class GLModel : public JObject {
 public:
-	RefClass(GLModel, RefGLModel)
+	JRefClass(GLModel, RefGLModel)
+
+	inline GLuint createMaterial(const JString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap) throw(const char*) { return THIS.ref().createMaterial(key, x, y, w, h, uvmap); }
+	inline GLuint insertMaterial(GLMaterial& material) throw(const char*) { return THIS.ref().insertMaterial(material); }
 };
+
+//===============================
 
 class GLModels {
 private:
 	GLRender* context;
-	HashMap<String, GLModel> list;
+	HashMap<JString, GLModel> list;
 	
 public:
 	GLModels(GLRender* context) throw(const char*);
 	~GLModels();
 	
-	GLModel& get(const String& key) throw(const char*);
-	GLModel& createModel(const String& key) throw(const char*);
+	GLModel& get(const JString& key) throw(const char*);
+	GLModel& createModel(const JString& key) throw(const char*);
 
 private:
 	// json parser callbacks
@@ -345,9 +506,12 @@ private:
 						static void onjson_material_property_value_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 						static void onjson_material_property_value_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
 	
+private: // Thread Safe
+	static void* CreateJsonModelCallback(void* threadData);
+
 public: // Thread Safe
 	
-	GLModel& createModel(const String& key, const char* jsonModelSource) throw(const char*);
+	GLModel& createModel(const JString& key, const char* jsonModelSource) throw(const char*);
 };
 
 #endif //JAPPSY_UGLMODEL_H

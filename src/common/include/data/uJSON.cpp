@@ -3203,7 +3203,13 @@ extern "C" {
 					if (!json_call_string(ctx, ptrptr, &value)) {
 						return false;
 					}
-					ctx->callbacks->onarray.onstring(ctx, index, value, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onarray.onstring(ctx, index, value, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						memFree(value);
+						return false;
+					}
 					memFree(value);
 				} else {
 					if (!json_check_string(ctx, ptrptr, 0)) {
@@ -3217,7 +3223,12 @@ extern "C" {
 					if (!json_call_number(ctx, ptrptr, &number)) {
 						return false;
 					}
-					ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 				} else {
 					if (!json_check_number(ctx, ptrptr, 0)) {
 						return false;
@@ -3228,10 +3239,20 @@ extern "C" {
 				if (ctx->callbacks->onarray.onobjectstart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onarray.onobjectstart(ctx, index, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onarray.onobjectstart(ctx, index, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 					bool result = json_call_object(ctx, ptrptr);
 					if (ctx->callbacks->onarray.onobjectend != NULL) {
-						ctx->callbacks->onarray.onobjectend(ctx, index, store.target, ctx->callbacks->target, result);
+						try {
+							ctx->callbacks->onarray.onobjectend(ctx, index, store.target, ctx->callbacks->target, result);
+						} catch (...) {
+							json_err(json_error_oom);
+							result = false;
+						}
 					}
 					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
@@ -3248,10 +3269,20 @@ extern "C" {
 				if (ctx->callbacks->onarray.onarraystart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onarray.onarraystart(ctx, index, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onarray.onarraystart(ctx, index, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 					bool result = json_call_array(ctx, ptrptr);
 					if (ctx->callbacks->onarray.onarrayend != NULL) {
-						ctx->callbacks->onarray.onarrayend(ctx, index, store.target, ctx->callbacks->target, result);
+						try {
+							ctx->callbacks->onarray.onarrayend(ctx, index, store.target, ctx->callbacks->target, result);
+						} catch (...) {
+							json_err(json_error_oom);
+							result = false;
+						}
 					}
 					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
@@ -3272,7 +3303,12 @@ extern "C" {
 						json_next;
 						if ((ch == 'e') || (ch == 'E')) {
 							if (ctx->callbacks->onarray.onboolean != NULL) {
-								ctx->callbacks->onarray.onboolean(ctx, index, true, ctx->callbacks->target);
+								try {
+									ctx->callbacks->onarray.onboolean(ctx, index, true, ctx->callbacks->target);
+								} catch (...) {
+									json_err(json_error_oom);
+									return false;
+								}
 							}
 							return true;
 						}
@@ -3294,7 +3330,12 @@ extern "C" {
 							json_next;
 							if ((ch == 'e') || (ch == 'E')) {
 								if (ctx->callbacks->onarray.onboolean != NULL) {
-									ctx->callbacks->onarray.onboolean(ctx, index, false, ctx->callbacks->target);
+									try {
+										ctx->callbacks->onarray.onboolean(ctx, index, false, ctx->callbacks->target);
+									} catch (...) {
+										json_err(json_error_oom);
+										return false;
+									}
 								}
 								return true;
 							}
@@ -3315,7 +3356,12 @@ extern "C" {
 						json_next;
 						if ((ch == 'l') || (ch == 'L')) {
 							if (ctx->callbacks->onarray.onnull != NULL) {
-								ctx->callbacks->onarray.onnull(ctx, index, ctx->callbacks->target);
+								try {
+									ctx->callbacks->onarray.onnull(ctx, index, ctx->callbacks->target);
+								} catch (...) {
+									json_err(json_error_oom);
+									return false;
+								}
 							}
 							return true;
 						}
@@ -3324,10 +3370,15 @@ extern "C" {
 					json_next;
 					if ((ch == 'n') || (ch == 'N')) {
 						if (ctx->callbacks->onarray.onnumber != NULL) {
-							struct json_number number;
-							number.is_float = true;
-							number.v.f = NAN;
-							ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+							try {
+								struct json_number number;
+								number.is_float = true;
+								number.v.f = NAN;
+								ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+							} catch (...) {
+								json_err(json_error_oom);
+								return false;
+							}
 						}
 						return true;
 					}
@@ -3344,10 +3395,15 @@ extern "C" {
 					json_next;
 					if ((ch == 'f') || (ch == 'F')) {
 						if (ctx->callbacks->onarray.onnumber != NULL) {
-							struct json_number number;
-							number.is_float = true;
-							number.v.f = INFINITY;
-							ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+							try {
+								struct json_number number;
+								number.is_float = true;
+								number.v.f = INFINITY;
+								ctx->callbacks->onarray.onnumber(ctx, index, number, ctx->callbacks->target);
+							} catch (...) {
+								json_err(json_error_oom);
+								return false;
+							}
 						}
 						return true;
 					}
@@ -3381,7 +3437,13 @@ extern "C" {
 					if (!json_call_string(ctx, ptrptr, &value)) {
 						return false;
 					}
-					ctx->callbacks->onobject.onstring(ctx, key, value, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onobject.onstring(ctx, key, value, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						memFree(value);
+						return false;
+					}
 					memFree(value);
 				} else {
 					if (!json_check_string(ctx, ptrptr, 0)) {
@@ -3395,7 +3457,12 @@ extern "C" {
 					if (!json_call_number(ctx, ptrptr, &number)) {
 						return false;
 					}
-					ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 				} else {
 					if (!json_check_number(ctx, ptrptr, 0)) {
 						return false;
@@ -3406,10 +3473,20 @@ extern "C" {
 				if (ctx->callbacks->onobject.onobjectstart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onobject.onobjectstart(ctx, key, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onobject.onobjectstart(ctx, key, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 					bool result = json_call_object(ctx, ptrptr);
 					if (ctx->callbacks->onobject.onobjectend != NULL) {
-						ctx->callbacks->onobject.onobjectend(ctx, key, store.target, ctx->callbacks->target, result);
+						try {
+							ctx->callbacks->onobject.onobjectend(ctx, key, store.target, ctx->callbacks->target, result);
+						} catch (...) {
+							json_err(json_error_oom);
+							result = false;
+						}
 					}
 					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
@@ -3426,10 +3503,20 @@ extern "C" {
 				if (ctx->callbacks->onobject.onarraystart != NULL) {
 					struct json_callbacks store;
 					json_store_callbacks(&store, ctx->callbacks);
-					ctx->callbacks->onobject.onarraystart(ctx, key, ctx->callbacks->target);
+					try {
+						ctx->callbacks->onobject.onarraystart(ctx, key, ctx->callbacks->target);
+					} catch (...) {
+						json_err(json_error_oom);
+						return false;
+					}
 					bool result = json_call_array(ctx, ptrptr);
 					if (ctx->callbacks->onobject.onarrayend != NULL) {
-						ctx->callbacks->onobject.onarrayend(ctx, key, store.target, ctx->callbacks->target, result);
+						try {
+							ctx->callbacks->onobject.onarrayend(ctx, key, store.target, ctx->callbacks->target, result);
+						} catch (...) {
+							json_err(json_error_oom);
+							result = false;
+						}
 					}
 					if (!result) {
 						json_store_callbacks(ctx->callbacks, &store);
@@ -3450,7 +3537,12 @@ extern "C" {
 						json_next;
 						if ((ch == 'e') || (ch == 'E')) {
 							if (ctx->callbacks->onobject.onboolean != NULL) {
-								ctx->callbacks->onobject.onboolean(ctx, key, true, ctx->callbacks->target);
+								try {
+									ctx->callbacks->onobject.onboolean(ctx, key, true, ctx->callbacks->target);
+								} catch (...) {
+									json_err(json_error_oom);
+									return false;
+								}
 							}
 							return true;
 						}
@@ -3472,7 +3564,12 @@ extern "C" {
 							json_next;
 							if ((ch == 'e') || (ch == 'E')) {
 								if (ctx->callbacks->onobject.onboolean != NULL) {
-									ctx->callbacks->onobject.onboolean(ctx, key, false, ctx->callbacks->target);
+									try {
+										ctx->callbacks->onobject.onboolean(ctx, key, false, ctx->callbacks->target);
+									} catch (...) {
+										json_err(json_error_oom);
+										return false;
+									}
 								}
 								return true;
 							}
@@ -3493,7 +3590,12 @@ extern "C" {
 						json_next;
 						if ((ch == 'l') || (ch == 'L')) {
 							if (ctx->callbacks->onobject.onnull != NULL) {
-								ctx->callbacks->onobject.onnull(ctx, key, ctx->callbacks->target);
+								try {
+									ctx->callbacks->onobject.onnull(ctx, key, ctx->callbacks->target);
+								} catch (...) {
+									json_err(json_error_oom);
+									return false;
+								}
 							}
 							return true;
 						}
@@ -3502,10 +3604,15 @@ extern "C" {
 					json_next;
 					if ((ch == 'n') || (ch == 'N')) {
 						if (ctx->callbacks->onobject.onnumber != NULL) {
-							struct json_number number;
-							number.is_float = true;
-							number.v.f = NAN;
-							ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+							try {
+								struct json_number number;
+								number.is_float = true;
+								number.v.f = NAN;
+								ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+							} catch (...) {
+								json_err(json_error_oom);
+								return false;
+							}
 						}
 						return true;
 					}
@@ -3522,10 +3629,15 @@ extern "C" {
 					json_next;
 					if ((ch == 'f') || (ch == 'F')) {
 						if (ctx->callbacks->onobject.onnumber != NULL) {
-							struct json_number number;
-							number.is_float = true;
-							number.v.f = INFINITY;
-							ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+							try {
+								struct json_number number;
+								number.is_float = true;
+								number.v.f = INFINITY;
+								ctx->callbacks->onobject.onnumber(ctx, key, number, ctx->callbacks->target);
+							} catch (...) {
+								json_err(json_error_oom);
+								return false;
+							}
 						}
 						return true;
 					}
@@ -3668,13 +3780,23 @@ extern "C" {
 			} else if (ch == '{') {
 				if (ctx->callbacks != NULL) {
 					if (ctx->callbacks->onrootstart != NULL) {
-						ctx->callbacks->onrootstart(ctx, ctx->callbacks->target);
+						try {
+							ctx->callbacks->onrootstart(ctx, ctx->callbacks->target);
+						} catch (...) {
+							json_err(json_error_oom);
+							return false;
+						}
 					}
 				}
 				bool result = json_call_object(ctx, ptrptr);
 				if (ctx->callbacks != NULL) {
 					if (ctx->callbacks->onrootend != NULL) {
-						ctx->callbacks->onrootend(ctx, ctx->callbacks->target, result);
+						try {
+							ctx->callbacks->onrootend(ctx, ctx->callbacks->target, result);
+						} catch (...) {
+							json_err(json_error_oom);
+							result = false;
+						}
 					}
 				}
 				if (!result) {

@@ -85,6 +85,7 @@ void OMEngine::onError(const JString& error) {
 #include <data/uListIterator.h>
 #include <data/uCollection.h>
 #include <data/uList.h>
+#include <data/uSet.h>
 
 OMEngine::OMEngine() {
     CStack<int> stack;
@@ -100,6 +101,9 @@ OMEngine::OMEngine() {
     list.push(1.0);
     list.push(2.0);
     list.items();
+    CSet<GLfloat> set;
+    set.add(1);
+    set.add(2);
     
     const char *sOMLoadRes =
         #include "OMLoad.res"

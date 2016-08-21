@@ -245,5 +245,30 @@ public:
 	}
 };
 
+template <typename Type>
+class CSet : public CList<Type> {
+public:
+	inline CSet(void (*onrelease)(Type& value) = NULL) : CList<Type>(onrelease) { }
+	inline CSet(int initialCapacity, void (*onrelease)(Type& value) = NULL) throw(const char*) : CList<Type>(initialCapacity, onrelease) { }
+	
+	virtual inline bool add(const Type& object) throw(const char*) {
+		if (!CStack<Type>::contains(object)) {
+			CStack<Type>::push(object);
+			return true;
+		}
+		return false;
+	}
+	
+	virtual inline bool addAll(CCollection<Type>& collection) throw(const char*) {
+		bool result = false;
+		int32_t count = collection.count();
+		const Type* items = collection.items();
+		for (int i = count - 1; i >= 0; i--) {
+			result | add(items[i]);
+		}
+		return result;
+	}
+};
+
 #endif //JAPPSY_USET_H
 

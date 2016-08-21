@@ -290,4 +290,100 @@ public:
 	}
 };
 
+template <typename K, typename V>
+class CMap : public CObject {
+public:
+	CSet<K>* m_keys;
+	CList<V>* m_values;
+	
+public:
+	void (*m_onrelease)(K& key, V& value) = NULL;
+	
+	inline CMap(void (*onrelease)(K& key, V& value) = NULL) throw(const char*) {
+		m_onrelease = onrelease;
+		m_keys = new CSet<K>();
+		m_values = new CList<V>();
+	}
+	
+	inline ~CMap() {
+		THIS.clear();
+		delete m_keys;
+		delete m_values;
+	}
+	
+	virtual inline void clear() throw(const char*) {
+		if (m_onrelease != NULL) {
+			int32_t count = m_keys->count();
+			K* keys = m_keys->items();
+			V* values = m_values->items();
+			for (int i = 0; i < count; i++) {
+				m_onrelease(keys[i], values[i]);
+			}
+		}
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(const K& key) const {
+		return m_keys->CStack<K>::contains(key);
+	}
+	
+	virtual inline bool containsValue(const V& value) const {
+		return m_values->CStack<V>::contains(value);
+	}
+	
+	virtual inline const V& get(const K& key) const throw(const char*) {
+		int32_t index = m_keys->CStack<K>::search(key);
+		if (index >= 0) return m_values->CStack<V>::get(index);
+		throw eNotFound;
+	}
+	
+	virtual inline const V& opt(const K& key, const V& defaultValue) const {
+		int32_t index = m_keys->CStack<K>::search(key);
+		if (index >= 0) {
+			try {
+				return m_values->CStack<V>::get(index);
+			} catch (const char* e) {
+			}
+		}
+		return defaultValue;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->CStack<K>::empty();
+	}
+	
+	virtual inline const CSet<K>& keySet() const {
+		return *m_keys;
+	}
+	
+	virtual inline V& put(const K& key, const V& value) throw(const char*) {
+		int32_t index = m_keys->CStack<K>::search(key);
+		if (index < 0) {
+			m_keys->CStack<K>::push(key);
+			return m_values->CStack<V>::push(value);
+		} else {
+			if (m_onrelease != NULL) m_onrelease(key, m_values->CStack<V>::get(index));
+			return m_values->CList<V>::set(index, value);
+		}
+	}
+	
+	virtual inline void remove(const K& key) throw(const char*) {
+		int32_t index = m_keys->CStack<K>::search(key);
+		if (index >= 0) {
+			if (m_onrelease != NULL) m_onrelease(key, m_values->CStack<V>::get(index));
+			m_keys->CStack<K>::remove(index);
+			m_values->CStack<V>::remove(index);
+		}
+	}
+	
+	virtual inline int32_t size() const {
+		return m_keys->CStack<K>::size();
+	}
+	
+	virtual inline const CCollection<V>& values() const {
+		return *m_values;
+	}
+};
+
 #endif //JAPPSY_UMAP_H

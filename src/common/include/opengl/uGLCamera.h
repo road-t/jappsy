@@ -19,19 +19,18 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <data/uHashMap.h>
 #include <data/uVector.h>
 
 class GLRender;
 
-class RefGLCamera : public JRefObject {
+class GLCamera : public CObject {
 public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
 	constexpr static uint32_t LAYER = 2;
 
-	GLRender* context;
-	const wchar_t* key;
+	GLRender* context = NULL;
+	CString key;
 	Vec3 position;
 	Vec3 target;
 	Vec3 head;
@@ -47,53 +46,34 @@ public:
 	Mat4 projection16fv;
 	Mat4 view16fv;
 	
-	inline RefGLCamera() { throw eInvalidParams; }
-	RefGLCamera(GLRender* context, const wchar_t* key);
-	~RefGLCamera();
+	GLCamera(GLRender* context, const CString& key);
 	
-	RefGLCamera& invalidate();
-	RefGLCamera& size(GLfloat width, GLfloat height);
+	GLCamera* invalidate();
+	GLCamera* size(GLfloat width, GLfloat height);
 	
-	RefGLCamera& perspective(GLfloat fov, GLfloat min, GLfloat max);
-	RefGLCamera& ortho(GLfloat min, GLfloat max);
-	RefGLCamera& layer(GLfloat offsetX, GLfloat offsetY);
+	GLCamera* perspective(GLfloat fov, GLfloat min, GLfloat max);
+	GLCamera* ortho(GLfloat min, GLfloat max);
+	GLCamera* layer(GLfloat offsetX, GLfloat offsetY);
 	
-	RefGLCamera& lookAt(const Vec3& position, const Vec3& target, const Vec3& head);
-	RefGLCamera& rotate(const Vec3& vec, GLfloat angle);
+	GLCamera* lookAt(const Vec3& position, const Vec3& target, const Vec3& head);
+	GLCamera* rotate(const Vec3& vec, GLfloat angle);
 	
 	bool update();
 };
 
-class GLCamera : public JObject {
-public:
-	JRefClass(GLCamera, RefGLCamera);
-	
-	inline RefGLCamera& invalidate() throw(const char*) { return THIS.ref().invalidate(); }
-	inline RefGLCamera& size(GLfloat width, GLfloat height) throw(const char*) { return THIS.ref().size(width, height); }
-	
-	inline RefGLCamera& perspective(GLfloat fov, GLfloat min, GLfloat max) throw(const char*) { return THIS.ref().perspective(fov, min, max); }
-	inline RefGLCamera& ortho(GLfloat min, GLfloat max) throw(const char*) { return THIS.ref().ortho(min, max); }
-	inline RefGLCamera& layer(GLfloat offsetX, GLfloat offsetY) throw(const char*) { return THIS.ref().layer(offsetX, offsetY); }
-	
-	inline RefGLCamera& lookAt(const Vec3& position, const Vec3& target, const Vec3& head) throw(const char*) { return THIS.ref().lookAt(position, target, head); }
-	inline RefGLCamera& rotate(const Vec3& vec, GLfloat angle) throw(const char*) { return THIS.ref().rotate(vec, angle); }
-	
-	inline bool update() throw(const char*) { return THIS.ref().update(); }
-};
-
-class GLCameras {
+class GLCameras : public CObject {
 private:
-	GLRender* context;
-	JHashMap<JString, GLCamera> list;
-	
+	GLRender* context = NULL;
+	VectorMap<CString&, GLCamera*> list;
+
 public:
-	GLCamera gui;
+	GLCamera* gui = NULL;
 	
 	GLCameras(GLRender* context) throw(const char*);
 	~GLCameras();
 	
-	GLCamera& get(const wchar_t* key) throw(const char*);
-	GLCamera& createCamera(const wchar_t* key) throw(const char*);
+	GLCamera* get(const CString& key);
+	GLCamera* createCamera(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLCAMERA_H

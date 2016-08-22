@@ -899,10 +899,8 @@ extern "C" {
 
 //==============================================================
 
-#include <core/uMemory.h>
-#include <core/uError.h>
-#include <data/uNumber.h>
-	
+#include <core/uSystem.h>
+
 #define StringTrue L"true"
 #define StringFalse L"false"
 #define StringNan L"NaN"
@@ -912,47 +910,6 @@ extern "C" {
 #define StringNil NULL
 #define StringNull L"null"
 #define StringUndefined L"undefined"
-	
-uint32_t getStringLength(const JString& self) {
-	if (self._object == NULL)
-		return 0;
-	return self.ref().m_length;
-}
-
-uint32_t setStringLength(JString& self, uint32_t length) throw(const char*) {
-	if (self._object == NULL) {
-		CString* newString = new CString();
-		if (newString == NULL)
-			throw eOutOfMemory;
-		self.setRef(newString);
-	}
-	self.ref().setLength(length);
-	return self.ref().m_length;
-}
-
-uint32_t getRefStringLength(const CString& self) {
-	return self.m_length;
-}
-
-uint32_t setRefStringLength(CString& self, uint32_t length) throw(const char*) {
-	self.setLength(length);
-	return self.m_length;
-}
-
-void CString::initialize() {
-	TYPE = TypeString;
-	THIS.length.initialize(this, &getRefStringLength, &setRefStringLength);
-}
-
-void JString::initialize() {
-	THIS.length.initialize(this, &getStringLength, &setStringLength);
-}
-
-void JString::release() {
-	if (_object != NULL) {
-		setRef(NULL);
-	}
-}
 
 #define STRING_BLOCK_SIZE	32
 
@@ -961,70 +918,65 @@ void CString::setSize(uint32_t size) throw(const char*) {
 	uint32_t newLength = (newSize / sizeof(wchar_t)) - 1;
 	
 	if (newSize < sizeof(wchar_t)) {
-		if (THIS.m_data != NULL) {
-			memFree(THIS.m_data);
-			THIS.m_data = NULL;
+		if (this->m_data != NULL) {
+			memFree(this->m_data);
+			this->m_data = NULL;
 		}
-		THIS.m_length = 0;
-		THIS.m_size = 0;
-		THIS.m_memorySize = 0;
+		this->m_length = 0;
+		this->m_size = 0;
+		this->m_memorySize = 0;
 		return;
 	}
 	
 	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-	if (THIS.m_memorySize != newMemSize) {
-		wchar_t* newString = memRealloc(wchar_t, newString, THIS.m_data, newMemSize);
+	if (this->m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
 		if (newString) {
-			THIS.m_data = newString;
-			THIS.m_memorySize = newMemSize;
+			this->m_data = newString;
+			this->m_memorySize = newMemSize;
 		} else {
 			throw eOutOfMemory;
 		}
 	}
 	
-	THIS.m_data[newLength] = 0;
-	THIS.m_length = newLength;
-	THIS.m_size = newSize;
+	this->m_data[newLength] = 0;
+	this->m_length = newLength;
+	this->m_size = newSize;
 }
 
 void CString::setLength(uint32_t length) throw(const char*) {
 	uint32_t newSize = (length + 1) * sizeof(wchar_t);
 	uint32_t newMemSize = newSize - (newSize % STRING_BLOCK_SIZE) + STRING_BLOCK_SIZE;
-	if (THIS.m_memorySize != newMemSize) {
-		wchar_t* newString = memRealloc(wchar_t, newString, THIS.m_data, newMemSize);
+	if (this->m_memorySize != newMemSize) {
+		wchar_t* newString = memRealloc(wchar_t, newString, this->m_data, newMemSize);
 		if (newString) {
-			THIS.m_data = newString;
-			THIS.m_memorySize = newMemSize;
+			this->m_data = newString;
+			this->m_memorySize = newMemSize;
 		} else {
 			throw eOutOfMemory;
 		}
 	}
 	
-	THIS.m_data[length] = 0;
-	THIS.m_length = length;
-	THIS.m_size = newSize;
+	this->m_data[length] = 0;
+	this->m_length = length;
+	this->m_size = newSize;
 }
 
 //==============================================================
 
 void CString::release() {
-	if (THIS.m_data != NULL) {
-		memFree(THIS.m_data);
-		THIS.m_data = NULL;
+	if (this->m_data != NULL) {
+		memFree(this->m_data);
+		this->m_data = NULL;
 	}
-	THIS.m_length = 0;
-	THIS.m_size = 0;
-	THIS.m_memorySize = 0;
-}
-
-CString::~CString() {
-	THIS.release();
+	this->m_length = 0;
+	this->m_size = 0;
+	this->m_memorySize = 0;
 }
 
 //==============================================================
 
 CString::CString(const void* string) throw(const char*) {
-	initialize();
 	if (string != NULL)
 		throw eInvalidPointer;
 }
@@ -1033,98 +985,45 @@ CString& CString::operator =(const void* string) throw(const char*) {
 	if (string != NULL) {
 		throw eInvalidPointer;
 	}
-	THIS.setSize(0);
+	this->setSize(0);
 	return *this;
 }
 
 CString::CString(const CString& string) throw(const char*) {
-	initialize();
 	if (string.m_size > 0) {
-		THIS.setSize(string.m_size);
-		memcpy(THIS.m_data, string.m_data, THIS.m_size);
+		this->setSize(string.m_size);
+		memcpy(this->m_data, string.m_data, this->m_size);
 	}
 }
 
 CString& CString::operator =(const CString& string) throw(const char*) {
-	THIS.setSize(string.m_size);
+	this->setSize(string.m_size);
 	if (string.m_size > 0)
-		memcpy(THIS.m_data, string.m_data, THIS.m_size);
+		memcpy(this->m_data, string.m_data, this->m_size);
 	return *this;
 }
 
 CString& CString::concat(const CString& string) throw(const char*) {
 	uint32_t length = string.m_length;
 	if (length != 0) {
-		uint32_t prevLength = THIS.m_length;
+		uint32_t prevLength = this->m_length;
 		setLength(prevLength + length);
-		memcpy(THIS.m_data + prevLength, string.m_data, string.m_size);
+		memcpy(this->m_data + prevLength, string.m_data, string.m_size);
 	}
 	return *this;
-}
-
-JString::JString(const JString& string) throw(const char*) : JObject() {
-	initialize();
-	if (string._object != NULL) {
-		CString* newString = new CString(*(CString*)(string._object));
-		setRef(newString);
-	}
-}
-
-JString::JString(const CString& string) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(string);
-	setRef(newString);
-}
-
-JString& JString::operator =(const JString& string) throw(const char*) {
-	if (string._object != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(*(CString*)(string._object));
-			setRef(newString);
-		} else {
-			((CString*)_object)->operator =(*(CString*)(string._object));
-		}
-	} else {
-		setRef(NULL);
-	}
-	return *this;
-}
-
-JString& JString::operator =(const CString& string) throw(const char*) {
-	CString* newString = new CString(string);
-	setRef(newString);
-	return *this;
-}
-
-JString& JString::concat(const JString& string) throw(const char*) {
-	if (string._object != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(*(CString*)(string._object));
-			setRef(newString);
-		} else {
-			((CString*)_object)->concat(*(CString*)(string._object));
-		}
-	}
-	return *this;
-}
-
-JString::JString(const Number& number) : JObject() {
-	initialize();
-	CString* newString = new CString((const wchar_t*)(number.toString()));
-	setRef(newString);
 }
 
 #if defined(__IOS__)
+
 CString::CString(const NSString* string) throw(const char*) {
-	initialize();
 	if (string != NULL) {
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			THIS.setLength(length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data, THIS.m_size);
-			THIS.setSize(newSize);
+			this->setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+			this->setSize(newSize);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	}
 }
@@ -1133,82 +1032,41 @@ CString& CString::operator =(const NSString* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			THIS.setLength(length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data, THIS.m_size);
-			THIS.setSize(newSize);
+			this->setLength(length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
+			this->setSize(newSize);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	} else {
-		THIS.setSize(0);
+		this->setSize(0);
 	}
 	return *this;
 }
 
 CString& CString::concat(const NSString* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = THIS.m_length;
+		uint32_t prevLength = this->m_length;
 		uint32_t length = (uint32_t)string.length;
 		if (length > 0) {
-			THIS.setLength(prevLength + length);
-			uint32_t newSize = utf8_towcs(string.UTF8String, THIS.m_data + prevLength, (length+1) * sizeof(wchar_t));
-			THIS.setSize(newSize);
+			this->setLength(prevLength + length);
+			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
+			this->setSize(newSize);
 		}
 	}
 	return *this;
-}
-
-JString::JString(const NSString* string) throw(const char*) : JObject() {
-	initialize();
-	if (string != NULL) {
-		CString* newString = new CString(string);
-		setRef(newString);
-	}
-}
-
-JString& JString::operator =(const NSString* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->operator =(string);
-		}
-	} else {
-		setRef(NULL);
-	}
-	return *this;
-}
-
-JString& JString::concat(const NSString* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->concat(string);
-		}
-	}
-	return *this;
-}
-
-JString::JString(const NSNumber *number) : JObject() {
-	initialize();
-	CString* newString = new CString([number stringValue]);
-	setRef(newString);
 }
 
 #endif
 
 CString::CString(const char* string) throw(const char*) {
-	initialize();
 	if (string != NULL) {
 		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			THIS.setLength(length);
-			utf8_towcs(string, THIS.m_data, THIS.m_size);
+			this->setLength(length);
+			utf8_towcs(string, this->m_data, this->m_size);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	}
 }
@@ -1217,94 +1075,50 @@ CString& CString::operator =(const char* string) throw(const char*) {
 	if (string != NULL) {
 		uint32_t length = utf8_strlen(string, NULL);
 		if (length > 0) {
-			THIS.setLength(length);
-			utf8_towcs(string, THIS.m_data, THIS.m_size);
+			this->setLength(length);
+			utf8_towcs(string, this->m_data, this->m_size);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	} else {
-		THIS.setSize(0);
+		this->setSize(0);
 	}
 	return *this;
 }
 
 CString& CString::concat(const char* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = THIS.m_length;
+		uint32_t prevLength = this->m_length;
 		uint32_t strSize;
 		uint32_t length = utf8_strlen(string, &strSize);
 		if (length > 0) {
-			THIS.setLength(prevLength + length);
-			utf8_towcs(string, THIS.m_data + prevLength, (length+1) * sizeof(wchar_t));
-		}
-	}
-	return *this;
-}
-
-JString::JString(const char* string) throw(const char*) : JObject() {
-	initialize();
-	if (string != NULL) {
-		CString* newString = new CString(string);
-		setRef(newString);
-	}
-}
-
-JString& JString::operator =(const char* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->operator =(string);
-		}
-	} else {
-		setRef(NULL);
-	}
-	return *this;
-}
-
-JString& JString::concat(const char* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->concat(string);
+			this->setLength(prevLength + length);
+			utf8_towcs(string, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
 		}
 	}
 	return *this;
 }
 
 CString::CString(const char* string, uint32_t size) throw(const char*) {
-	initialize();
 	if (string != NULL) {
 		uint32_t strSize = 0;
 		uint32_t length = utf8_strlen_nzt(string, size, &strSize);
-		THIS.setLength(length);
+		this->setLength(length);
 		if (length > 0) {
-			utf8_towcs(string, THIS.m_data, THIS.m_size);
+			utf8_towcs(string, this->m_data, this->m_size);
 		}
 	}
 }
 
-JString::JString(const char* string, uint32_t size) throw(const char*) : JObject() {
-	initialize();
-	if (string != NULL) {
-		CString* newString = new CString(string, size);
-		setRef(newString);
-	}
-}
-
 CString::CString(const wchar_t* string) throw(const char*) {
-	initialize();
 	if (string != NULL) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
 		if (length > 0) {
-			THIS.setSize(newSize);
-			memcpy(THIS.m_data, string, THIS.m_size);
+			this->setSize(newSize);
+			memcpy(this->m_data, string, this->m_size);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	}
 }
@@ -1314,676 +1128,336 @@ CString& CString::operator =(const wchar_t* string) throw(const char*) {
 		uint32_t newSize = 0;
 		uint32_t length = wcs_strlen(string, &newSize);
 		if (length > 0) {
-			THIS.setSize(newSize);
-			memcpy(THIS.m_data, string, THIS.m_size);
+			this->setSize(newSize);
+			memcpy(this->m_data, string, this->m_size);
 		} else {
-			THIS.setLength(0);
+			this->setLength(0);
 		}
 	} else {
-		THIS.setSize(0);
+		this->setSize(0);
 	}
 	return *this;
 }
 
 CString& CString::concat(const wchar_t* string) throw(const char*) {
 	if (string != NULL) {
-		uint32_t prevLength = THIS.m_length;
+		uint32_t prevLength = this->m_length;
 		uint32_t strSize;
 		uint32_t length = wcs_strlen(string, &strSize);
 		if (length > 0) {
-			THIS.setLength(THIS.m_length + length);
-			memcpy(THIS.m_data + prevLength, string, strSize);
-		}
-	}
-	return *this;
-}
-
-JString::JString(const wchar_t* string) throw(const char*) : JObject() {
-	initialize();
-	if (string != NULL) {
-		CString* newString = new CString(string);
-		setRef(newString);
-	}
-}
-
-JString& JString::operator =(const wchar_t* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->operator =(string);
-		}
-	} else {
-		setRef(NULL);
-	}
-	return *this;
-}
-
-JString& JString::concat(const wchar_t* string) throw(const char*) {
-	if (string != NULL) {
-		if (_object == NULL) {
-			CString* newString = new CString(string);
-			setRef(newString);
-		} else {
-			((CString*)_object)->concat(string);
+			this->setLength(this->m_length + length);
+			memcpy(this->m_data + prevLength, string, strSize);
 		}
 	}
 	return *this;
 }
 
 CString::CString(const wchar_t* string, uint32_t length) throw(const char*) {
-	initialize();
 	if (string != NULL) {
-		THIS.setLength(length);
+		this->setLength(length);
 		if (length > 0)
-			memcpy(THIS.m_data, string, length * sizeof(wchar_t));
-	}
-}
-
-JString::JString(const wchar_t* string, uint32_t length) throw(const char*) : JObject() {
-	initialize();
-	if (string != NULL) {
-		CString* newString = new CString(string, length);
-		setRef(newString);
+			memcpy(this->m_data, string, length * sizeof(wchar_t));
 	}
 }
 
 CString::CString(const char character) throw(const char*) {
-	initialize();
-	THIS.setLength(1);
-	THIS.m_data[0] = (wchar_t)character;
+	this->setLength(1);
+	this->m_data[0] = (wchar_t)character;
 }
 
 CString& CString::operator =(const char character) throw(const char*) {
-	THIS.setLength(1);
-	THIS.m_data[0] = (wchar_t)character;
+	this->setLength(1);
+	this->m_data[0] = (wchar_t)character;
 	return *this;
 }
 
 CString& CString::concat(const char character) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 1);
-	THIS.m_data[prevLength] = (wchar_t)character;
-	return *this;
-}
-
-JString::JString(const char character) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(character);
-	setRef(newString);
-}
-
-JString& JString::operator =(const char character) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(character);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(character);
-	}
-	return *this;
-}
-
-JString& JString::concat(const char character) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(character);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(character);
-	}
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 1);
+	this->m_data[prevLength] = (wchar_t)character;
 	return *this;
 }
 
 CString::CString(const wchar_t character) throw(const char*) {
-	initialize();
-	THIS.setLength(1);
-	THIS.m_data[0] = character;
+	this->setLength(1);
+	this->m_data[0] = character;
 }
 
 CString& CString::operator =(const wchar_t character) throw(const char*) {
-	THIS.setLength(1);
-	THIS.m_data[0] = character;
+	this->setLength(1);
+	this->m_data[0] = character;
 	return *this;
 }
 
 CString& CString::concat(const wchar_t character) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 1);
-	THIS.m_data[prevLength] = character;
-	return *this;
-}
-
-JString::JString(const wchar_t character) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(character);
-	setRef(newString);
-}
-
-JString& JString::operator =(const wchar_t character) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(character);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(character);
-	}
-	return *this;
-}
-
-JString& JString::concat(const wchar_t character) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(character);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(character);
-	}
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 1);
+	this->m_data[prevLength] = character;
 	return *this;
 }
 
 CString::CString(bool value) throw(const char*) {
-	initialize();
-	THIS.operator =(value);
+	this->operator =(value);
 }
 
 CString& CString::operator =(bool value) throw(const char*) {
 	if (value)
-		return THIS.operator =(StringTrue);
+		return this->operator =(StringTrue);
 	else
-		return THIS.operator =(StringFalse);
+		return this->operator =(StringFalse);
 }
 
 CString& CString::concat(const bool value) throw(const char*) {
 	if (value)
-		return THIS.concat(StringTrue);
+		return this->concat(StringTrue);
 	else
-		return THIS.concat(StringFalse);
+		return this->concat(StringFalse);
 }
 
-JString::JString(const bool value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const bool value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const bool value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, int8_t value) {
+static inline int swprintf(wchar_t* target, int8_t value) {
 	return ::swprintf(target, 4, L"%hhd", value);
 }
 
 CString::CString(int8_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(4);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(4);
+	int length = swprintf(this->m_data, value);
 	if (length != 4) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(int8_t value) throw(const char*) {
-	THIS.setLength(4);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(4);
+	int length = swprintf(this->m_data, value);
 	if (length != 4) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const int8_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 4);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 4);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 4) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const int8_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const int8_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const int8_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, uint8_t value) {
+static inline int swprintf(wchar_t* target, uint8_t value) {
 	return ::swprintf(target, 3, L"%hhu", value);
 }
 
 CString::CString(uint8_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(3);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(3);
+	int length = swprintf(this->m_data, value);
 	if (length != 3) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(uint8_t value) throw(const char*) {
-	THIS.setLength(3);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(3);
+	int length = swprintf(this->m_data, value);
 	if (length != 3) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const uint8_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 3);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 3);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 3) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const uint8_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const uint8_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const uint8_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, int16_t value) {
+static inline int swprintf(wchar_t* target, int16_t value) {
 	return ::swprintf(target, 6, L"%hd", value);
 }
 
 CString::CString(int16_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(6);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(6);
+	int length = swprintf(this->m_data, value);
 	if (length != 6) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(int16_t value) throw(const char*) {
-	THIS.setLength(6);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(6);
+	int length = swprintf(this->m_data, value);
 	if (length != 6) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const int16_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 6);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 6);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 6) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const int16_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const int16_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const int16_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, uint16_t value) {
+static inline int swprintf(wchar_t* target, uint16_t value) {
 	return ::swprintf(target, 5, L"%hu", value);
 }
 
 CString::CString(uint16_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(5);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(5);
+	int length = swprintf(this->m_data, value);
 	if (length != 5) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(uint16_t value) throw(const char*) {
-	THIS.setLength(5);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(5);
+	int length = swprintf(this->m_data, value);
 	if (length != 5) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const uint16_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 5);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 5);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 5) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const uint16_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const uint16_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const uint16_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, int32_t value) {
+int swprintf(wchar_t* target, int32_t value) {
 	return ::swprintf(target, 11, L"%ld", value);
 }
 
 CString::CString(int32_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(11);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(11);
+	int length = swprintf(this->m_data, value);
 	if (length != 11) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(int32_t value) throw(const char*) {
-	THIS.setLength(11);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(11);
+	int length = swprintf(this->m_data, value);
 	if (length != 11) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const int32_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 11);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 11);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 11) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const int32_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const int32_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const int32_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, uint32_t value) {
+static inline int swprintf(wchar_t* target, uint32_t value) {
 	return ::swprintf(target, 10, L"%lu", value);
 }
 
 CString::CString(uint32_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(10);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(10);
+	int length = swprintf(this->m_data, value);
 	if (length != 10) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(uint32_t value) throw(const char*) {
-	THIS.setLength(10);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(10);
+	int length = swprintf(this->m_data, value);
 	if (length != 10) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const uint32_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 10);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 10);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 10) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const uint32_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const uint32_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const uint32_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, int64_t value) {
+static inline int swprintf(wchar_t* target, int64_t value) {
 	return ::swprintf(target, 21, L"%lld", value);
 }
 
 CString::CString(int64_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(21);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(21);
+	int length = swprintf(this->m_data, value);
 	if (length != 21) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(int64_t value) throw(const char*) {
-	THIS.setLength(21);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(21);
+	int length = swprintf(this->m_data, value);
 	if (length != 21) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const int64_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 21);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 21);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 21) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
-JString::JString(const int64_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const int64_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const int64_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, uint64_t value) {
+static inline int swprintf(wchar_t* target, uint64_t value) {
 	return ::swprintf(target, 20, L"%llu", value);
 }
 
 CString::CString(uint64_t value) throw(const char*) {
-	initialize();
-	THIS.setLength(20);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(20);
+	int length = swprintf(this->m_data, value);
 	if (length != 20) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(uint64_t value) throw(const char*) {
-	THIS.setLength(20);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(20);
+	int length = swprintf(this->m_data, value);
 	if (length != 20) {
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	}
 	return *this;
 }
 
 CString& CString::concat(const uint64_t value) throw(const char*) {
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 20);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 20);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length != 20) {
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
-	}
-	return *this;
-}
-
-JString::JString(const uint64_t value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const uint64_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const uint64_t value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	}
 	return *this;
 }
@@ -1992,7 +1466,7 @@ JString& JString::concat(const uint64_t value) throw(const char*) {
 #include <math.h>
 #endif
 
-int CString::swprintf(wchar_t* target, float value) {
+static inline int swprintf(wchar_t* target, float value) {
 	int length = ::swprintf(target, 23, L"%.7f", value);
 	if (length == EOF)
 		return ::swprintf(target, 23, L"%.7e", value);
@@ -2016,95 +1490,68 @@ int CString::swprintf(wchar_t* target, float value) {
 }
 
 CString::CString(float value) throw(const char*) {
-	initialize();
 	if (isnan(value)) {
-		THIS.operator=(StringNan);
+		this->operator=(StringNan);
 	} else if (isinf(value)) {
 		if (signbit(value)) {
-			THIS.operator=(StringNegInfinite);
+			this->operator=(StringNegInfinite);
 		} else {
-			THIS.operator=(StringInfinite);
+			this->operator=(StringInfinite);
 		}
 	} else {
-		THIS.setLength(23);
-		int length = CString::swprintf(THIS.m_data, value);
+		this->setLength(23);
+		int length = swprintf(this->m_data, value);
 		if (length == EOF) {
-			THIS.setSize(0);
+			this->setSize(0);
 			throw eConvert;
 		} else if (length != 23)
-			THIS.setLength(static_cast<uint32_t>(length));
+			this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(float value) throw(const char*) {
 	if (isnan(value))
-		return THIS.operator=(StringNan);
+		return this->operator=(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return THIS.operator=(StringNegInfinite);
+			return this->operator=(StringNegInfinite);
 		else
-			return THIS.operator=(StringInfinite);
+			return this->operator=(StringInfinite);
 	}
 	
-	THIS.setLength(23);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(23);
+	int length = swprintf(this->m_data, value);
 	if (length == EOF) {
-		THIS.setSize(0);
+		this->setSize(0);
 		throw eConvert;
 	} else if (length != 23)
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	return *this;
 }
 
 CString& CString::concat(const float value) throw(const char*) {
 	if (isnan(value))
-		return THIS.concat(StringNan);
+		return this->concat(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return THIS.concat(StringNegInfinite);
+			return this->concat(StringNegInfinite);
 		else
-			return THIS.concat(StringInfinite);
+			return this->concat(StringInfinite);
 	}
 	
-	uint32_t prevSize = THIS.m_size;
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 23);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevSize = this->m_size;
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 23);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length == EOF) {
-		THIS.setSize(prevSize);
+		this->setSize(prevSize);
 		throw eConvert;
 	} else if (length != 23)
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	return *this;
 }
 
-JString::JString(const float value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const float value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const float value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
-	return *this;
-}
-
-int CString::swprintf(wchar_t* target, double value) {
+static inline int swprintf(wchar_t* target, double value) {
 	int length = ::swprintf(target, 31, L"%.15f", value);
 	if (length == EOF)
 		return ::swprintf(target, 31, L"%.15e", value);
@@ -2128,112 +1575,79 @@ int CString::swprintf(wchar_t* target, double value) {
 }
 
 CString::CString(double value) throw(const char*) {
-	initialize();
 	if (isnan(value)) {
-		THIS.operator=(StringNan);
+		this->operator=(StringNan);
 	} else if (isinf(value)) {
 		if (signbit(value)) {
-			THIS.operator=(StringNegInfinite);
+			this->operator=(StringNegInfinite);
 		} else {
-			THIS.operator=(StringInfinite);
+			this->operator=(StringInfinite);
 		}
 	} else {
-		THIS.setLength(31);
-		int length = CString::swprintf(THIS.m_data, value);
+		this->setLength(31);
+		int length = swprintf(this->m_data, value);
 		if (length == EOF) {
-			THIS.setSize(0);
+			this->setSize(0);
 			throw eConvert;
 		} else if (length != 31)
-			THIS.setLength(static_cast<uint32_t>(length));
+			this->setLength(static_cast<uint32_t>(length));
 	}
 }
 
 CString& CString::operator =(double value) throw(const char*) {
 	if (isnan(value))
-		return THIS.operator=(StringNan);
+		return this->operator=(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return THIS.operator=(StringNegInfinite);
+			return this->operator=(StringNegInfinite);
 		else
-			return THIS.operator=(StringInfinite);
+			return this->operator=(StringInfinite);
 	}
 	
-	THIS.setLength(31);
-	int length = CString::swprintf(THIS.m_data, value);
+	this->setLength(31);
+	int length = swprintf(this->m_data, value);
 	if (length == EOF) {
-		THIS.setSize(0);
+		this->setSize(0);
 		throw eConvert;
 	} else if (length != 31)
-		THIS.setLength(static_cast<uint32_t>(length));
+		this->setLength(static_cast<uint32_t>(length));
 	return *this;
 }
 
 CString& CString::concat(const double value) throw(const char*) {
 	if (isnan(value))
-		return THIS.concat(StringNan);
+		return this->concat(StringNan);
 	else if (isinf(value)) {
 		if (signbit(value))
-			return THIS.concat(StringNegInfinite);
+			return this->concat(StringNegInfinite);
 		else
-			return THIS.concat(StringInfinite);
+			return this->concat(StringInfinite);
 	}
 	
-	uint32_t prevSize = THIS.m_size;
-	uint32_t prevLength = THIS.m_length;
-	THIS.setLength(prevLength + 31);
-	int length = CString::swprintf(THIS.m_data + prevLength, value);
+	uint32_t prevSize = this->m_size;
+	uint32_t prevLength = this->m_length;
+	this->setLength(prevLength + 31);
+	int length = swprintf(this->m_data + prevLength, value);
 	if (length == EOF) {
-		THIS.setSize(prevSize);
+		this->setSize(prevSize);
 		throw eConvert;
 	} else if (length != 31)
-		THIS.setLength(prevLength + static_cast<uint32_t>(length));
-	return *this;
-}
-
-JString::JString(const double value) throw(const char*) : JObject() {
-	initialize();
-	CString* newString = new CString(value);
-	setRef(newString);
-}
-
-JString& JString::operator =(const double value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->operator =(value);
-	}
-	return *this;
-}
-
-JString& JString::concat(const double value) throw(const char*) {
-	if (_object == NULL) {
-		CString* newString = new CString(value);
-		setRef(newString);
-	} else {
-		((CString*)_object)->concat(value);
-	}
+		this->setLength(prevLength + static_cast<uint32_t>(length));
 	return *this;
 }
 
 #ifdef __IOS__
+
 CString::operator NSString*() const {
 	NSString* result = NULL;
-	if (THIS.m_data != NULL) {
+	if (this->m_data != NULL) {
 #if __WCHAR_MAX__ > 0x10000
-		result = [[NSString alloc] initWithBytes:(char*)(THIS.m_data) length:(THIS.m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
+		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF32LittleEndianStringEncoding];
 #else
-		result = [[NSString alloc] initWithBytes:(char*)(THIS.m_data) length:(THIS.m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
+		result = [[NSString alloc] initWithBytes:(char*)(this->m_data) length:(this->m_length) * sizeof(wchar_t) encoding:NSUTF16LittleEndianStringEncoding];
 #endif
 	}
 	return result;
-}
-
-JString::operator NSString*() const {
-	if (_object != NULL) {
-		return ((CString*)_object)->operator NSString*();
-	}
-	return NULL;
 }
 
 #endif
@@ -2242,7 +1656,7 @@ JString::operator NSString*() const {
 
 enum StringNumberFormat { snfNone, snfUndefined, snfNil, snfNull, snfBoolTrue, snfBoolFalse, snfHex, snfOct, snfBit, snfFloat, snfFloatEx, snfFloatNan, snfFloatInfPos, snfFloatInfNeg, snfInt, snfUInt };
 
-int CString::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
+static int getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
 	if (srcLen > 0) {
 		wchar_t* lpStr = src;
 		wchar_t ch = lpStr[0];
@@ -2404,7 +1818,7 @@ int CString::getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos,
 	return snfNone;
 }
 
-uint64_t CString::wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
+static uint64_t wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
 	switch (type) {
 		case snfNone:
 		case snfUndefined:
@@ -2446,7 +1860,7 @@ uint64_t CString::wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
 	return 0;
 }
 
-int64_t CString::wtoll(const wchar_t* data, uint32_t len, uint32_t type) {
+int64_t wtoll(const wchar_t* data, uint32_t len, uint32_t type) {
 	switch (type) {
 		case snfNone:
 		case snfUndefined:
@@ -2488,7 +1902,7 @@ int64_t CString::wtoll(const wchar_t* data, uint32_t len, uint32_t type) {
 	return 0;
 }
 
-long double CString::wtod(const wchar_t* data, uint32_t len, uint32_t type) {
+long double wtod(const wchar_t* data, uint32_t len, uint32_t type) {
 	switch (type) {
 		case snfNone:
 		case snfUndefined:
@@ -2534,23 +1948,16 @@ long double CString::wtod(const wchar_t* data, uint32_t len, uint32_t type) {
 
 //==============================================================
 
-JString::operator wchar_t*() const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().operator wchar_t*();
-}
-
 CString::operator bool() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return false;
 	
 	uint32_t pos;
 	uint32_t len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	switch (type) {
 		case snfNone:
-			return THIS.m_length != 0; // Не пустое?
+			return this->m_length != 0; // Не пустое?
 			
 		case snfUndefined:
 		case snfNil:
@@ -2565,193 +1972,100 @@ CString::operator bool() const {
 			return true;
 	}
 	
-	return CString::wtoll(THIS.m_data + pos, len, type) != 0;
-}
-
-JString::operator bool() const {
-	if (_object == NULL)
-		return false;
-	
-	return THIS.ref().operator bool();
+	return wtoll(this->m_data + pos, len, type) != 0;
 }
 
 CString::operator int8_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<uint8_t>(CString::wtoll(THIS.m_data + pos, len, type));
-}
-
-JString::operator int8_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator int8_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint8_t>(wtoll(this->m_data + pos, len, type));
 }
 
 CString::operator uint8_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<uint8_t>(CString::wtoull(THIS.m_data + pos, len, type));
-}
-
-JString::operator uint8_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator uint8_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint8_t>(wtoull(this->m_data + pos, len, type));
 }
 
 CString::operator int16_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<int16_t>(CString::wtoll(THIS.m_data + pos, len, type));
-}
-
-JString::operator int16_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator int16_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<int16_t>(wtoll(this->m_data + pos, len, type));
 }
 
 CString::operator uint16_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<uint16_t>(CString::wtoull(THIS.m_data + pos, len, type));
-}
-
-JString::operator uint16_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator uint16_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint16_t>(wtoull(this->m_data + pos, len, type));
 }
 
 CString::operator int32_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<int32_t>(CString::wtoll(THIS.m_data + pos, len, type));
-}
-
-JString::operator int32_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator int32_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<int32_t>(wtoll(this->m_data + pos, len, type));
 }
 
 CString::operator uint32_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return static_cast<uint32_t>(CString::wtoull(THIS.m_data + pos, len, type));
-}
-
-JString::operator uint32_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator uint32_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return static_cast<uint32_t>(wtoull(this->m_data + pos, len, type));
 }
 
 CString::operator int64_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return CString::wtoll(THIS.m_data + pos, len, type);
-}
-
-JString::operator int64_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator int64_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return wtoll(this->m_data + pos, len, type);
 }
 
 CString::operator uint64_t() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return CString::wtoull(THIS.m_data + pos, len, type);
-}
-
-JString::operator uint64_t() const {
-	if (_object == NULL)
-		return 0;
-	
-	return THIS.ref().operator uint64_t();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return wtoull(this->m_data + pos, len, type);
 }
 
 CString::operator float() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return (float)(CString::wtod(THIS.m_data + pos, len, type));
-}
-
-JString::operator float() const {
-	if (_object == NULL)
-		return NAN;
-	
-	return THIS.ref().operator float();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return (float)(wtod(this->m_data + pos, len, type));
 }
 
 CString::operator double() const {
-	if (THIS.m_data == NULL)
+	if (this->m_data == NULL)
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(THIS.m_data, THIS.m_length, &pos, &len);
-	return (double)(CString::wtod(THIS.m_data + pos, len, type));
-}
-
-JString::operator double() const {
-	if (_object == NULL)
-		return NAN;
-	
-	return THIS.ref().operator double();
+	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	return (double)(wtod(this->m_data + pos, len, type));
 }
 
 //==============================================================
-
-bool CString::equals(const JString& string) const {
-	if (string._object == NULL)
-		return m_length == 0;
-
-	return equals((*(CString*)(string._object)));
-}
-
-bool JString::equals(const JString& string) const {
-	if (_object == NULL)
-		return (string._object == NULL);
-	else if (string._object == NULL)
-		return false;
-	else
-		return THIS.ref().equals(*((CString*)(string._object)));
-}
 
 bool CString::equals(const CString& string) const {
 	if (m_length == string.m_length) {
@@ -2763,10 +2077,6 @@ bool CString::equals(const CString& string) const {
 	return false;
 }
 
-bool JString::equals(const CString& string) const {
-	return string.equals(*this);
-}
-
 bool CString::equals(const wchar_t* string) const {
 	if (string == NULL)
 		return (m_length == 0);
@@ -2774,13 +2084,6 @@ bool CString::equals(const wchar_t* string) const {
 		return memcmp(m_data, string, m_size) == 0;
 		
 	return false;
-}
-
-bool JString::equals(const wchar_t* string) const {
-	if (_object == NULL)
-		return string == NULL;
-	else
-		return THIS.ref().equals(string);
 }
 
 bool CString::equals(const char* string) const {
@@ -2793,15 +2096,6 @@ bool CString::equals(const char* string) const {
 }
 
 
-bool JString::equals(const char* string) const {
-	if (_object == NULL)
-		return string == NULL;
-	else if (string != NULL)
-		return JString(string).equals(*this);
-	
-	return false;
-}
-
 int CString::compareTo(const CString& string) const {
 	if (m_length == 0)
 		return (string.m_length == 0) ? 0 : -1;
@@ -2809,29 +2103,6 @@ int CString::compareTo(const CString& string) const {
 		return 1;
 	else
 		return wcscmp(m_data, string.m_data);
-}
-
-int JString::compareTo(const CString& string) const {
-	if (_object == NULL)
-		return -1;
-	else
-		return THIS.ref().compareTo(string);
-}
-
-int CString::compareTo(const JString& string) const {
-	if (string._object == NULL)
-		return (m_length == 0) ? 0 : 1;
-	else
-		return compareTo(*((CString*)(string._object)));
-}
-
-int JString::compareTo(const JString& string) const {
-	if (_object == NULL)
-		return (string._object == NULL) ? 0 : -1;
-	else if (string._object == NULL)
-		return 1;
-	else
-		return THIS.ref().compareTo(*((CString*)(string._object)));
 }
 
 int CString::compareTo(const wchar_t* string) const {
@@ -2845,13 +2116,6 @@ int CString::compareTo(const wchar_t* string) const {
 		return wcscmp(m_data, string);
 }
 
-int JString::compareTo(const wchar_t* string) const {
-	if (_object == NULL)
-		return (string == NULL) ? 0 : 1;
-	else
-		return THIS.ref().compareTo(string);
-}
-
 //==============================================================
 
 CString& CString::toLowerCase() {
@@ -2863,18 +2127,6 @@ CString& CString::toLowerCase() {
 CString& CString::toUpperCase() {
 	if (m_length != 0)
 		wcsupr(m_data);
-	return *this;
-}
-
-JString& JString::toLowerCase() {
-	if (_object != NULL)
-		THIS.ref().toLowerCase();
-	return *this;
-}
-
-JString& JString::toUpperCase() {
-	if (_object != NULL)
-		THIS.ref().toUpperCase();
 	return *this;
 }
 
@@ -2896,42 +2148,6 @@ bool CString::equalsIgnoreCase(const CString& string) const {
 		return true;
 	}
 	return false;
-}
-
-bool JString::equalsIgnoreCase(const CString& string) const {
-	if (_object == NULL)
-		return false;
-	else
-		return THIS.ref().equalsIgnoreCase(string);
-}
-
-bool CString::equalsIgnoreCase(const JString& string) const {
-	if (string._object == NULL)
-		return (m_length == 0);
-	
-	if (m_length == ((CString*)(string._object))->m_length) {
-		if (m_length == 0)
-			return true;
-		else {
-			wchar_t* ptr1 = m_data;
-			wchar_t* ptr2 = ((CString*)(string._object))->m_data;
-			uint32_t len = m_length;
-			while (len-- > 0) {
-				wchar_t v1 = towlower(*ptr1); ptr1++;
-				wchar_t v2 = towlower(*ptr2); ptr2++;
-				if (v1 != v2) return false;
-			}
-			return true;
-		}
-	}
-	return false;
-}
-
-bool JString::equalsIgnoreCase(const JString& string) const {
-	if (_object == NULL)
-		return (string._object == NULL);
-	else
-		return THIS.ref().equalsIgnoreCase(string);
 }
 
 bool CString::equalsIgnoreCase(const wchar_t* string) const {
@@ -2957,13 +2173,6 @@ bool CString::equalsIgnoreCase(const wchar_t* string) const {
 	return false;
 }
 
-bool JString::equalsIgnoreCase(const wchar_t* string) const {
-	if (_object == NULL)
-		return (string == NULL);
-	else
-		return THIS.ref().equalsIgnoreCase(string);
-}
-
 int CString::compareToIgnoreCase(const CString& string) const {
 	uint32_t len1 = m_length;
 	uint32_t len2 = string.m_length;
@@ -2984,45 +2193,6 @@ int CString::compareToIgnoreCase(const CString& string) const {
 		return 0;
 	else
 		return (len1 < len2) ? -1 : 1;
-}
-
-int JString::compareToIgnoreCase(const CString& string) const {
-	if (_object == NULL)
-		return -1;
-	else
-		return THIS.ref().compareToIgnoreCase(string);
-}
-
-int CString::compareToIgnoreCase(const JString& string) const {
-	if (string._object == NULL)
-		return (m_length == 0) ? 0 : 1;
-	
-	uint32_t len1 = m_length;
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	uint32_t len = (len1 < len2) ? len1 : len2;
-	if (len1 == 0)
-		return (len2 == 0) ? 0 : -1;
-	else if (len2 == 0)
-		return 1;
-
-	wchar_t* ptr1 = m_data;
-	wchar_t* ptr2 = ((CString*)(string._object))->m_data;
-	while (len-- > 0) {
-		wchar_t v1 = towlower(*ptr1); ptr1++;
-		wchar_t v2 = towlower(*ptr2); ptr2++;
-		if (v1 != v2) return (v1 < v2) ? -1 : 1;
-	}
-	if (len1 == len2)
-		return 0;
-	else
-		return (len1 < len2) ? -1 : 1;
-}
-
-int JString::compareToIgnoreCase(const JString& string) const {
-	if (_object == NULL)
-		return (string._object == NULL) ? 0 : -1;
-	else
-		return THIS.ref().compareToIgnoreCase(string);
 }
 
 int CString::compareToIgnoreCase(const wchar_t* string) const {
@@ -3050,13 +2220,6 @@ int CString::compareToIgnoreCase(const wchar_t* string) const {
 		return (len1 < len2) ? -1 : 1;
 }
 
-int JString::compareToIgnoreCase(const wchar_t* string) const {
-	if (_object == NULL)
-		return (string == NULL) ? 0 : -1;
-	else
-		return THIS.ref().compareToIgnoreCase(string);
-}
-
 //==============================================================
 
 bool CString::startsWith(const CString& string, uint32_t start) const {
@@ -3073,39 +2236,6 @@ bool CString::startsWith(const CString& string, uint32_t start) const {
 		return false;
 	
 	return memcmp(m_data + start, string.m_data, len2 * sizeof(wchar_t)) == 0;
-}
-
-bool JString::startsWith(const CString& string, uint32_t start) const {
-	if (_object == NULL)
-		return false;
-	else
-		return THIS.ref().startsWith(string, start);
-}
-
-bool CString::startsWith(const JString& string, uint32_t start) const {
-	if (string._object == NULL)
-		return true;
-	
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if (len2 == 0)
-		return true;
-	
-	uint32_t len1 = m_length;
-	if (len1 == 0)
-		return false;
-	
-	uint32_t end = start + len2;
-	if (len1 < end)
-		return false;
-	
-	return memcmp(m_data + start, ((CString*)(string._object))->m_data, len2 * sizeof(wchar_t)) == 0;
-}
-
-bool JString::startsWith(const JString& string, uint32_t start) const {
-	if (_object == NULL)
-		return string._object == NULL;
-	else
-		return THIS.ref().startsWith(string, start);
 }
 
 bool CString::startsWith(const wchar_t* string, uint32_t start) const {
@@ -3127,13 +2257,6 @@ bool CString::startsWith(const wchar_t* string, uint32_t start) const {
 	return memcmp(m_data + start, string, len2 * sizeof(wchar_t)) == 0;
 }
 
-bool JString::startsWith(const wchar_t* string, uint32_t start) const {
-	if (_object == NULL)
-		return string == NULL;
-	else
-		return THIS.ref().startsWith(string, start);
-}
-
 bool CString::endsWith(const CString& string) const {
 	uint32_t len2 = string.m_length;
 	if (len2 == 0)
@@ -3147,38 +2270,6 @@ bool CString::endsWith(const CString& string) const {
 		return false;
 
 	return memcmp(m_data + len1 - len2, string.m_data, len2 * sizeof(wchar_t)) == 0;
-}
-
-bool JString::endsWith(const CString& string) const {
-	if (_object == NULL)
-		return false;
-	else
-		return THIS.ref().endsWith(string);
-}
-
-bool CString::endsWith(const JString& string) const {
-	if (string._object == NULL)
-		return true;
-	
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if (len2 == 0)
-		return true;
-
-	uint32_t len1 = m_length;
-	if (len1 == 0)
-		return false;
-
-	if (len1 < len2)
-		return false;
-
-	return memcmp(m_data + len1 - len2, ((CString*)(string._object))->m_data, len2 * sizeof(wchar_t)) == 0;
-}
-
-bool JString::endsWith(const JString& string) const {
-	if (_object == NULL)
-		return string._object == NULL;
-	else
-		return THIS.ref().endsWith(string);
 }
 
 bool CString::endsWith(const wchar_t* string) const {
@@ -3199,13 +2290,6 @@ bool CString::endsWith(const wchar_t* string) const {
 	return memcmp(m_data + len1 - len2, string, len2 * sizeof(wchar_t)) == 0;
 }
 
-bool JString::endsWith(const wchar_t* string) const {
-	if (_object == NULL)
-		return string == NULL;
-	else
-		return THIS.ref().endsWith(string);
-}
-
 //==============================================================
 
 int CString::indexOf(wchar_t character) const {
@@ -3221,13 +2305,6 @@ int CString::indexOf(wchar_t character) const {
 		idx++; ptr++;
 	}
 	return -1;
-}
-
-int JString::indexOf(wchar_t character) const {
-	if (_object == NULL)
-		return -1;
-	
-	return THIS.ref().indexOf(character);
 }
 
 int CString::indexOf(const CString& string) const {
@@ -3247,42 +2324,6 @@ int CString::indexOf(const CString& string) const {
 		return -1;
 	
 	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
-}
-
-int JString::indexOf(const CString& string) const {
-	if (_object == NULL)
-		return -1;
-	
-	return THIS.ref().indexOf(string);
-}
-
-int CString::indexOf(const JString& string) const {
-	if (string._object == NULL)
-		return -1;
-	
-	uint32_t len1 = m_length;
-	if (len1 == 0)
-		return -1;
-
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if ((len2 == 0) || (len2 > len1))
-		return -1;
-
-	if (len1 == len2)
-		return memcmp(m_data, ((CString*)(string._object))->m_data, len1 * sizeof(wchar_t)) == 0;
-
-	wchar_t* ptr = wcsstr(m_data, ((CString*)(string._object))->m_data);
-	if (ptr == NULL)
-		return -1;
-
-	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
-}
-
-int JString::indexOf(const JString& string) const {
-	if (_object == NULL)
-		return string._object == NULL ? 0 : -1;
-	
-	return THIS.ref().indexOf(string);
 }
 
 int CString::indexOf(const wchar_t* string) const {
@@ -3307,13 +2348,6 @@ int CString::indexOf(const wchar_t* string) const {
 	return (uint32_t)(intptr_t(ptr) - intptr_t(m_data)) / sizeof(wchar_t);
 }
 
-int JString::indexOf(const wchar_t* string) const {
-	if (_object == NULL)
-		return string == NULL ? 0 : -1;
-	
-	return THIS.ref().indexOf(string);
-}
-
 int CString::lastIndexOf(wchar_t character) const {
 	if (m_length == 0)
 		return -1;
@@ -3325,13 +2359,6 @@ int CString::lastIndexOf(wchar_t character) const {
 		if (*ptr == character) return len;
 	}
 	return -1;
-}
-
-int JString::lastIndexOf(wchar_t character) const {
-	if (_object == NULL)
-		return -1;
-	
-	return THIS.ref().lastIndexOf(character);
 }
 
 int CString::lastIndexOf(const CString& string) const {
@@ -3358,49 +2385,6 @@ int CString::lastIndexOf(const CString& string) const {
 		ptr1--; len--;
 	}
 	return -1;
-}
-
-int JString::lastIndexOf(const CString& string) const {
-	if (_object == NULL)
-		return -1;
-	
-	return THIS.ref().lastIndexOf(string);
-}
-
-int CString::lastIndexOf(const JString& string) const {
-	if (string._object == NULL)
-		return -1;
-	
-	uint32_t len1 = m_length;
-	if (len1 == 0)
-		return -1;
-
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if ((len2 == 0) || (len2 > len1))
-		return -1;
-
-	if (len1 == len2)
-		return memcmp(m_data, ((CString*)(string._object))->m_data, len1 * sizeof(wchar_t)) == 0;
-
-	wchar_t* ptr2 = ((CString*)(string._object))->m_data;
-	wchar_t ch2 = *ptr2;
-	int32_t len = len1 - len2;
-	wchar_t* ptr1 = m_data + len;
-	while (len >= 0) {
-		if (*ptr1 == ch2) {
-			if (memcmp(ptr1, ptr2, len2 * sizeof(wchar_t)) == 0)
-				return len;
-		}
-		ptr1--; len--;
-	}
-	return -1;
-}
-
-int JString::lastIndexOf(const JString& string) const {
-	if (_object == NULL)
-		return (string._object == NULL) ? 0 : -1;
-	
-	return THIS.ref().lastIndexOf(string);
 }
 
 int CString::lastIndexOf(const wchar_t* string) const {
@@ -3431,13 +2415,6 @@ int CString::lastIndexOf(const wchar_t* string) const {
 	return -1;
 }
 
-int JString::lastIndexOf(const wchar_t* string) const {
-	if (_object == NULL)
-		return (string == NULL) ? 0 : -1;
-	
-	return THIS.ref().lastIndexOf(string);
-}
-
 //==============================================================
 
 CString CString::substring(int start, int end) const {
@@ -3464,32 +2441,19 @@ CString CString::substring(int start, int end) const {
 	return CString(m_data + pos, len);
 }
 
-JString getSubString(JString& self, int start, int end) {
-	if (self._object == NULL)
-		return StringNil;
-	
-	int32_t len = getStringLength(self);
-	int32_t pos;
-	if (start < 0) {
-		pos = len + start;
-		if (pos < 0) pos = 0;
-		len -= pos;
-	} else {
-		pos = start;
-		if (pos >= len)
-			return StringNil;
-		
-		if ((end < 0) || (end > len)) {
-			len -= pos;
-		} else {
-			len = (end - pos);
-		}
-	}
-	if (len == 0)
-		return StringEmpty;
-	
-	return JString(self.ref().m_data + pos, len);
+wchar_t& CString::operator [](int index) const throw(const char*) {
+	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+		throw eOutOfRange;
+	return m_data[index];
 }
+
+wchar_t CString::charAt(int index) const throw(const char*) {
+	if ((this->m_data == NULL) || (index < 0) || (index >= m_length))
+		throw eOutOfRange;
+	return m_data[index];
+}
+
+//==============================================================
 
 CString CString::replace(const CString& target, const CString& replacement) const {
 	int pos = indexOf(target);
@@ -3504,50 +2468,6 @@ CString CString::replace(const CString& target, const CString& replacement) cons
 			return substring(0, pos).concat(replacement);
 	} else
 		return CString(replacement).concat(substring(pos + len));
-}
-
-JString JString::replace(const CString& target, const CString& replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replace(target, replacement);
-}
-
-CString CString::replace(const JString& target, const JString& replacement) const {
-	int pos = indexOf(target);
-	if (pos < 0)
-		return *this;
-	
-	int len = ((CString*)(target._object))->m_length;
-	if (pos > 0) {
-		if (m_length > (pos + len)) {
-			if (replacement._object == NULL)
-				return substring(0, pos).concat(substring(pos + len));
-			else
-				return substring(0, pos).concat(*((CString*)(replacement._object))).concat(substring(pos + len));
-		} else {
-			if (replacement._object == NULL)
-				return substring(0, pos);
-			else
-				return substring(0, pos).concat(*((CString*)(replacement._object)));
-		}
-	} else
-		return JString(replacement).ref().concat(substring(pos + len));
-}
-
-JString JString::replace(const JString& target, const JString& replacement) const {
-	int pos = indexOf(target);
-	if (pos < 0)
-		return *this;
-	
-	int len = getStringLength(target);
-	if (pos > 0) {
-		if (getStringLength(*this) > (pos + len))
-			return substring(0, pos).concat(replacement).concat(substring(pos + len));
-		else
-			return substring(0, pos).concat(replacement);
-	} else
-		return JString(replacement).concat(substring(pos + len));
 }
 
 CString CString::replace(const wchar_t* target, const wchar_t* replacement) const {
@@ -3565,63 +2485,16 @@ CString CString::replace(const wchar_t* target, const wchar_t* replacement) cons
 		return CString(replacement).concat(substring(pos + len));
 }
 
-JString JString::replace(const wchar_t* target, const wchar_t* replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replace(target, replacement);
-}
-
-//==============================================================
-
-wchar_t& CString::operator [](int index) const throw(const char*) {
-	if ((THIS.m_data == NULL) || (index < 0) || (index >= m_length))
-		throw eOutOfRange;
-	return m_data[index];
-}
-
-wchar_t& JString::operator [](int index) const throw(const char*) {
-	if (_object == NULL)
-		throw eOutOfRange;
-	
-	return ((CString*)_object)->operator [](index);
-}
-
-wchar_t CString::charAt(int index) const throw(const char*) {
-	if ((THIS.m_data == NULL) || (index < 0) || (index >= m_length))
-		throw eOutOfRange;
-	return m_data[index];
-}
-
-wchar_t JString::charAt(int index) const throw(const char*) {
-	if (_object == NULL)
-		throw eOutOfRange;
-	
-	return ((CString*)_object)->charAt(index);
-}
-
-//==============================================================
-
-JString CString::toString() const {
-	return m_data;
-}
-
-JString CString::toJSON() const {
-	if (m_data == NULL)
-		return L"null";
-	
-	return JString(L"\"").ref().concat(*this).concat(L"\"");
-}
-
 //==============================================================
 
 #if defined(__IOS__)
+
 bool CString::matches(const CString& regularExpression) const {
 	if (regularExpression.m_length == 0) {
 		return m_length == 0;
 	}
 	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
+	NSString* string = this->operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return false;
 	
@@ -3631,39 +2504,6 @@ bool CString::matches(const CString& regularExpression) const {
 	int end = m_length;
 	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
 	return (find != NULL);
-}
-
-bool JString::matches(const CString& regularExpression) const {
-	if (_object == NULL)
-		return false;
-	
-	return THIS.ref().matches(regularExpression);
-}
-
-bool CString::matches(const JString& regularExpression) const {
-	if (regularExpression._object == NULL) {
-		return false;
-	} else if (((CString*)(regularExpression._object))->m_length == 0) {
-		return m_length == 0;
-	}
-	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
-	if ((expression == NULL) || (string == NULL))
-		return false;
-	
-	NSError *error = NULL;
-	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:NSRegularExpressionCaseInsensitive error:&error];
-	int start = 0;
-	int end = m_length;
-	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
-	return (find != NULL);
-}
-
-bool JString::matches(const JString& regularExpression) const {
-	if (_object == NULL)
-		return regularExpression._object == NULL;
-	
-	return THIS.ref().matches(regularExpression);
 }
 
 bool CString::regionMatches(bool ignoreCase, int thisStart, const CString& string, int start, int length) const {
@@ -3700,56 +2540,6 @@ bool CString::regionMatches(bool ignoreCase, int thisStart, const CString& strin
 	return true;
 }
 
-bool JString::regionMatches(bool ignoreCase, int thisStart, const CString& string, int start, int length) const {
-	if (_object == NULL)
-		return false;
-	
-	return THIS.ref().regionMatches(ignoreCase, thisStart, string, start, length);
-}
-
-bool CString::regionMatches(bool ignoreCase, int thisStart, const JString& string, int start, int length) const {
-	if (!ignoreCase)
-		return regionMatches(thisStart, string, start, length);
-	
-	if ((thisStart < 0) || (length < 0))
-		return false;
-	else if (string._object == NULL)
-		return false;
-	
-	uint32_t len1 = m_length;
-	if (thisStart > len1)
-		return false;
-
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if (thisStart == len1)
-		return len2 == 0;
-
-	if (start >= len2)
-		return false;
-
-	if ((start + length) > len2)
-		length = len2 - start;
-
-	if ((thisStart + length) > len1)
-		length = len1 - thisStart;
-
-	wchar_t* ptr1 = m_data + thisStart;
-	wchar_t* ptr2 = ((CString*)(string._object))->m_data + start;
-	while (length-- > 0) {
-		wchar_t v1 = towlower(*ptr1); ptr1++;
-		wchar_t v2 = towlower(*ptr2); ptr2++;
-		if (v1 != v2) return false;
-	}
-	return true;
-}
-
-bool JString::regionMatches(bool ignoreCase, int thisStart, const JString& string, int start, int length) const {
-	if (_object == NULL)
-		return string._object == NULL && start == 0 && length == 0;
-
-	return THIS.ref().regionMatches(ignoreCase, thisStart, string, start, length);
-}
-
 bool CString::regionMatches(int thisStart, const CString& string, int start, int length) const {
 	if ((thisStart < 0) || (length < 0))
 		return false;
@@ -3774,52 +2564,12 @@ bool CString::regionMatches(int thisStart, const CString& string, int start, int
 	return memcmp(m_data + thisStart, string.m_data + start, length * sizeof(wchar_t)) == 0;
 }
 
-bool JString::regionMatches(int thisStart, const CString& string, int start, int length) const {
-	if (_object == NULL)
-		return false;
-	
-	return THIS.ref().regionMatches(thisStart, string, start, length);
-}
-
-bool CString::regionMatches(int thisStart, const JString& string, int start, int length) const {
-	if ((thisStart < 0) || (length < 0))
-		return false;
-	else if (string._object == NULL)
-		return false;
-
-	uint32_t len1 = m_length;
-	if (thisStart > len1)
-		return false;
-
-	uint32_t len2 = ((CString*)(string._object))->m_length;
-	if (thisStart == len1)
-		return len2 == 0;
-
-	if (start >= len2)
-		return false;
-
-	if ((start + length) > len2)
-		length = len2 - start;
-
-	if ((thisStart + length) > len1)
-		length = len1 - thisStart;
-
-	return memcmp(m_data + thisStart, ((CString*)(string._object))->m_data + start, length * sizeof(wchar_t)) == 0;
-}
-
-bool JString::regionMatches(int thisStart, const JString& string, int start, int length) const {
-	if (_object == NULL)
-		return string._object == NULL && start == 0 && length == 0;
-	
-	return THIS.ref().regionMatches(thisStart, string, start, length);
-}
-
-JString CString::replaceAll(const CString& regularExpression, const CString& replacement) const {
+CString CString::replaceAll(const CString& regularExpression, const CString& replacement) const {
 	if (regularExpression.m_length == 0)
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
+	NSString* string = this->operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 	
@@ -3827,79 +2577,31 @@ JString CString::replaceAll(const CString& regularExpression, const CString& rep
 	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
 	int start = 0;
 	int end = m_length;
-	JString result = StringEmpty;
+	CString result = StringEmpty;
 	NSArray* matches = [regex matchesInString:string options:0 range:NSMakeRange(start, end - start)];
 	if ((matches == NULL) || (matches.count == 0))
 		return *this;
 	
 	for (NSTextCheckingResult* find in matches) {
 		if (find.range.location == start)
-			result.ref().concat(replacement);
+			result.concat(replacement);
 		else
-			result.ref().concat(substring(start, (int32_t)find.range.location)).concat(replacement);
+			result.concat(substring(start, (int32_t)find.range.location)).concat(replacement);
 
 		start = (int32_t)find.range.location + (int32_t)find.range.length;
 	}
 	if (start < end)
-		result.ref().concat(substring(start));
+		result.concat(substring(start));
 
 	return result;
 }
 
-JString JString::replaceAll(const CString& regularExpression, const CString& replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replaceAll(regularExpression, replacement);
-}
-
-JString CString::replaceAll(const JString& regularExpression, const JString& replacement) const {
-	if (regularExpression._object == NULL)
-		return *this;
-	else if (((CString*)(regularExpression._object))->m_length == 0)
-		return *this;
-
-	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
-	if ((expression == NULL) || (string == NULL))
-		return *this;
-	
-	NSError *error = NULL;
-	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
-	int start = 0;
-	int end = m_length;
-	JString result = StringEmpty;
-	NSArray* matches = [regex matchesInString:string options:0 range:NSMakeRange(start, end - start)];
-	if ((matches == nil) || (matches.count == 0))
-		return *this;
-	
-	for (NSTextCheckingResult* find in matches) {
-		if (find.range.location == start)
-			result.ref().concat(replacement);
-		else
-			result.ref().concat(substring(start, (int32_t)find.range.location)).concat(replacement);
-
-		start = (int32_t)find.range.location + (int32_t)find.range.length;
-	}
-	if (start < end)
-		result.ref().concat(substring(start));
-
-	return result;
-}
-
-JString JString::replaceAll(const JString& regularExpression, const JString& replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replaceAll(regularExpression, replacement);
-}
-
-JString CString::replaceFirst(const CString& regularExpression, const CString& replacement) const {
+CString CString::replaceFirst(const CString& regularExpression, const CString& replacement) const {
 	if (regularExpression.m_length == 0)
 		return *this;
 
 	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
+	NSString* string = this->operator NSString*();
 	if ((expression == NULL) || (string == NULL))
 		return *this;
 
@@ -3912,52 +2614,11 @@ JString CString::replaceFirst(const CString& regularExpression, const CString& r
 		return *this;
 
 	if (find.range.location == 0)
-		return JString(replacement).ref().concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
+		return CString(replacement).concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
 	else if ((find.range.location + find.range.length) >= m_length)
 		return substring(0, (int32_t)find.range.location).concat(replacement);
 	else
 		return substring(0, (int32_t)find.range.location).concat(replacement).concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
-}
-
-JString JString::replaceFirst(const CString& regularExpression, const CString& replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replaceFirst(regularExpression, replacement);
-}
-
-JString CString::replaceFirst(const JString& regularExpression, const JString& replacement) const {
-	if (regularExpression._object == NULL)
-		return *this;
-	else if (((CString*)(regularExpression._object))->m_length == 0)
-		return *this;
-
-	NSString* expression = regularExpression;
-	NSString* string = THIS.operator NSString*();
-	if ((expression == NULL) || (string == NULL))
-		return *this;
-
-	NSError *error = NULL;
-	NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:expression options:0 error:&error];
-	int start = 0;
-	int end = m_length;
-	NSTextCheckingResult* find = [regex firstMatchInString:string options:0 range:NSMakeRange(start, end - start)];
-	if (find == NULL)
-		return *this;
-
-	if (find.range.location == 0)
-		return JString(replacement).ref().concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
-	else if ((find.range.location + find.range.length) >= m_length)
-		return substring(0, (int32_t)find.range.location).concat(replacement);
-	else
-		return substring(0, (int32_t)find.range.location).concat(replacement).concat(substring((int32_t)find.range.location + (int32_t)find.range.length));
-}
-
-JString JString::replaceFirst(const JString& regularExpression, const JString& replacement) const {
-	if (_object == NULL)
-		return NULL;
-	
-	return THIS.ref().replaceFirst(regularExpression, replacement);
 }
 
 /*
@@ -4029,13 +2690,6 @@ CString& CString::trim() {
 	return *this;
 }
 
-JString& JString::trim() {
-	if (_object != NULL)
-		THIS.ref().trim();
-	
-	return *this;
-}
-
 //==============================================================
 
 #define va_format(type) \
@@ -4058,7 +2712,7 @@ JString& JString::trim() {
 #define va_concat(type) \
 	++ptr; \
 	type val = va_arg(arglist, type); \
-	THIS.concat(val);
+	this->concat(val);
 
 int CString::vswprintf(const wchar_t* string, va_list arglist) {
 	setLength(0);
@@ -4285,62 +2939,6 @@ CString CString::format(const CString& string, ...) {
 	return result;
 }
 
-JString JString::format(const CString& string, ...) {
-	if (getRefStringLength(string) == 0)
-		return StringEmpty;
-	
-	va_list arglist;
-	va_start(arglist, string);
-	
-	CString* result = new CString();
-	if (result->vswprintf((wchar_t*)string, arglist) == EOF) {
-		va_end(arglist);
-		delete result;
-		return StringNil;
-	}
-	
-	va_end(arglist);
-	return result;
-}
-
-CString CString::format(const JString& string, ...) {
-	if (string._object == NULL)
-		return StringNil;
-	else if (((CString*)(string._object))->m_length == 0)
-		return StringEmpty;
-
-	va_list arglist;
-	va_start(arglist, string);
-	CString result;
-	if (result.vswprintf(((CString*)(string._object))->m_data, arglist) == EOF) {
-		va_end(arglist);
-		return StringNil;
-	}
-	va_end(arglist);
-	return result;
-}
-
-JString JString::format(const JString& string, ...) {
-	if (string._object == NULL)
-		return StringNil;
-	
-	if (getStringLength(string) == 0)
-		return StringEmpty;
-	
-	va_list arglist;
-	va_start(arglist, string);
-	
-	CString* result = new CString();
-	if (result->vswprintf((wchar_t*)string, arglist) == EOF) {
-		va_end(arglist);
-		delete result;
-		return StringNil;
-	}
-	
-	va_end(arglist);
-	return result;
-}
-
 CString CString::format(const wchar_t* string, ...) {
 	if (string == NULL)
 		return StringNil;
@@ -4354,26 +2952,6 @@ CString CString::format(const wchar_t* string, ...) {
 	CString result;
 	if (result.vswprintf(string, arglist) == EOF) {
 		va_end(arglist);
-		return StringNil;
-	}
-	va_end(arglist);
-	return result;
-}
-
-JString JString::format(const wchar_t* string, ...) {
-	if (string == NULL)
-		return StringNil;
-	
-	uint32_t lenf = (uint32_t)wcs_strlen(string, NULL);
-	if (lenf == 0)
-		return StringEmpty;
-	
-	va_list arglist;
-	va_start(arglist, string);
-	CString* result = new CString();
-	if (result->vswprintf(string, arglist) == EOF) {
-		va_end(arglist);
-		delete result;
 		return StringNil;
 	}
 	va_end(arglist);
@@ -4406,9 +2984,17 @@ CString CString::md5() const throw(const char*) {
 							 );
 }
 
-JString JString::md5() const throw(const char*) {
-	return THIS.ref().md5();
+CString CString::toString() const {
+	return m_data;
 }
+
+CString CString::toJSON() const {
+	if (m_data == NULL)
+		return L"null";
+	
+	return CString(L"\"").concat(*this).concat(L"\"");
+}
+
 
 //==============================================================
 

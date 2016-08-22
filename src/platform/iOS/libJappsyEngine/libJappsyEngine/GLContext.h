@@ -24,8 +24,8 @@
 
 class GLContext {
 private:
-	EAGLContext* context;
-	GLEngine engine;
+	EAGLContext* context = NULL;
+	GLEngine* engine = NULL;
 	
 	GLuint frameBuffer = 0;
 	GLuint colorRenderBuffer = 0;
@@ -42,7 +42,7 @@ public:
 	void render();
 	void touch(MotionEvent* event);
 	
-	void initialize(GLEngine& engine);
+	void initialize(GLEngine* engine);
 };
 
 #endif //JAPPSY_GLRENDERCONTEXT_H

@@ -148,42 +148,42 @@ extern "C" {
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		
-		inline GLfloat dot(const Vec3& v) { return Vec3Dot(THIS.v, v.v); }
-		inline GLfloat size() { return Vec3Size(THIS.v); }
-		inline GLfloat min() { return Vec3Min(THIS.v); }
-		inline GLfloat max() { return Vec3Max(THIS.v); }
-		inline GLfloat angle(const Vec3& v) { return Vec3Angle(THIS.v, v.v); }
-		inline void angles(GLfloat* theta, GLfloat* phi) { Vec3Angles(THIS.v, theta, phi); }
+		inline GLfloat dot(const Vec3& v) { return Vec3Dot(this->v, v.v); }
+		inline GLfloat size() { return Vec3Size(this->v); }
+		inline GLfloat min() { return Vec3Min(this->v); }
+		inline GLfloat max() { return Vec3Max(this->v); }
+		inline GLfloat angle(const Vec3& v) { return Vec3Angle(this->v, v.v); }
+		inline void angles(GLfloat* theta, GLfloat* phi) { Vec3Angles(this->v, theta, phi); }
 		
-		inline Vec3& set(GLfloat v) { Vec3Set(THIS.v, v); return *this; }
-		inline Vec3& set(const Vec3& v) { Vec3SetV(THIS.v, v.v); return *this; }
-		inline Vec3& negative() { Vec3Negative(THIS.v, THIS.v); return *this; }
-		inline Vec3& negative(const Vec3& v) { Vec3Negative(THIS.v, v.v); return *this; }
-		inline Vec3& add(GLfloat v) { Vec3Add(THIS.v, THIS.v, v); return *this; }
-		inline Vec3& add(const Vec3& v) { Vec3AddV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec3& add(const Vec3& a, GLfloat b) { Vec3Add(THIS.v, a.v, b); return *this; }
-		inline Vec3& add(const Vec3& a, const Vec3& b) { Vec3AddV(THIS.v, a.v, b.v); return *this; }
-		inline Vec3& subtract(GLfloat v) { Vec3Subtract(THIS.v, THIS.v, v); return *this; }
-		inline Vec3& subtract(const Vec3& v) { Vec3SubtractV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec3& subtract(const Vec3& a, GLfloat b) { Vec3Subtract(THIS.v, a.v, b); return *this; }
-		inline Vec3& subtract(const Vec3& a, const Vec3& b) { Vec3SubtractV(THIS.v, a.v, b.v); return *this; }
-		inline Vec3& multiply(GLfloat v) { Vec3Multiply(THIS.v, THIS.v, v); return *this; }
-		inline Vec3& multiply(const Vec3& v) { Vec3MultiplyV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec3& multiply(const Vec3& a, GLfloat b) { Vec3Multiply(THIS.v, a.v, b); return *this; }
-		inline Vec3& multiply(const Vec3& a, const Vec3& b) { Vec3MultiplyV(THIS.v, a.v, b.v); return *this; }
-		inline Vec3& divide(GLfloat v) { Vec3Divide(THIS.v, THIS.v, v); return *this; }
-		inline Vec3& divide(const Vec3& v) { Vec3DivideV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec3& divide(const Vec3& a, GLfloat b) { Vec3Divide(THIS.v, a.v, b); return *this; }
-		inline Vec3& divide(const Vec3& a, const Vec3& b) { Vec3DivideV(THIS.v, a.v, b.v); return *this; }
-		inline Vec3& cross(const Vec3& v) { Vec3Cross(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec3& cross(const Vec3& a, const Vec3& b) { Vec3Cross(THIS.v, a.v, b.v); return *this; }
-		inline Vec3& normalize() { Vec3Normalize(THIS.v, THIS.v); return *this; }
-		inline Vec3& normalize(const Vec3& v) { Vec3Normalize(THIS.v, v.v); return *this; }
+		inline Vec3& set(GLfloat v) { Vec3Set(this->v, v); return *this; }
+		inline Vec3& set(const Vec3& v) { Vec3SetV(this->v, v.v); return *this; }
+		inline Vec3& negative() { Vec3Negative(this->v, this->v); return *this; }
+		inline Vec3& negative(const Vec3& v) { Vec3Negative(this->v, v.v); return *this; }
+		inline Vec3& add(GLfloat v) { Vec3Add(this->v, this->v, v); return *this; }
+		inline Vec3& add(const Vec3& v) { Vec3AddV(this->v, this->v, v.v); return *this; }
+		inline Vec3& add(const Vec3& a, GLfloat b) { Vec3Add(this->v, a.v, b); return *this; }
+		inline Vec3& add(const Vec3& a, const Vec3& b) { Vec3AddV(this->v, a.v, b.v); return *this; }
+		inline Vec3& subtract(GLfloat v) { Vec3Subtract(this->v, this->v, v); return *this; }
+		inline Vec3& subtract(const Vec3& v) { Vec3SubtractV(this->v, this->v, v.v); return *this; }
+		inline Vec3& subtract(const Vec3& a, GLfloat b) { Vec3Subtract(this->v, a.v, b); return *this; }
+		inline Vec3& subtract(const Vec3& a, const Vec3& b) { Vec3SubtractV(this->v, a.v, b.v); return *this; }
+		inline Vec3& multiply(GLfloat v) { Vec3Multiply(this->v, this->v, v); return *this; }
+		inline Vec3& multiply(const Vec3& v) { Vec3MultiplyV(this->v, this->v, v.v); return *this; }
+		inline Vec3& multiply(const Vec3& a, GLfloat b) { Vec3Multiply(this->v, a.v, b); return *this; }
+		inline Vec3& multiply(const Vec3& a, const Vec3& b) { Vec3MultiplyV(this->v, a.v, b.v); return *this; }
+		inline Vec3& divide(GLfloat v) { Vec3Divide(this->v, this->v, v); return *this; }
+		inline Vec3& divide(const Vec3& v) { Vec3DivideV(this->v, this->v, v.v); return *this; }
+		inline Vec3& divide(const Vec3& a, GLfloat b) { Vec3Divide(this->v, a.v, b); return *this; }
+		inline Vec3& divide(const Vec3& a, const Vec3& b) { Vec3DivideV(this->v, a.v, b.v); return *this; }
+		inline Vec3& cross(const Vec3& v) { Vec3Cross(this->v, this->v, v.v); return *this; }
+		inline Vec3& cross(const Vec3& a, const Vec3& b) { Vec3Cross(this->v, a.v, b.v); return *this; }
+		inline Vec3& normalize() { Vec3Normalize(this->v, this->v); return *this; }
+		inline Vec3& normalize(const Vec3& v) { Vec3Normalize(this->v, v.v); return *this; }
 		Vec3& transform(const Mat4& m);
 		Vec3& transform(const Vec3& v, const Mat4& m);
 		Vec3& transformNormal(const Mat4& m);
 		Vec3& transformNormal(const Vec3& v, const Mat4& m);
-		inline Vec3& random(const Vec3& v) { Vec3Random(THIS.v, v.x, v.y, v.z); return *this; }
+		inline Vec3& random(const Vec3& v) { Vec3Random(this->v, v.x, v.y, v.z); return *this; }
 	};
 	
 	struct Vec4 {
@@ -220,31 +220,31 @@ extern "C" {
 		inline operator GLfloat*() const { return (GLfloat*)v; }
 		inline operator Vec3() const { return *((Vec3*)this); }
 		
-		inline GLfloat dot(const Vec4& v) { return Vec4Dot(THIS.v, v.v); }
+		inline GLfloat dot(const Vec4& v) { return Vec4Dot(this->v, v.v); }
 		
-		inline Vec4& set(GLfloat v) { Vec4Set(THIS.v, v); return *this; }
-		inline Vec4& set(const Vec3& v, GLfloat v3) { Vec3SetV(THIS.v, v.v); THIS.v[3] = v3; return *this; }
-		inline Vec4& set(const Vec4& v) { Vec4SetV(THIS.v, v.v); return *this; }
-		inline Vec4& negative() { Vec4Negative(THIS.v, THIS.v); return *this; }
-		inline Vec4& negative(const Vec4& v) { Vec4Negative(THIS.v, v.v); return *this; }
-		inline Vec4& add(GLfloat v) { Vec4Add(THIS.v, THIS.v, v); return *this; }
-		inline Vec4& add(const Vec4& v) { Vec4AddV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec4& add(const Vec4& a, GLfloat b) { Vec4Add(THIS.v, a.v, b); return *this; }
-		inline Vec4& add(const Vec4& a, const Vec4& b) { Vec4AddV(THIS.v, a.v, b.v); return *this; }
-		inline Vec4& subtract(GLfloat v) { Vec4Subtract(THIS.v, THIS.v, v); return *this; }
-		inline Vec4& subtract(const Vec4& v) { Vec4SubtractV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec4& subtract(const Vec4& a, GLfloat b) { Vec4Subtract(THIS.v, a.v, b); return *this; }
-		inline Vec4& subtract(const Vec4& a, const Vec4& b) { Vec4SubtractV(THIS.v, a.v, b.v); return *this; }
-		inline Vec4& multiply(GLfloat v) { Vec4Multiply(THIS.v, THIS.v, v); return *this; }
-		inline Vec4& multiply(const Vec4& v) { Vec4MultiplyV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec4& multiply(const Vec4& a, GLfloat b) { Vec4Multiply(THIS.v, a.v, b); return *this; }
-		inline Vec4& multiply(const Vec4& a, const Vec4& b) { Vec4MultiplyV(THIS.v, a.v, b.v); return *this; }
-		inline Vec4& divide(GLfloat v) { Vec4Divide(THIS.v, THIS.v, v); return *this; }
-		inline Vec4& divide(const Vec4& v) { Vec4DivideV(THIS.v, THIS.v, v.v); return *this; }
-		inline Vec4& divide(const Vec4& a, GLfloat b) { Vec4Divide(THIS.v, a.v, b); return *this; }
-		inline Vec4& divide(const Vec4& a, const Vec4& b) { Vec4DivideV(THIS.v, a.v, b.v); return *this; }
-		inline Vec4& normalize() { Vec4Normalize(THIS.v, THIS.v); return *this; }
-		inline Vec4& normalize(const Vec4& v) { Vec4Normalize(THIS.v, v.v); return *this; }
+		inline Vec4& set(GLfloat v) { Vec4Set(this->v, v); return *this; }
+		inline Vec4& set(const Vec3& v, GLfloat v3) { Vec3SetV(this->v, v.v); this->v[3] = v3; return *this; }
+		inline Vec4& set(const Vec4& v) { Vec4SetV(this->v, v.v); return *this; }
+		inline Vec4& negative() { Vec4Negative(this->v, this->v); return *this; }
+		inline Vec4& negative(const Vec4& v) { Vec4Negative(this->v, v.v); return *this; }
+		inline Vec4& add(GLfloat v) { Vec4Add(this->v, this->v, v); return *this; }
+		inline Vec4& add(const Vec4& v) { Vec4AddV(this->v, this->v, v.v); return *this; }
+		inline Vec4& add(const Vec4& a, GLfloat b) { Vec4Add(this->v, a.v, b); return *this; }
+		inline Vec4& add(const Vec4& a, const Vec4& b) { Vec4AddV(this->v, a.v, b.v); return *this; }
+		inline Vec4& subtract(GLfloat v) { Vec4Subtract(this->v, this->v, v); return *this; }
+		inline Vec4& subtract(const Vec4& v) { Vec4SubtractV(this->v, this->v, v.v); return *this; }
+		inline Vec4& subtract(const Vec4& a, GLfloat b) { Vec4Subtract(this->v, a.v, b); return *this; }
+		inline Vec4& subtract(const Vec4& a, const Vec4& b) { Vec4SubtractV(this->v, a.v, b.v); return *this; }
+		inline Vec4& multiply(GLfloat v) { Vec4Multiply(this->v, this->v, v); return *this; }
+		inline Vec4& multiply(const Vec4& v) { Vec4MultiplyV(this->v, this->v, v.v); return *this; }
+		inline Vec4& multiply(const Vec4& a, GLfloat b) { Vec4Multiply(this->v, a.v, b); return *this; }
+		inline Vec4& multiply(const Vec4& a, const Vec4& b) { Vec4MultiplyV(this->v, a.v, b.v); return *this; }
+		inline Vec4& divide(GLfloat v) { Vec4Divide(this->v, this->v, v); return *this; }
+		inline Vec4& divide(const Vec4& v) { Vec4DivideV(this->v, this->v, v.v); return *this; }
+		inline Vec4& divide(const Vec4& a, GLfloat b) { Vec4Divide(this->v, a.v, b); return *this; }
+		inline Vec4& divide(const Vec4& a, const Vec4& b) { Vec4DivideV(this->v, a.v, b.v); return *this; }
+		inline Vec4& normalize() { Vec4Normalize(this->v, this->v); return *this; }
+		inline Vec4& normalize(const Vec4& v) { Vec4Normalize(this->v, v.v); return *this; }
 	};
 	
 	struct Mat4 {
@@ -253,26 +253,26 @@ extern "C" {
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() { return v; }
 		
-		inline Mat4& set(GLfloat v) { Mat4Set(THIS.v, v); return *this; }
-		inline Mat4& set(const Mat4& m) { Mat4SetV(THIS.v, m.v); return *this; }
-		inline Mat4& identity() { Mat4Identity(THIS.v); return *this; }
-		inline Mat4& translate(const Vec3& v) { Mat4Translate(THIS.v, v.x, v.y, v.z); return *this; }
-		inline Mat4& scale(const Vec3& v) { Mat4Scale(THIS.v, v.x, v.y, v.z); return *this; }
-		inline Mat4& rotateX(GLfloat a) { Mat4RotateX(THIS.v, a); return *this; }
-		inline Mat4& rotateY(GLfloat a) { Mat4RotateY(THIS.v, a); return *this; }
-		inline Mat4& rotateZ(GLfloat a) { Mat4RotateZ(THIS.v, a); return *this; }
-		inline Mat4& frustum(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Frustum(THIS.v, l,r,b,t,n,f); return *this; }
-		inline Mat4& perspective(GLfloat fov, GLfloat aspect, GLfloat near, GLfloat far) { Mat4Perspective(THIS.v, fov, aspect, near, far); return *this; }
-		inline Mat4& ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Ortho(THIS.v, l,r,b,t,n,f); return *this; }
-		inline Mat4& rotate(const Vec3& v, GLfloat a) { Mat4Rotate(THIS.v, v.x, v.y, v.z, a); return *this; }
-		inline Mat4& lookAt(const Vec3& eye, const Vec3& center, const Vec3& up) { Mat4LookAt(THIS.v, eye.v, center.v, up.v); return *this; }
+		inline Mat4& set(GLfloat v) { Mat4Set(this->v, v); return *this; }
+		inline Mat4& set(const Mat4& m) { Mat4SetV(this->v, m.v); return *this; }
+		inline Mat4& identity() { Mat4Identity(this->v); return *this; }
+		inline Mat4& translate(const Vec3& v) { Mat4Translate(this->v, v.x, v.y, v.z); return *this; }
+		inline Mat4& scale(const Vec3& v) { Mat4Scale(this->v, v.x, v.y, v.z); return *this; }
+		inline Mat4& rotateX(GLfloat a) { Mat4RotateX(this->v, a); return *this; }
+		inline Mat4& rotateY(GLfloat a) { Mat4RotateY(this->v, a); return *this; }
+		inline Mat4& rotateZ(GLfloat a) { Mat4RotateZ(this->v, a); return *this; }
+		inline Mat4& frustum(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Frustum(this->v, l,r,b,t,n,f); return *this; }
+		inline Mat4& perspective(GLfloat fov, GLfloat aspect, GLfloat near, GLfloat far) { Mat4Perspective(this->v, fov, aspect, near, far); return *this; }
+		inline Mat4& ortho(GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) { Mat4Ortho(this->v, l,r,b,t,n,f); return *this; }
+		inline Mat4& rotate(const Vec3& v, GLfloat a) { Mat4Rotate(this->v, v.x, v.y, v.z, a); return *this; }
+		inline Mat4& lookAt(const Vec3& eye, const Vec3& center, const Vec3& up) { Mat4LookAt(this->v, eye.v, center.v, up.v); return *this; }
 
-		inline Mat4& inverse() { Mat4Inverse(THIS.v, THIS.v); return *this; }
-		inline Mat4& inverse(const Mat4& m) { Mat4Inverse(THIS.v, m.v); return *this; }
-		inline Mat4& transpose() { Mat4Transpose(THIS.v, THIS.v); return *this; }
-		inline Mat4& transpose(const Mat4& m) { Mat4Transpose(THIS.v, m.v); return *this; }
-		inline Mat4& multiply(const Mat4& m) { Mat4Multiply(THIS.v, THIS.v, m.v); return *this; }
-		inline Mat4& multiply(const Mat4& a, const Mat4& b) { Mat4Multiply(THIS.v, a.v, b.v); return *this; }
+		inline Mat4& inverse() { Mat4Inverse(this->v, this->v); return *this; }
+		inline Mat4& inverse(const Mat4& m) { Mat4Inverse(this->v, m.v); return *this; }
+		inline Mat4& transpose() { Mat4Transpose(this->v, this->v); return *this; }
+		inline Mat4& transpose(const Mat4& m) { Mat4Transpose(this->v, m.v); return *this; }
+		inline Mat4& multiply(const Mat4& m) { Mat4Multiply(this->v, this->v, m.v); return *this; }
+		inline Mat4& multiply(const Mat4& a, const Mat4& b) { Mat4Multiply(this->v, a.v, b.v); return *this; }
 	};
 	
 #ifdef __cplusplus
@@ -282,9 +282,11 @@ extern "C" {
 #ifdef __cplusplus
 
 #include <core/uMemory.h>
+#include <data/uObject.h>
+#include <data/uString.h>
 
 template <typename Type>
-class Vector {
+class Vector : public CObject {
 private:
 	Type* m_items = NULL;
 	uint32_t m_count = 0;
@@ -328,15 +330,15 @@ public:
 		m_count = count;
 	}
 	
-	virtual inline Type& push(const Type& value) throw(const char*) {
+	virtual inline void push(const Type value) throw(const char*) {
 		resize(m_count + 1);
-		return (m_items[m_count - 1] = value);
+		m_items[m_count - 1] = value;
 	}
 	
-	virtual inline Type& unshift(const Type& value) throw(const char*) {
+	virtual inline void unshift(const Type value) throw(const char*) {
 		resize(m_count + 1);
 		memmove(m_items + 1, m_items, (m_count - 1) * sizeof(Type));
-		return (m_items[0] = value);
+		m_items[0] = value;
 	}
 	
 	virtual inline Type pop() throw(const char*) {
@@ -360,7 +362,7 @@ public:
 		throw eEmpty;
 	}
 	
-	virtual inline bool contains(const Type& value) const {
+	virtual inline bool contains(const Type value) const {
 		if (m_count > 0) {
 			for (int i = m_count - 1; i >= 0; i--) {
 				if (m_items[i] == value) return true;
@@ -373,17 +375,7 @@ public:
 		return m_count;
 	}
 	
-	// synonym to count()
-	virtual inline int32_t size() const {
-		return m_count;
-	}
-	
 	virtual inline bool empty() const {
-		return (m_count == 0);
-	}
-	
-	// synonym to empty()
-	virtual inline bool isEmpty() const {
 		return (m_count == 0);
 	}
 	
@@ -391,39 +383,21 @@ public:
 		resize(0);
 	}
 	
-	virtual inline const Type& peek() const throw(const char*) {
+	virtual inline const Type peek() const throw(const char*) {
 		if (m_count > 0) {
 			return m_items[m_count - 1];
 		}
 		throw eEmpty;
 	}
 	
-	virtual inline const Type& peek(int32_t index) const throw(const char*) {
+	virtual inline const Type get(int32_t index) const throw(const char*) {
 		if ((index >= 0) && (index < m_count)) {
 			return m_items[index];
 		}
 		throw eOutOfRange;
 	}
 	
-	// synonym to peek(index)
-	virtual inline const Type& get(int32_t index) const throw(const char*) {
-		if ((index >= 0) && (index < m_count)) {
-			return m_items[index];
-		}
-		throw eOutOfRange;
-	}
-	
-	virtual inline int32_t search(const Type& value) const {
-		if (m_count > 0) {
-			for (int i = m_count-1; i >= 0; i--) {
-				if (m_items[i] == value) return i;
-			}
-		}
-		return -1;
-	}
-	
-	// synonym to search(value)
-	virtual inline int32_t indexOf(const Type& value) const {
+	virtual inline int32_t search(const Type value) const {
 		if (m_count > 0) {
 			for (int i = m_count-1; i >= 0; i--) {
 				if (m_items[i] == value) return i;
@@ -453,6 +427,610 @@ public:
 			return m_items[index];
 		}
 		throw eOutOfRange;
+	}
+};
+
+template <typename Type>
+class Vector<Type*> : public CObject {
+private:
+	Type** m_items = NULL;
+	uint32_t m_count = 0;
+	uint32_t m_size = 0;
+	uint32_t m_step = 1;
+	
+public:
+	inline Vector() {}
+	inline Vector(uint32_t count) throw(const char*) { resize(count); }
+	inline Vector(uint32_t count, uint32_t step) throw(const char*) { if (step != 0) m_step = step; resize(count); }
+	inline ~Vector() { resize(0); }
+	
+	inline void growstep(uint32_t step) { if (step != 0) m_step = step; }
+	
+	inline void resize(uint32_t count) throw(const char*) {
+		if (count == m_count)
+			return;
+		
+		if (count == 0) {
+			memFree(m_items);
+			m_items = NULL;
+			m_count = 0;
+			return;
+		}
+		
+		uint32_t newSize = count;
+		if (m_step > 1) {
+			newSize = count + m_step - 1;
+			newSize = newSize - (newSize % m_step);
+		}
+		
+		if (m_size != newSize) {
+			Type** newItems = memRealloc(Type*, newItems, m_items, newSize * sizeof(Type*));
+			if (newItems == NULL)
+				throw eOutOfMemory;
+			
+			m_items = newItems;
+			m_size = newSize;
+		}
+		
+		m_count = count;
+	}
+	
+	virtual inline void push(const Type* value) throw(const char*) {
+		resize(m_count + 1);
+		m_items[m_count - 1] = (Type*)value;
+	}
+	
+	virtual inline void unshift(const Type* value) throw(const char*) {
+		resize(m_count + 1);
+		memmove(m_items + 1, m_items, (m_count - 1) * sizeof(Type*));
+		m_items[0] = (Type*)value;
+	}
+	
+	virtual inline Type* pop() throw(const char*) {
+		if (m_count > 0) {
+			Type* result = m_items[m_count - 1];
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline Type* shift() throw(const char*) {
+		if (m_count > 0) {
+			Type* result = m_items[0];
+			memmove(m_items, m_items + 1, (m_count - 1) * sizeof(Type*));
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline bool contains(const Type* value) const {
+		if (m_count > 0) {
+			for (int i = m_count - 1; i >= 0; i--) {
+				if (m_items[i] == value) return true;
+			}
+		}
+		return false;
+	}
+	
+	virtual inline int32_t count() const {
+		return m_count;
+	}
+	
+	virtual inline bool empty() const {
+		return (m_count == 0);
+	}
+	
+	virtual inline void clear() throw(const char*) {
+		resize(0);
+	}
+	
+	virtual inline Type* peek() const throw(const char*) {
+		if (m_count > 0) {
+			return m_items[m_count - 1];
+		}
+		throw eEmpty;
+	}
+	
+	virtual inline Type* get(int32_t index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return m_items[index];
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline int32_t search(const Type* value) const {
+		if (m_count > 0) {
+			for (int i = m_count-1; i >= 0; i--) {
+				if (m_items[i] == value) return i;
+			}
+		}
+		return -1;
+	}
+	
+	virtual inline Type* remove(int32_t index) throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			Type* result = m_items[index];
+			if ((m_count > 0) && (index < (m_count - 1))) {
+				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type*));
+			}
+			resize(m_count - 1);
+			return result;
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline Type** items() const {
+		return m_items;
+	}
+	
+	virtual inline Type*& operator [](int index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return m_items[index];
+		}
+		throw eOutOfRange;
+	}
+};
+
+template <class Type>
+class Vector<Type&> : public CObject {
+private:
+	Type** m_items = NULL;
+	uint32_t m_count = 0;
+	uint32_t m_size = 0;
+	uint32_t m_step = 1;
+	
+public:
+	inline Vector() {}
+	inline Vector(uint32_t count) throw(const char*) { resize(count); }
+	inline Vector(uint32_t count, uint32_t step) throw(const char*) { if (step != 0) m_step = step; resize(count); }
+	inline ~Vector() { resize(0); }
+	
+	inline void growstep(uint32_t step) { if (step != 0) m_step = step; }
+	
+	inline void resize(uint32_t count) throw(const char*) {
+		if (count == m_count)
+			return;
+		
+		if (count == 0) {
+			for (int i = 0; i < m_count; i++) {
+				delete m_items[i];
+			}
+			memFree(m_items);
+			m_items = NULL;
+			m_count = 0;
+			return;
+		}
+		
+		uint32_t newSize = count;
+		if (m_step > 1) {
+			newSize = count + m_step - 1;
+			newSize = newSize - (newSize % m_step);
+		}
+		
+		if (m_size != newSize) {
+			CString** newItems = memRealloc(CString*, newItems, m_items, newSize * sizeof(CString*));
+			if (newItems == NULL)
+				throw eOutOfMemory;
+			
+			m_items = newItems;
+			m_size = newSize;
+		}
+		
+		m_count = count;
+	}
+	
+	virtual inline Type& push(const Type& value) throw(const char*) {
+		resize(m_count + 1);
+		return *(m_items[m_count - 1] = new Type(value));
+	}
+	
+	virtual inline Type& unshift(const Type& value) throw(const char*) {
+		resize(m_count + 1);
+		memmove(m_items + 1, m_items, (m_count - 1) * sizeof(Type*));
+		return *(m_items[0] = new Type(value));
+	}
+	
+	virtual inline Type pop() throw(const char*) {
+		if (m_count > 0) {
+			Type result = *(m_items[m_count - 1]);
+			delete m_items[m_count - 1];
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline Type shift() throw(const char*) {
+		if (m_count > 0) {
+			Type result = *(m_items[0]);
+			delete m_items[0];
+			memmove(m_items, m_items + 1, (m_count - 1) * sizeof(Type*));
+			resize(m_count - 1);
+			return result;
+		}
+		
+		throw eEmpty;
+	}
+	
+	virtual inline bool contains(const Type& value) const {
+		if (m_count > 0) {
+			for (int i = m_count - 1; i >= 0; i--) {
+				if (*(m_items[i]) == value) return true;
+			}
+		}
+		return false;
+	}
+	
+	virtual inline int32_t count() const {
+		return m_count;
+	}
+	
+	virtual inline bool empty() const {
+		return (m_count == 0);
+	}
+	
+	virtual inline void clear() throw(const char*) {
+		resize(0);
+	}
+	
+	virtual inline const Type& peek() const throw(const char*) {
+		if (m_count > 0) {
+			return *(m_items[m_count - 1]);
+		}
+		throw eEmpty;
+	}
+	
+	virtual inline const Type& get(int32_t index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return *(m_items[index]);
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline int32_t search(const Type& value) const {
+		if (m_count > 0) {
+			for (int i = m_count-1; i >= 0; i--) {
+				if (*(m_items[i]) == value) return i;
+			}
+		}
+		return -1;
+	}
+	
+	virtual inline const Type remove(int32_t index) throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			Type result = *(m_items[index]);
+			delete m_items[index];
+			if ((m_count > 0) && (index < (m_count - 1))) {
+				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type*));
+			}
+			resize(m_count - 1);
+			return result;
+		}
+		throw eOutOfRange;
+	}
+	
+	virtual inline Type** items() const {
+		return m_items;
+	}
+	
+	virtual inline Type& operator [](int index) const throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			return *(m_items[index]);
+		}
+		throw eOutOfRange;
+	}
+};
+
+template <typename K, typename V>
+class VectorMap : public CObject {
+public:
+	Vector<K>* m_keys;
+	Vector<V>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K>();
+		m_values = new Vector<V>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K>(count);
+		m_values = new Vector<V>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K>(count, step);
+		m_values = new Vector<V>(count, step);
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(K key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(V value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V get(K key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(K key, V value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = value;
+		}
+	}
+	
+	virtual inline void remove(K key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->remove(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K* keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V* values() const {
+		return m_values->items();
+	}
+};
+
+template <typename K, typename V>
+class VectorMap<K&,V> : public CObject {
+public:
+	Vector<K&>* m_keys;
+	Vector<V>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K&>();
+		m_values = new Vector<V>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K&>(count);
+		m_values = new Vector<V>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K&>(count, step);
+		m_values = new Vector<V>(count, step);
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(const K& key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(V value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V get(const K& key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(const K& key, V value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = value;
+		}
+	}
+	
+	virtual inline void remove(const K& key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->remove(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K** keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V* items() const {
+		return m_values->items();
+	}
+};
+
+template <typename K, typename V>
+class VectorMap<K&,V&> : public CObject {
+public:
+	Vector<K&>* m_keys;
+	Vector<V&>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K&>();
+		m_values = new Vector<V&>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K&>(count);
+		m_values = new Vector<V&>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K&>(count, step);
+		m_values = new Vector<V&>(count, step);
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(const K& key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(const V& value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V& get(const K& key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(const K& key, const V& value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = value;
+		}
+	}
+	
+	virtual inline void remove(const K& key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->remove(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K** keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V** items() const {
+		return m_values->items();
+	}
+};
+
+template <typename K, typename V>
+class VectorMap<K,V&> : public CObject {
+public:
+	Vector<K>* m_keys;
+	Vector<V&>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K>();
+		m_values = new Vector<V&>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K>(count);
+		m_values = new Vector<V&>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K>(count, step);
+		m_values = new Vector<V&>(count, step);
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(K key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(const V& value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V& get(K key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(K key, const V& value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = value;
+		}
+	}
+	
+	virtual inline void remove(K key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->remove(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K** keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V** items() const {
+		return m_values->items();
 	}
 };
 

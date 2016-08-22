@@ -21,9 +21,8 @@
 #include <data/uObject.h>
 #include <data/uStream.h>
 #include <data/uString.h>
-#include <data/uJSONObject.h>
-#include <data/uList.h>
-#include <core/uHandler.h>
+#include <data/uVector.h>
+#include <core/uSystem.h>
 
 class Loader;
 class GLRender;
@@ -36,66 +35,46 @@ struct LoaderStatus {
 	int error = 0;
 };
 
-class RefLoader : public JRefObject {
+class Loader : public CObject {
 private:
-	class RefFile : public JRefObject {
+	class File : public CObject {
 	public:
-		JString file;
-		JString ext;
-		JString key;
-		JString group;
+		CString file;
+		CString ext;
+		CString key;
+		CString group;
 		
-		inline RefFile() {}
-		
-		inline RefFile(const JString& file, const JString& ext, const JString& key, const JString& group) {
-			THIS.file = file;
-			THIS.ext = ext;
-			THIS.key = key;
-			THIS.group = group;
+		inline File(const CString& file, const CString& ext, const CString& key, const CString& group) {
+			this->file = file;
+			this->ext = ext;
+			this->key = key;
+			this->group = group;
 		}
-	};
-	
-	class File : public JObject {
-	public:
-		JRefClass(File, RefFile);
 	};
 	
 public:
-	class RefInfo : public JRefObject {
+	class Info : public CObject {
 	public:
 		Loader* loader = NULL;
-		File info;
+		File* info = NULL;
 		
-		inline RefInfo() {}
-
-		RefInfo(const RefLoader& loader, const RefFile& info);
-		~RefInfo();
-	};
-	
-	class Info : public JObject {
-	public:
-		JRefClass(Info, RefInfo);
-
-		inline Info(const RefLoader& loader, const RefFile& info) {
-			RefInfo* o = new RefInfo(loader, info);
-			if (o == NULL) throw eOutOfMemory;
-			THIS.setRef(o);
-		}
+		Info(Loader* loader, File* info);
+		~Info();
 	};
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const JString& url, const JObject& object, const JObject userData);
-	typedef void (*onStatusCallback)(const LoaderStatus& status, const JObject userData);
-	typedef void (*onReadyCallback)(const JSONObject& result, const JObject userData);
-	typedef void (*onErrorCallback)(const JString& error, const JObject userData);
+	typedef void (*onFileCallback)(const CString& url, void* object, void* userData);
+	typedef void (*onStatusCallback)(const LoaderStatus& status, void* userData);
+	typedef void (*onReadyCallback)(void* userData);
+	typedef void (*onErrorCallback)(const CString& error, void* userData);
 
 	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
 	onReadyCallback onready = NULL;
 	onErrorCallback onerror = NULL;
 	
-	JObject userData;
+	void* userData = NULL;
 
 private:
 	// loader internal data
@@ -105,85 +84,57 @@ private:
 	int loadSpeed = 5;
 #endif
 	
-	JSONObject result;
-	JList<File> list;
+	Vector<File*> list;
 	struct LoaderStatus status;
 	volatile int32_t shutdown = 0;
-	volatile bool updating = false;
-	JString lastError;
+	volatile jlock updating = false;
+	CString lastError;
 	
-	JString cacheid;
+	CString cacheid;
 	
-	inline int hasDownloads() { return list.size(); }
-	
-	inline File& lastDownload() throw(const char*) {
-		return *(File*)&(list.peek());
-	}
-	
-	inline void doneDownload() throw(const char*) {
-		list.pop();
-	}
-	
-	Handler handler;
 	void checkUpdate(int time);
-	static void onUpdate(const JObject& data);
+	static void* onUpdateWait(void* data);
+	static void* onUpdate(void* data);
 	void update();
 	void run();
 	
-	static bool onhttp_text(const JString& url, Stream& stream, const JObject& userData);
-	static bool onhttp_data(const JString& url, Stream& stream, const JObject& userData);
-	static void onhttp_error(const JString& url, const JString& error, const JObject& userData);
-	static bool onhttp_retry(const JString& url, const JObject& userData);
+	static bool onhttp_text(const CString& url, Stream* stream, void* userData);
+	static bool onhttp_data(const CString& url, Stream* stream, void* userData);
+	static void onhttp_error(const CString& url, const CString& error, void* userData);
+	static bool onhttp_retry(const CString& url, void* userData);
 	
-	bool onText(const File& info, Stream& stream);
-	bool onData(const File& info, Stream& stream);
-	void onLoad(const File& info, const JObject& object);
-	void onError(const File& info, const JString& error);
-	bool onRetry(const File& info);
+	bool onText(const File* info, Stream* stream);
+	bool onData(const File* info, Stream* stream);
+	void onLoad(const File* info, void* object);
+	void onError(const File* info, const CString& error);
+	bool onRetry(const File* info);
 	
 private:
 	// json parser callbacks and data
-	JString group;
-	JString subgroup;
+	CString group;
+	CString subgroup;
 	
-	static void onjson_root_start(struct json_context* ctx, void* target);
-	static void onjson_group(struct json_context* ctx, const char* key, void* target);
-	static void onjson_subgroup(struct json_context* ctx, const char* key, void* target);
-	static void onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target);
+	static void onjson_root_start(struct JsonContext* ctx, void* target);
+	static void onjson_group(struct JsonContext* ctx, const char* key, void* target);
+	static void onjson_subgroup(struct JsonContext* ctx, const char* key, void* target);
+	static void onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target);
 
 private:
-	GLRender* context;
+	GLRender* context = NULL;
 	
 public:
 	
-	JString basePath;
+	CString basePath;
 
-	inline void initialize() {
-		result = new JSONObject();
-		list = new JList<File>();
-		handler = new Handler();
+	inline Loader(GLRender* context, void* userData) {
+		this->context = context;
+		this->userData = userData;
 	}
-
-	inline RefLoader() { throw eInvalidParams; }
-	inline RefLoader(GLRender* context, JObject& userData) { initialize(); THIS.context = context; THIS.userData = userData; }
-	~RefLoader();
+	
+	~Loader();
 	
 	void setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror);
 	void load(const char* jsonconfig) throw(const char*);
-	void release();
-};
-
-class Loader : public JObject {
-public:
-	JRefClass(Loader, RefLoader);
-	
-	inline Loader(GLRender* context, JObject& userData) {
-		RefLoader* o = new RefLoader(context, userData);
-		if (o == NULL) throw eOutOfMemory;
-		THIS.setRef(o);
-	}
-	
-	inline void release() throw(const char*) { THIS.ref().release(); }
 };
 
 #endif //JAPPSY_ULOADER_H

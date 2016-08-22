@@ -36,8 +36,7 @@
 
 - (void) engine:(void*)refEngine {
 	if (_renderer != NULL) {
-		GLEngine engine = (RefGLEngine*)refEngine;
-		_renderer->initialize(engine);
+		_renderer->initialize((GLEngine*)refEngine);
 	}
 }
 

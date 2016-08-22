@@ -45,18 +45,16 @@ void OMEngine::onTouch(const wchar_t* event) {
     
 }
 
-void OMEngine::onFile(const JString& url, const JObject& object) {
-    JString::format(L"FILE: %ls", (wchar_t*)url).log();
+void OMEngine::onFile(const CString& url, void* object) {
+    CString::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 
 void OMEngine::onStatus(const LoaderStatus& status) {
-    JString::format(L"STATUS: %d / %d", status.count, status.total).log();
+    CString::format(L"STATUS: %d / %d", status.count, status.total).log();
 }
 
-void OMEngine::onReady(const JSONObject& result) {
-    JString::format(L"READY!").log();
-    
-    JSONObject fallback = new JSONObject();
+void OMEngine::onReady() {
+    CString::format(L"READY!").log();
     
     // Подготавливаем шейдеры
     
@@ -68,25 +66,34 @@ void OMEngine::onReady(const JSONObject& result) {
         shutdown();
     }
     
-    // Подготавливаем модели
-    JSONObject models = result.optJSONObject(L"models", fallback);
-    context->createModels(models);
-    
     m_paint.setColor(0xFF4080FF);
     ready = true;
 }
 
-void OMEngine::onError(const JString& error) {
-    JString::format(L"ERROR: %ls", (wchar_t*)error).log();
+void OMEngine::onError(const CString& error) {
+    CString::format(L"ERROR: %ls", (wchar_t*)error).log();
 }
+
+#include <data/uVector.h>
+#include <data/uString.h>
 
 OMEngine::OMEngine() {
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
+    
+    Vector<CString&> test;
+    test.push(L"asdasd");
+    
+    Vector<void*> test2;
+    test2.push(NULL);
+    
+    Vector<int> test5;
+    test5.items();
+    test5.push(1);
  
     //sOMLoadRes = "{\"groups\":{\"shaders\":{\"vsh_main\":\"shaders/vsh_main.jsh\"}}}";
     
-    THIS.setBasePath(L"https://www.cox.ru/res/om/");
-    THIS.load(sOMLoadRes);
+    this->setBasePath(L"https://www.cox.ru/res/om/");
+    this->load(sOMLoadRes);
 }

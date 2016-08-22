@@ -20,17 +20,15 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uString.h>
-#include <data/uHashMap.h>
 #include <opengl/uGLScene.h>
 #include <data/uVector.h>
-#include <data/uJSONObject.h>
 
 enum GLLightStyle { OMNI, SPOT, DIRECT };
 
-class RefGLLight : public JRefObject {
+class GLLight : public CObject {
 private:
-	GLScene scene;
-	JString key;
+	GLScene* scene = NULL;
+	CString key;
 	Vec3 position = {0.0, 0.0, -1.0};
 	Vec3 target = {0.0, 0.0, 0.0};
 	Vec3 color = {1.0, 1.0, 1.0};
@@ -47,35 +45,28 @@ public:
 	Vec3 target3fv;
 	Mat4 light16fv;
 	
-	inline RefGLLight() { throw eInvalidParams; }
-	RefGLLight(GLScene& scene);
-	~RefGLLight();
+	GLLight(GLScene* scene, const CString& key);
 	
-	inline RefGLLight& invalidate() { invalid = true; return *this; }
+	inline GLLight& invalidate() { invalid = true; return *this; }
 
-	RefGLLight& omni(const Vec3& position, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
-	RefGLLight& spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat angle = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
-	RefGLLight& direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	GLLight* omni(const Vec3& position, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	GLLight* spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat angle = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
+	GLLight* direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity = 1.0, const GLfloat radius = 0.0, const GLfloat falloff = 0.0, const bool fixed = false);
 	
-	void update();
+	bool update();
 };
 
-class GLLight : public JObject {
-public:
-	JRefClass(GLLight, RefGLLight)
-};
-
-class GLLights {
+class GLLights : public CObject {
 private:
-	GLScene scene;
-	JHashMap<JString, GLLight> list;
-	
+	GLScene* scene = NULL;
+	VectorMap<CString&, GLLight*> list;
+
 public:
-	GLLights(RefGLScene* scene) throw(const char*);
+	GLLights(GLScene* scene) throw(const char*);
 	~GLLights();
 	
-	GLLight& get(const JString& key) throw(const char*);
-	GLLight& create(const JString& key) throw(const char*);
+	GLLight* get(const CString& key);
+	GLLight* createLight(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLLIGHT_H

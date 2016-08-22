@@ -21,7 +21,7 @@
 #include <data/uObject.h>
 #include <data/uString.h>
 
-class URI {
+class URI : public CObject {
 private:
 	wchar_t* m_scheme;
 	wchar_t* m_user;
@@ -34,25 +34,25 @@ private:
 	wchar_t* m_query;
 	wchar_t* m_anchor;
 	
-	JString* _scheme;
-	JString* _server;
-	JString* _fullPath;
-	JString* _absolutePath;
-	JString* _uri;
+	CString* _scheme;
+	CString* _server;
+	CString* _fullPath;
+	CString* _absolutePath;
+	CString* _uri;
 	
-	const JString& scheme();
-	const JString& server();
+	const CString& scheme();
+	const CString& server();
 public:
 	static const wchar_t* basePath;
 	
 	URI(const wchar_t* uri);
 	~URI();
 	
-	const JString& fullPath();
-	const JString& absolutePath(const wchar_t* basePath);
-	inline const JString& absolutePath() { return absolutePath(NULL); }
-	const JString& uri();
-	inline const JString ext() { return m_ext; }
+	const CString& fullPath();
+	const CString& absolutePath(const wchar_t* basePath);
+	inline const CString& absolutePath() { return absolutePath(NULL); }
+	const CString& uri();
+	inline const CString ext() { return m_ext; }
 };
 
 #endif //JAPPSY_UURI_H

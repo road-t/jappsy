@@ -60,7 +60,7 @@ void* GLReader::CreateTextureCallback(void* threadData) {
 	struct CreateTextureThreadData* thread = (struct CreateTextureThreadData*)threadData;
 	
 	if (thread->handles.count() > 0) {
-		return &(thread->context->textures->createTexture(thread->key, thread->handles, thread->width, thread->height));
+		return thread->context->textures->createTexture(thread->key, thread->handles, thread->width, thread->height);
 	} else {
 		throw eIOReadLimit;
 	}
@@ -69,7 +69,7 @@ void* GLReader::CreateTextureCallback(void* threadData) {
 void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	struct CreateTextureThreadData* thread = (struct CreateTextureThreadData*)threadData;
 	
-	uint32_t count = thread->handles.size();
+	uint32_t count = thread->handles.count();
 	GLuint* items = thread->handles.items();
 	for (int i = 0; i < count; i++) {
 		thread->context->textures->releaseTextureHandle(items[i]);
@@ -79,49 +79,49 @@ void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLTexture& GLReader::createTexture(GLRender* ctx, const JString& key, Stream& stream) throw(const char*) {
-	stream.setPosition(0);
-	uint32_t head = (uint32_t)stream.readInt();
+GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* stream) throw(const char*) {
+	stream->setPosition(0);
+	uint32_t head = (uint32_t)stream->readInt();
 	if ((head == GLReader::SDFFHEAD) || (head == GLReader::SDFIHEAD) || (head == GLReader::JIMGHEAD)) {
 		struct CreateTextureThreadData thread;
 		thread.context = ctx;
 		thread.key = (wchar_t*)key;
-		thread.width = stream.readInt();
-		thread.height = stream.readInt();
+		thread.width = stream->readInt();
+		thread.height = stream->readInt();
 		thread.style = GLTexture::NONE;
 		int distance = 0; //unused
 		
 		if (head != GLReader::JIMGHEAD) {
-			distance = stream.readUnsignedByte();
+			distance = stream->readUnsignedByte();
 		} else {
-			thread.style = stream.readInt();
+			thread.style = stream->readInt();
 		}
 		
 		try {
-			uint32_t len = (uint32_t)stream.readInt();
-			uint32_t chunk = (uint32_t)stream.readInt();
+			uint32_t len = (uint32_t)stream->readInt();
+			uint32_t chunk = (uint32_t)stream->readInt();
 			while (chunk != GLReader::JENDCHUNK) {
 				if ((chunk == GLReader::IGZCHUNK) || (chunk == GLReader::IRWCHUNK)) {
 					uint32_t dataSize;
 					if (chunk == GLReader::IGZCHUNK) {
 						dataSize = thread.width * thread.height * 4;
-						thread.data = stream.readGZip(len, &dataSize);
+						thread.data = stream->readGZip(len, &dataSize);
 					} else {
-						thread.data = stream.readBytes(len);
+						thread.data = stream->readBytes(len);
 						dataSize = len;
 					}
 
 					(void)MainThreadSync(CreateTextureHandleCallback, &thread);
 				} else {
-					if (stream.skip(len) < 0)
+					if (stream->skip(len) < 0)
 						break;
 				}
 				
-				len = (uint32_t)stream.readInt();
-				chunk = (uint32_t)stream.readInt();
+				len = (uint32_t)stream->readInt();
+				chunk = (uint32_t)stream->readInt();
 			}
 			
-			return *(GLTexture*)(MainThreadSync(CreateTextureCallback, &thread));
+			return (GLTexture*)(MainThreadSync(CreateTextureCallback, &thread));
 		} catch (...) {
 			(void)MainThreadSync(CreateTextureErrorCallback, &thread);
 			throw;
@@ -236,7 +236,7 @@ void* GLReader::CreateShaderProgramCallback(void* threadData) {
 void* GLReader::CreateShaderCallback(void* threadData) {
 	struct CreateShaderThreadData* thread = (struct CreateShaderThreadData*)threadData;
 	
-	return &(thread->context->shaders->createShader(thread->key, thread->vsh, thread->fsh, thread->program, thread->textures));
+	return thread->context->shaders->createShader(thread->key, thread->vsh, thread->fsh, thread->program, thread->textures);
 }
 
 void* GLReader::CreateShaderErrorCallback(void* threadData) {
@@ -269,9 +269,9 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stream) throw(const char*) {
-	stream.setPosition(0);
-	uint32_t head = (uint32_t)stream.readInt();
+GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stream) throw(const char*) {
+	stream->setPosition(0);
+	uint32_t head = (uint32_t)stream->readInt();
 	if (head == GLReader::JSHDHEAD) {
 		struct CreateShaderThreadData thread;
 		thread.context = ctx;
@@ -280,8 +280,8 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 		thread.fsh = NULL;
 		thread.program = 0;
 
-		uint32_t len = (uint32_t)stream.readInt();
-		uint32_t chunk = (uint32_t)stream.readInt();
+		uint32_t len = (uint32_t)stream->readInt();
+		uint32_t chunk = (uint32_t)stream->readInt();
 
 		try {
 			while (chunk != GLReader::JENDCHUNK) {
@@ -291,9 +291,9 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 					(chunk == GLReader::FSHCHUNK)
 				) {
 					if ((chunk == GLReader::VGZCHUNK) || (chunk == GLReader::FGZCHUNK)) {
-						thread.shaderSource = stream.readGZipString(len);
+						thread.shaderSource = stream->readGZipString(len);
 					} else {
-						thread.shaderSource = stream.readString(len);
+						thread.shaderSource = stream->readString(len);
 					}
 					
 					thread.chunk = chunk;
@@ -307,7 +307,7 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 					memFree(thread.shaderSource);
 					thread.shaderSource = NULL;
 				} else if ((chunk == GLReader::VRFCHUNK) || (chunk == GLReader::FRFCHUNK) || (chunk == GLReader::IRFCHUNK)) {
-					char* target = stream.readString(len);
+					char* target = stream->readString(len);
 					GLObjectData* shd = NULL;
 					try {
 						shd = memNew(shd, GLObjectData(ctx));
@@ -337,19 +337,19 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 						}
 					}
 				} else if (chunk == GLReader::IHDCHUNK) {
-					thread.width = stream.readInt();
-					thread.height = stream.readInt();
-					thread.style = stream.readInt();
+					thread.width = stream->readInt();
+					thread.height = stream->readInt();
+					thread.style = stream->readInt();
 					
-					len = stream.readInt();
-					chunk = (uint32_t)stream.readInt();
+					len = stream->readInt();
+					chunk = (uint32_t)stream->readInt();
 					if ((chunk == GLReader::IGZCHUNK) || (chunk == GLReader::IRWCHUNK)) {
 						uint32_t dataSize;
 						if (chunk == GLReader::IGZCHUNK) {
 							dataSize = thread.width * thread.height * 4;
-							thread.data = stream.readGZip(len, &dataSize);
+							thread.data = stream->readGZip(len, &dataSize);
 						} else {
-							thread.data = stream.readBytes(len);
+							thread.data = stream->readBytes(len);
 							dataSize = len;
 						}
 						
@@ -358,12 +358,12 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 						throw eIOInvalidFile;
 					}
 				} else {
-					if (stream.skip(len) < 0)
+					if (stream->skip(len) < 0)
 						break;
 				}
 				
-				len = (uint32_t)stream.readInt();
-				chunk = (uint32_t)stream.readInt();
+				len = (uint32_t)stream->readInt();
+				chunk = (uint32_t)stream->readInt();
 			}
 			
 			if ((thread.vsh == NULL) && (thread.fsh == NULL)) {
@@ -372,7 +372,7 @@ GLShader& GLReader::createShader(GLRender* ctx, const JString& key, Stream& stre
 				(void)MainThreadSync(CreateShaderProgramCallback, &thread);
 			}
 			
-			return *(GLShader*)(MainThreadSync(CreateShaderCallback, &thread));
+			return (GLShader*)(MainThreadSync(CreateShaderCallback, &thread));
 		} catch (...) {
 			(void)MainThreadSync(CreateShaderErrorCallback, &thread);
 			throw;

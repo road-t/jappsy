@@ -20,35 +20,29 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uString.h>
-#include <data/uHashMap.h>
+#include <data/uVector.h>
 
 class GLRender;
 
-class RefGLObject : public JRefObject {
+class GLObject : public CObject {
 public:
 	GLRender* context = NULL;
 	
-	inline RefGLObject() { throw eInvalidParams; }
-	RefGLObject(GLRender* context);
-	~RefGLObject();
+	GLObject(GLRender* context);
+	~GLObject();
 };
 
-class GLObject : public JObject {
-public:
-	JRefClass(GLObject, RefGLObject)
-};
-
-class GLObjects {
+class GLObjects : public CObject {
 private:
 	GLRender* context;
-	JHashMap<JString, GLObject> list;
+	VectorMap<CString&, GLObject*> list;
 	
 public:
 	GLObjects(GLRender* context) throw(const char*);
 	~GLObjects();
 	
-	GLObject& get(const JString& key) throw(const char*);
-	GLObject& create(const JString& key) throw(const char*);
+	GLObject* get(const CString& key) throw(const char*);
+	GLObject* create(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLOBJECT_H

@@ -22,54 +22,87 @@
 #include <opengl/uGLRender.h>
 #include <opengl/uGLReader.h>
 
-void RefLoader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror) {
-	THIS.onfile = onfile;
-	THIS.onstatus = onstatus;
-	THIS.onready = onready;
-	THIS.onerror = onerror;
+void Loader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror) {
+	this->onfile = onfile;
+	this->onstatus = onstatus;
+	this->onready = onready;
+	this->onerror = onerror;
 }
 
-void RefLoader::release() {
-	THIS.wait();
+Loader::~Loader() {
+	lock();
 	AtomicSet(&shutdown, 1);
-	handler.release();
 	
+	do {
+		if (AtomicLockTry(&updating))
+			break;
+		
+		unlock();
+		usleep(1);
+		lock();
+	} while (true);
+
 	while (AtomicGet(&status.left) > 0) {
-		sleep(1);
+		usleep(1);
 	}
 	
-	THIS.userData = null;
-	THIS.context = NULL;
-	THIS.notifyAll();
-}
-
-RefLoader::~RefLoader() {
-	release();
-	// TODO: RELEASE LOADER
-}
-
-void RefLoader::checkUpdate(int time) {
-	THIS.wait();
-	if (AtomicGet(&shutdown) == 0) {
-		if (AtomicLockTry(&updating)) {
-			handler.postDelayed(onUpdate, time, this);
+	int32_t count = list.count();
+	if (count > 0) {
+		File** items = list.items();
+		for (int i = 0; i < count; i++) {
+			delete items[i];
 		}
 	}
-	THIS.notifyAll();
 }
 
-void RefLoader::onUpdate(const JObject& data) {
-	(*(Loader*)(&data)).ref().update();
+struct LoaderUpdateWaitData {
+	Loader* loader;
+	int time;
+};
+
+void Loader::checkUpdate(int time) {
+	lock();
+	if (AtomicGet(&shutdown) == 0) {
+		if (AtomicLockTry(&updating)) {
+			struct LoaderUpdateWaitData* threadData = memAlloc(struct LoaderUpdateWaitData, threadData, sizeof(struct LoaderUpdateWaitData));
+			if (threadData == NULL) {
+				AtomicUnlock(&updating);
+				unlock();
+				return;
+			}
+			
+			threadData->loader = this;
+			threadData->time = time;
+			NewThreadAsync(onUpdateWait, NULL, threadData);
+		}
+	}
+	unlock();
 }
 
-void RefLoader::update() {
-	THIS.wait();
+void* Loader::onUpdateWait(void* data) {
+	struct LoaderUpdateWaitData* threadData = (struct LoaderUpdateWaitData*)data;
+	Loader* loader = (Loader*)AtomicGetPtr(&(threadData->loader));
+	systemSleep(AtomicGet(&(threadData->time)));
+	
+	MainThreadAsync(loader->onUpdate, NULL, loader);
+	memFree(threadData);
+	return NULL;
+}
+
+void* Loader::onUpdate(void* data) {
+	Loader* loader = (Loader*)data;
+	loader->update();
+	return NULL;
+}
+
+void Loader::update() {
+	lock();
 	AtomicUnlock(&updating);
 
 	if (AtomicGet(&shutdown) == 0) {
 		cacheid = currentTimeMillis();
 		
-		int count = hasDownloads();
+		int count = list.count();
 		if (AtomicGet(&(status.error)) > 0) count = 0;
 		if (count > loadSpeed) count = loadSpeed;
 		if (count == 0) count = -1;
@@ -79,47 +112,57 @@ void RefLoader::update() {
 			AtomicSet(&(status.update), false);
 		}
 		while (count > 0) {
-			File* info = &(lastDownload());
-			JString ext = (*info).ref().ext;
-			
-			AtomicSet(&(status.update), true);
-			AtomicIncrement(&(status.left));
-			if ((ext.compareToIgnoreCase(L"png") == 0) ||
-				(ext.compareToIgnoreCase(L"jpg") == 0) ||
-				(ext.compareToIgnoreCase(L"jpeg") == 0)) {
-				// TODO: PNG JPG Loader not needed
-				// Fake OK
-				AtomicIncrement(&(status.count));
-				AtomicDecrement(&(status.left));
+			File* info = list.pop();
+			try {
+				bool releaseInfo = false;
 				AtomicSet(&(status.update), true);
-			} else if (
-				(ext.compareToIgnoreCase(L"mp3") == 0) ||
-				(ext.compareToIgnoreCase(L"ogg") == 0)
-			) {
-				// TODO: MP3 OGG Loader
-				// Fake OK
-				AtomicIncrement(&(status.count));
-				AtomicDecrement(&(status.left));
-				AtomicSet(&(status.update), true);
-			} else if (
-				(ext.compareToIgnoreCase(L"jimg") == 0) ||
-				(ext.compareToIgnoreCase(L"jsh") == 0)) {
-				Info user = new Info(*this, info->ref());
-				HTTPClient::Request(info->ref().file, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry);
-			} else if (
-				(ext.compareToIgnoreCase(L"json") == 0) ||
-				(ext.compareToIgnoreCase(L"vsh") == 0) ||
-				(ext.compareToIgnoreCase(L"fsh") == 0)) {
-				Info user = new Info(*this, info->ref());
-				HTTPClient::Request(info->ref().file, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry);
-			} else {
-				// Unknown File Type
-				// Fake OK
-				AtomicIncrement(&(status.count));
-				AtomicDecrement(&(status.left));
-				AtomicSet(&(status.update), true);
+				AtomicIncrement(&(status.left));
+				if ((info->ext.compareToIgnoreCase(L"png") == 0) ||
+					(info->ext.compareToIgnoreCase(L"jpg") == 0) ||
+					(info->ext.compareToIgnoreCase(L"jpeg") == 0)) {
+					// TODO: PNG JPG Loader not needed
+					// Fake OK
+					AtomicIncrement(&(status.count));
+					AtomicDecrement(&(status.left));
+					AtomicSet(&(status.update), true);
+					releaseInfo = true;
+				} else if (
+					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
+					(info->ext.compareToIgnoreCase(L"ogg") == 0)
+				) {
+					// TODO: MP3 OGG Loader
+					// Fake OK
+					AtomicIncrement(&(status.count));
+					AtomicDecrement(&(status.left));
+					AtomicSet(&(status.update), true);
+					releaseInfo = true;
+				} else if (
+					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
+					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
+					Info* user = new Info(this, info);
+					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry);
+				} else if (
+					(info->ext.compareToIgnoreCase(L"json") == 0) ||
+					(info->ext.compareToIgnoreCase(L"vsh") == 0) ||
+					(info->ext.compareToIgnoreCase(L"fsh") == 0)) {
+					Info* user = new Info(this, info);
+					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry);
+				} else {
+					// Unknown File Type
+					// Fake OK
+					AtomicIncrement(&(status.count));
+					AtomicDecrement(&(status.left));
+					AtomicSet(&(status.update), true);
+					releaseInfo = true;
+				}
+				if (releaseInfo) {
+					delete info;
+				}
+			} catch (...) {
+				AtomicIncrement(&(status.error));
+				lastError = eOutOfMemory;
+				delete info;
 			}
-			doneDownload();
 			count--;
 		}
 		if (AtomicGet(&(status.left)) > 0) {
@@ -131,7 +174,7 @@ void RefLoader::update() {
 		} else {
 			if (onready != NULL) {
 				try {
-					onready(result, userData);
+					onready(userData);
 				} catch (const char* e) {
 					lastError = e;
 					if (onerror != NULL) onerror(lastError, userData);
@@ -139,60 +182,67 @@ void RefLoader::update() {
 			}
 		}
 	}
-	THIS.notifyAll();
+	unlock();
 }
 
-void RefLoader::run() {
+void Loader::run() {
 	checkUpdate(15);
 }
 
-void RefLoader::onjson_root_start(struct json_context* ctx, void* target) {
+void Loader::onjson_root_start(struct JsonContext* ctx, void* target) {
 	ctx->callbacks->onobject.onobjectstart = onjson_group;
 }
 
-void RefLoader::onjson_group(struct json_context* ctx, const char* key, void* target) {
-	RefLoader* loader = (RefLoader*)target;
+void Loader::onjson_group(struct JsonContext* ctx, const char* key, void* target) {
+	Loader* loader = (Loader*)target;
 	loader->group = key;
 	
-	json_clear_callbacks(ctx->callbacks, target);
+	JsonClearCallbacks(ctx->callbacks, target);
 	ctx->callbacks->onobject.onobjectstart = onjson_subgroup;
 }
 
-void RefLoader::onjson_subgroup(struct json_context* ctx, const char* key, void* target) {
-	RefLoader* loader = (RefLoader*)target;
+void Loader::onjson_subgroup(struct JsonContext* ctx, const char* key, void* target) {
+	Loader* loader = (Loader*)target;
 	loader->subgroup = key;
 	
-	json_clear_callbacks(ctx->callbacks, target);
+	JsonClearCallbacks(ctx->callbacks, target);
 	ctx->callbacks->onobject.onstring = onjson_subfile;
 }
 
-void RefLoader::onjson_subfile(struct json_context* ctx, const char* key, char* value, void* target) {
-	RefLoader* loader = (RefLoader*)target;
+void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target) {
+	Loader* loader = (Loader*)target;
 	
-	JString path = value;
+	CString path = value;
 	URI* uri = new URI((wchar_t*)path);
-	uri->absolutePath((wchar_t*)(loader->basePath));
 	
-	if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
-		loader->list.add(new RefLoader::RefFile(uri->uri(), uri->ext(), key, loader->subgroup));
-		loader->status.total++;
+	try {
+		uri->absolutePath((wchar_t*)(loader->basePath));
+	
+		if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
+			Loader::File* info = new Loader::File(uri->uri(), uri->ext(), key, loader->subgroup);
+			loader->list.push(info);
+			AtomicIncrement(&(loader->status.total));
+		}
+	} catch (...) {
+		delete uri;
+		throw;
 	}
 	
 	delete uri;
 }
 
-void RefLoader::load(const char* json) throw(const char*) {
+void Loader::load(const char* json) throw(const char*) {
 	if (json == NULL)
 		throw eNullPointer;
 	
-	struct json_context ctx;
-	struct json_callbacks callbacks;
+	struct JsonContext ctx;
+	struct JsonCallbacks callbacks;
 	ctx.callbacks = &callbacks;
-	json_clear_callbacks(&callbacks, this);
+	JsonClearCallbacks(&callbacks, this);
 	callbacks.onrootstart = onjson_root_start;
-	if (!json_call(&ctx, json)) {
+	if (!JsonCall(&ctx, json)) {
 #ifdef DEBUG
-		json_debug_error(ctx, json);
+		JsonDebugError(ctx, json);
 #endif
 		throw eConvert;
 	}
@@ -200,125 +250,147 @@ void RefLoader::load(const char* json) throw(const char*) {
 	run();
 }
 
-RefLoader::RefInfo::RefInfo(const RefLoader& loader, const RefFile& info) {
-	this->loader = new Loader(&loader);
-	this->info = &info;
+Loader::Info::Info(Loader* loader, File* info) {
+	this->loader = loader;
+	this->info = info;
 }
 
-RefLoader::RefInfo::~RefInfo() {
-	delete loader;
+Loader::Info::~Info() {
+	delete info;
 }
 
-bool RefLoader::onhttp_text(const JString& url, Stream& stream, const JObject& userData) {
-	RefInfo* info = (RefInfo*)&(userData.ref());
-	return info->loader->ref().onText(info->info, stream);
+bool Loader::onhttp_text(const CString& url, Stream* stream, void* userData) {
+	Info* info = (Info*)userData;
+	
+	bool result = false;
+	try {
+		result = info->loader->onText(info->info, stream);
+	} catch (...) {
+	}
+	
+	delete info;
+	return result;
 }
 
-bool RefLoader::onhttp_data(const JString& url, Stream& stream, const JObject& userData) {
-	RefInfo* info = (RefInfo*)&(userData.ref());
-	return info->loader->ref().onData(info->info, stream);
+bool Loader::onhttp_data(const CString& url, Stream* stream, void* userData) {
+	Info* info = (Info*)userData;
+
+	bool result = false;
+	try {
+		result = info->loader->onData(info->info, stream);
+	} catch (...) {
+	}
+	
+	delete info;
+	return result;
 }
 
-void RefLoader::onhttp_error(const JString& url, const JString& error, const JObject& userData) {
-	JString err = JString::format(L"Unable to load %ls - %ls", (wchar_t*)url, (wchar_t*)error);
-	err.log();
-
-	RefInfo* info = (RefInfo*)&(userData.ref());
-	info->loader->ref().onError(info->info, error);
+void Loader::onhttp_error(const CString& url, const CString& error, void* userData) {
+	Info* info = (Info*)userData;
+	
+	try {
+		info->loader->onError(info->info, error);
+	} catch (...) {
+	}
+	
+	delete info;
 }
 
-bool RefLoader::onhttp_retry(const JString& url, const JObject& userData) {
-	RefInfo* info = (RefInfo*)&(userData.ref());
-	return info->loader->ref().onRetry(info->info);
+bool Loader::onhttp_retry(const CString& url, void* userData) {
+	Info* info = (Info*)userData;
+	
+	bool result = false;
+	try {
+		result = info->loader->onRetry(info->info);
+	} catch (...) {
+	}
+	
+	if (!result) {
+		delete info;
+	}
+	
+	return result;
 }
 
-bool RefLoader::onText(const File& info, Stream& stream) {
+bool Loader::onText(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
-	JString ext = info.ref().ext;
-	if (ext.compareToIgnoreCase(L"vsh") == 0) {
+	if (info->ext.compareToIgnoreCase(L"vsh") == 0) {
 		try {
-			GLShader* shader = &(context->shaders->createVertexShader(info.ref().key, (char*)stream.getBuffer()));
-			onLoad(info, *shader);
-			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+			GLShader* shader = context->shaders->createVertexShader((wchar_t*)info->key, (char*)stream->getBuffer());
+			onLoad(info, shader);
+			if (onfile != NULL) onfile(info->file, shader, userData);
 		} catch (...) {
 			return false;
 		}
-	} else if (ext.compareToIgnoreCase(L"fsh") == 0) {
+	} else if (info->ext.compareToIgnoreCase(L"fsh") == 0) {
 		try {
-			GLShader* shader = &(context->shaders->createFragmentShader(info.ref().key, (char*)stream.getBuffer()));
-			onLoad(info, *shader);
-			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+			GLShader* shader = context->shaders->createFragmentShader((wchar_t*)info->key, (char*)stream->getBuffer());
+			onLoad(info, shader);
+			if (onfile != NULL) onfile(info->file, shader, userData);
 		} catch (...) {
 			return false;
 		}
-	} else if ((ext.compareToIgnoreCase(L"json") == 0) && (info.ref().group.compareToIgnoreCase(L"models") == 0)) {
+	} else if ((info->ext.compareToIgnoreCase(L"json") == 0) && (info->group.compareToIgnoreCase(L"models") == 0)) {
 		try {
-			GLModel* model = &(context->models->createModel(info.ref().key, (char*)stream.getBuffer()));
+			GLModel* model = context->models->createModel((wchar_t*)info->key, (char*)stream->getBuffer());
+			onLoad(info, model);
+			if (onfile != NULL) onfile(info->file, model, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info.ref().file, stream, userData);
+		if (onfile != NULL) onfile(info->file, stream, userData);
 	}
 	return true;
 }
 
-bool RefLoader::onData(const File& info, Stream& stream) {
+bool Loader::onData(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
-	JString ext = info.ref().ext;
-	if (ext.compareToIgnoreCase(L"jimg") == 0) {
+	if (info->ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
-			GLTexture* texture = &(GLReader::createTexture(context, info.ref().key, stream));
-			onLoad(info, *texture);
-			if (onfile != NULL) onfile(info.ref().file, *texture, userData);
+			GLTexture* texture = GLReader::createTexture(context, info->key, stream);
+			onLoad(info, texture);
+			if (onfile != NULL) onfile(info->file, texture, userData);
 		} catch (...) {
 			return false;
 		}
-	} else if (ext.compareToIgnoreCase(L"jsh") == 0) {
+	} else if (info->ext.compareToIgnoreCase(L"jsh") == 0) {
 		try {
-			GLShader* shader = &(GLReader::createShader(context, info.ref().key, stream));
-			onLoad(info, *shader);
-			if (onfile != NULL) onfile(info.ref().file, *shader, userData);
+			GLShader* shader = GLReader::createShader(context, info->key, stream);
+			onLoad(info, shader);
+			if (onfile != NULL) onfile(info->file, shader, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info.ref().file, stream, userData);
+		if (onfile != NULL) onfile(info->file, stream, userData);
 	}
 	return true;
 }
 
-void RefLoader::onError(const File& info, const JString& error) {
+void Loader::onError(const File* info, const CString& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
-	lastError = info.ref().file;
+	lastError = info->file;
 }
 
-bool RefLoader::onRetry(const File& info) {
+bool Loader::onRetry(const File* info) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
 	return true;
 }
 
-void RefLoader::onLoad(const File& info, const JObject& object) {
+void Loader::onLoad(const File* info, void* object) {
 	__sync_synchronize();
 
-	JSONObject group;
-	try {
-		group = result.getJSONObject(info.ref().group);
-	} catch (...) {
-		group = new JSONObject();
-		result.put(info.ref().group, group);
-	}
-	
-	group.put(info.ref().key, object);
+	// Тут можно добавить result как в джаве, но он не нужен в си
 
 	AtomicIncrement(&(status.count));
 	AtomicDecrement(&(status.left));

@@ -19,35 +19,29 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <data/uHashMap.h>
+#include <data/uVector.h>
 
 class GLRender;
 
-class RefGLSprite : public JRefObject {
+class GLSprite : public CObject {
 public:
 	GLRender* context = NULL;
 	
-	inline RefGLSprite() { throw eInvalidParams; }
-	RefGLSprite(GLRender* context);
-	~RefGLSprite();
+	GLSprite(GLRender* context);
+	~GLSprite();
 };
 
-class GLSprite : public JObject {
-public:
-	JRefClass(GLSprite, RefGLSprite)
-};
-
-class GLSprites {
+class GLSprites : public CObject {
 private:
 	GLRender* context;
-	JHashMap<JString, GLSprite> list;
+	VectorMap<CString&, GLSprite*> list;
 	
 public:
 	GLSprites(GLRender* context) throw(const char*);
 	~GLSprites();
 	
-	GLSprite& get(const wchar_t* key) throw(const char*);
-	GLSprite& create(const wchar_t* key) throw(const char*);
+	GLSprite* get(const CString& key) throw(const char*);
+	GLSprite* create(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSPRITE_H

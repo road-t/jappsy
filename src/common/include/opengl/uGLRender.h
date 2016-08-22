@@ -21,6 +21,7 @@
 #include <net/uLoader.h>
 #include <opengl/uOpenGL.h>
 #include <data/uVector.h>
+#include <data/uJSON.h>
 
 #include <opengl/uGLEngine.h>
 #include <opengl/uGLFrame.h>
@@ -35,10 +36,12 @@
 #include <opengl/uGLParticle.h>
 #include <opengl/uGLDrawing.h>
 
-class GLSpriteShader : public GLShader {
+class GLSpriteShader : public CObject {
 public:
-	JRefClassEx(GLSpriteShader, GLShader, RefGLShader);
+	GLShader* shader = NULL;
 	
+	inline GLSpriteShader(GLShader* shader) { this->shader = shader; }
+
 	GLuint program = 0;
 	
 	int uLayerProjectionMatrix;
@@ -51,9 +54,11 @@ public:
 	int uTime;
 };
 
-class GLParticleShader : public GLShader {
+class GLParticleShader : public CObject {
 public:
-	JRefClassEx(GLParticleShader, GLShader, RefGLShader);
+	GLShader* shader = NULL;
+
+	inline GLParticleShader(GLShader* shader) { this->shader = shader; }
 	
 	GLuint program = 0;
 	
@@ -72,9 +77,11 @@ public:
 	int aTime;
 };
 
-class GLModelShader : public GLShader {
+class GLModelShader : public CObject {
 public:
-	JRefClassEx(GLModelShader, GLShader, RefGLShader);
+	GLShader* shader = NULL;
+
+	inline GLModelShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
 	
@@ -95,10 +102,12 @@ public:
 	int aVertexNormal;
 };
 
-class GLSquareFillShader : public GLShader {
+class GLSquareFillShader : public CObject {
 public:
-	JRefClassEx(GLSquareFillShader, GLShader, RefGLShader);
-	
+	GLShader* shader = NULL;
+
+	inline GLSquareFillShader(GLShader* shader) { this->shader = shader; }
+
 	GLuint program = 0;
 	
 	int uLayerProjectionMatrix;
@@ -106,10 +115,12 @@ public:
 	int aVertexPosition;
 };
 
-class GLSquareStrokeShader : public GLShader {
+class GLSquareStrokeShader : public CObject {
 public:
-	JRefClassEx(GLSquareStrokeShader, GLShader, RefGLShader);
-	
+	GLShader* shader = NULL;
+
+	inline GLSquareStrokeShader(GLShader* shader) { this->shader = shader; }
+
 	GLuint program = 0;
 	
 	int uLayerProjectionMatrix;
@@ -119,10 +130,12 @@ public:
 	int aVertexPosition;
 };
 
-class GLSquareTextureShader : public GLShader {
+class GLSquareTextureShader : public CObject {
 public:
-	JRefClassEx(GLSquareTextureShader, GLShader, RefGLShader);
-	
+	GLShader* shader = NULL;
+
+	inline GLSquareTextureShader(GLShader* shader) { this->shader = shader; }
+
 	GLuint program = 0;
 	
 	int uLayerProjectionMatrix;
@@ -131,42 +144,42 @@ public:
 	int aTextureCoord;
 };
 
-class GLRender {
+class GLRender : public CObject {
 private:
 	static const char* extensions;
 	static bool isExtensionSupported(const char *extension);
 	
 public:
-	GLEngine engine;
+	GLEngine* engine = NULL;
 	
 	uint32_t width;
 	uint32_t height;
 	
-	GLFrame* frame;
-	GLTouchScreen touchScreen;
-	Loader loader;
+	GLFrame* frame = NULL;
+	GLTouchScreen* touchScreen = NULL;
+	Loader* loader = NULL;
 	
 	GLfloat m_square[8];
 	GLfloat m_line[4];
 	GLfloat m_color[20];
 	
-	GLTextures* textures;
-	GLShaders* shaders;
-	GLSprites* sprites;
-	GLScenes* scenes;
-	GLCameras* cameras;
-	GLModels* models;
-	GLParticles* particles;
-	GLDrawings* drawings;
+	GLTextures* textures = NULL;
+	GLShaders* shaders = NULL;
+	GLSprites* sprites = NULL;
+	GLScenes* scenes = NULL;
+	GLCameras* cameras = NULL;
+	GLModels* models = NULL;
+	GLParticles* particles = NULL;
+	GLDrawings* drawings = NULL;
 	
 	uint32_t lightsMaxCount = 6;
 	
-	GLSpriteShader shaderSprite;
-	GLParticleShader shaderParticle;
-	GLModelShader shaderModel;
-	GLSquareFillShader shaderSquareFill;
-	GLSquareStrokeShader shaderSquareStroke;
-	GLSquareTextureShader shaderSquareTexture;
+	GLSpriteShader* shaderSprite = NULL;
+	GLParticleShader* shaderParticle = NULL;
+	GLModelShader* shaderModel = NULL;
+	GLSquareFillShader* shaderSquareFill = NULL;
+	GLSquareStrokeShader* shaderSquareStroke = NULL;
+	GLSquareTextureShader* shaderSquareTexture = NULL;
 	
 	GLint maxTextureSize;
 	bool isNPOTSupported;
@@ -178,7 +191,7 @@ public:
 	
 	Vec4 light;
 	
-	GLRender(GLEngine engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, RefGLTouchScreen::onTouchCallback ontouch);
+	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch);
 	~GLRender();
 	
 	void resetBlend();
@@ -194,14 +207,13 @@ public:
 	void fillDepth();
 	
 	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint);
-	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key);
-	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime);
-	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const JString& key, GLfloat localTime, GLfloat worldTime);
+	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key);
+	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
+	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
 	
-	bool createShaders(JSONObject shaders);
-	void createModels(JSONObject models);
-	void createSprites(JSONObject sprites);
-	void createDrawings(JSONObject drawings);
+	bool createShaders(JSONObject shaders) throw(const char*);
+	void createSprites(JSONObject sprites) throw(const char*);
+	void createDrawings(JSONObject drawings) throw(const char*);
 };
 
 #endif //JAPPSY_UGLRENDER_H

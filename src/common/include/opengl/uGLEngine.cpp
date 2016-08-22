@@ -17,81 +17,76 @@
 #include "uGLEngine.h"
 #include <opengl/uGLRender.h>
 
-void onFrameCallback(GLRender* context, JObject& userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onFrame(context);
+void onFrameCallback(GLRender* context, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onFrame(context);
 }
 
-void onTouchCallback(const wchar_t* event, JObject& userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onTouch(event);
+void onTouchCallback(const wchar_t* event, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onTouch(event);
 }
 
-void onFileCallback(const JString& url, const JObject& object, JObject userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onFile(url, object);
+void onFileCallback(const CString& url, void* object, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onFile(url, object);
 }
 
-void onStatusCallback(const LoaderStatus& status, JObject userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onStatus(status);
+void onStatusCallback(const LoaderStatus& status, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onStatus(status);
 }
 
-void onReadyCallback(const JSONObject& result, JObject userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onReady(result);
+void onReadyCallback(void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onReady();
 }
 
-void onErrorCallback(const JString& error, JObject userData) {
-	GLEngine* engine = (GLEngine*)(&userData);
-	engine->ref().onError(error);
+void onErrorCallback(const CString& error, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onError(error);
 }
 
-RefGLEngine::RefGLEngine() {
-	context = memNew(context, GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback));
-	context->loader.ref().setCallbacks(onFileCallback, onStatusCallback, onReadyCallback, onErrorCallback);
+GLEngine::GLEngine() {
+	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
+	context->loader->setCallbacks(onFileCallback, onStatusCallback, onReadyCallback, onErrorCallback);
 }
 
-RefGLEngine::~RefGLEngine() {
-	release();
-}
-
-void RefGLEngine::release() {
+GLEngine::~GLEngine() {
 	if (context != NULL) {
-		memDelete(context);
-		context = NULL;
+		delete context;
 	}
 }
 
-void RefGLEngine::setBasePath(const JString& basePath) {
-	context->loader.ref().basePath = basePath;
+void GLEngine::setBasePath(const CString& basePath) {
+	context->loader->basePath = basePath;
 }
 
-void RefGLEngine::load(const char* json) {
-	context->loader.ref().load(json);
+void GLEngine::load(const char* json) {
+	context->loader->load(json);
 }
 
-void RefGLEngine::onRender() {
-	THIS.context->frame->loop();
+void GLEngine::onRender() {
+	this->context->frame->loop();
 }
 
-void RefGLEngine::onUpdate(int width, int height) {
-	THIS.context->frame->width = width;
-	THIS.context->frame->height = height;
+void GLEngine::onUpdate(int width, int height) {
+	context->frame->width = width;
+	context->frame->height = height;
 }
 
-void RefGLEngine::onTouch(MotionEvent* event) {
+void GLEngine::onTouch(MotionEvent* event) {
 	switch (event->actionEvent) {
 		case MotionEvent::ACTION_DOWN:
-			THIS.context->touchScreen.ref().onTouchStart(event);
+			context->touchScreen->onTouchStart(event);
 			break;
 			
 		case MotionEvent::ACTION_MOVE:
-			THIS.context->touchScreen.ref().onTouchMove(event);
+			context->touchScreen->onTouchMove(event);
 			break;
 			
 		case MotionEvent::ACTION_UP:
-			THIS.context->touchScreen.ref().onTouchEnd(event);
+			context->touchScreen->onTouchEnd(event);
 			break;
 		
 		default:;

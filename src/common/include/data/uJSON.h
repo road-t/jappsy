@@ -19,27 +19,29 @@
 
 #include <platform.h>
 
+#include <data/uString.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 	
-	enum json_type {
-		json_type_null = 0,
-		json_type_object = 1,
-		json_type_array = 2,
-		json_type_string = 3,
-		json_type_number = 4,
-		json_type_boolean = 5
+	enum JsonType {
+		JSON_TYPE_NULL = 0,
+		JSON_TYPE_OBJECT = 1,
+		JSON_TYPE_ARRAY = 2,
+		JSON_TYPE_STRING = 3,
+		JSON_TYPE_NUMBER = 4,
+		JSON_TYPE_BOOLEAN = 5
 	};
 	
-	enum json_error_type {
-		json_error_none = 0,
-		json_error_oom = 1,
-		json_error_eof = 2,
-		json_error_syntax = 3,
+	enum JsonErrorType {
+		JSON_ERROR_NONE = 0,
+		JSON_ERROR_OUTOFMEMORY = 1,
+		JSON_ERROR_UNEXPECTEDEND = 2,
+		JSON_ERROR_SYNTAX = 3,
 	};
 
-	struct json_number {
+	struct JsonNumber {
 		bool is_float;
 		union {
 			int64_t	 i;
@@ -47,72 +49,52 @@ extern "C" {
 		} v;
 	};
 	
-	struct json_context;
-	struct json_node;
+	struct JsonContext;
+	struct JsonNode;
 	
-	struct json_object_callbacks {
-		typedef void (*object_start_callback)(struct json_context* ctx, const char* key, void* target);
-		typedef void (*object_end_callback)(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-		typedef void (*array_start_callback)(struct json_context* ctx, const char* key, void* target);
-		typedef void (*array_end_callback)(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-		typedef void (*string_callback)(struct json_context* ctx, const char* key, char* value, void* target);
-		typedef void (*number_callback)(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
-		typedef void (*boolean_callback)(struct json_context* ctx, const char* key, bool value, void* target);
-		typedef void (*null_callback)(struct json_context* ctx, const char* key, void* target);
-		
-		object_start_callback onobjectstart;
-		object_end_callback onobjectend;
-		array_start_callback onarraystart;
-		array_end_callback onarrayend;
-		string_callback onstring;
-		number_callback onnumber;
-		boolean_callback onboolean;
-		null_callback onnull;
+	struct JsonObjectCallbacks {
+		void (*onobjectstart)(struct JsonContext* ctx, const char* key, void* target);
+		void (*onobjectend)(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		void (*onarraystart)(struct JsonContext* ctx, const char* key, void* target);
+		void (*onarrayend)(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		void (*onstring)(struct JsonContext* ctx, const char* key, char* value, void* target);
+		void (*onnumber)(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
+		void (*onboolean)(struct JsonContext* ctx, const char* key, bool value, void* target);
+		void (*onnull)(struct JsonContext* ctx, const char* key, void* target);
 	};
 
-	struct json_array_callbacks {
-		typedef void (*object_start_callback)(struct json_context* ctx, const int index, void* target);
-		typedef void (*object_end_callback)(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
-		typedef void (*array_start_callback)(struct json_context* ctx, const int index, void* target);
-		typedef void (*array_end_callback)(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
-		typedef void (*string_callback)(struct json_context* ctx, const int index, const char* value, void* target);
-		typedef void (*number_callback)(struct json_context* ctx, const int index, const struct json_number& number, void* target);
-		typedef void (*boolean_callback)(struct json_context* ctx, const int index, const bool value, void* target);
-		typedef void (*null_callback)(struct json_context* ctx, const int index, void* target);
-		
-		object_start_callback onobjectstart;
-		object_end_callback onobjectend;
-		array_start_callback onarraystart;
-		array_end_callback onarrayend;
-		string_callback onstring;
-		number_callback onnumber;
-		boolean_callback onboolean;
-		null_callback onnull;
+	struct JsonArrayCallbacks {
+		void (*onobjectstart)(struct JsonContext* ctx, const int index, void* target);
+		void (*onobjectend)(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
+		void (*onarraystart)(struct JsonContext* ctx, const int index, void* target);
+		void (*onarrayend)(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
+		void (*onstring)(struct JsonContext* ctx, const int index, const char* value, void* target);
+		void (*onnumber)(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
+		void (*onboolean)(struct JsonContext* ctx, const int index, const bool value, void* target);
+		void (*onnull)(struct JsonContext* ctx, const int index, void* target);
 	};
 	
-	struct json_callbacks {
-		typedef void (*root_start_callback)(struct json_context* ctx, void* target);
-		typedef void (*root_end_callback)(struct json_context* ctx, void* target, bool noerror);
-		
+	struct JsonCallbacks {
 		void* target;
 		
-		root_start_callback onrootstart;
-		root_end_callback onrootend;
-		struct json_object_callbacks onobject;
-		struct json_array_callbacks onarray;
+		void (*onrootstart)(struct JsonContext* ctx, void* target);
+		void (*onrootend)(struct JsonContext* ctx, void* target, bool noerror);
+		
+		struct JsonObjectCallbacks onobject;
+		struct JsonArrayCallbacks onarray;
 	};
 	
-	inline void json_store_callbacks(struct json_callbacks* dst, const struct json_callbacks* src) { memcpy(dst, src, sizeof(struct json_callbacks)); }
-	inline void json_clear_callbacks(struct json_callbacks* dst, void* newtarget) { memset(dst, 0, sizeof(struct json_callbacks)); dst->target = newtarget; }
+	inline void JsonCopyCallbacks(struct JsonCallbacks* dst, const struct JsonCallbacks* src) { memcpy(dst, src, sizeof(struct JsonCallbacks)); }
+	inline void JsonClearCallbacks(struct JsonCallbacks* dst, void* newtarget) { memset(dst, 0, sizeof(struct JsonCallbacks)); dst->target = newtarget; }
 	
-	struct json_context {
+	struct JsonContext {
 		union {
 			char buffer[64];
 			wchar_t wbuffer[64];
 		};
 		
 		struct {
-			json_error_type type;
+			JsonErrorType type;
 			union {
 				const char* ptr;
 				const wchar_t* wptr;
@@ -124,24 +106,25 @@ extern "C" {
 			};
 		} error;
 		
-		inline void seterror(json_error_type type, const char* ptr, const char* expected = NULL) {
-			THIS.error.type = type;
-			THIS.error.ptr = ptr;
-			THIS.error.expected = expected;
+		inline void seterror(JsonErrorType type, const char* ptr, const char* expected = NULL) {
+			error.type = type;
+			error.ptr = ptr;
+			error.expected = expected;
 		}
 
-		inline void wseterror(json_error_type type, const wchar_t* ptr, const wchar_t* expected = NULL) {
-			THIS.error.type = type;
-			THIS.error.wptr = ptr;
-			THIS.error.wexpected = expected;
+		inline void wseterror(JsonErrorType type, const wchar_t* ptr, const wchar_t* expected = NULL) {
+			error.type = type;
+			error.wptr = ptr;
+			error.wexpected = expected;
 		}
 		
-		json_callbacks* callbacks;
+		struct JsonCallbacks* callbacks;
 	};
 	
-	struct json_node {
-		struct json_node*	parent;
-		json_type	type;
+	struct JsonNode {
+		struct JsonNode*	parent;
+		JsonType	type;
+		bool		wide;
 		int32_t		level;
 		union {
 			char*		data;
@@ -151,55 +134,68 @@ extern "C" {
 		
 		union {
 			struct {
-				struct json_node** k;
-				struct json_node** v;
+				struct JsonNode** k;
+				struct JsonNode** v;
 				uint32_t 	 c;
 			} o;
 			
 			struct {
-				struct json_node** v;
+				struct JsonNode** v;
 				uint32_t	 c;
 			} a;
 			
-			char*		s;
-			wchar_t*	ws;
+			CString*	cs;
 			
-			struct json_number n;
+			struct JsonNumber n;
 			
 			bool		b;
 		} value;
+		
+		struct JsonNode*	it;
+		
+		int32_t count();
+		JsonNode** keys() throw(const char*);
+		JsonNode** items();
+		
+		JsonNode* get(int index) throw(const char*);
+		JsonNode* getKey(int index) throw(const char*);
+		JsonNode* get(const CString& key) throw(const char*);
+
+		inline bool isNull() { return type == JSON_TYPE_NULL; }
+		inline bool isObject() { return type == JSON_TYPE_OBJECT; }
+		inline bool isArray() { return type == JSON_TYPE_ARRAY; }
+		
+		CString toString() throw(const char*);
+		double toDouble() throw(const char*);
+		int64_t toInt() throw(const char*);
+		bool toBoolean() throw(const char*);
 	};
 
-	bool json_check(struct json_context* ctx, const char* json);
-	bool jsonw_check(struct json_context* ctx, const wchar_t* json);
+	bool JsonCheck(struct JsonContext* ctx, const char* json);
+	bool JsonCheckW(struct JsonContext* ctx, const wchar_t* json);
 	
-	struct json_node* json_create(struct json_node* parent, json_type type, uint32_t level, const char* data, uint32_t size);
-	struct json_node* jsonw_create(struct json_node* parent, json_type type, uint32_t level, const wchar_t* data, uint32_t size);
-	void json_destroy(struct json_node* j);
-	#define jsonw_destroy json_destroy
-	bool json_object_add(struct json_node* node, struct json_node* vkey, struct json_node* value);
-	#define jsonw_object_add json_object_add
-	bool json_array_add(struct json_node* node, struct json_node* value);
-	#define jsonw_array_add json_array_add
+	struct JsonNode* JsonCreate(struct JsonNode* parent, JsonType type, uint32_t level, const char* data, uint32_t size);
+	struct JsonNode* JsonCreateW(struct JsonNode* parent, JsonType type, uint32_t level, const wchar_t* data, uint32_t size);
+	void JsonDestroy(struct JsonNode* j);
+	#define JsonDestroyW JsonDestroy
+	bool JsonObjectAdd(struct JsonNode* node, struct JsonNode* vkey, struct JsonNode* value);
+	#define JsonObjectAddW JsonObjectAdd
+	bool JsonArrayAdd(struct JsonNode* node, struct JsonNode* value);
+	#define JsonArrayAddW JsonArrayAdd
 	
-	struct json_node* json_parse(struct json_context* ctx, const char* json);
-	struct json_node* jsonw_parse(struct json_context* ctx, const wchar_t* json);
+	struct JsonNode* JsonParse(struct JsonContext* ctx, const char* json);
+	struct JsonNode* JsonParseW(struct JsonContext* ctx, const wchar_t* json);
 
-	bool json_call(struct json_context* ctx, const char* json);
+	bool JsonCall(struct JsonContext* ctx, const char* json);
 
-	struct json_node* json_array_get(const struct json_node* node, uint32_t index);
-	struct json_node* json_object_get(const struct json_node* node, const char* key);
-	struct json_node* json_object_geti(const struct json_node* node, const char* key);
-	struct json_node* jsonw_object_get(const struct json_node* node, const wchar_t* key);
-	struct json_node* jsonw_object_geti(const struct json_node* node, const wchar_t* key);
+	struct JsonNode* JsonArrayGet(const struct JsonNode* node, uint32_t index);
+	struct JsonNode* JsonObjectGet(const struct JsonNode* node, const CString& key);
+	struct JsonNode* JsonObjectGetIC(const struct JsonNode* node, const CString& key);
 	
-	const char* json_key(const struct json_node* value, const char* def = 0);
-	const wchar_t* jsonw_key(const struct json_node* value, const wchar_t* def = 0);
-	const char* json_value(const struct json_node* value, const char* def = 0);
-	const wchar_t* jsonw_value(const struct json_node* value, const wchar_t* def = 0);
+	const CString* JsonParentKey(const struct JsonNode* value, const CString* def = 0);
 	
-	void json_debug_error(const struct json_context& ctx, const char* json);
-	void jsonw_debug_error(const struct json_context& ctx, const wchar_t* json);
+	void JsonDebugError(const struct JsonContext& ctx, const char* json);
+	void JsonDebugErrorW(const struct JsonContext& ctx, const wchar_t* json);
 
 #ifdef __cplusplus
 }
@@ -207,62 +203,70 @@ extern "C" {
 
 #ifdef __cplusplus
 
+#include <data/uObject.h>
 #include <data/uString.h>
+
+class JSONObject : public CObject {
+public:
+	JsonNode* root = NULL;
+	
+	JSONObject(const CString& json);
+	JSONObject(const wchar_t* json);
+	JSONObject(const char* json);
+	
+	~JSONObject();
+};
 
 class JSON {
 private:
-	inline static JString key(const JString& value) throw(const char*) {
-		if ((value.length > 0) && (value[0] == L'\"'))
+	inline static CString key(const CString& value) throw(const char*) {
+		if ((value.m_length > 0) && (value[0] == L'\"'))
 			return value;
 
-		return JString(L"\"").concat(value).concat(L"\"");
+		return CString(L"\"").concat(value).concat(L"\"");
 	}
 	
 	
 public:
-	static JString encode(const JString& value) throw(const char*);
+	static CString encode(const CString& value) throw(const char*);
 	
-	inline static JString keyify(const JRefObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
-	inline static JString keyify(const JObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
-	inline static JString keyify(const JRefObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
-	inline static JString keyify(const JObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
-	inline static JString keyify(const void* ptr) throw(const char*) { return JSON::key(JSON::encode(L"null")); }
-	inline static JString keyify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static JString keyify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static JString keyify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static JString keyify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static JString keyify(const bool value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const int8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const uint8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const int16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const uint16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const int32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const uint32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const int64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static JString keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+//	inline static CString keyify(const CObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
+//	inline static CString keyify(const CObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
+	inline static CString keyify(const void* ptr) throw(const char*) { return JSON::key(JSON::encode(L"null")); }
+	inline static CString keyify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static CString keyify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static CString keyify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static CString keyify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static CString keyify(const bool value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const int8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const uint8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const int16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const uint16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const int32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const uint32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const int64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
 	
-	inline static JString stringify(const JRefObject& object) throw(const char*) { return object.toJSON(); }
-	inline static JString stringify(const JObject& object) throw(const char*) { return object.toJSON(); }
-	inline static JString stringify(const JRefObject* object) throw(const char*) { return object->toJSON(); }
-	inline static JString stringify(const JObject* object) throw(const char*) { return object->toJSON(); }
-	inline static JString stringify(const void* ptr) throw(const char*) { return L"null"; }
-	inline static JString stringify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static JString stringify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static JString stringify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static JString stringify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static JString stringify(const bool value) throw(const char*) { return value; }
-	inline static JString stringify(const int8_t value) throw(const char*) { return value; }
-	inline static JString stringify(const uint8_t value) throw(const char*) { return value; }
-	inline static JString stringify(const int16_t value) throw(const char*) { return value; }
-	inline static JString stringify(const uint16_t value) throw(const char*) { return value; }
-	inline static JString stringify(const int32_t value) throw(const char*) { return value; }
-	inline static JString stringify(const uint32_t value) throw(const char*) { return value; }
-	inline static JString stringify(const int64_t value) throw(const char*) { return value; }
-	inline static JString stringify(const uint64_t value) throw(const char*) { return value; }
-	inline static JString stringify(const float value) throw(const char*) { return value; }
-	inline static JString stringify(const double value) throw(const char*) { return value; }
+//	inline static CString stringify(const CObject& object) throw(const char*) { return object.toJSON(); }
+//	inline static CString stringify(const CObject* object) throw(const char*) { return object->toJSON(); }
+	inline static CString stringify(const void* ptr) throw(const char*) { return L"null"; }
+	inline static CString stringify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static CString stringify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
+	inline static CString stringify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static CString stringify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static CString stringify(const bool value) throw(const char*) { return value; }
+	inline static CString stringify(const int8_t value) throw(const char*) { return value; }
+	inline static CString stringify(const uint8_t value) throw(const char*) { return value; }
+	inline static CString stringify(const int16_t value) throw(const char*) { return value; }
+	inline static CString stringify(const uint16_t value) throw(const char*) { return value; }
+	inline static CString stringify(const int32_t value) throw(const char*) { return value; }
+	inline static CString stringify(const uint32_t value) throw(const char*) { return value; }
+	inline static CString stringify(const int64_t value) throw(const char*) { return value; }
+	inline static CString stringify(const uint64_t value) throw(const char*) { return value; }
+	inline static CString stringify(const float value) throw(const char*) { return value; }
+	inline static CString stringify(const double value) throw(const char*) { return value; }
 };
 
 #endif

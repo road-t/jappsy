@@ -18,35 +18,41 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLDrawing::RefGLDrawing(GLRender* context) {
-	THIS.context = context;
+GLDrawing::GLDrawing(GLRender* context) {
+	this->context = context;
 }
 
-RefGLDrawing::~RefGLDrawing() {
-	THIS.context = NULL;
+GLDrawing::~GLDrawing() {
+	this->context = NULL;
 }
 
 GLDrawings::GLDrawings(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLDrawing>();
+	this->context = context;
 }
 
 GLDrawings::~GLDrawings() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLDrawing** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLDrawing& GLDrawings::get(const wchar_t* key) throw(const char*) {
-	return (GLDrawing&)list.get(key);
+GLDrawing* GLDrawings::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
-GLDrawing& GLDrawings::create(const wchar_t* key) throw(const char*) {
+GLDrawing* GLDrawings::create(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLDrawing* shader = &(list.put(key, new RefGLDrawing(context)));
-		if (wcscmp(key, L"null") == 0) {
+		GLDrawing* drawing = new GLDrawing(context);
+		try {
+			list.put(key, drawing);
+		} catch (...) {
+			delete drawing;
+			throw;
 		}
-		return *shader;
+		return drawing;
 	} catch (...) {
 		throw;
 	}

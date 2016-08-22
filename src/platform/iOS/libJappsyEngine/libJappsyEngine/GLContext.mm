@@ -18,7 +18,7 @@
 #include <core/uMemory.h>
 
 GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*) {
-	THIS.context = context;
+	this->context = context;
 	
 	glGenFramebuffers(1, &frameBuffer);
 	if (glGetError() == GL_OUT_OF_MEMORY)
@@ -74,20 +74,24 @@ GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor
 
 void GLContext::release() {
 	if (frameBuffer) {
-		glDeleteFramebuffers(1, &frameBuffer); frameBuffer = 0;
+		glDeleteFramebuffers(1, &frameBuffer);
+		frameBuffer = 0;
 	}
 	
 	if (colorRenderBuffer) {
-		glDeleteRenderbuffers(1, &colorRenderBuffer); colorRenderBuffer = 0;
+		glDeleteRenderbuffers(1, &colorRenderBuffer);
+		colorRenderBuffer = 0;
 	}
 	
 	if (depthRenderBuffer) {
-		glDeleteRenderbuffers(1, &depthRenderBuffer); depthRenderBuffer = 0;
+		glDeleteRenderbuffers(1, &depthRenderBuffer);
+		depthRenderBuffer = 0;
 	}
 	
-	engine.release();
-	engine = null;
-	context = NULL;
+	if (engine != NULL) {
+		delete engine;
+		engine = NULL;
+	}
 }
 
 GLContext::~GLContext() {
@@ -132,8 +136,8 @@ void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
 		throw eOpenGL;
 	}
 	
-	if (engine != null)
-		engine.onUpdate(width, height);
+	if (engine != NULL)
+		engine->onUpdate(width, height);
 }
 
 static int color = 0;
@@ -141,8 +145,8 @@ static int color = 0;
 void GLContext::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	
-	if (engine != null) {
-		engine.onRender();
+	if (engine != NULL) {
+		engine->onRender();
 	} else {
 		float c = (float)color / 255.0f;
 		glClearColor(c, c, c, 1.0f);
@@ -158,11 +162,11 @@ void GLContext::render() {
 
 void GLContext::touch(MotionEvent* event) {
 	if (engine != null)
-		THIS.engine.onTouch(event);
+		this->engine->onTouch(event);
 }
 
-void GLContext::initialize(GLEngine& engine) {
-	THIS.engine = engine;
-	engine.onUpdate(width, height);
-	engine.onRender();
+void GLContext::initialize(GLEngine* engine) {
+	this->engine = engine;
+	engine->onUpdate(width, height);
+	engine->onRender();
 }

@@ -20,17 +20,16 @@
 #include <platform.h>
 #include <data/uObject.h>
 #include <data/uString.h>
-#include <data/uAtomicObject.h>
 #include <data/uStream.h>
 
-class HTTPClient {
+class HTTPClient : public CObject {
 public:
-	typedef bool (*onStreamCallback)(const JString& url, Stream& stream, const JObject& userData);
-	typedef void (*onErrorCallback)(const JString& url, const JString& error, const JObject& userData);
-	typedef bool (*onRetryCallback)(const JString& url, const JObject& userData);
+	typedef bool (*onStreamCallback)(const CString& url, Stream* stream, void* userData);
+	typedef void (*onErrorCallback)(const CString& url, const CString& error, void* userData);
+	typedef bool (*onRetryCallback)(const CString& url, void* userData);
 	
-	static void Request(const JString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
-	static void Request(const JString& url, bool threaded, int retry, int timeout, const JObject& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
+	static void Request(const CString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
+	static void Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
 };
 
 #endif //JAPPSY_UHTTPCLIENT_H

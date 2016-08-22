@@ -20,11 +20,10 @@
 #include <opengl/uGLEngine.h>
 #include <event/uMotionEvent.h>
 #include <data/uStream.h>
-#include <data/uHashMap.h>
 #include <net/uLoader.h>
 #include <opengl/uGLPaint.h>
 
-class OMEngine : public RefGLEngine {
+class OMEngine : public GLEngine {
 public:
     OMEngine();
     
@@ -34,10 +33,10 @@ public:
     
     void onFrame(GLRender* context);
     void onTouch(const wchar_t* event);
-    void onFile(const JString& url, const JObject& object);
+    void onFile(const CString& url, void* object);
     void onStatus(const LoaderStatus& status);
-    void onReady(const JSONObject& result);
-    void onError(const JString& error);
+    void onReady();
+    void onError(const CString& error);
 };
 
 #endif //OMENGINE_H

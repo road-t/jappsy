@@ -18,35 +18,41 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLSprite::RefGLSprite(GLRender* context) {
-	THIS.context = context;
+GLSprite::GLSprite(GLRender* context) {
+	this->context = context;
 }
 
-RefGLSprite::~RefGLSprite() {
-	THIS.context = NULL;
+GLSprite::~GLSprite() {
+	this->context = NULL;
 }
 
 GLSprites::GLSprites(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLSprite>();
+	this->context = context;
 }
 
 GLSprites::~GLSprites() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLSprite** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLSprite& GLSprites::get(const wchar_t* key) throw(const char*) {
-	return (GLSprite&)list.get(key);
+GLSprite* GLSprites::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
-GLSprite& GLSprites::create(const wchar_t* key) throw(const char*) {
+GLSprite* GLSprites::create(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLSprite* shader = &(list.put(key, new RefGLSprite(context)));
-		if (wcscmp(key, L"null") == 0) {
+		GLSprite* sprite = new GLSprite(context);
+		try {
+			list.put(key, sprite);
+		} catch (...) {
+			delete sprite;
+			throw;
 		}
-		return *shader;
+		return sprite;
 	} catch (...) {
 		throw;
 	}

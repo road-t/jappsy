@@ -17,84 +17,129 @@
 #include "uGLLight.h"
 #include <core/uMemory.h>
 
-RefGLLight::RefGLLight(GLScene& scene) {
-	THIS.scene = scene;
+GLLight::GLLight(GLScene* scene, const CString& key) {
+	this->scene = scene;
+	this->key = key;
 }
 
-RefGLLight::~RefGLLight() {
-	THIS.scene = null;
+GLLight* GLLight::omni(const Vec3& position, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
+	this->position.set(position);
+	this->target.set(0.0);
+	this->color.set(color);
+	this->intensivity = intensivity;
+	this->hotspot = radius;
+	this->falloff = falloff;
+	this->fixed = fixed;
+	this->style = GLLightStyle::OMNI;
+	this->invalid = true;
+	return this;
 }
 
-RefGLLight& RefGLLight::omni(const Vec3& position, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
-	THIS.position.set(position);
-	THIS.target.set(0.0);
-	THIS.color.set(color);
-	THIS.intensivity = intensivity;
-	THIS.hotspot = radius;
-	THIS.falloff = falloff;
-	THIS.fixed = fixed;
-	THIS.style = GLLightStyle::OMNI;
-	THIS.invalid = true;
-	return *this;
+GLLight* GLLight::spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat angle, const GLfloat falloff, const bool fixed) {
+	this->position.set(position);
+	this->target.set(target);
+	this->color.set(color);
+	this->intensivity = intensivity;
+	this->hotspot = angle;
+	this->falloff = falloff;
+	this->fixed = fixed;
+	this->style = GLLightStyle::SPOT;
+	this->invalid = true;
+	return this;
 }
 
-RefGLLight& RefGLLight::spot(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat angle, const GLfloat falloff, const bool fixed) {
-	THIS.position.set(position);
-	THIS.target.set(target);
-	THIS.color.set(color);
-	THIS.intensivity = intensivity;
-	THIS.hotspot = angle;
-	THIS.falloff = falloff;
-	THIS.fixed = fixed;
-	THIS.style = GLLightStyle::SPOT;
-	THIS.invalid = true;
-	return *this;
+GLLight* GLLight::direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
+	this->position.set(position);
+	this->target.set(target);
+	this->color.set(color);
+	this->intensivity = intensivity;
+	this->hotspot = radius;
+	this->falloff = falloff;
+	this->fixed = fixed;
+	this->style = GLLightStyle::DIRECT;
+	this->invalid = true;
+	return this;
 }
 
-RefGLLight& RefGLLight::direct(const Vec3& position, const Vec3& target, const Vec3& color, const GLfloat intensivity, const GLfloat radius, const GLfloat falloff, const bool fixed) {
-	THIS.position.set(position);
-	THIS.target.set(target);
-	THIS.color.set(color);
-	THIS.intensivity = intensivity;
-	THIS.hotspot = radius;
-	THIS.falloff = falloff;
-	THIS.fixed = fixed;
-	THIS.style = GLLightStyle::DIRECT;
-	THIS.invalid = true;
-	return *this;
-}
+#include <math.h>
 
-void RefGLLight::update() {
+bool GLLight::update() {
 	if (invalid) {
 		if (fixed) {
 			position3fv.set(position);
 			target3fv.set(target);
 		} else {
-			position3fv.transform(position, scene.ref().camera.ref().view16fv);
+			position3fv.transform(position, scene->camera->view16fv);
+			target3fv.transform(target, scene->camera->view16fv);
 		}
+		
+		light16fv[0] = position3fv[0];
+		light16fv[1] = position3fv[1];
+		light16fv[2] = position3fv[2];
+		light16fv[8] = color[0] * intensivity;
+		light16fv[9] = color[1] * intensivity;
+		light16fv[10] = color[2] * intensivity;
+		
+		if (style == GLLightStyle::OMNI) {
+			light16fv[3] = hotspot;
+			light16fv[4] = light16fv[5] = light16fv[6] = 0;
+			light16fv[7] = falloff;
+			light16fv[11] = 0;
+		} else {
+			light16fv[4] = target3fv[0];
+			light16fv[5] = target3fv[1];
+			light16fv[6] = target3fv[2];
+			
+			if (style == GLLightStyle::SPOT) {
+				light16fv[3] = hotspot * M_PI / 360.0;
+				light16fv[7] = falloff * M_PI / 360.0;
+				light16fv[11] = 1;
+			} else {
+				light16fv[3] = hotspot;
+				light16fv[7] = falloff;
+				light16fv[11] = 2;
+			}
+		}
+		light16fv[12] = light16fv[13] = light16fv[14] = light16fv[15] = 0;
+		
+		invalid = false;
+		return true;
 	}
+	
+	return false;
 }
 
-
-GLLights::GLLights(RefGLScene* scene) throw(const char*) {
-	THIS.scene = scene;
-	list = new JHashMap<JString, GLLight>();
+GLLights::GLLights(GLScene* scene) throw(const char*) {
+	this->scene = scene;
 }
 
 GLLights::~GLLights() {
-	list = null;
-	scene = null;
+	int32_t count = list.count();
+	GLLight** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLLight& GLLights::get(const JString& key) throw(const char*) {
-	return (GLLight&)list.get(key);
+GLLight* GLLights::get(const CString& key) {
+	try {
+		return list.get(key);
+	} catch (...) {
+		return NULL;
+	}
 }
 
-GLLight& GLLights::create(const JString& key) throw(const char*) {
+GLLight* GLLights::createLight(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLLight* light = &(list.put(key, new RefGLLight(scene)));
-		return *light;
+		GLLight* light = new GLLight(scene, key);
+		try {
+			list.put(key, light);
+		} catch (...) {
+			delete light;
+			throw;
+		}
+		return light;
 	} catch (...) {
 		throw;
 	}

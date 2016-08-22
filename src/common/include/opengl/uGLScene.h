@@ -20,7 +20,6 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uString.h>
-#include <data/uHashMap.h>
 #include <opengl/uGLCamera.h>
 #include <data/uVector.h>
 
@@ -29,10 +28,10 @@ class GLLights;
 class GLObjects;
 class GLObject;
 
-class RefGLScene : public JRefObject {
+class GLScene : public CObject {
 public:
 	GLRender* context = NULL;
-	GLCamera camera;
+	GLCamera* camera;
 	Vec3 ambient = {0.25, 0.25, 0.25};
 	GLLights* lights;
 	GLObjects* objects;
@@ -44,27 +43,21 @@ public:
 	Mat4 modelView16fv;
 	Mat4 normal16fv;
 	
-	inline RefGLScene() { throw eInvalidParams; }
-	RefGLScene(GLRender* context);
-	~RefGLScene();
+	GLScene(GLRender* context);
+	~GLScene();
 };
 
-class GLScene : public JObject {
-public:
-	JRefClass(GLScene, RefGLScene)
-};
-
-class GLScenes {
+class GLScenes : public CObject {
 private:
 	GLRender* context;
-	JHashMap<JString, GLScene> list;
+	VectorMap<CString&, GLScene*> list;
 	
 public:
 	GLScenes(GLRender* context) throw(const char*);
 	~GLScenes();
 	
-	GLScene& get(const JString& key) throw(const char*);
-	GLScene& create(const JString& key) throw(const char*);
+	GLScene* get(const CString& key);
+	GLScene* createScene(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSCENE_H

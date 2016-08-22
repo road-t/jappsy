@@ -18,33 +18,41 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLObject::RefGLObject(GLRender* context) {
-	THIS.context = context;
+GLObject::GLObject(GLRender* context) {
+	this->context = context;
 }
 
-RefGLObject::~RefGLObject() {
-	THIS.context = NULL;
+GLObject::~GLObject() {
+	this->context = NULL;
 }
 
 GLObjects::GLObjects(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLObject>();
+	this->context = context;
 }
 
 GLObjects::~GLObjects() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLObject** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLObject& GLObjects::get(const JString& key) throw(const char*) {
-	return (GLObject&)list.get(key);
+GLObject* GLObjects::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
-GLObject& GLObjects::create(const JString& key) throw(const char*) {
+GLObject* GLObjects::create(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLObject* shader = &(list.put(key, new RefGLObject(context)));
-		return *shader;
+		GLObject* object = new GLObject(context);
+		try {
+			list.put(key, object);
+		} catch (...) {
+			delete object;
+			throw;
+		}
+		return object;
 	} catch (...) {
 		throw;
 	}

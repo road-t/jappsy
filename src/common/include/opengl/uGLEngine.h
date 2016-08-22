@@ -20,22 +20,20 @@
 #include <data/uObject.h>
 #include <event/uMotionEvent.h>
 #include <net/uLoader.h>
-#include <data/uJSONObject.h>
 
 class GLRender;
 
-class RefGLEngine : public JRefObject {
+class GLEngine : public CObject {
 protected:
-	GLRender* context;
+	GLRender* context = NULL;
 	
 public:
-	RefGLEngine();
-	~RefGLEngine();
-	void release();
+	GLEngine();
+	~GLEngine();
 	
 	inline void shutdown() {}
 	
-	void setBasePath(const JString& basePath);
+	void setBasePath(const CString& basePath);
 	void load(const char* json);
 	
 	void onRender();
@@ -44,21 +42,10 @@ public:
 
 	virtual void onFrame(GLRender* context) {}
 	virtual void onTouch(const wchar_t* event) {}
-	virtual void onFile(const JString& url, const JObject& object) {}
+	virtual void onFile(const CString& url, void* object) {}
 	virtual void onStatus(const LoaderStatus& status) {}
-	virtual void onReady(const JSONObject& result) {}
-	virtual void onError(const JString& error) {}
-};
-
-class GLEngine : public JObject {
-public:
-	JRefClass(GLEngine, RefGLEngine);
-	
-	inline void release() throw(const char*) { THIS.ref().release(); }
-	
-	inline void onRender() throw(const char*) { THIS.ref().onRender(); }
-	inline void onUpdate(int width, int height) throw(const char*) { THIS.ref().onUpdate(width, height); }
-	inline void onTouch(MotionEvent* event) throw(const char*) { THIS.ref().onTouch(event); }
+	virtual void onReady() {}
+	virtual void onError(const CString& error) {}
 };
 
 #endif //JAPPSY_UGLENGINE_H

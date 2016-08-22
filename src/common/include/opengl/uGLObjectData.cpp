@@ -31,21 +31,17 @@ GLObjectData::~GLObjectData() {
 			m_context->shaders->releaseShader(m_handles[0]);
 		}
 	}
-	m_target = null;
-	m_handles.clear();
-	m_reference = false;
-	m_type = GLObjectDataType::NONE;
 }
 
-GLObjectData& GLObjectData::setTarget(const JString& target) {
+GLObjectData* GLObjectData::setTarget(const CString& target) {
 	m_target = target;
 	m_handles.clear();
 	m_reference = false;
 	m_type = GLObjectDataType::STRING;
-	return THIS;
+	return this;
 }
 
-GLObjectData& GLObjectData::setTextures(const Vector<GLuint>& handles, bool reference) {
+GLObjectData* GLObjectData::setTextures(const Vector<GLuint>& handles, bool reference) {
 	m_target = null;
 	m_handles.clear();
 	uint32_t count = handles.count();
@@ -57,14 +53,14 @@ GLObjectData& GLObjectData::setTextures(const Vector<GLuint>& handles, bool refe
 	}
 	m_reference = reference;
 	m_type = GLObjectDataType::TEXTURES;
-	return THIS;
+	return this;
 }
 
-GLObjectData& GLObjectData::setShader(const GLuint handle, bool reference) {
+GLObjectData* GLObjectData::setShader(const GLuint handle, bool reference) {
 	m_target = null;
 	m_handles.clear();
 	m_handles.push(handle);
 	m_reference = reference;
 	m_type = GLObjectDataType::SHADER;
-	return THIS;
+	return this;
 }

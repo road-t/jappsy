@@ -19,7 +19,7 @@
 #include <data/uString.h>
 #include <cipher/uCipher.h>
 
-RefStream::RefStream(const wchar_t* data) throw(const char*) {
+Stream::Stream(const wchar_t* data) throw(const char*) {
 	if (data != NULL) {
 		uint32_t size = wcs_toutf8_size(data);
 		if (size != 0) {
@@ -33,7 +33,7 @@ RefStream::RefStream(const wchar_t* data) throw(const char*) {
 	}
 }
 
-RefStream::RefStream(const char* data, bool autorelease) {
+Stream::Stream(const char* data, bool autorelease) {
 	if (data != NULL) {
 		uint32_t size = 0;
 		uint32_t length = utf8_strlen(data, &size);
@@ -45,7 +45,7 @@ RefStream::RefStream(const char* data, bool autorelease) {
 	}
 }
 
-RefStream::RefStream(const void* data, uint32_t length, bool autorelease) {
+Stream::Stream(const void* data, uint32_t length, bool autorelease) {
 	if ((data != NULL) && (length != 0)) {
 		m_buffer = (uint8_t*)data;
 		m_size = length;
@@ -53,7 +53,7 @@ RefStream::RefStream(const void* data, uint32_t length, bool autorelease) {
 	}
 }
 
-RefStream::~RefStream() {
+Stream::~Stream() {
 	if (m_allocated) {
 		memFree(m_buffer);
 	}
@@ -64,7 +64,7 @@ RefStream::~RefStream() {
 	m_position = 0;
 }
 
-uint8_t* RefStream::readBytes(uint32_t length) throw(const char*) {
+uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
 	if (length == 0)
 		return NULL;
 	
@@ -82,7 +82,7 @@ uint8_t* RefStream::readBytes(uint32_t length) throw(const char*) {
 	return data;
 }
 
-uint32_t RefStream::readInt() throw(const char*) {
+uint32_t Stream::readInt() throw(const char*) {
 	uint32_t end = m_position + 4;
 	if (end > m_size)
 		throw eIOReadLimit;
@@ -92,7 +92,7 @@ uint32_t RefStream::readInt() throw(const char*) {
 	return value;
 }
 
-uint8_t RefStream::readUnsignedByte() throw(const char*) {
+uint8_t Stream::readUnsignedByte() throw(const char*) {
 	uint32_t end = m_position + 1;
 	if (end > m_size)
 		throw eIOReadLimit;
@@ -102,7 +102,7 @@ uint8_t RefStream::readUnsignedByte() throw(const char*) {
 	return value;
 }
 
-int32_t RefStream::skip(uint32_t length) {
+int32_t Stream::skip(uint32_t length) {
 	uint32_t end = m_position + length;
 	if (end > m_size)
 		return -1;
@@ -111,7 +111,7 @@ int32_t RefStream::skip(uint32_t length) {
 	return (int32_t)length;
 }
 
-char* RefStream::readString(uint32_t length) throw(const char*) {
+char* Stream::readString(uint32_t length) throw(const char*) {
 	if (length == 0)
 		return NULL;
 	
@@ -130,7 +130,7 @@ char* RefStream::readString(uint32_t length) throw(const char*) {
 	return data;
 }
 
-uint8_t* RefStream::readGZip(uint32_t length, uint32_t* resultSize) throw(const char*) {
+uint8_t* Stream::readGZip(uint32_t length, uint32_t* resultSize) throw(const char*) {
 	uint8_t* data = readBytes(length);
 	uint32_t dataSize = length;
 	uint32_t ungzipSize = *resultSize;
@@ -150,7 +150,7 @@ uint8_t* RefStream::readGZip(uint32_t length, uint32_t* resultSize) throw(const 
 	return data;
 }
 
-char* RefStream::readGZipString(uint32_t length) throw(const char*) {
+char* Stream::readGZipString(uint32_t length) throw(const char*) {
 	uint32_t dataSize = 0;
 	uint8_t* data = readGZip(length, &dataSize);
 	if (data != NULL)

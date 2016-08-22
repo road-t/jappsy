@@ -25,7 +25,7 @@
 #include <data/uVector.h>
 #include <data/uObject.h>
 
-class GLPaint : public JRefObject {
+class GLPaint : public CObject {
 public:
 	GLfloat m_scale;
 	bool m_antialias;

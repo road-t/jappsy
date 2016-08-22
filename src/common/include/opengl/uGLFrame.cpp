@@ -23,19 +23,19 @@
 
 #include <opengl/uGLRender.h>
 
-void defaultOnFrame(GLRender* context, JObject& userData) {
+void defaultOnFrame(GLRender* context, void* userData) {
 }
 
-GLFrame::GLFrame(GLEngine& engine, GLRender* context, onFrameCallback callback, JObject& userData) {
-	THIS.engine = engine;
-	THIS.context = context;
+GLFrame::GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback, void* userData) {
+	this->engine = engine;
+	this->context = context;
 	
-	THIS.currentTime = THIS.lastFrame = currentTimeMillis();
-	THIS.frames = memNew(THIS.frames, SmoothValue(10));
-	THIS.fps = 0;
+	this->currentTime = this->lastFrame = currentTimeMillis();
+	this->frames = memNew(this->frames, SmoothValue(10));
+	this->fps = 0;
 	
-	THIS.onFrame = (callback != NULL) ? callback : defaultOnFrame;
-	THIS.userData = userData;
+	this->onFrame = (callback != NULL) ? callback : defaultOnFrame;
+	this->userData = userData;
 }
 
 GLFrame::~GLFrame() {
@@ -53,25 +53,25 @@ GLFrame::~GLFrame() {
 		glDeleteBuffers(1, &tempBuffer);
 	} while (false);
 	
-	THIS.engine = null;
-	THIS.context = NULL;
+	this->engine = NULL;
+	this->context = NULL;
 	
-	THIS.currentTime = THIS.lastFrame = 0;
-	memDelete(THIS.frames);
-	THIS.frames = NULL;
-	THIS.fps = 0;
+	this->currentTime = this->lastFrame = 0;
+	memDelete(this->frames);
+	this->frames = NULL;
+	this->fps = 0;
 	
-	THIS.onFrame = NULL;
+	this->onFrame = NULL;
 }
 
 void GLFrame::loop() {
-	THIS.currentTime = currentTimeMillis();
-	uint64_t elapsed = THIS.currentTime - THIS.lastFrame;
+	this->currentTime = currentTimeMillis();
+	uint64_t elapsed = this->currentTime - this->lastFrame;
 	if (elapsed > 0)
-		THIS.frames->put(1000.0 / elapsed);
-	THIS.fps = (uint32_t)floorf(THIS.frames->value());
+		this->frames->put(1000.0 / elapsed);
+	this->fps = (uint32_t)floorf(this->frames->value());
 	
-	THIS.onFrame(THIS.context, THIS.userData);
+	this->onFrame(this->context, this->userData);
 	
-	THIS.lastFrame = THIS.currentTime;
+	this->lastFrame = this->currentTime;
 }

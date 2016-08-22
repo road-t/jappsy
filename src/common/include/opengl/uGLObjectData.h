@@ -18,6 +18,7 @@
 #define JAPPSY_UGLOBJECTDATA_H
 
 #include <opengl/uOpenGL.h>
+#include <data/uObject.h>
 #include <data/uString.h>
 #include <data/uVector.h>
 
@@ -25,27 +26,26 @@ class GLRender;
 
 enum GLObjectDataType { NONE, STRING, TEXTURES, SHADER };
 
-class GLObjectData : public JRefObject {
+class GLObjectData : public CObject {
 private:
 	GLRender* m_context = NULL;
 	
 	GLObjectDataType m_type = GLObjectDataType::NONE;
 	bool m_reference = false;
 	
-	JString m_target;
+	CString m_target;
 	Vector<GLuint> m_handles;
 	
 public:
-	inline GLObjectData() { throw eInvalidParams; }
-	inline GLObjectData(GLRender* context) { THIS.m_context = context; }
+	inline GLObjectData(GLRender* context) { this->m_context = context; }
 	~GLObjectData();
 	
-	GLObjectData& setTarget(const JString& target);
-	GLObjectData& setTextures(const Vector<GLuint>& handles, bool reference);
-	GLObjectData& setShader(const GLuint handle, bool reference);
+	GLObjectData* setTarget(const CString& target);
+	GLObjectData* setTextures(const Vector<GLuint>& handles, bool reference);
+	GLObjectData* setShader(const GLuint handle, bool reference);
 	
 	inline bool isReference() { return m_type == GLObjectDataType::STRING; }
-	inline const JString& getTarget() { return m_target; }
+	inline const CString& getTarget() { return m_target; }
 	inline GLuint getShader() { return m_handles[0]; }
 	inline Vector<GLuint>& getTextures() { return m_handles; }
 };

@@ -20,35 +20,47 @@
 #include <opengl/uGLLight.h>
 #include <opengl/uGLObject.h>
 
-RefGLScene::RefGLScene(GLRender* context) {
-	THIS.context = context;
+GLScene::GLScene(GLRender* context) {
+	this->context = context;
 
 	//lights = new GLLights(this);
 }
 
-RefGLScene::~RefGLScene() {
-	THIS.context = NULL;
+GLScene::~GLScene() {
+	this->context = NULL;
 }
 
 GLScenes::GLScenes(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLScene>();
+	this->context = context;
 }
 
 GLScenes::~GLScenes() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLScene** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLScene& GLScenes::get(const JString& key) throw(const char*) {
-	return (GLScene&)list.get(key);
+GLScene* GLScenes::get(const CString& key) {
+	try {
+		return list.get(key);
+	} catch (...) {
+		return NULL;
+	}
 }
 
-GLScene& GLScenes::create(const JString& key) throw(const char*) {
+GLScene* GLScenes::createScene(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLScene* shader = &(list.put(key, new RefGLScene(context)));
-		return *shader;
+		GLScene* scene = new GLScene(context);
+		try {
+			list.put(key, scene);
+		} catch (...) {
+			delete scene;
+			throw;
+		}
+		return scene;
 	} catch (...) {
 		throw;
 	}

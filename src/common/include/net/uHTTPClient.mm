@@ -18,8 +18,8 @@
 
 class HTTPRequest {
 public:
-	JString url = null;
-	JObject userData = null;
+	CString url;
+	void* userData = NULL;
 	bool threaded = false;
 	int retry = 0;
 	int timeout = 30;
@@ -43,7 +43,7 @@ public:
 
 @implementation iOSThread;
 
-Stream NSDataToStream(NSData* data) throw(const char*) {
+Stream* NSDataToStream(NSData* data) throw(const char*) {
 	NSUInteger size = [data length];
 	uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
 	if (streamptr != NULL) {
@@ -80,8 +80,10 @@ Stream NSDataToStream(NSData* data) throw(const char*) {
 			
 			if (data != nil) {
 				try {
-					Stream stream = NSDataToStream(data);
-					if (http->onstream((http->url), stream, (http->userData))) {
+					Stream* stream = NSDataToStream(data);
+					bool result = http->onstream(http->url, stream, http->userData);
+					delete stream;
+					if (result) {
 						break;
 					}
 				} catch (...) {
@@ -118,7 +120,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 				volatile void* dataResult = NULL;
 				volatile int64_t dataSize = 0;
 				volatile OSSpinLock ready = 0;
-				JString dataError = 0;
+				CString dataError;
 				OSSpinLockLock((OSSpinLock*)&(ready));
 				
 				do {
@@ -131,8 +133,10 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 					if (dataResult != nil) {
 						NSData* data = [NSData dataWithBytes:(void*)dataResult length:(NSUInteger)dataSize];
 						try {
-							Stream stream = NSDataToStream(data);
-							if (http->onstream((http->url), stream, (http->userData))) {
+							Stream* stream = NSDataToStream(data);
+							bool result = http->onstream(http->url, stream, http->userData);
+							delete stream;
+							if (result) {
 								memFree((void*)dataResult);
 								break;
 							}
@@ -172,7 +176,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 	OSSpinLock* ready = (OSSpinLock*)([valReady pointerValue]);
 	
 	NSValue* valError = [threadData objectAtIndex:4];
-	JString* dataError = (JString*)([valError pointerValue]);
+	CString* dataError = (CString*)([valError pointerValue]);
 	
 	@autoreleasepool {
 		__sync_synchronize();
@@ -222,8 +226,10 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 				do {
 					if (data != nil) {
 						try {
-							Stream stream = NSDataToStream(data);
-							if (http->onstream((http->url), stream, (http->userData))) {
+							Stream* stream = NSDataToStream(data);
+							bool result = http->onstream(http->url, stream, http->userData);
+							delete stream;
+							if (result) {
 								break;
 							}
 						} catch (...) {
@@ -256,7 +262,7 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 
 #endif
 
-void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
+void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -265,7 +271,7 @@ void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeo
 	http->threaded = threaded;
 	http->retry = retry;
 	http->timeout = timeout;
-	http->userData = null;
+	http->userData = NULL;
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
@@ -278,7 +284,7 @@ void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeo
 #endif
 }
 
-void HTTPClient::Request(const JString& url, bool threaded, int retry, int timeout, const JObject& userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
+void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;

@@ -280,71 +280,56 @@ URI::URI(const wchar_t* uri) {
 
 URI::~URI() {
 	if (_uri != NULL) {
-		memDelete(_uri);
-		_uri = NULL;
+		delete _uri;
 	}
 	if (_absolutePath != NULL) {
-		memDelete(_absolutePath);
-		_absolutePath = NULL;
+		delete _absolutePath;
 	}
 	if (_fullPath != NULL) {
-		memDelete(_fullPath);
-		_fullPath = NULL;
+		delete _fullPath;
 	}
 	if (_scheme != NULL) {
-		memDelete(_scheme);
-		_scheme = NULL;
+		delete _scheme;
 	}
 	if (_server != NULL) {
-		memDelete(_server);
-		_server = NULL;
+		delete _server;
 	}
 	
 	if (m_scheme != NULL) {
 		memFree(m_scheme);
-		m_scheme = NULL;
 	}
 	if (m_user != NULL) {
 		memFree(m_user);
-		m_user = NULL;
 	}
 	if (m_password != NULL) {
 		memFree(m_password);
-		m_password = NULL;
 	}
 	if (m_host != NULL) {
 		memFree(m_host);
-		m_host = NULL;
 	}
 	if (m_port != NULL) {
 		memFree(m_port);
-		m_port = NULL;
 	}
 	if (m_path != NULL) {
 		memFree(m_path);
-		m_path = NULL;
 	}
 	if (m_file != NULL) {
 		memFree(m_file);
-		m_file = NULL;
 	}
 	if (m_ext != NULL) {
 		memFree(m_ext);
-		m_ext = NULL;
 	}
 	if (m_query != NULL) {
 		memFree(m_query);
-		m_query = NULL;
 	}
 	if (m_anchor != NULL) {
 		memFree(m_anchor);
-		m_anchor = NULL;
 	}
 }
 
-const JString& URI::scheme() {
+const CString& URI::scheme() {
 	if (_scheme == NULL) {
-		_scheme = memNew(_scheme, JString());
+		_scheme = new CString();
 		if (m_scheme != NULL) {
 			_scheme->concat(m_scheme);
 			_scheme->concat(L"://");
@@ -353,9 +338,9 @@ const JString& URI::scheme() {
 	return *_scheme;
 }
 
-const JString& URI::server() {
+const CString& URI::server() {
 	if (_server == NULL) {
-		_server = memNew(_server, JString());
+		_server = new CString();
 		if ((m_user != NULL) || (m_password != NULL)) {
 			if (m_user != NULL) {
 				_server->concat(m_user);
@@ -378,49 +363,48 @@ const JString& URI::server() {
 }
 
 
-const JString& URI::fullPath() {
+const CString& URI::fullPath() {
 	if (_fullPath == NULL) {
-		_fullPath = memNew(_fullPath, JString());
+		_fullPath = new CString();
 		_fullPath->concat(scheme());
 		_fullPath->concat(server());
 		if (m_path != NULL) {
 			_fullPath->concat(m_path);
-		} else if (_fullPath->length != 0) {
+		} else if (_fullPath->m_length != 0) {
 			_fullPath->concat(L"/");
 		}
 		if (m_file != NULL) {
 			_fullPath->concat(m_file);
 		}
-		uint32_t len = _fullPath->length;
+		uint32_t len = _fullPath->m_length;
 		if (len > 0) {
 			if (_fullPath->charAt(len - 1) == L'/') {
-				_fullPath->length = len - 1;
+				_fullPath->m_length = len - 1;
 			}
 		}
 	}
 	return *_fullPath;
 }
 
-const JString& URI::absolutePath(const wchar_t* basePath) {
+const CString& URI::absolutePath(const wchar_t* basePath) {
 	if ((_absolutePath == NULL) || (basePath != NULL)) {
 		if (_absolutePath != NULL) {
-			memDelete(_absolutePath);
-			_absolutePath = NULL;
+			delete _absolutePath;
 		}
-		_absolutePath = memNew(_absolutePath, JString());
+		_absolutePath = new CString();
 		
 		if ((m_scheme == NULL) || (m_host == NULL)) {
-			JString path;
+			CString path;
 			if (m_path != NULL) {
 				if (m_path[0] == L'/') {
 					path = (m_path + 1);
 				} else {
 					path = m_path;
 				}
-				uint32_t len = path.length;
+				uint32_t len = path.m_length;
 				if (len > 0) {
 					if (path.charAt(len - 1) == L'/') {
-						path.length = len - 1;
+						path.m_length = len - 1;
 					}
 				}
 			}
@@ -428,15 +412,15 @@ const JString& URI::absolutePath(const wchar_t* basePath) {
 			if (basePath != NULL) {
 				_absolutePath->concat(basePath);
 			} else {
-				_absolutePath->concat(THIS.basePath);
+				_absolutePath->concat(this->basePath);
 			}
-			uint32_t len = _absolutePath->length;
+			uint32_t len = _absolutePath->m_length;
 			if (len > 0) {
 				if (_absolutePath->charAt(len - 1) == L'/') {
-					_absolutePath->length = len - 1;
+					_absolutePath->m_length = len - 1;
 				}
 			}
-			if (path.length != 0) {
+			if (path.m_length != 0) {
 				_absolutePath->concat(L"/");
 				_absolutePath->concat(path);
 			}
@@ -447,9 +431,9 @@ const JString& URI::absolutePath(const wchar_t* basePath) {
 	return *_absolutePath;
 }
 
-const JString& URI::uri() {
+const CString& URI::uri() {
 	if (_uri == NULL) {
-		_uri = memNew(_uri, JString());
+		_uri = new CString();
 		_uri->concat(absolutePath());
 		_uri->concat(L"/");
 		if (m_file != NULL) {

@@ -19,10 +19,8 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <data/uHashMap.h>
 #include <data/uString.h>
 #include <data/uVector.h>
-#include <data/uList.h>
 #include <opengl/uGLObjectData.h>
 #include <opengl/uGLObject.h>
 
@@ -36,7 +34,7 @@ enum GLTextureMapping {
 	UVMAP_SPHERE = 4
 };
 
-class RefGLMaterialTexture : public JRefObject {
+class GLMaterialTexture : public CObject {
 public:
 	GLRender* context = NULL;
 	GLObjectData* texture = NULL;
@@ -49,40 +47,26 @@ public:
 	
 	GLTextureMapping uvmap = GLTextureMapping::UVMAP_DEFAULT;
 	
-	inline RefGLMaterialTexture() { throw eInvalidParams; }
-	RefGLMaterialTexture(GLRender* context, const JString& textureReference) throw(const char*);
-	~RefGLMaterialTexture();
+	GLMaterialTexture(GLRender* context, const CString& textureReference) throw(const char*);
+	~GLMaterialTexture();
 	
-	inline RefGLMaterialTexture& setUVMap(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLTextureMapping uvmap) {
-		THIS.x = x;
-		THIS.y = y;
-		THIS.w = w;
-		THIS.h = h;
-		THIS.uvmap = uvmap;
-		return *this;
+	inline GLMaterialTexture* setUVMap(GLfloat x, GLfloat y, GLfloat w, GLfloat h, GLTextureMapping uvmap) {
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
+		this->uvmap = uvmap;
+		return this;
 	}
 	
 	bool checkReady();
 };
 
-class GLMaterialTexture : public JObject {
-public:
-	JRefClass(GLMaterialTexture, RefGLMaterialTexture);
-	
-	inline GLMaterialTexture(GLRender* context, const JString& textureReference) throw(const char*) {
-		RefGLMaterialTexture* o = new RefGLMaterialTexture(context, textureReference);
-		if (o == NULL) throw eOutOfMemory;
-		THIS.setRef(o);
-	}
-	
-	inline bool checkReady() throw(const char*) { return THIS.ref().checkReady(); }
-};
-
 //===============================
 
-class RefGLMaterial : public JRefObject {
+class GLMaterial : public CObject {
 public:
-	JString name;
+	CString name;
 	
 	// Ambient color is the color of an object where it is in shadow.
 	// This color is what the object reflects when illuminated by ambient light rather than direct light.
@@ -97,7 +81,7 @@ public:
 	// 3DSMax - Diffuse
 	struct {
 		Vec3 color = {1.0, 1.0, 1.0};
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 		GLfloat blend = 0.0;
 	} diffuse;
 	
@@ -106,7 +90,7 @@ public:
 	// 3DSMax - Specular
 	struct {
 		Vec3 color = {1.0, 1.0, 1.0};
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 		GLfloat blend = 0.0;
 	} specular;
 	
@@ -114,7 +98,7 @@ public:
 	// 3DSMax - Self-Illumination
 	struct {
 		Vec3 color = {0.0, 0.0, 0.0};
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 		GLfloat blend = 0.0;
 	} emissive;
 	
@@ -122,14 +106,14 @@ public:
 	struct {
 		GLfloat value = 50;
 		GLfloat percent = 1;
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 		GLfloat blend = 0.0;
 	} shininess;
 	
 	// 3DSMax - Opacity
 	struct {
 		GLfloat value = 1;
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 		GLfloat blend = 0.0;
 	} opacity;
 	
@@ -137,52 +121,33 @@ public:
 	// Not supported
 	struct {
 		GLfloat scale = 1;
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 	} bump;
 	
 	// 3DSMax - Reflection
 	// Not supported
 	struct {
-		GLMaterialTexture texture;
+		GLMaterialTexture* texture = NULL;
 	} reflection;
 	
 public:
 	Vector<GLfloat> colors4fv;
 	
-	RefGLMaterial();
-	RefGLMaterial(const JString& name);
-	RefGLMaterial(const JString& name, const GLMaterialTexture& texture);
-	~RefGLMaterial();
+	GLMaterial();
+	GLMaterial(const CString& name);
+	GLMaterial(const CString& name, GLMaterialTexture* texture);
+	~GLMaterial();
 
 	void update();
-};
-
-class GLMaterial : public JObject {
-public:
-	JRefClass(GLMaterial, RefGLMaterial);
-	
-	inline GLMaterial(const JString& name) throw(const char*) {
-		RefGLMaterial* o = new RefGLMaterial(name);
-		if (o == NULL) throw eOutOfMemory;
-		THIS.setRef(o);
-	}
-	
-	inline GLMaterial(const JString& name, const GLMaterialTexture& texture) throw(const char*) {
-		RefGLMaterial* o = new RefGLMaterial(name, texture);
-		if (o == NULL) throw eOutOfMemory;
-		THIS.setRef(o);
-	}
-	
-	inline void update() throw(const char*) { THIS.ref().update(); }
 };
 
 //===============================
 
 class GLModels;
 
-class ModelJsonParserNodeData {
+class ModelJsonParserNodeData : public CObject {
 public:
-	JString name;
+	CString name;
 	Vector<GLfloat> transformation;
 	Vector<ModelJsonParserNodeData*> children;
 	Vector<GLuint> meshes;
@@ -213,9 +178,9 @@ public:
 	}
 };
 
-class ModelJsonParserMeshData {
+class ModelJsonParserMeshData : public CObject {
 public:
-	JString name;
+	CString name;
 	GLuint materialindex;
 	Vector<GLfloat> vertices;
 	Vector<GLfloat> normals;
@@ -245,20 +210,20 @@ public:
 	}
 };
 
-class ModelJsonParserMaterialData {
+class ModelJsonParserMaterialData : public CObject {
 public:
-	GLModels* models;
-	RefGLMaterial* material;
+	GLModels* models = NULL;
+	GLMaterial* material = NULL;
 	
-	JString key;
+	CString key;
 	GLuint semantic = 0;
 	Vector<GLfloat> value;
 };
 
-class ModelJsonParser {
+class ModelJsonParser : public CObject {
 public:
 	GLModels* models;
-	JString key;
+	CString key;
 	
 	ModelJsonParserNodeData* rootnode = NULL;
 	Vector<ModelJsonParserMeshData*> meshes;
@@ -310,39 +275,29 @@ class GLModelNode;
 class GLModelMesh;
 class GLModel;
 
-class RefGLModelNode : public JRefObject {
+class GLModelNode : public CObject {
 public:
-	JString name;
+	CString name;
 	Mat4 transformation;
 	
-	JList<GLModelNode> nodes = null;
-	JList<GLModelMesh> meshes = null;
+	Vector<GLModelNode*> nodes;
+	Vector<GLModelMesh*> meshes;
 	
-	inline RefGLModelNode() { Mat4Identity(transformation.v); }
-	inline RefGLModelNode(const JString& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
-	~RefGLModelNode();
+	inline GLModelNode() { Mat4Identity(transformation.v); }
+	inline GLModelNode(const CString& name, const Mat4& transformation) { this->name = name; Mat4SetV(this->transformation.v, transformation.v); }
+	~GLModelNode();
 	
-	GLModelNode& insertNode(const GLModelNode& node) throw(const char*);
-	GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*);
+	void insertNode(GLModelNode* node) throw(const char*);
+	void insertMesh(GLModelMesh* mesh) throw(const char*);
 	
 	void parseJson(ModelJsonParserNodeData* node, Vector<ModelJsonParserMeshData*>& meshes, Mat4& rootmat);
 	
-	void render(GLRender* context, GLModel& model) const;
+	void render(GLRender* context, GLModel* model) const;
 };
 
-class GLModelNode : public JObject {
+class GLModelMesh : public CObject {
 public:
-	JRefClass(GLModelNode, RefGLModelNode);
-
-	inline GLModelNode& insertNode(const GLModelNode& node) throw(const char*) { return THIS.ref().insertNode(node); }
-	inline GLModelMesh& insertMesh(const GLModelMesh& mesh) throw(const char*) { return THIS.ref().insertMesh(mesh); }
-	
-	inline void render(GLRender* context, GLModel& model) const throw(const char*) { THIS.ref().render(context, model); }
-};
-
-class RefGLModelMesh : public JRefObject {
-public:
-	JString name;
+	CString name;
 	GLuint material;
 	GLuint vertices;
 	GLuint normals;
@@ -350,168 +305,152 @@ public:
 	GLuint indexes;
 	GLuint indexCount;
 	
-	inline RefGLModelMesh() {
-		name = null;
+	inline GLModelMesh() {
 		material = 0;
 		vertices = normals = texturecoords = indexes = indexCount = 0;
 	}
 	
-	inline RefGLModelMesh(const JString& name, GLuint materialIndex, GLuint vertexBuffer, GLuint normalsBuffer, GLuint textureBuffer, GLuint indexBuffer, GLuint indexCount) {
-		THIS.name = name;
-		THIS.material = materialIndex;
-		THIS.vertices = vertexBuffer;
-		THIS.normals = normalsBuffer;
-		THIS.texturecoords = textureBuffer;
-		THIS.indexes = indexBuffer;
-		THIS.indexCount = indexCount;
+	inline GLModelMesh(const CString& name, GLuint materialIndex, GLuint vertexBuffer, GLuint normalsBuffer, GLuint textureBuffer, GLuint indexBuffer, GLuint indexCount) {
+		this->name = name;
+		this->material = materialIndex;
+		this->vertices = vertexBuffer;
+		this->normals = normalsBuffer;
+		this->texturecoords = textureBuffer;
+		this->indexes = indexBuffer;
+		this->indexCount = indexCount;
 	}
 	
-	~RefGLModelMesh();
+	~GLModelMesh();
 	
 	void parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& matV);
 	
-	void render(GLRender* context, GLModel& model) const;
-};
-
-class GLModelMesh : public JObject {
-public:
-	JRefClass(GLModelMesh, RefGLModelMesh);
-
-	inline void render(GLRender* context, GLModel& model) const throw(const char*) { THIS.ref().render(context, model); }
+	void render(GLRender* context, GLModel* model) const;
 };
 
 //===============================
 
-class RefGLModel : public JRefObject {
+class GLModel : public CObject {
 public:
 	GLRender* context = NULL;
-	JList<GLMaterial> materials;
-	GLModelNode rootnode;
+	Vector<GLMaterial*> materials;
+	GLModelNode* rootnode = NULL;
 	
-	inline RefGLModel() { throw eInvalidParams; }
-	RefGLModel(GLRender* context);
-	~RefGLModel();
+	inline GLModel() { throw eInvalidParams; }
+	GLModel(GLRender* context);
+	~GLModel();
 	
-	GLuint createMaterial(const JString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap);
-	GLuint insertMaterial(GLMaterial& material);
+	GLuint createMaterial(const CString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap) throw(const char*);
+	GLuint insertMaterial(GLMaterial* material) throw(const char*);
 	
 	void parseJson(ModelJsonParser* parser) throw(const char*);
 	
-	void render(const GLObject& object);
-};
-
-class GLModel : public JObject {
-public:
-	JRefClass(GLModel, RefGLModel)
-
-	inline GLuint createMaterial(const JString& key, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, GLTextureMapping uvmap) throw(const char*) { return THIS.ref().createMaterial(key, x, y, w, h, uvmap); }
-	inline GLuint insertMaterial(GLMaterial& material) throw(const char*) { return THIS.ref().insertMaterial(material); }
+	void render(const GLObject* object);
 };
 
 //===============================
 
-class GLModels {
+class GLModels : public CObject {
 private:
-	GLRender* context;
-	JHashMap<JString, GLModel> list;
-	
+	GLRender* context = NULL;
+	VectorMap<CString&, GLModel*> list;
+
 public:
 	GLModels(GLRender* context) throw(const char*);
 	~GLModels();
 	
-	GLModel& get(const JString& key) throw(const char*);
-	GLModel& createModel(const JString& key) throw(const char*);
+	GLModel* get(const CString& key);
+	GLModel* createModel(const CString& key) throw(const char*);
 
 private:
 	// json parser callbacks
 	// root
-	static void onjson_root_start(struct json_context* ctx, void* target);
-	static void onjson_root_end(struct json_context* ctx, void* target, bool noerror);
-	static void onjson_root_object_start(struct json_context* ctx, const char* key, void* target);
+	static void onjson_root_start(struct JsonContext* ctx, void* target);
+	static void onjson_root_end(struct JsonContext* ctx, void* target, bool noerror);
+	static void onjson_root_object_start(struct JsonContext* ctx, const char* key, void* target);
 		// root.rootnode
-		static void onjson_rootnode_start(struct json_context* ctx, const char* key, void* target);
-		static void onjson_rootnode_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-		static void onjson_node_string(struct json_context* ctx, const char* key, char* value, void* target);
-		static void onjson_node_array_start(struct json_context* ctx, const char* key, void* target);
+		static void onjson_rootnode_start(struct JsonContext* ctx, const char* key, void* target);
+		static void onjson_rootnode_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		static void onjson_node_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+		static void onjson_node_array_start(struct JsonContext* ctx, const char* key, void* target);
 			// node.transformation
-			static void onjson_node_tranformation_start(struct json_context* ctx, const char* key, void* target);
-			static void onjson_node_transformation_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+			static void onjson_node_tranformation_start(struct JsonContext* ctx, const char* key, void* target);
+			static void onjson_node_transformation_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 				// node.transformation[index]
-				static void onjson_node_transformation_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+				static void onjson_node_transformation_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 			// node.children
-			static void onjson_node_children_start(struct json_context* ctx, const char* key, void* target);
-			static void onjson_node_children_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+			static void onjson_node_children_start(struct JsonContext* ctx, const char* key, void* target);
+			static void onjson_node_children_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 				// node.children[index]
-				static void onjson_node_start(struct json_context* ctx, const int index, void* target);
-				static void onjson_node_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+				static void onjson_node_start(struct JsonContext* ctx, const int index, void* target);
+				static void onjson_node_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
 			// node.meshes
-			static void onjson_node_meshes_start(struct json_context* ctx, const char* key, void* target);
-			static void onjson_node_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+			static void onjson_node_meshes_start(struct JsonContext* ctx, const char* key, void* target);
+			static void onjson_node_meshes_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 				// node.meshes[index]
-				static void onjson_node_meshes_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
-	static void onjson_root_array_start(struct json_context* ctx, const char* key, void* target);
+				static void onjson_node_meshes_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
+	static void onjson_root_array_start(struct JsonContext* ctx, const char* key, void* target);
 		// root.meshes
-		static void onjson_meshes_start(struct json_context* ctx, const char* key, void* target);
-		static void onjson_meshes_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		static void onjson_meshes_start(struct JsonContext* ctx, const char* key, void* target);
+		static void onjson_meshes_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 			// root.meshes[index]
-			static void onjson_mesh_start(struct json_context* ctx, const int index, void* target);
-			static void onjson_mesh_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
-			static void onjson_mesh_string(struct json_context* ctx, const char* key, char* value, void* target);
-			static void onjson_mesh_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
-			static void onjson_mesh_array_start(struct json_context* ctx, const char* key, void* target); // vertices | normals | texturecoords | faces
+			static void onjson_mesh_start(struct JsonContext* ctx, const int index, void* target);
+			static void onjson_mesh_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
+			static void onjson_mesh_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+			static void onjson_mesh_number(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
+			static void onjson_mesh_array_start(struct JsonContext* ctx, const char* key, void* target); // vertices | normals | texturecoords | faces
 				// mesh.vertices
-				static void onjson_vertices_start(struct json_context* ctx, const char* key, void* target);
-				static void onjson_vertices_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				static void onjson_vertices_start(struct JsonContext* ctx, const char* key, void* target);
+				static void onjson_vertices_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 					// mesh.vertices[index]
-					static void onjson_vertices_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+					static void onjson_vertices_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 				// mesh.normals
-				static void onjson_normals_start(struct json_context* ctx, const char* key, void* target);
-				static void onjson_normals_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				static void onjson_normals_start(struct JsonContext* ctx, const char* key, void* target);
+				static void onjson_normals_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 					// mesh.normals[index]
-					static void onjson_normals_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+					static void onjson_normals_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 				// mesh.texturecoords
-				static void onjson_texturecoords_start(struct json_context* ctx, const char* key, void* target);
-				static void onjson_texturecoords_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				static void onjson_texturecoords_start(struct JsonContext* ctx, const char* key, void* target);
+				static void onjson_texturecoords_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 					// mesh.texturecoords[index]
-					static void onjson_coords_start(struct json_context* ctx, const int index, void* target);
-					static void onjson_coords_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+					static void onjson_coords_start(struct JsonContext* ctx, const int index, void* target);
+					static void onjson_coords_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
 						// mesh.texturecoords[index][index]
-						static void onjson_coords_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+						static void onjson_coords_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 				// mesh.faces
-				static void onjson_faces_start(struct json_context* ctx, const char* key, void* target);
-				static void onjson_faces_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				static void onjson_faces_start(struct JsonContext* ctx, const char* key, void* target);
+				static void onjson_faces_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 					// mesh.faces[index]
-					static void onjson_triangle_start(struct json_context* ctx, const int index, void* target);
-					static void onjson_triangle_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
+					static void onjson_triangle_start(struct JsonContext* ctx, const int index, void* target);
+					static void onjson_triangle_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
 						// mesh.faces[index][index]
-						static void onjson_triangle_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+						static void onjson_triangle_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 		// root.materials
-		static void onjson_materials_start(struct json_context* ctx, const char* key, void* target);
-		static void onjson_materials_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+		static void onjson_materials_start(struct JsonContext* ctx, const char* key, void* target);
+		static void onjson_materials_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 			// root.materials[index]
-			static void onjson_material_start(struct json_context* ctx, const int index, void* target);
-			static void onjson_material_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
-			static void onjson_material_array_start(struct json_context* ctx, const char* key, void* target);
+			static void onjson_material_start(struct JsonContext* ctx, const int index, void* target);
+			static void onjson_material_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
+			static void onjson_material_array_start(struct JsonContext* ctx, const char* key, void* target);
 				// material.properties
-				static void onjson_material_properties_start(struct json_context* ctx, const char* key, void* target);
-				static void onjson_material_properties_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+				static void onjson_material_properties_start(struct JsonContext* ctx, const char* key, void* target);
+				static void onjson_material_properties_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 					// material.properties[index]
-					static void onjson_material_property_start(struct json_context* ctx, const int index, void* target);
-					static void onjson_material_property_end(struct json_context* ctx, const int index, void* parenttarget, void* target, bool noerror);
-					static void onjson_material_property_string(struct json_context* ctx, const char* key, char* value, void* target);
-					static void onjson_material_property_number(struct json_context* ctx, const char* key, const struct json_number& number, void* target);
-					static void onjson_material_property_array_start(struct json_context* ctx, const char* key, void* target);
+					static void onjson_material_property_start(struct JsonContext* ctx, const int index, void* target);
+					static void onjson_material_property_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
+					static void onjson_material_property_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+					static void onjson_material_property_number(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
+					static void onjson_material_property_array_start(struct JsonContext* ctx, const char* key, void* target);
 						// material.properties[index].value
-						static void onjson_material_property_value_start(struct json_context* ctx, const char* key, void* target);
-						static void onjson_material_property_value_end(struct json_context* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-						static void onjson_material_property_value_number(struct json_context* ctx, const int index, const struct json_number& number, void* target);
+						static void onjson_material_property_value_start(struct JsonContext* ctx, const char* key, void* target);
+						static void onjson_material_property_value_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
+						static void onjson_material_property_value_number(struct JsonContext* ctx, const int index, const struct JsonNumber& number, void* target);
 	
 private: // Thread Safe
 	static void* CreateJsonModelCallback(void* threadData);
 
 public: // Thread Safe
 	
-	GLModel& createModel(const JString& key, const char* jsonModelSource) throw(const char*);
+	GLModel* createModel(const CString& key, const char* jsonModelSource) throw(const char*);
 };
 
 #endif //JAPPSY_UGLMODEL_H

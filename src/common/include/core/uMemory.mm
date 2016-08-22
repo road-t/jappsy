@@ -523,7 +523,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 #if defined(__WINNT__)
         Sleep(0);
 #else
-        sleep(0);
+        usleep(0);
 #endif
     }
     if (dwSize == 0) {
@@ -679,7 +679,7 @@ void mmfree(void* mem) {
 #if defined(__WINNT__)
             Sleep(0);
 #else
-            sleep(0);
+            usleep(0);
 #endif
         }
 #ifdef DEBUG

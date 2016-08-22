@@ -280,6 +280,3 @@ extern "C" {
 		#define null ((void*)0)
 	#endif
 #endif
-
-#define THIS (*this)
-

@@ -19,40 +19,33 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <data/uHashMap.h>
 #include <data/uVector.h>
 
 class GLRender;
 
-class RefGLTexture : public JRefObject {
+class GLTexture : public CObject {
 public:
+	constexpr static int NONE = 0;
+	constexpr static int SMOOTH = 1;
+	constexpr static int REPEAT = 2;
+
 	GLRender* context = NULL;
 	Vector<GLuint> handles;
 	GLint width = 0;
 	GLint height = 0;
 	Vector<GLint> handles1iv;
 	
-	inline RefGLTexture() { throw eInvalidParams; }
-	RefGLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
-	~RefGLTexture();
+	GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	~GLTexture();
 	
 	GLuint bind(GLint index, GLint uniform = -1);
 };
 
-class GLTexture : public JObject {
-public:
-	constexpr static int NONE = 0;
-	constexpr static int SMOOTH = 1;
-	constexpr static int REPEAT = 2;
-	
-	JRefClass(GLTexture, RefGLTexture)
-};
-
-class GLTextures {
+class GLTextures : public CObject {
 private:
-	GLRender* context;
-	JHashMap<JString, GLTexture> list;
-	GLTexture defaultTexture;
+	GLRender* context = NULL;
+	VectorMap<CString&, GLTexture*> list;
+	GLTexture* defaultTexture;
 	
 public:
 	GLuint defaultTextureHandle = 0;
@@ -60,9 +53,9 @@ public:
 	GLTextures(GLRender* context) throw(const char*);
 	~GLTextures();
 	
-	GLTexture& get(const JString& key) throw(const char*);
-	GLTexture& createSolidTexture(const JString& key, const Vec4& rgba4fv) throw(const char*);
-	GLTexture& createTexture(const JString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	GLTexture* get(const CString& key);
+	GLTexture* createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*);
+	GLTexture* createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	
 	GLuint createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*);
 	void releaseTextureHandle(GLuint handle);

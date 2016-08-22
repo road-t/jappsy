@@ -29,7 +29,6 @@
 		C33FC40D1D68CCFC000D33D4 /* uGLObjectData.h in Headers */ = {isa = PBXBuildFile; fileRef = C33FC40B1D68CCFC000D33D4 /* uGLObjectData.h */; };
 		C3401C5D1D668B4E009B223D /* uSystem.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3401C5C1D668B4E009B223D /* uSystem.mm */; };
 		C3401C5F1D668B70009B223D /* jappsy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C5E1D668B70009B223D /* jappsy.cpp */; };
-		C3401C611D6698CC009B223D /* uHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C601D6698CC009B223D /* uHandler.cpp */; };
 		C3401C631D669B8C009B223D /* uVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C621D669B8C009B223D /* uVector.cpp */; };
 		C3401C651D669BE0009B223D /* uObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C641D669BE0009B223D /* uObject.cpp */; };
 		C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C340853A1D67F82E007D4835 /* uGLShader.mm */; };
@@ -53,7 +52,6 @@
 		C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9B31D5BBBB70022FF71 /* JappsyView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9B41D5BBBB70022FF71 /* JappsyView.mm */; };
 		C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */; };
-		C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA3B1D5BE2E60022FF71 /* uHandler.h */; };
 		C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */; };
 		C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA401D5C01FC0022FF71 /* uGLCamera.h */; };
 		C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */; };
@@ -67,7 +65,6 @@
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C350705D1D6A717200722351 /* uStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C350705C1D6A717200722351 /* uStack.cpp */; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
 		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
 		C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900B11D6540AA00C1D154 /* uGLReader.cpp */; };
@@ -91,28 +88,10 @@
 		C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C61D6542C700C1D154 /* uGLSprite.h */; };
 		C35900DB1D6542C700C1D154 /* uGLTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C35900C71D6542C700C1D154 /* uGLTexture.cpp */; };
 		C35900DC1D6542C700C1D154 /* uGLTexture.h in Headers */ = {isa = PBXBuildFile; fileRef = C35900C81D6542C700C1D154 /* uGLTexture.h */; };
-		C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */; };
-		C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4B61D5EB5D60039DD09 /* uStack.h */; };
-		C3A4B4BC1D5EB5DF0039DD09 /* uIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */; };
-		C3A4B4C01D5EB5E70039DD09 /* uListIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */; };
-		C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */; };
-		C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4C61D5EB5F80039DD09 /* uList.h */; };
-		C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */; };
-		C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */; };
-		C3A4B4D41D5EB6100039DD09 /* uLinkedHashSet.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */; };
-		C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4D61D5EB61E0039DD09 /* uMap.h */; };
-		C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */; };
-		C3A4B4E01D5EB62A0039DD09 /* uLinkedHashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */; };
-		C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */; };
-		C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */; };
-		C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4E61D5EB63C0039DD09 /* uNumber.h */; };
 		C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */; };
 		C3A4B4EC1D5FD41C0039DD09 /* uJSON.h in Headers */ = {isa = PBXBuildFile; fileRef = C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */; };
 		C3ACF9311D5DED6D0065A832 /* uURI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3ACF92F1D5DED6D0065A832 /* uURI.cpp */; };
 		C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */ = {isa = PBXBuildFile; fileRef = C3ACF9301D5DED6D0065A832 /* uURI.h */; };
-		C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBAC91D6104910099AD22 /* uJSONArray.h */; };
-		C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */; };
-		C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBACB1D6104910099AD22 /* uJSONObject.h */; };
 		C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */ = {isa = PBXBuildFile; fileRef = C3FFBAD61D62FF360099AD22 /* uHTTPClient.h */; };
 		C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3FFBAD71D62FF360099AD22 /* uHTTPClient.mm */; };
 /* End PBXBuildFile section */
@@ -140,7 +119,6 @@
 		C33FC40B1D68CCFC000D33D4 /* uGLObjectData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLObjectData.h; sourceTree = "<group>"; };
 		C3401C5C1D668B4E009B223D /* uSystem.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uSystem.mm; sourceTree = "<group>"; };
 		C3401C5E1D668B70009B223D /* jappsy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = jappsy.cpp; sourceTree = "<group>"; };
-		C3401C601D6698CC009B223D /* uHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uHandler.cpp; sourceTree = "<group>"; };
 		C3401C621D669B8C009B223D /* uVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uVector.cpp; sourceTree = "<group>"; };
 		C3401C641D669BE0009B223D /* uObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uObject.cpp; sourceTree = "<group>"; };
 		C340853A1D67F82E007D4835 /* uGLShader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uGLShader.mm; sourceTree = "<group>"; };
@@ -164,7 +142,6 @@
 		C34FD9B31D5BBBB70022FF71 /* JappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JappsyView.h; sourceTree = "<group>"; };
 		C34FD9B41D5BBBB70022FF71 /* JappsyView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = JappsyView.mm; sourceTree = "<group>"; };
 		C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLEngine.cpp; sourceTree = "<group>"; };
-		C34FDA3B1D5BE2E60022FF71 /* uHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHandler.h; sourceTree = "<group>"; };
 		C34FDA3F1D5C01FC0022FF71 /* uGLCamera.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLCamera.cpp; sourceTree = "<group>"; };
 		C34FDA401D5C01FC0022FF71 /* uGLCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLCamera.h; sourceTree = "<group>"; };
 		C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLAlignX.h; sourceTree = "<group>"; };
@@ -181,7 +158,6 @@
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C350705A1D6A420400722351 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TODO.txt; sourceTree = "<group>"; };
-		C350705C1D6A717200722351 /* uStack.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uStack.cpp; sourceTree = "<group>"; };
 		C35272071D551BBE00F41198 /* uOpenGL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uOpenGL.h; sourceTree = "<group>"; };
 		C35272091D551E9F00F41198 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		C35900B11D6540AA00C1D154 /* uGLReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLReader.cpp; sourceTree = "<group>"; };
@@ -205,28 +181,10 @@
 		C35900C61D6542C700C1D154 /* uGLSprite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSprite.h; sourceTree = "<group>"; };
 		C35900C71D6542C700C1D154 /* uGLTexture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLTexture.cpp; sourceTree = "<group>"; };
 		C35900C81D6542C700C1D154 /* uGLTexture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLTexture.h; sourceTree = "<group>"; };
-		C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uAtomicObject.h; sourceTree = "<group>"; };
-		C3A4B4B61D5EB5D60039DD09 /* uStack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uStack.h; sourceTree = "<group>"; };
-		C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uIterator.h; sourceTree = "<group>"; };
-		C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uListIterator.h; sourceTree = "<group>"; };
-		C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uCollection.h; sourceTree = "<group>"; };
-		C3A4B4C61D5EB5F80039DD09 /* uList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uList.h; sourceTree = "<group>"; };
-		C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSet.h; sourceTree = "<group>"; };
-		C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHashSet.h; sourceTree = "<group>"; };
-		C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLinkedHashSet.h; sourceTree = "<group>"; };
-		C3A4B4D61D5EB61E0039DD09 /* uMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMap.h; sourceTree = "<group>"; };
-		C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHashMap.h; sourceTree = "<group>"; };
-		C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLinkedHashMap.h; sourceTree = "<group>"; };
-		C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uSparseArray.h; sourceTree = "<group>"; };
-		C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uNumber.cpp; sourceTree = "<group>"; };
-		C3A4B4E61D5EB63C0039DD09 /* uNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uNumber.h; sourceTree = "<group>"; };
 		C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uJSON.cpp; sourceTree = "<group>"; };
 		C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSON.h; sourceTree = "<group>"; };
 		C3ACF92F1D5DED6D0065A832 /* uURI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uURI.cpp; sourceTree = "<group>"; };
 		C3ACF9301D5DED6D0065A832 /* uURI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uURI.h; sourceTree = "<group>"; };
-		C3FFBAC91D6104910099AD22 /* uJSONArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONArray.h; sourceTree = "<group>"; };
-		C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uJSONObject.cpp; sourceTree = "<group>"; };
-		C3FFBACB1D6104910099AD22 /* uJSONObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uJSONObject.h; sourceTree = "<group>"; };
 		C3FFBAD61D62FF360099AD22 /* uHTTPClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uHTTPClient.h; sourceTree = "<group>"; };
 		C3FFBAD71D62FF360099AD22 /* uHTTPClient.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uHTTPClient.mm; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -288,8 +246,6 @@
 				C30577CF1D54BA9C00171EFC /* uMemory.h */,
 				C3401C5C1D668B4E009B223D /* uSystem.mm */,
 				C30577D51D54BA9C00171EFC /* uSystem.h */,
-				C34FDA3B1D5BE2E60022FF71 /* uHandler.h */,
-				C3401C601D6698CC009B223D /* uHandler.cpp */,
 			);
 			path = core;
 			sourceTree = "<group>";
@@ -311,29 +267,10 @@
 			children = (
 				C3401C641D669BE0009B223D /* uObject.cpp */,
 				C34FDA6C1D5DDD0B0022FF71 /* uObject.h */,
-				C3A4B4E51D5EB63C0039DD09 /* uNumber.cpp */,
-				C3A4B4E61D5EB63C0039DD09 /* uNumber.h */,
 				C34FD9801D5B8E0A0022FF71 /* uString.mm */,
 				C34FD97F1D5B8E0A0022FF71 /* uString.h */,
 				C3A4B4E91D5FD41C0039DD09 /* uJSON.cpp */,
 				C3A4B4EA1D5FD41C0039DD09 /* uJSON.h */,
-				C3FFBAC91D6104910099AD22 /* uJSONArray.h */,
-				C3FFBACA1D6104910099AD22 /* uJSONObject.cpp */,
-				C3FFBACB1D6104910099AD22 /* uJSONObject.h */,
-				C3A4B4B21D5EA5F20039DD09 /* uAtomicObject.h */,
-				C3A4B4B61D5EB5D60039DD09 /* uStack.h */,
-				C350705C1D6A717200722351 /* uStack.cpp */,
-				C3A4B4E21D5EB6310039DD09 /* uSparseArray.h */,
-				C3A4B4BA1D5EB5DF0039DD09 /* uIterator.h */,
-				C3A4B4BE1D5EB5E70039DD09 /* uListIterator.h */,
-				C3A4B4C21D5EB5EF0039DD09 /* uCollection.h */,
-				C3A4B4C61D5EB5F80039DD09 /* uList.h */,
-				C3A4B4CA1D5EB5FF0039DD09 /* uSet.h */,
-				C3A4B4CE1D5EB6070039DD09 /* uHashSet.h */,
-				C3A4B4D21D5EB6100039DD09 /* uLinkedHashSet.h */,
-				C3A4B4D61D5EB61E0039DD09 /* uMap.h */,
-				C3A4B4DA1D5EB6240039DD09 /* uHashMap.h */,
-				C3A4B4DE1D5EB62A0039DD09 /* uLinkedHashMap.h */,
 				C34FDA581D5CADCB0022FF71 /* uStream.cpp */,
 				C34FDA591D5CADCB0022FF71 /* uStream.h */,
 				C34FD97D1D5B8E0A0022FF71 /* uSmoothValue.cpp */,
@@ -454,20 +391,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				C35900D61D6542C700C1D154 /* uGLScene.h in Headers */,
-				C3FFBACD1D6104910099AD22 /* uJSONArray.h in Headers */,
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
-				C3A4B4D01D5EB6070039DD09 /* uHashSet.h in Headers */,
 				C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
 				C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */,
-				C3A4B4C41D5EB5EF0039DD09 /* uCollection.h in Headers */,
 				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
 				C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */,
-				C3A4B4E81D5EB63C0039DD09 /* uNumber.h in Headers */,
-				C34FDA3D1D5BE2E60022FF71 /* uHandler.h in Headers */,
 				C35900DC1D6542C700C1D154 /* uGLTexture.h in Headers */,
 				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
@@ -475,26 +407,16 @@
 				C33FC40D1D68CCFC000D33D4 /* uGLObjectData.h in Headers */,
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
-				C3FFBACF1D6104910099AD22 /* uJSONObject.h in Headers */,
-				C3A4B4DC1D5EB6240039DD09 /* uHashMap.h in Headers */,
-				C3A4B4B41D5EA5F20039DD09 /* uAtomicObject.h in Headers */,
-				C3A4B4CC1D5EB5FF0039DD09 /* uSet.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
 				C35900D81D6542C700C1D154 /* uGLShader.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
 				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
-				C3A4B4E41D5EB6310039DD09 /* uSparseArray.h in Headers */,
-				C3A4B4E01D5EB62A0039DD09 /* uLinkedHashMap.h in Headers */,
 				C34FD9661D5B67900022FF71 /* uGLTouchScreen.h in Headers */,
-				C3A4B4D41D5EB6100039DD09 /* uLinkedHashSet.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,
 				C34FD9941D5B926A0022FF71 /* uMotionEvent.h in Headers */,
 				C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */,
 				C30578011D54BA9C00171EFC /* uMemory.h in Headers */,
-				C3A4B4BC1D5EB5DF0039DD09 /* uIterator.h in Headers */,
-				C3A4B4C81D5EB5F80039DD09 /* uList.h in Headers */,
-				C3A4B4D81D5EB61E0039DD09 /* uMap.h in Headers */,
 				C30577F61D54BA9C00171EFC /* uMD5.h in Headers */,
 				C35900CE1D6542C700C1D154 /* uGLLight.h in Headers */,
 				C35900D41D6542C700C1D154 /* uGLParticle.h in Headers */,
@@ -504,10 +426,8 @@
 				C3ACF9321D5DED6D0065A832 /* uURI.h in Headers */,
 				C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */,
 				C34FDA421D5C01FC0022FF71 /* uGLCamera.h in Headers */,
-				C3A4B4C01D5EB5E70039DD09 /* uListIterator.h in Headers */,
 				C34FDA471D5C96DD0022FF71 /* uGLAlignX.h in Headers */,
 				C30577FC1D54BA9C00171EFC /* uError.h in Headers */,
-				C3A4B4B81D5EB5D60039DD09 /* uStack.h in Headers */,
 				C30577EC1D54BA9C00171EFC /* uCipher.h in Headers */,
 				C305780B1D54BA9C00171EFC /* uSystem.h in Headers */,
 				C34FD9B61D5BBBB70022FF71 /* GLContext.h in Headers */,
@@ -584,7 +504,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3A4B4E71D5EB63C0039DD09 /* uNumber.cpp in Sources */,
 				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
 				C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */,
 				C35900CF1D6542C700C1D154 /* uGLModel.cpp in Sources */,
@@ -596,7 +515,6 @@
 				C34FD9841D5B8E0A0022FF71 /* uSmoothValue.cpp in Sources */,
 				C34FD9881D5B8E0A0022FF71 /* uString.mm in Sources */,
 				C33F48801D674A0E00DD03A5 /* uCipher.cpp in Sources */,
-				C3401C611D6698CC009B223D /* uHandler.cpp in Sources */,
 				C34FD9B91D5BBBB70022FF71 /* JappsyView.mm in Sources */,
 				C3401C5F1D668B70009B223D /* jappsy.cpp in Sources */,
 				C35900B31D6540AA00C1D154 /* uGLReader.cpp in Sources */,
@@ -605,7 +523,6 @@
 				C30578371D54C73B00171EFC /* platform.m in Sources */,
 				C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */,
 				C35900CB1D6542C700C1D154 /* uGLFunc.cpp in Sources */,
-				C3FFBACE1D6104910099AD22 /* uJSONObject.cpp in Sources */,
 				C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C35900DB1D6542C700C1D154 /* uGLTexture.cpp in Sources */,
@@ -624,7 +541,6 @@
 				C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */,
 				C35900D11D6542C700C1D154 /* uGLObject.cpp in Sources */,
 				C33F48821D674A1500DD03A5 /* uCrc.cpp in Sources */,
-				C350705D1D6A717200722351 /* uStack.cpp in Sources */,
 				C30577FA1D54BA9C00171EFC /* uError.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

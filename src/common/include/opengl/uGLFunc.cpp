@@ -18,35 +18,41 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLFunc::RefGLFunc(GLRender* context) {
-	THIS.context = context;
+GLFunc::GLFunc(GLRender* context) {
+	this->context = context;
 }
 
-RefGLFunc::~RefGLFunc() {
-	THIS.context = NULL;
+GLFunc::~GLFunc() {
+	this->context = NULL;
 }
 
 GLFuncs::GLFuncs(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLFunc>();
+	this->context = context;
 }
 
 GLFuncs::~GLFuncs() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLFunc** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLFunc& GLFuncs::get(const wchar_t* key) throw(const char*) {
-	return (GLFunc&)list.get(key);
+GLFunc* GLFuncs::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
-GLFunc& GLFuncs::create(const wchar_t* key) throw(const char*) {
+GLFunc* GLFuncs::create(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLFunc* shader = &(list.put(key, new RefGLFunc(context)));
-		if (wcscmp(key, L"null") == 0) {
+		GLFunc* func = new GLFunc(context);
+		try {
+			list.put(key, func);
+		} catch (...) {
+			delete func;
+			throw;
 		}
-		return *shader;
+		return func;
 	} catch (...) {
 		throw;
 	}

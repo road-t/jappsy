@@ -20,14 +20,13 @@
 #include <platform.h>
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <core/uHandler.h>
 #include <event/uMotionEvent.h>
 
 class GLRender;
 
 class GLTouchEvent {
 public:
-	typedef bool (*Callback)(const wchar_t* event, JObject& userData);
+	typedef bool (*Callback)(const wchar_t* event, void* userData);
 
 	float x;
 	float y;
@@ -37,16 +36,14 @@ public:
 	Callback onEvent;
 };
 
-class RefGLTouchScreen : public JRefObject {
+class GLTouchScreen : public CObject {
 public:
-	typedef void (*onTouchCallback)(const wchar_t* event, JObject& userData);
+	typedef void (*onTouchCallback)(const wchar_t* event, void* userData);
 
 private:
-	Handler handler = new Handler();
-	
-	GLRender* context;
-	onTouchCallback onTouch;
-	JObject userData;
+	GLRender* context = NULL;
+	onTouchCallback onTouch = NULL;
+	void* userData;
 
 	GLfloat recordDistance;
 	GLfloat minimalDistance;
@@ -83,9 +80,8 @@ private:
 	void recordTrack(float x, float y, bool stop);
 	void record(float x, float y);
 public:
-	RefGLTouchScreen() throw(const char*) { throw eInvalidParams; }
-	RefGLTouchScreen(GLRender* context, onTouchCallback callback, JObject& userData);
-	~RefGLTouchScreen();
+	GLTouchScreen(GLRender* context, onTouchCallback callback, void* userData);
+	~GLTouchScreen();
 	
 	void release();
 	
@@ -103,19 +99,6 @@ public:
 	void onMouseUp(MotionEvent* event);
 	void onMouseOut(MotionEvent* event);
 	void onMouseMove(MotionEvent* event);
-};
-
-class GLTouchScreen : public JObject {
-public:
-	JRefClass(GLTouchScreen, RefGLTouchScreen);
-	
-	inline GLTouchScreen(GLRender* context, RefGLTouchScreen::onTouchCallback callback, JObject& userData) {
-		RefGLTouchScreen* o = new RefGLTouchScreen(context, callback, userData);
-		if (o == NULL) throw eOutOfMemory;
-		THIS.setRef(o);
-	}
-	
-	inline void release() throw(const char*) { THIS.ref().release(); }
 };
 
 #endif //JAPPSY_UGLTOUCHSCREEN_H

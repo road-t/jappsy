@@ -18,35 +18,41 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLParticle::RefGLParticle(GLRender* context) {
-	THIS.context = context;
+GLParticle::GLParticle(GLRender* context) {
+	this->context = context;
 }
 
-RefGLParticle::~RefGLParticle() {
-	THIS.context = NULL;
+GLParticle::~GLParticle() {
+	this->context = NULL;
 }
 
 GLParticles::GLParticles(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLParticle>();
+	this->context = context;
 }
 
 GLParticles::~GLParticles() {
-	list = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLParticle** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLParticle& GLParticles::get(const wchar_t* key) throw(const char*) {
-	return (GLParticle&)list.get(key);
+GLParticle* GLParticles::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
-GLParticle& GLParticles::create(const wchar_t* key) throw(const char*) {
+GLParticle* GLParticles::create(const CString& key) throw(const char*) {
 	try {
 		list.remove(key);
-		GLParticle* shader = &(list.put(key, new RefGLParticle(context)));
-		if (wcscmp(key, L"null") == 0) {
+		GLParticle* particle = new GLParticle(context);
+		try {
+			list.put(key, particle);
+		} catch (...) {
+			delete particle;
+			throw;
 		}
-		return *shader;
+		return particle;
 	} catch (...) {
 		throw;
 	}

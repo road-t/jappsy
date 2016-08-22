@@ -123,7 +123,10 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
     #elif defined(__WINNT__)
         Sleep(ms);
     #else
-        sleep((unsigned int)ms);
+		struct timespec time;
+		struct timespec rem;
+		t.ms = ms;
+		nanosleep(&time, &rem);
     #endif
     }
 #endif

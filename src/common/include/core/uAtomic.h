@@ -68,8 +68,8 @@
 	typedef bool jlock;
 	typedef bool jbool;
 
-    #define AtomicLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) sleep(1)
-    #define AtomicFastLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) sleep(0)
+    #define AtomicLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) usleep(1)
+    #define AtomicFastLock(ptr) while (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL)) usleep(0)
 	#define AtomicLockTry(ptr) (__atomic_test_and_set(ptr, __ATOMIC_ACQ_REL) == false)
     #define AtomicUnlock(ptr) __atomic_clear(ptr, __ATOMIC_RELEASE)
     #define AtomicGet(ptr) __atomic_load_n(ptr, __ATOMIC_ACQUIRE)
@@ -132,8 +132,8 @@
 	typedef int32_t jlock;
 	typedef int32_t jbool;
 
-	#define AtomicLock(ptr) while (__sync_lock_test_and_set(ptr, 1) != 0) sleep(1)
-    #define AtomicFastLock(ptr) while (__sync_lock_test_and_set(ptr, 1) != 0) sleep(0)
+	#define AtomicLock(ptr) while (__sync_lock_test_and_set(ptr, 1) != 0) usleep(1)
+    #define AtomicFastLock(ptr) while (__sync_lock_test_and_set(ptr, 1) != 0) usleep(0)
 	#define AtomicLockTry(ptr) (__sync_lock_test_and_set(ptr, 1) == 0)
     #define AtomicUnlock(ptr) __sync_lock_release(ptr)
     #define AtomicGet(ptr) __sync_val_compare_and_swap(ptr, 0, 0)

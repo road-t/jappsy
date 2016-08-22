@@ -19,35 +19,29 @@
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
-#include <data/uHashMap.h>
+#include <data/uVector.h>
 
 class GLRender;
 
-class RefGLParticle : public JRefObject {
+class GLParticle : public CObject {
 public:
 	GLRender* context = NULL;
 	
-	inline RefGLParticle() { throw eInvalidParams; }
-	RefGLParticle(GLRender* context);
-	~RefGLParticle();
+	GLParticle(GLRender* context);
+	~GLParticle();
 };
 
-class GLParticle : public JObject {
-public:
-	JRefClass(GLParticle, RefGLParticle)
-};
-
-class GLParticles {
+class GLParticles : public CObject {
 private:
 	GLRender* context;
-	JHashMap<JString, GLParticle> list;
+	VectorMap<CString&, GLParticle*> list;
 	
 public:
 	GLParticles(GLRender* context) throw(const char*);
 	~GLParticles();
 	
-	GLParticle& get(const wchar_t* key) throw(const char*);
-	GLParticle& create(const wchar_t* key) throw(const char*);
+	GLParticle* get(const CString& key) throw(const char*);
+	GLParticle* create(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLPARTICLE_H

@@ -18,38 +18,34 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-RefGLTexture::RefGLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
-	THIS.context = context;
+GLTexture::GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+	this->context = context;
 	uint32_t count = handles.count();
 	if (count > 0) {
-		THIS.handles.resize(count);
-		memcpy(THIS.handles.items(), handles.items(), count * sizeof(GLuint));
+		this->handles.resize(count);
+		memcpy(this->handles.items(), handles.items(), count * sizeof(GLuint));
 
 		try {
 			handles1iv.resize(count);
 		} catch (...) {
-			THIS.handles.clear();
+			this->handles.clear();
 			throw;
 		}
 	}
-	THIS.width = width;
-	THIS.height = height;
+	this->width = width;
+	this->height = height;
 }
 
-RefGLTexture::~RefGLTexture() {
+GLTexture::~GLTexture() {
 	uint32_t count = handles.count();
-	if (handles.size() > 0) {
+	if (handles.count() > 0) {
 		for (int i = 0; i < count; i++) {
 			context->textures->releaseTextureHandle(handles[i]);
 		}
-		handles.clear();
 	}
-	handles1iv.clear();
-	width = height = 0;
-	context = NULL;
 }
 
-GLuint RefGLTexture::bind(GLint index, GLint uniform) {
+GLuint GLTexture::bind(GLint index, GLint uniform) {
 	for (int i = 0; i < handles.count(); i++) {
 		GLuint handle = handles.get(i);
 		context->activeTexture(index);
@@ -73,22 +69,27 @@ GLuint RefGLTexture::bind(GLint index, GLint uniform) {
 static Vec4 defaultTextureColor = { 0, 0, 0, 0 };
 
 GLTextures::GLTextures(GLRender* context) throw(const char*) {
-	THIS.context = context;
-	list = new JHashMap<JString, GLTexture>();
+	this->context = context;
 	defaultTexture = createSolidTexture(L"null", defaultTextureColor);
 }
 
 GLTextures::~GLTextures() {
-	list = null;
-	defaultTexture = null;
-	context = NULL;
+	int32_t count = list.count();
+	GLTexture** items = list.items();
+	for (int i = 0; i < count; i++) {
+		delete items[i];
+	}
 }
 
-GLTexture& GLTextures::get(const JString& key) throw(const char*) {
-	return (GLTexture&)list.get(key);
+GLTexture* GLTextures::get(const CString& key) {
+	try {
+		return list.get(key);
+	} catch (...) {
+		return NULL;
+	}
 }
 
-GLTexture& GLTextures::createSolidTexture(const JString& key, const Vec4& rgba4fv) throw(const char*) {
+GLTexture* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*) {
 	GLuint handle;
 	glGenTextures(1, &handle);
 	CheckGLError();
@@ -108,29 +109,42 @@ GLTexture& GLTextures::createSolidTexture(const JString& key, const Vec4& rgba4f
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	
 	try {
+		list.remove(key);
+
 		Vector<GLuint> handles;
 		handles.push(handle);
-		list.remove(key);
-		GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, 1, 1)));
-		if (key.equals(L"null")) {
-			defaultTexture = *texture;
+		GLTexture* texture = new GLTexture(context, handles, 1, 1);
+		try {
+			list.put(key, texture);
+		} catch (...) {
+			delete texture;
+			throw;
+		}
+		if (key == L"null") {
+			defaultTexture = texture;
 			defaultTextureHandle = handles[0];
 		}
-		return *texture;
+		return texture;
 	} catch (...) {
 		glDeleteTextures(1, &handle);
 		throw;
 	}
 }
 
-GLTexture& GLTextures::createTexture(const JString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+GLTexture* GLTextures::createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	list.remove(key);
-	GLTexture* texture = &(list.put(key, new RefGLTexture(context, handles, width, height)));
-	if (key.equals(L"null")) {
-		defaultTexture = *texture;
+	GLTexture* texture = new GLTexture(context, handles, width, height);
+	try {
+		list.put(key, texture);
+	} catch (...) {
+		delete texture;
+		throw;
+	}
+	if (key == L"null") {
+		defaultTexture = texture;
 		defaultTextureHandle = handles[0];
 	}
-	return *texture;
+	return texture;
 }
 
 GLuint GLTextures::createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*) {

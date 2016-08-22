@@ -747,6 +747,11 @@ public:
 		m_values = new Vector<V>(count, step);
 	}
 	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
+	}
+	
 	virtual inline void clear() {
 		m_keys->clear();
 		m_values->clear();
@@ -822,6 +827,11 @@ public:
 	inline VectorMap(uint32_t count, uint32_t step) {
 		m_keys = new Vector<K&>(count, step);
 		m_values = new Vector<V>(count, step);
+	}
+	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
 	}
 	
 	virtual inline void clear() {
@@ -901,6 +911,11 @@ public:
 		m_values = new Vector<V&>(count, step);
 	}
 	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
+	}
+	
 	virtual inline void clear() {
 		m_keys->clear();
 		m_values->clear();
@@ -976,6 +991,11 @@ public:
 	inline VectorMap(uint32_t count, uint32_t step) {
 		m_keys = new Vector<K>(count, step);
 		m_values = new Vector<V&>(count, step);
+	}
+	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
 	}
 	
 	virtual inline void clear() {

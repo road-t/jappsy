@@ -53,7 +53,7 @@ public:
 	GLTextures(GLRender* context) throw(const char*);
 	~GLTextures();
 	
-	GLTexture* get(const CString& key);
+	GLTexture* get(const CString& key) throw(const char*);
 	GLTexture* createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*);
 	GLTexture* createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	

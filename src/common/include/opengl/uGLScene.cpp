@@ -42,12 +42,8 @@ GLScenes::~GLScenes() {
 	}
 }
 
-GLScene* GLScenes::get(const CString& key) {
-	try {
-		return list.get(key);
-	} catch (...) {
-		return NULL;
-	}
+GLScene* GLScenes::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
 GLScene* GLScenes::createScene(const CString& key) throw(const char*) {

@@ -280,7 +280,7 @@ extern "C" {
 		void setLength(uint32_t length) throw(const char*);
 
 	// Destructor
-		virtual void release();
+		~CString();
 		
 	// Constructors
 		inline CString() { }
@@ -498,6 +498,8 @@ extern "C" {
 		static CString format(const wchar_t* string, ...);
 		
 		CString md5() const throw(const char*);
+
+		void log() const;
 	};
 
 #endif

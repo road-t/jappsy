@@ -141,7 +141,7 @@ GLCameras::~GLCameras() {
 	}
 }
 
-GLCamera* GLCameras::get(const CString& key) {
+GLCamera* GLCameras::get(const CString& key) throw(const char*) {
 	return list.get(key);
 }
 

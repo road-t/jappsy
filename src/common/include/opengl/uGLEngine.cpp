@@ -58,6 +58,10 @@ GLEngine::~GLEngine() {
 	}
 }
 
+void GLEngine::shutdown() {
+	context->loader->release();
+}
+
 void GLEngine::setBasePath(const CString& basePath) {
 	context->loader->basePath = basePath;
 }

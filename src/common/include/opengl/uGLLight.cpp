@@ -121,12 +121,8 @@ GLLights::~GLLights() {
 	}
 }
 
-GLLight* GLLights::get(const CString& key) {
-	try {
-		return list.get(key);
-	} catch (...) {
-		return NULL;
-	}
+GLLight* GLLights::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
 GLLight* GLLights::createLight(const CString& key) throw(const char*) {

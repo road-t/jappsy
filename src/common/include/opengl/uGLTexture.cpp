@@ -81,12 +81,8 @@ GLTextures::~GLTextures() {
 	}
 }
 
-GLTexture* GLTextures::get(const CString& key) {
-	try {
-		return list.get(key);
-	} catch (...) {
-		return NULL;
-	}
+GLTexture* GLTextures::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
 GLTexture* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*) {

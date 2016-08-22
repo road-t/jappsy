@@ -358,7 +358,7 @@ public:
 	GLModels(GLRender* context) throw(const char*);
 	~GLModels();
 	
-	GLModel* get(const CString& key);
+	GLModel* get(const CString& key) throw(const char*);
 	GLModel* createModel(const CString& key) throw(const char*);
 
 private:

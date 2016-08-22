@@ -215,7 +215,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 	
-	if ((paint.m_color & 0xFF000000) != 0) {
+	if (((paint.m_color & 0xFF000000) != 0) && (shaderSquareFill != NULL)) {
 		if ((paint.m_color & 0xFF000000) != 0xFF000000)
 			glEnable(GL_BLEND);
 		else
@@ -240,7 +240,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		glUseProgram(0);
 	}
 	
-	if ((paint.m_strokeColor & 0xFF000000) != 0) {
+	if (((paint.m_strokeColor & 0xFF000000) != 0) && (shaderSquareStroke != NULL)) {
 		glEnable(GL_BLEND);
 		glUseProgram(shaderSquareStroke->program);
 		
@@ -272,6 +272,9 @@ void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 	
+	if (shaderSquareTexture == NULL)
+		return;
+	
 	glEnable(GL_BLEND);
 	glUseProgram(shaderSquareTexture->program);
 	
@@ -302,7 +305,12 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 
-	GLShader* shader = shaders->get((wchar_t*)key);
+	GLShader* shader;
+	try {
+		shader = shaders->get(key);
+	} catch (...) {
+		return;
+	}
 	GLuint program = shader->program;
 	int uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
 	int aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
@@ -343,7 +351,12 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 
-	GLShader* shader = shaders->get((wchar_t*)key);
+	GLShader* shader;
+	try {
+		shader = shaders->get(key);
+	} catch (...) {
+		return;
+	}
 	GLuint program = shader->program;
 	int uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
 	int aVertexPosition = glGetAttribLocation(program, "aVertexPosition");

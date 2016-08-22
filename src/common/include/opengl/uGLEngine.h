@@ -31,7 +31,7 @@ public:
 	GLEngine();
 	~GLEngine();
 	
-	inline void shutdown() {}
+	void shutdown();
 	
 	void setBasePath(const CString& basePath);
 	void load(const char* json);

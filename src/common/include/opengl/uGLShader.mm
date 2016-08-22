@@ -210,12 +210,8 @@ GLShaders::~GLShaders() {
 	}
 }
 
-GLShader* GLShaders::get(const CString& key) {
-	try {
-		return list.get(key);
-	} catch (...) {
-		return NULL;
-	}
+GLShader* GLShaders::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
 GLShader* GLShaders::createShader(const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {

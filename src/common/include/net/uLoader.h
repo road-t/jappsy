@@ -93,7 +93,6 @@ private:
 	CString cacheid;
 	
 	void checkUpdate(int time);
-	static void* onUpdateWait(void* data);
 	static void* onUpdate(void* data);
 	void update();
 	void run();
@@ -131,6 +130,7 @@ public:
 		this->userData = userData;
 	}
 	
+	void release();
 	~Loader();
 	
 	void setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror);

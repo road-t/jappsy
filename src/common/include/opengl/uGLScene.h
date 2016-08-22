@@ -56,7 +56,7 @@ public:
 	GLScenes(GLRender* context) throw(const char*);
 	~GLScenes();
 	
-	GLScene* get(const CString& key);
+	GLScene* get(const CString& key) throw(const char*);
 	GLScene* createScene(const CString& key) throw(const char*);
 };
 

@@ -111,7 +111,11 @@ void HTTPRequest::run(HTTPRequest* http) throw(const char*) {
 		throw eNullPointer;
 	
 	if (http->threaded) {
-		[[iOSThread class] performSelectorOnMainThread:@selector(runAsync:) withObject:[NSValue valueWithPointer:http] waitUntilDone:NO];
+		if ([NSThread isMainThread]) {
+			[[iOSThread class] runAsync:[NSValue valueWithPointer:http]];
+		} else {
+			[[iOSThread class] performSelectorOnMainThread:@selector(runAsync:) withObject:[NSValue valueWithPointer:http] waitUntilDone:NO];
+		}
 	} else {
 		if ([NSThread isMainThread]) {
 			[[iOSThread class] performSelectorOnMainThread:@selector(runSyncMain:) withObject:[NSValue valueWithPointer:http] waitUntilDone:YES];

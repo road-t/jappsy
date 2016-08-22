@@ -20,6 +20,7 @@
 
 @property (readonly, nonatomic, getter=isRunning) BOOL running;
 @property (nonatomic) NSInteger interval;
+@property (readonly, nonatomic, getter=isRunning) BOOL stopping;
 
 - (BOOL) onStart;
 - (BOOL) onStop;

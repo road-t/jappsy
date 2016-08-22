@@ -29,7 +29,7 @@ void Loader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onRe
 	this->onerror = onerror;
 }
 
-Loader::~Loader() {
+void Loader::release() {
 	lock();
 	AtomicSet(&shutdown, 1);
 	
@@ -41,11 +41,18 @@ Loader::~Loader() {
 		usleep(1);
 		lock();
 	} while (true);
-
+	
 	while (AtomicGet(&status.left) > 0) {
 		usleep(1);
 	}
 	
+	AtomicUnlock(&updating);
+	unlock();
+}
+
+Loader::~Loader() {
+	release();
+
 	int32_t count = list.count();
 	if (count > 0) {
 		File** items = list.items();
@@ -73,24 +80,18 @@ void Loader::checkUpdate(int time) {
 			
 			threadData->loader = this;
 			threadData->time = time;
-			NewThreadAsync(onUpdateWait, NULL, threadData);
+			NewThreadAsync(onUpdate, NULL, threadData);
 		}
 	}
 	unlock();
 }
 
-void* Loader::onUpdateWait(void* data) {
+void* Loader::onUpdate(void* data) {
 	struct LoaderUpdateWaitData* threadData = (struct LoaderUpdateWaitData*)data;
 	Loader* loader = (Loader*)AtomicGetPtr(&(threadData->loader));
 	systemSleep(AtomicGet(&(threadData->time)));
-	
-	MainThreadAsync(loader->onUpdate, NULL, loader);
 	memFree(threadData);
-	return NULL;
-}
-
-void* Loader::onUpdate(void* data) {
-	Loader* loader = (Loader*)data;
+	
 	loader->update();
 	return NULL;
 }
@@ -265,10 +266,12 @@ bool Loader::onhttp_text(const CString& url, Stream* stream, void* userData) {
 	bool result = false;
 	try {
 		result = info->loader->onText(info->info, stream);
+		if (result) {
+			delete info;
+		}
 	} catch (...) {
 	}
 	
-	delete info;
 	return result;
 }
 
@@ -278,10 +281,12 @@ bool Loader::onhttp_data(const CString& url, Stream* stream, void* userData) {
 	bool result = false;
 	try {
 		result = info->loader->onData(info->info, stream);
+		if (result) {
+			delete info;
+		}
 	} catch (...) {
 	}
 	
-	delete info;
 	return result;
 }
 
@@ -303,10 +308,6 @@ bool Loader::onhttp_retry(const CString& url, void* userData) {
 	try {
 		result = info->loader->onRetry(info->info);
 	} catch (...) {
-	}
-	
-	if (!result) {
-		delete info;
 	}
 	
 	return result;

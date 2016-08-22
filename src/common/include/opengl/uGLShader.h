@@ -53,7 +53,7 @@ public:
 	GLShaders(GLRender* context) throw(const char*);
 	~GLShaders();
 	
-	GLShader* get(const CString& key);
+	GLShader* get(const CString& key) throw(const char*);
 	GLShader* createShader(const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	
 	GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);

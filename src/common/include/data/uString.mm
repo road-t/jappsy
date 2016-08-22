@@ -964,7 +964,7 @@ void CString::setLength(uint32_t length) throw(const char*) {
 
 //==============================================================
 
-void CString::release() {
+CString::~CString() {
 	if (this->m_data != NULL) {
 		memFree(this->m_data);
 		this->m_data = NULL;
@@ -2995,6 +2995,25 @@ CString CString::toJSON() const {
 	return CString(L"\"").concat(*this).concat(L"\"");
 }
 
+void CString::log() const {
+	wchar_t* wstr = (wchar_t*)m_data;
+	if (wstr == NULL)
+		return;
+	
+	uint32_t size = wcs_toutf8_size(wstr);
+	if (size == 0)
+		return;
+	
+	char* str = memAlloc(char, str, size);
+	if (str == NULL)
+		return;
+	
+	wcs_toutf8(wstr, str, size);
+	
+	LOG("%s", str);
+	
+	memFree(str);
+}
 
 //==============================================================
 

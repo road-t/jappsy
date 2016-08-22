@@ -65,7 +65,6 @@ OMView *omView = NULL;
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
 	[omView onStop];
-	jappsyQuit();
 }
 
 #pragma mark -
@@ -75,8 +74,8 @@ OMView *omView = NULL;
 	/*
 	 Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
 	 */
+	
 	[omView onStop];
-	jappsyQuit();
 }
-
+	 
 @end

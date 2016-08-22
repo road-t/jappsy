@@ -25,8 +25,8 @@ R"JAPPSYRAWSTRING(
         },
 
         "textures": {
-            "null":						"models/null.jimg",
-            "mramor.png":				"models/mramor.jimg",
+//            "null":						"models/null.jimg",
+//            "mramor.png":				"models/mramor.jimg",
 /*
             "metal.png":				"models/metal.jimg",
             "gold.png":					"models/gold.jimg",
@@ -39,11 +39,11 @@ R"JAPPSYRAWSTRING(
             "buttons":					"images/buttons.jimg",
             "sprites":					"images/sprites.jimg",
 */
-            "mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
-            "mobile_tex_random":					"shaders/mobile_tex_random.jimg",
+//            "mobile_tex_effect_star":				"shaders/mobile_tex_effect_star.jimg",
+//            "mobile_tex_random":					"shaders/mobile_tex_random.jimg",
         },
         "models": {
-            "ball":						"models/ball.json",
+//            "ball":						"models/ball.json",
 /*
             "cap":						"models/cap.json",
             "separator":				"models/separator.json",

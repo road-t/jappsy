@@ -72,7 +72,7 @@ public:
 	GLCameras(GLRender* context) throw(const char*);
 	~GLCameras();
 	
-	GLCamera* get(const CString& key);
+	GLCamera* get(const CString& key) throw(const char*);
 	GLCamera* createCamera(const CString& key) throw(const char*);
 };
 

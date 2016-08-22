@@ -23,7 +23,7 @@
 #include <event/uMotionEvent.h>
 
 class GLContext {
-private:
+public:
 	EAGLContext* context = NULL;
 	GLEngine* engine = NULL;
 	
@@ -32,6 +32,7 @@ private:
 	GLuint depthRenderBuffer = 0;
 	
 	void release();
+	
 public:
 	GLint width;
 	GLint height;

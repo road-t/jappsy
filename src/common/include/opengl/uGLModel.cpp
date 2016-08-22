@@ -298,12 +298,8 @@ GLModels::~GLModels() {
 	}
 }
 
-GLModel* GLModels::get(const CString& key) {
-	try {
-		return list.get(key);
-	} catch (...) {
-		return NULL;
-	}
+GLModel* GLModels::get(const CString& key) throw(const char*) {
+	return list.get(key);
 }
 
 GLModel* GLModels::createModel(const CString& key) throw(const char*) {

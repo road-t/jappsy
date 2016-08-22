@@ -20,6 +20,7 @@
 #include <core/uSystem.h>
 #include <opengl/uGLEngine.h>
 #include <core/uMemory.h>
+#include <jappsy.h>
 
 @interface JappsyView () {
 	GLContext* _renderer;
@@ -57,6 +58,7 @@
 		
 		_renderer = NULL;
 		_running = FALSE;
+		_stopping = FALSE;
 		_interval = 1;
 		_displayLink = nil;
 		
@@ -119,19 +121,21 @@
 
 - (BOOL) onStart
 {
-	if (_renderer == NULL) {
-		if (_context && [EAGLContext setCurrentContext:_context]) {
-			try {
-				CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
-				_renderer = memNew(_renderer, GLContext(_context, eaglLayer, self.contentScaleFactor));
-			} catch (const char* e) {
+	if (!_stopping) {
+		if (_renderer == NULL) {
+			if (_context && [EAGLContext setCurrentContext:_context]) {
+				try {
+					CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
+					_renderer = memNew(_renderer, GLContext(_context, eaglLayer, self.contentScaleFactor));
+				} catch (const char* e) {
+				}
 			}
 		}
-	}
-	
-	if (_renderer != NULL) {
-		[self onResume];
-		return YES;
+		
+		if (_renderer != NULL) {
+			[self onResume];
+			return YES;
+		}
 	}
 	
 	return NO;
@@ -139,39 +143,65 @@
 
 - (BOOL) onStop
 {
-	[self onPause];
-	
-	if (_renderer != NULL) {
+	if (!_stopping) {
+		_stopping = YES;
+		
 		if (_renderer != NULL) {
-			memDelete(_renderer);
-			_renderer = NULL;
+			[NSThread detachNewThreadSelector:@selector(onShutdownRequest) toTarget:self withObject:nil];
+		
+			return YES;
+		} else {
+			[self onPause];
 		}
-		
-		if ([EAGLContext currentContext] == _context)
-			[EAGLContext setCurrentContext:nil];
-		
-		return YES;
 	}
 	
 	return NO;
 }
 
+- (void) onShutdownRequest
+{
+	_renderer->engine->shutdown();
+		
+	[self performSelectorOnMainThread:@selector(onShutdown) withObject:self waitUntilDone:NO];
+}
+
+- (void) onShutdown
+{
+	[self onPause];
+	
+	if (_renderer != NULL) {
+		memDelete(_renderer);
+		_renderer = NULL;
+	}
+		
+	if ([EAGLContext currentContext] == _context)
+		[EAGLContext setCurrentContext:nil];
+	
+	jappsyQuit();
+
+	_stopping = NO;
+}
+
 - (void) onResume
 {
-	if (!_running) {
-		_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
-		[_displayLink setFrameInterval:_interval];
-		[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-		_running = TRUE;
+	if (!_stopping) {
+		if (!_running) {
+			_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
+			[_displayLink setFrameInterval:_interval];
+			[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+			_running = TRUE;
+		}
 	}
 }
 
 - (void) onPause
 {
-	if (_running) {
-		[_displayLink invalidate];
-		_displayLink = nil;
-		_running = FALSE;
+	if (!_stopping) {
+		if (_running) {
+			[_displayLink invalidate];
+			_displayLink = nil;
+			_running = FALSE;
+		}
 	}
 }
 

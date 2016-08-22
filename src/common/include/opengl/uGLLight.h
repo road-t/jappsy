@@ -65,7 +65,7 @@ public:
 	GLLights(GLScene* scene) throw(const char*);
 	~GLLights();
 	
-	GLLight* get(const CString& key);
+	GLLight* get(const CString& key) throw(const char*);
 	GLLight* createLight(const CString& key) throw(const char*);
 };
 

@@ -30,6 +30,7 @@ typedef void* (*ThreadRunCallback)(void* userData);
 typedef void* (*ThreadResultCallback)(void* userData, void* resultData);
 
 void* CurrentThreadId();
+bool IsMainThread();
 
 void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const char*);
 void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);

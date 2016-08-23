@@ -32,6 +32,10 @@ void* CurrentThreadId() {
 
 static void* MainThreadId = NULL;
 
+bool IsMainThread() {
+	return MainThreadId == CurrentThreadId();
+}
+
 struct ThreadSyncData {
 	volatile jlock syncLock;
 	volatile void* resultData;

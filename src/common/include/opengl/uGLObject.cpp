@@ -44,7 +44,7 @@ GLObject* GLObjects::get(const CString& key) throw(const char*) {
 
 GLObject* GLObjects::create(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLObject* object = new GLObject(context);
 		try {
 			list.put(key, object);

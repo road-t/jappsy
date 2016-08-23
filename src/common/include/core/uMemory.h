@@ -94,7 +94,15 @@ void mmQuit();
             memLogDelete(MM_T(var), var); \
             delete var
 
-    #define memCall(func) \
+	#define memAllocNew(type,var,size) \
+			(type*)mmalloc(size); \
+			memLogNew(MM_LOC, MM_T(var), MM_T(type), ((uint8_t*)var) + 1, size)
+	
+	#define memFreeNew(var) \
+			memLogDelete(MM_T(var), ((uint8_t*)var) + 1); \
+			mmfree(var)
+
+	#define memCall(func) \
             memLogCallFunction(MM_LOC); \
             func \
             memLogRetFunction();
@@ -127,6 +135,12 @@ void mmQuit();
     #define memDelete(var) \
         delete var
 
+	#define memAllocNew(type,var,size) \
+		(type*)mmalloc(size);
+
+	#define memFreeNew(var) \
+		mmfree(var)
+	
     #define memCall(func) \
         func
 

@@ -44,7 +44,7 @@ GLParticle* GLParticles::get(const CString& key) throw(const char*) {
 
 GLParticle* GLParticles::create(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLParticle* particle = new GLParticle(context);
 		try {
 			list.put(key, particle);

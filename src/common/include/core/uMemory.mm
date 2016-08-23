@@ -194,21 +194,53 @@ extern "C" {
 		}
 	}
 	
-#if defined(__WINNT__)
-volatile int32_t mmHeapInit = 0;
-volatile int32_t mmHeap = 0;
-
-#define MM_ZERO		0	//HEAP_ZERO_MEMORY
-
-//#define MM_CHECK_LEFT
-//#define MM_CHECK_RIGHT
+	static volatile int32_t memCount = 0;
+	static volatile int32_t memAllocCount = 0;
+	static volatile int32_t memNewCount = 0;
+#if MEMORY_LOG == 1
+	static volatile int32_t memSize = 0;
 #endif
-
-struct MM_STACK_ITEM {
-    void* ptr;
-    struct MM_STACK_ITEM* next;
-};
-
+	
+	struct MemLogElement {
+		char type[60];
+		char var[60];
+		void* ptr;
+		int32_t size;
+		jbool isnew;
+		char loc[MAX_PATH];
+		char caller[3][MAX_PATH];
+	};
+	
+#if MEMORY_LOG == 1
+	static volatile struct MemLogElement* memLogElements = 0;
+	static volatile int32_t memLogElementsCount = 0;
+#endif
+	static volatile jlock memLockTrigger = false;
+	
+#define memLock() AtomicFastLock(&memLockTrigger)
+#define memUnlock() AtomicUnlock(&memLockTrigger)
+	
+#if MEMORY_LOG == 1
+#define memLogMaxCallStackSize		256
+	static volatile int32_t memLogCallStackCount = -1;
+	static volatile char memLogCallStack[memLogMaxCallStackSize][MAX_PATH];
+#endif
+	
+#if defined(__WINNT__)
+	volatile int32_t mmHeapInit = 0;
+	volatile int32_t mmHeap = 0;
+	
+#define MM_ZERO		0	//HEAP_ZERO_MEMORY
+	
+	//#define MM_CHECK_LEFT
+	//#define MM_CHECK_RIGHT
+#endif
+	
+	struct MM_STACK_ITEM {
+		void* ptr;
+		struct MM_STACK_ITEM* next;
+	};
+	
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
 void mmerror() {
 #ifdef DEBUG
@@ -527,7 +559,31 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 #endif
     }
     if (dwSize == 0) {
-        if (prevSize < 2048) {
+#if MEMORY_LOG == 1
+		memLock();
+		struct MemLogElement* el = 0;
+		struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+		int32_t count = AtomicGet(&memLogElementsCount);
+		if (els != 0) {
+			int32_t i = 0;
+			for (; i < count; i++) {
+				void* elptr = AtomicGetPtr(&(els[i].ptr));
+				if (elptr == mem) {
+					el = &(els[i]);
+				}
+			}
+		}
+		memUnlock();
+		if (el != NULL) {
+			if (AtomicGet(&(el->isnew))) {
+				LOG("Error: Expected memDelete!");
+			} else {
+				LOG("Warning: Expected memRealloc!");
+			}
+		}
+#endif
+		
+		if (prevSize < 2048) {
             free(ptr);
         } else {
             mmVirtualFree(ptr);
@@ -640,7 +696,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
 #endif
 }
 
-void mmfree(void* mem) {
+void _mmfree(void* mem) {
     if (mem != 0) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
 		if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
@@ -703,37 +759,35 @@ void mmfree(void* mem) {
 #endif
     }
 }
-
-static volatile int32_t memCount = 0;
-static volatile int32_t memAllocCount = 0;
-static volatile int32_t memNewCount = 0;
+	
+void mmfree(void* mem) {
+	if (mem != 0) {
 #if MEMORY_LOG == 1
-static volatile int32_t memSize = 0;
+		memLock();
+		struct MemLogElement* el = 0;
+		struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+		int32_t count = AtomicGet(&memLogElementsCount);
+		if (els != 0) {
+			int32_t i = 0;
+			for (; i < count; i++) {
+				void* elptr = AtomicGetPtr(&(els[i].ptr));
+				if (elptr == mem) {
+					el = &(els[i]);
+				}
+			}
+		}
+		memUnlock();
+		if (el != NULL) {
+			if (AtomicGet(&(el->isnew))) {
+				LOG("Error: Expected memDelete!");
+			} else {
+				LOG("Warning: Expected memFree!");
+			}
+		}
 #endif
-
-struct MemLogElement {
-    char type[60];
-    char var[60];
-    void* ptr;
-    int32_t size;
-    char loc[MAX_PATH];
-    char caller[3][MAX_PATH];
-};
-
-#if MEMORY_LOG == 1
-static volatile struct MemLogElement* memLogElements = 0;
-static volatile int32_t memLogElementsCount = 0;
-#endif
-static volatile jlock memLockTrigger = false;
-
-#define memLock() AtomicFastLock(&memLockTrigger)
-#define memUnlock() AtomicUnlock(&memLockTrigger)
-
-#if MEMORY_LOG == 1
-#define memLogMaxCallStackSize		256
-static volatile int32_t memLogCallStackCount = -1;
-static volatile char memLogCallStack[memLogMaxCallStackSize][MAX_PATH];
-#endif
+	}
+	_mmfree(mem);
+}
 
 void memLogCallFunction(const char* location) {
 #if MEMORY_LOG == 1
@@ -755,7 +809,7 @@ void memLogRetFunction() {
 #endif
 }
 
-void memAdd(const char* location, const char* type, const char* var, const void* ptr, uint32_t size) {
+void memAdd(const char* location, const char* type, const char* var, const void* ptr, uint32_t size, jbool isnew) {
 #if MEMORY_LOG == 1
     memLock();
     struct MemLogElement* el = 0;
@@ -781,7 +835,7 @@ void memAdd(const char* location, const char* type, const char* var, const void*
         struct MemLogElement* newElements = (struct MemLogElement*)mmalloc((uint32_t)sizeof(struct MemLogElement)*(count+1024));
 		atomic_bzero((void*)newElements, sizeof(struct MemLogElement)*(count+1024));
 		atomic_memcpy((void*)newElements, (void*)els, sizeof(struct MemLogElement)*(count));
-		mmfree(els);
+		_mmfree(els);
 		els = newElements;
 		AtomicSetPtr(&memLogElements, els);
 		AtomicAdd(&memLogElementsCount, 1024);
@@ -806,12 +860,13 @@ void memAdd(const char* location, const char* type, const char* var, const void*
     strcpy(el->var, var);
     AtomicSetPtr(&(el->ptr), (void*)ptr);
     AtomicSet(&(el->size), size);
+	AtomicSet(&(el->isnew), isnew);
     memUnlock();
     (void)AtomicAdd(&memSize, size);
 #endif
 }
 
-void memDel(const char* var, const void* ptr) {
+void memDel(const char* var, const void* ptr, jbool isnew) {
 #if MEMORY_LOG == 1
     memLock();
     if (ptr == 0) {
@@ -837,13 +892,25 @@ void memDel(const char* var, const void* ptr) {
         }
         if (el != 0) freeCount++;
     }
+	if (el != 0) {
+		if (AtomicGet(&(el->isnew))) {
+			if (!isnew) {
+				LOG("Error: Expected memFree!");
+			}
+		} else {
+			if (isnew) {
+				LOG("Error: Expected memDelete");
+			}
+		}
+	}
 	if ((freeCount > 0) && (freeCount == count)) {
 		AtomicSet(&memLogElementsCount, 0);
-		mmfree(els);
+		_mmfree(els);
 		AtomicSetPtr(&memLogElements, NULL);
 	}
     if (el == 0) {
-        memUnlock();
+		LOG("Error: Unexpected Memory Log");
+		memUnlock();
         return;
     }
 	
@@ -852,7 +919,7 @@ void memDel(const char* var, const void* ptr) {
     memUnlock();
 #endif
 }
-
+	
 void memLogSort() {
 #if MEMORY_LOG == 1
 	struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
@@ -884,42 +951,42 @@ void memLogAlloc(const char* location, const char* type, const char* var, const 
     if (size == 0)
         return;
 
-    memAdd(location,type,var,ptr,size);
+    memAdd(location,type,var,ptr,size,false);
     (void)AtomicIncrement(&memCount);
     (void)AtomicIncrement(&memAllocCount);
 }
 
 void memLogRealloc(const char* location, const char* type, const char* varNew, const void* ptrNew, const char* varOld, const void* ptrOld, uint32_t sizeNew) {
     if (sizeNew == 0) {
-        memDel(varOld,ptrOld);
+        memDel(varOld,ptrOld,false);
         (void)AtomicDecrement(&memCount);
         (void)AtomicDecrement(&memAllocCount);
     } else if (ptrOld != 0) {
         if (ptrNew != 0) {
-            memDel(varOld,ptrOld);
-            memAdd(location,type,varNew,ptrNew,sizeNew);
+            memDel(varOld,ptrOld,false);
+            memAdd(location,type,varNew,ptrNew,sizeNew,false);
         }
     } else {
-        memAdd(location,type,varNew,ptrNew,sizeNew);
+        memAdd(location,type,varNew,ptrNew,sizeNew,false);
         (void)AtomicIncrement(&memCount);
         (void)AtomicIncrement(&memAllocCount);
     }
 }
 
 void memLogFree(const char* var, const void* ptr) {
-    memDel(var,ptr);
+    memDel(var,ptr,false);
     (void)AtomicDecrement(&memCount);
     (void)AtomicDecrement(&memAllocCount);
 }
 
 void memLogNew(const char* location, const char* var, const char* type, const void* ptr, uint32_t size) {
-    memAdd(location,type,var,ptr,size);
+    memAdd(location,type,var,ptr,size,true);
     (void)AtomicIncrement(&memCount);
     (void)AtomicIncrement(&memNewCount);
 }
 
 void memLogDelete(const char* var, const void* ptr) {
-    memDel(var,ptr);
+    memDel(var,ptr,true);
     (void)AtomicDecrement(&memCount);
     (void)AtomicDecrement(&memNewCount);
 }
@@ -1288,4 +1355,73 @@ Java_com_jappsy_core_Memory_toIntArray(JNIEnv *env, jclass type, jobject memory)
 
 #ifdef __cplusplus
 }
+#endif
+
+#include <new>
+
+#if MEMORY_LOG == 1
+
+void* operator new(std::size_t n) throw(std::bad_alloc) {
+	return malloc(n);
+}
+
+void operator delete(void* mem) throw() {
+	if (mem != 0) {
+		memLock();
+		struct MemLogElement* el = 0;
+		struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+		int32_t count = AtomicGet(&memLogElementsCount);
+		if (els != 0) {
+			int32_t i = 0;
+			for (; i < count; i++) {
+				void* elptr = AtomicGetPtr(&(els[i].ptr));
+				if (elptr == mem) {
+					el = &(els[i]);
+				}
+			}
+		}
+		memUnlock();
+		if (el != NULL) {
+			if (AtomicGet(&(el->isnew))) {
+				LOG("Error: Expected memDelete!");
+			} else {
+				LOG("Warning: Expected memFree!");
+			}
+		}
+	}
+	
+	free(mem);
+}
+
+void* operator new[](std::size_t s) throw(std::bad_alloc) {
+	return malloc(s);
+}
+void operator delete[](void* mem) throw() {
+	if (mem != 0) {
+		memLock();
+		struct MemLogElement* el = 0;
+		struct MemLogElement* els = (struct MemLogElement*)AtomicGetPtr(&memLogElements);
+		int32_t count = AtomicGet(&memLogElementsCount);
+		if (els != 0) {
+			int32_t i = 0;
+			for (; i < count; i++) {
+				void* elptr = AtomicGetPtr(&(els[i].ptr));
+				if (elptr == mem) {
+					el = &(els[i]);
+				}
+			}
+		}
+		memUnlock();
+		if (el != NULL) {
+			if (AtomicGet(&(el->isnew))) {
+				LOG("Error: Expected memDelete!");
+			} else {
+				LOG("Warning: Expected memFree!");
+			}
+		}
+	}
+	
+	free(mem);
+}
+
 #endif

@@ -28,7 +28,6 @@ public:
 	typedef void (*onErrorCallback)(const CString& url, const CString& error, void* userData);
 	typedef bool (*onRetryCallback)(const CString& url, void* userData);
 	
-	static void Request(const CString& url, bool threaded, int retry, int timeout, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
 	static void Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*);
 };
 

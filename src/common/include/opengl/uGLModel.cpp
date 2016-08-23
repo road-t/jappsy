@@ -304,7 +304,7 @@ GLModel* GLModels::get(const CString& key) throw(const char*) {
 
 GLModel* GLModels::createModel(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLModel* model = new GLModel(context);
 		try {
 			list.put(key, model);

@@ -48,7 +48,7 @@ GLScene* GLScenes::get(const CString& key) throw(const char*) {
 
 GLScene* GLScenes::createScene(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLScene* scene = new GLScene(context);
 		try {
 			list.put(key, scene);

@@ -44,7 +44,7 @@ GLSprite* GLSprites::get(const CString& key) throw(const char*) {
 
 GLSprite* GLSprites::create(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLSprite* sprite = new GLSprite(context);
 		try {
 			list.put(key, sprite);

@@ -38,10 +38,10 @@ protected:
 	void threadUnlock() const;
 	
 public:
-	inline void* operator new(size_t size) throw(const char*) { void *p = memAlloc(void, p, size); if (!p) throw eOutOfMemory; return p; }
-	inline void* operator new[](size_t size) throw(const char*) { void *p = memAlloc(void, p, size); if (!p) throw eOutOfMemory; return p; }
-	inline void operator delete(void* p) { memFree(p); }
-	inline void operator delete[](void* p) { memFree(p); }
+	inline void* operator new(size_t size) throw(const char*) { void *p = memAllocNew(void, p, size); if (!p) throw eOutOfMemory; return p; }
+	inline void* operator new[](size_t size) throw(const char*) { void *p = memAllocNew(void, p, size); if (!p) throw eOutOfMemory; return p; }
+	inline void operator delete(void* p) { memFreeNew(p); }
+	inline void operator delete[](void* p) { memFreeNew(p); }
 	
 	inline void lock() const { threadLock(); }
 	inline bool lockTry() const { return threadLockTry(); }

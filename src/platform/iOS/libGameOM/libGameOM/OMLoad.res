@@ -2,26 +2,26 @@ R"JAPPSYRAWSTRING(
 {
     "groups": {
         "shaders": {
-            "vsh_main":					"shaders/vsh_main.jsh",
-            "vsh_texture":				"shaders/vsh_texture.jsh",
-            "square_fill":				"shaders/square_fill.jsh",
-            "square_stroke":			"shaders/square_stroke.jsh",
-            "square_texture":			"shaders/square_texture.jsh",
+//            "vsh_main":					"shaders/vsh_main.jsh",
+//            "vsh_texture":				"shaders/vsh_texture.jsh",
+//            "square_fill":				"shaders/square_fill.jsh",
+//            "square_stroke":			"shaders/square_stroke.jsh",
+//            "square_texture":			"shaders/square_texture.jsh",
 
-            "sprite":					"shaders/sprite.jsh",
-            "particle":					"shaders/particle.jsh",
-            "model":					"shaders/model.jsh",
+//            "sprite":					"shaders/sprite.jsh",
+//            "particle":					"shaders/particle.jsh",
+//            "model":					"shaders/model.jsh",
 
-//            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
+            "mobile_effect_torsion":				"shaders/mobile_effect_torsion.jsh",
             "mobile_effect_sun1":					"shaders/mobile_effect_sun1.jsh",
-/*            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
-            "mobile_effect_unknown":				"shaders/mobile_effect_unknown.jsh",
+            "mobile_effect_moon1":					"shaders/mobile_effect_moon1.jsh",
+/*            "mobile_effect_unknown":				"shaders/mobile_effect_unknown.jsh",
             "mobile_effect_unknown_star":			"shaders/mobile_effect_unknown_star.jsh",   // iOS ничего не видно
             "mobile_effect_sun2":					"shaders/mobile_effect_sun2.jsh",
             "mobile_effect_moon2":					"shaders/mobile_effect_moon2.jsh",
             "mobile_effect_star1":					"shaders/mobile_effect_star1.jsh",
 */
-            "mobile_effect_star2":					"shaders/mobile_effect_star2.jsh",
+//            "mobile_effect_star2":					"shaders/mobile_effect_star2.jsh",
         },
 
         "textures": {

@@ -151,6 +151,10 @@
 		
 			return YES;
 		} else {
+#ifdef DEBUG
+			memLogStats(NULL, NULL, NULL, NULL);
+#endif
+
 			[self onPause];
 		}
 	}

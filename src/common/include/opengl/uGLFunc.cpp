@@ -44,7 +44,7 @@ GLFunc* GLFuncs::get(const CString& key) throw(const char*) {
 
 GLFunc* GLFuncs::create(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLFunc* func = new GLFunc(context);
 		try {
 			list.put(key, func);

@@ -371,7 +371,6 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 			} else if ((thread.vsh != NULL) && (thread.fsh != NULL) && (!thread.vsh->isReference()) && (!thread.fsh->isReference())) {
 				(void)MainThreadSync(CreateShaderProgramCallback, &thread);
 			}
-			
 			return (GLShader*)(MainThreadSync(CreateShaderCallback, &thread));
 		} catch (...) {
 			(void)MainThreadSync(CreateShaderErrorCallback, &thread);

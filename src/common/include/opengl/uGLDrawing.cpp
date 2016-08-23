@@ -44,7 +44,7 @@ GLDrawing* GLDrawings::get(const CString& key) throw(const char*) {
 
 GLDrawing* GLDrawings::create(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLDrawing* drawing = new GLDrawing(context);
 		try {
 			list.put(key, drawing);

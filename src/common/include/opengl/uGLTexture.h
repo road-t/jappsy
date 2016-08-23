@@ -47,6 +47,7 @@ private:
 	VectorMap<CString&, GLTexture*> list;
 	GLTexture* defaultTexture;
 	
+	void remove(const CString& key);
 public:
 	GLuint defaultTextureHandle = 0;
 

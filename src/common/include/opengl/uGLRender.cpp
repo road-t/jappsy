@@ -413,7 +413,7 @@ bool GLRender::createShaders(JSONObject shaders) throw(const char*) {
 							CString vsh = subitems[0]->toString();
 							CString fsh = subitems[1]->toString();
 							
-							this->shaders->createShader((wchar_t*)key, (wchar_t*)vsh, (wchar_t*)fsh);
+							this->shaders->createShader(key, (wchar_t*)vsh, (wchar_t*)fsh);
 						}
 					}
 				} catch (...) {

@@ -216,7 +216,7 @@ GLShader* GLShaders::get(const CString& key) throw(const char*) {
 
 GLShader* GLShaders::createShader(const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLShader* shader = new GLShader(context, vsh, fsh, program, textures);
 		try {
 			list.put(key, shader);
@@ -456,12 +456,12 @@ GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReferenc
 	try {
 		try {
 			GLShader* shader = list.get(key);
-			Vector<GLObjectData*> *shaderTextures = &(shader->textures);
-			int32_t count = shaderTextures->count();
+			int32_t count = shader->textures.count();
+			GLObjectData** items = shader->textures.items();
 			for (int i = 0; i < count; i++) {
-				textures.push(shaderTextures->get(i));
+				textures.push(items[i]);
 			}
-			shaderTextures->clear();
+			shader->textures.clear();
 		} catch (...) {
 		}
 		return createShader(key, vsh, fsh, 0, textures);

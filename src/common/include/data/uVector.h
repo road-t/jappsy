@@ -560,7 +560,27 @@ public:
 			resize(m_count - 1);
 			return result;
 		}
-		throw eOutOfRange;
+		return NULL;
+	}
+	
+	virtual inline void removefree(int32_t index) throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			mmfree(m_items[index]);
+			if ((m_count > 0) && (index < (m_count - 1))) {
+				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type*));
+			}
+			resize(m_count - 1);
+		}
+	}
+	
+	virtual inline void removedelete(int32_t index) throw(const char*) {
+		if ((index >= 0) && (index < m_count)) {
+			delete m_items[index];
+			if ((m_count > 0) && (index < (m_count - 1))) {
+				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type*));
+			}
+			resize(m_count - 1);
+		}
 	}
 	
 	virtual inline Type** items() const {
@@ -791,7 +811,7 @@ public:
 		int32_t index = m_keys->search(key);
 		if (index >= 0) {
 			m_keys->remove(index);
-			m_values->remove(index);
+			return m_values->remove(index);
 		}
 	}
 	
@@ -873,7 +893,7 @@ public:
 		int32_t index = m_keys->search(key);
 		if (index >= 0) {
 			m_keys->remove(index);
-			m_values->remove(index);
+			return m_values->remove(index);
 		}
 	}
 	
@@ -1038,6 +1058,203 @@ public:
 		if (index >= 0) {
 			m_keys->remove(index);
 			m_values->remove(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K** keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V** items() const {
+		return m_values->items();
+	}
+};
+
+template <typename K, typename V>
+class VectorMap<K,V*> : public CObject {
+public:
+	Vector<K>* m_keys;
+	Vector<V*>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K>();
+		m_values = new Vector<V*>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K>(count);
+		m_values = new Vector<V*>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K>(count, step);
+		m_values = new Vector<V*>(count, step);
+	}
+	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(K key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(const V* value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V* get(K key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(K key, const V* value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = value;
+		}
+	}
+	
+	virtual inline V* remove(K key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			return m_values->remove(index);
+		}
+	}
+	
+	virtual inline void removefree(K key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->removefree(index);
+		}
+	}
+	
+	virtual inline void removedelete(K key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->removedelete(index);
+		}
+	}
+	
+	virtual inline int32_t count() const {
+		return m_keys->count();
+	}
+	
+	virtual inline K* keys() const {
+		return m_keys->items();
+	}
+	
+	virtual inline V* values() const {
+		return m_values->items();
+	}
+};
+
+template <typename K, typename V>
+class VectorMap<K&,V*> : public CObject {
+public:
+	Vector<K&>* m_keys;
+	Vector<V*>* m_values;
+	
+	inline VectorMap() {
+		m_keys = new Vector<K&>();
+		m_values = new Vector<V*>();
+	}
+	
+	inline VectorMap(uint32_t count) {
+		m_keys = new Vector<K&>(count);
+		m_values = new Vector<V*>(count);
+	}
+	
+	inline VectorMap(uint32_t count, uint32_t step) {
+		m_keys = new Vector<K&>(count, step);
+		m_values = new Vector<V*>(count, step);
+	}
+	
+	inline ~VectorMap() {
+		delete m_keys;
+		delete m_values;
+	}
+	
+	virtual inline void clear() {
+		m_keys->clear();
+		m_values->clear();
+	}
+	
+	virtual inline bool containsKey(const K& key) const {
+		return m_keys->contains(key);
+	}
+	
+	virtual inline bool containsValue(const V* value) const {
+		return m_values->contains(value);
+	}
+	
+	virtual inline V* get(const K& key) const {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			return m_values->get(index);
+		}
+		throw eNotFound;
+	}
+	
+	virtual inline bool empty() const {
+		return m_keys->empty();
+	}
+	
+	virtual inline void put(const K& key, const V* value) {
+		int32_t index = m_keys->search(key);
+		if (index < 0) {
+			m_keys->push(key);
+			m_values->push(value);
+		} else {
+			m_values->operator[](index) = (V*)value;
+		}
+	}
+	
+	virtual inline V* remove(const K& key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			return m_values->remove(index);
+		}
+		return NULL;
+	}
+	
+	virtual inline void removefree(const K& key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->removefree(index);
+		}
+	}
+	
+	virtual inline void removedelete(const K& key) {
+		int32_t index = m_keys->search(key);
+		if (index >= 0) {
+			m_keys->remove(index);
+			m_values->removedelete(index);
 		}
 	}
 	

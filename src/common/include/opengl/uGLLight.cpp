@@ -127,7 +127,7 @@ GLLight* GLLights::get(const CString& key) throw(const char*) {
 
 GLLight* GLLights::createLight(const CString& key) throw(const char*) {
 	try {
-		list.remove(key);
+		list.removedelete(key);
 		GLLight* light = new GLLight(scene, key);
 		try {
 			list.put(key, light);

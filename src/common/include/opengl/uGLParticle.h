@@ -20,10 +20,11 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uVector.h>
+#include <opengl/uGLSceneObject.h>
 
 class GLRender;
 
-class GLParticle : public CObject {
+class GLParticle : public GLSceneObject {
 public:
 	GLRender* context = NULL;
 	

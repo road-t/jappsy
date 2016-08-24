@@ -43,6 +43,8 @@ GLMaterialTexture::GLMaterialTexture(GLRender* context, const CString& textureRe
 			throw;
 		}
 	}
+	
+	(void)checkReady();
 }
 
 bool GLMaterialTexture::checkReady() {
@@ -205,13 +207,13 @@ void GLModelMesh::render(GLRender* context, GLModel* model) const {
 	glUniform4fv(context->shaderModel->uColors, mat->colors4fv.count() / 4, mat->colors4fv.items());
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vertices);
-	glVertexAttribPointer(context->shaderModel->aVertexPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(context->shaderModel->aVertexPosition, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, texturecoords);
-	glVertexAttribPointer(context->shaderModel->aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(context->shaderModel->aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, normals);
-	glVertexAttribPointer(context->shaderModel->aVertexNormal, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(context->shaderModel->aVertexNormal, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 	
 	glActiveTexture(GL_TEXTURE0);
 	if (mat->diffuse.texture != NULL) {
@@ -282,6 +284,74 @@ GLuint GLModel::insertMaterial(GLMaterial* material) throw(const char*) {
 	material->update();
 	materials.push(material);
 	return materials.search(material);
+}
+
+void GLModel::render(GLObject* object, const GLfloat* time) {
+	GLScene* scene = object->scene;
+	GLModelShader* shader = context->shaderModel;
+	
+	glEnable(GL_DEPTH_TEST);
+	
+	GLuint index = shader->shader->bind(0);
+	
+	glUniform3fv(shader->uAmbientLightColor, 1, scene->ambient.v);
+	glUniform1i(shader->uLightsCount, scene->lights1i);
+	glUniformMatrix4fv(shader->uLights, scene->lights1i, false, scene->lights16fvv);
+	
+	glEnableVertexAttribArray(shader->aVertexPosition);
+	glEnableVertexAttribArray(shader->aTextureCoord);
+	glEnableVertexAttribArray(shader->aVertexNormal);
+	
+	glEnable(GL_BLEND);
+	
+	scene->modelView16fv.multiply(scene->camera->view16fv, object->objectMatrix).multiply(object->modelMatrix);
+	scene->modelViewProjection16fv.multiply(scene->camera->projection16fv, scene->modelView16fv);
+	scene->normal16fv.inverse(scene->modelView16fv).transpose();
+	glUniformMatrix4fv(shader->uModelViewProjectionMatrix, 1, false, scene->modelViewProjection16fv.v);
+	glUniformMatrix4fv(shader->uModelViewMatrix, 1, false, scene->modelView16fv.v);
+	glUniformMatrix4fv(shader->uNormalMatrix, 1, false, scene->normal16fv.v);
+	
+	rootnode->render(context, this);
+	
+	glDisableVertexAttribArray(shader->aVertexPosition);
+	glDisableVertexAttribArray(shader->aTextureCoord);
+	glDisableVertexAttribArray(shader->aVertexNormal);
+	
+	context->cleanup(3);
+	
+	glDisable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+}
+
+bool GLModel::checkReady() {
+	int32_t count = materials.count();
+	GLMaterial** items = materials.items();
+	for (int i = 0; i < count; i++) {
+		GLMaterial* material = items[i];
+
+		if (material->diffuse.texture != NULL) {
+			if (!material->diffuse.texture->checkReady()) return false;
+		}
+		if (material->specular.texture != NULL) {
+			if (!material->specular.texture->checkReady()) return false;
+		}
+		if (material->emissive.texture != NULL) {
+			if (!material->emissive.texture->checkReady()) return false;
+		}
+		if (material->shininess.texture != NULL) {
+			if (!material->shininess.texture->checkReady()) return false;
+		}
+		if (material->opacity.texture != NULL) {
+			if (!material->opacity.texture->checkReady()) return false;
+		}
+		if (material->bump.texture != NULL) {
+			if (!material->bump.texture->checkReady()) return false;
+		}
+		if (material->reflection.texture != NULL) {
+			if (!material->reflection.texture->checkReady()) return false;
+		}
+	}
+	return true;
 }
 
 //===============================

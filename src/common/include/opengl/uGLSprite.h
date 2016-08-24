@@ -20,15 +20,30 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uVector.h>
+#include <opengl/uGLTexture.h>
+#include <opengl/uGLPaint.h>
 
 class GLRender;
 
 class GLSprite : public CObject {
 public:
 	GLRender* context = NULL;
+	GLTexture* texture = NULL;
+	CString key;
+	GLint width = 0;
+	GLint height = 0;
+	GLuint frames = 0;
 	
-	GLSprite(GLRender* context);
+	GLuint vertexBuffer = 0;
+	GLuint textureBuffer = 0;
+	GLuint indexBuffer = 0;
+	
+	GLSprite(GLRender* context, const CString& key, const CString& textureKey, const Vec2& size, const GLuint frames = 1, const Vec2* first = NULL, const Vec2* next = NULL) throw(const char*);
 	~GLSprite();
+	
+	Vec2 getPosition(const Vec2& position, const GLPaint* paint = NULL);
+	
+	void render(const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat* time = NULL);
 };
 
 class GLSprites : public CObject {
@@ -41,7 +56,11 @@ public:
 	~GLSprites();
 	
 	GLSprite* get(const CString& key) throw(const char*);
-	GLSprite* create(const CString& key) throw(const char*);
+	GLSprite* createSprite(const CString& key, const CString& textureKey, const Vec2& size, const GLuint frames = 1, const Vec2* first = NULL, const Vec2* next = NULL) throw(const char*);
+	
+	inline void renderSprite(const CString& key, const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat* time = NULL) { list.get(key)->render(position, frame, paint, time); }
+	
+	void renderSpriteNumber(const CString& key, const Vec2& position, GLfloat step, const CString& value);
 };
 
 #endif //JAPPSY_UGLSPRITE_H

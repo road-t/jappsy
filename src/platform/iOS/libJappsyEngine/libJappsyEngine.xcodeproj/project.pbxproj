@@ -22,6 +22,7 @@
 		C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C305782B1D54BBBB00171EFC /* UIKit.framework */; };
 		C30578371D54C73B00171EFC /* platform.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.m */; };
 		C30578401D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
+		C310C7A51D6CE9C20031E73A /* uGLSceneObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C310C7A41D6CE9C20031E73A /* uGLSceneObject.h */; };
 		C33F48801D674A0E00DD03A5 /* uCipher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33F487F1D674A0E00DD03A5 /* uCipher.cpp */; };
 		C33F48821D674A1500DD03A5 /* uCrc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33F48811D674A1500DD03A5 /* uCrc.cpp */; };
 		C33F48841D674A1C00DD03A5 /* uMD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C33F48831D674A1C00DD03A5 /* uMD5.cpp */; };
@@ -112,6 +113,7 @@
 		C305782B1D54BBBB00171EFC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		C30578361D54C73B00171EFC /* platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = platform.m; sourceTree = "<group>"; };
 		C305783F1D54CBAB00171EFC /* uMemory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uMemory.mm; sourceTree = "<group>"; };
+		C310C7A41D6CE9C20031E73A /* uGLSceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSceneObject.h; sourceTree = "<group>"; };
 		C33F487F1D674A0E00DD03A5 /* uCipher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uCipher.cpp; sourceTree = "<group>"; };
 		C33F48811D674A1500DD03A5 /* uCrc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uCrc.cpp; sourceTree = "<group>"; };
 		C33F48831D674A1C00DD03A5 /* uMD5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uMD5.cpp; sourceTree = "<group>"; };
@@ -356,20 +358,21 @@
 				C35900C81D6542C700C1D154 /* uGLTexture.h */,
 				C340853A1D67F82E007D4835 /* uGLShader.mm */,
 				C35900C41D6542C700C1D154 /* uGLShader.h */,
-				C35900BB1D6542C700C1D154 /* uGLModel.cpp */,
-				C35900BC1D6542C700C1D154 /* uGLModel.h */,
-				C35900BF1D6542C700C1D154 /* uGLParticle.cpp */,
-				C35900C01D6542C700C1D154 /* uGLParticle.h */,
-				C35900BD1D6542C700C1D154 /* uGLObject.cpp */,
-				C35900BE1D6542C700C1D154 /* uGLObject.h */,
 				C35900C51D6542C700C1D154 /* uGLSprite.cpp */,
 				C35900C61D6542C700C1D154 /* uGLSprite.h */,
-				C35900B51D6542C700C1D154 /* uGLDrawing.cpp */,
-				C35900B61D6542C700C1D154 /* uGLDrawing.h */,
-				C35900B71D6542C700C1D154 /* uGLFunc.cpp */,
-				C35900B81D6542C700C1D154 /* uGLFunc.h */,
 				C35900C11D6542C700C1D154 /* uGLScene.cpp */,
 				C35900C21D6542C700C1D154 /* uGLScene.h */,
+				C310C7A41D6CE9C20031E73A /* uGLSceneObject.h */,
+				C35900BD1D6542C700C1D154 /* uGLObject.cpp */,
+				C35900BE1D6542C700C1D154 /* uGLObject.h */,
+				C35900BB1D6542C700C1D154 /* uGLModel.cpp */,
+				C35900BC1D6542C700C1D154 /* uGLModel.h */,
+				C35900B71D6542C700C1D154 /* uGLFunc.cpp */,
+				C35900B81D6542C700C1D154 /* uGLFunc.h */,
+				C35900BF1D6542C700C1D154 /* uGLParticle.cpp */,
+				C35900C01D6542C700C1D154 /* uGLParticle.h */,
+				C35900B51D6542C700C1D154 /* uGLDrawing.cpp */,
+				C35900B61D6542C700C1D154 /* uGLDrawing.h */,
 				C34FD9621D5B67900022FF71 /* uGLTouchScreen.cpp */,
 				C34FD9631D5B67900022FF71 /* uGLTouchScreen.h */,
 				C34FDA391D5BDAB60022FF71 /* uGLEngine.cpp */,
@@ -411,6 +414,7 @@
 				C35900D81D6542C700C1D154 /* uGLShader.h in Headers */,
 				C34FD9861D5B8E0A0022FF71 /* uSmoothValue.h in Headers */,
 				C34FDA4E1D5C97BC0022FF71 /* uGLPaint.h in Headers */,
+				C310C7A51D6CE9C20031E73A /* uGLSceneObject.h in Headers */,
 				C34FD9661D5B67900022FF71 /* uGLTouchScreen.h in Headers */,
 				C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */,
 				C30577F91D54BA9C00171EFC /* uAtomic.h in Headers */,

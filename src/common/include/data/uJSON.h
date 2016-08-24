@@ -153,22 +153,32 @@ extern "C" {
 		
 		struct JsonNode*	it;
 		
-		int32_t count();
-		JsonNode** keys() throw(const char*);
-		JsonNode** items();
+	// C++ calls
+		int32_t count() const;
+		const struct JsonNode** keys() const throw(const char*);
+		const struct JsonNode** items() const;
 		
-		JsonNode* get(int index) throw(const char*);
-		JsonNode* getKey(int index) throw(const char*);
-		JsonNode* get(const CString& key) throw(const char*);
+		const struct JsonNode* get(int index) const throw(const char*);
+		const struct JsonNode* getKey(int index) const throw(const char*);
+		const struct JsonNode* get(const CString& key) const throw(const char*);
 
-		inline bool isNull() { return type == JSON_TYPE_NULL; }
-		inline bool isObject() { return type == JSON_TYPE_OBJECT; }
-		inline bool isArray() { return type == JSON_TYPE_ARRAY; }
+		inline bool isNull() const { return type == JSON_TYPE_NULL; }
+		inline bool isObject() const { return type == JSON_TYPE_OBJECT; }
+		inline bool isArray() const { return type == JSON_TYPE_ARRAY; }
 		
-		CString toString() throw(const char*);
-		double toDouble() throw(const char*);
-		int64_t toInt() throw(const char*);
-		bool toBoolean() throw(const char*);
+		CString toString() const throw(const char*);
+		double toDouble() const throw(const char*);
+		int64_t toInt() const throw(const char*);
+		bool toBoolean() const throw(const char*);
+		
+		CString optString(int index, const CString& fallback) const;
+		CString optString(const CString& key, const CString& fallback) const;
+		double optDouble(int index, double fallback = 0) const;
+		double optDouble(const CString& key, double fallback = 0) const;
+		int64_t optInt(int index, int64_t fallback = 0) const;
+		int64_t optInt(const CString& key, int64_t fallback = 0) const;
+		bool optBoolean(int index, bool fallback = false) const;
+		bool optBoolean(const CString& key, bool fallback = false) const;
 	};
 
 	bool JsonCheck(struct JsonContext* ctx, const char* json);

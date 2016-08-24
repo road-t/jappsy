@@ -15,19 +15,62 @@
  */
 
 #include "uGLObject.h"
+#include <opengl/uGLScene.h>
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
+#include <opengl/uGLModel.h>
+#include <opengl/uGLFunc.h>
+#include <opengl/uGLParticle.h>
+#include <opengl/uGLDrawing.h>
 
-GLObject::GLObject(GLRender* context) {
-	this->context = context;
+GLObject::GLObject(GLScene* scene, const CString& key) {
+	this->scene = scene;
+	this->key = key;
+	
+	modelMatrix.identity();
+	objectMatrix.identity();
 }
 
 GLObject::~GLObject() {
-	this->context = NULL;
 }
 
-GLObjects::GLObjects(GLRender* context) throw(const char*) {
-	this->context = context;
+GLObject* GLObject::setModel(const CString& key) throw(const char*) {
+	object = scene->context->models->get(key);
+	return this;
+}
+
+GLObject* GLObject::setFunc(const CString& key) throw(const char*) {
+	//object.func = new GLFunc(
+	throw eOK;
+}
+
+GLObject* GLObject::setParticleSystem(const CString& key) throw(const char*) {
+	object = scene->context->particles->get(key);
+	return this;
+}
+
+GLObject* GLObject::setDrawing(const CString& key, const GLfloat* time) throw(const char*) {
+	object = scene->context->drawings->get(key);
+	this->time = time;
+	return this;
+}
+
+void GLObject::render() {
+	/*
+	if (visible) {
+		if (object.model != NULL) {
+			object.model->render(this);
+		} else if (object.func != NULL) {
+			object.func->render(this);
+		} else if (object.particle != NULL) {
+			object.particle->render(this);
+		} else if (object.)
+	}
+	 */
+}
+
+GLObjects::GLObjects(GLScene* scene) throw(const char*) {
+	this->scene = scene;
 }
 
 GLObjects::~GLObjects() {
@@ -42,10 +85,10 @@ GLObject* GLObjects::get(const CString& key) throw(const char*) {
 	return list.get(key);
 }
 
-GLObject* GLObjects::create(const CString& key) throw(const char*) {
+GLObject* GLObjects::createObject(const CString& key) throw(const char*) {
 	try {
 		list.removedelete(key);
-		GLObject* object = new GLObject(context);
+		GLObject* object = new GLObject(scene, key);
 		try {
 			list.put(key, object);
 		} catch (...) {

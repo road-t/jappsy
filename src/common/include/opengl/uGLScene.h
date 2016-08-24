@@ -22,6 +22,8 @@
 #include <data/uString.h>
 #include <opengl/uGLCamera.h>
 #include <data/uVector.h>
+#include <opengl/uGLObject.h>
+#include <opengl/uGLDrawing.h>
 
 class GLRender;
 class GLLights;
@@ -31,20 +33,32 @@ class GLObject;
 class GLScene : public CObject {
 public:
 	GLRender* context = NULL;
-	GLCamera* camera;
+	GLCamera* camera = NULL;
 	Vec3 ambient = {0.25, 0.25, 0.25};
-	GLLights* lights;
-	GLObjects* objects;
+	GLLights* lights = NULL;
+	GLObjects* objects = NULL;
 	Vector<Vector<GLObject*>*> layers;
 	
 	GLuint lights1i = 0;
-	Vector<GLfloat> lights16fvv;
+	GLfloat* lights16fvv = NULL;
 	Mat4 modelViewProjection16fv;
 	Mat4 modelView16fv;
 	Mat4 normal16fv;
 	
 	GLScene(GLRender* context);
 	~GLScene();
+	
+	inline GLScene* setCamera(GLCamera* camera) { this->camera = camera; return this; }
+	
+	GLScene* rotateGroup(Vector<GLObject*>& group, const Vec3& vec, GLfloat angle, bool permanent = false);
+	GLScene* visibleGroup(Vector<GLObject*>& group, bool visible);
+	
+	Vector<GLObject*>* createLayer() throw(const char*);
+	GLObject* createLayerObject(Vector<GLObject*>* layer, const CString& key) throw(const char*);
+	GLObject* createLayerDrawing(Vector<GLObject*>* layer, const CString& key, const GLfloat* time = NULL) throw(const char*);
+	
+	void update();
+	void render();
 };
 
 class GLScenes : public CObject {

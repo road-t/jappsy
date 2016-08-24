@@ -158,10 +158,12 @@ GLuint GLShader::bind(GLint index, GLint uniform) {
 		index++;
 	}
 	
-	if (count == 1) {
-		glUniform1i(uniform, handles1iv[0]);
-	} else {
-		glUniform1iv(uniform, count, handles1iv.items());
+	if (uniform != -1) {
+		if (count == 1) {
+			glUniform1i(uniform, handles1iv[0]);
+		} else {
+			glUniform1iv(uniform, count, handles1iv.items());
+		}
 	}
 	
 	return index;
@@ -412,21 +414,33 @@ GLShader* GLShaders::createFragmentShader(const CString& key, const char* fragme
 	return (GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
 }
 
-GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReference, const wchar_t* fshReference) throw(const char*) {
+GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReference, const wchar_t* fshReference, void* library) throw(const char*) {
 	GLObjectData* vsh = NULL;
 	GLObjectData* fsh = NULL;
 	Vector<GLObjectData*> textures;
 	
 	if (vshReference[0] == L'@') {
 		CString vshRef = vshReference + 1;
-		NSString *vertexShaderSource = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:(NSString*)vshRef ofType:nil] encoding:NSUTF8StringEncoding error:nil];
+		
+		NSBundle* bundle = [NSBundle mainBundle];
+		if (library != NULL) {
+			bundle = (__bridge NSBundle*)library;
+		}
+		
+		NSString *vertexShaderSource = [NSString stringWithContentsOfFile:[bundle pathForResource:(NSString*)vshRef ofType:nil] encoding:NSUTF8StringEncoding error:nil];
 		const char *vertexShaderSourceCString = [vertexShaderSource cStringUsingEncoding:NSUTF8StringEncoding];
 		createVertexShader(vshReference, vertexShaderSourceCString);
 	}
 	
 	if (fshReference[0] == L'@') {
 		CString fshRef = fshReference + 1;
-		NSString *fragmentShaderSource = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:(NSString*)fshRef ofType:nil] encoding:NSUTF8StringEncoding error:nil];
+
+		NSBundle* bundle = [NSBundle mainBundle];
+		if (library != NULL) {
+			bundle = (__bridge NSBundle*)library;
+		}
+		
+		NSString *fragmentShaderSource = [NSString stringWithContentsOfFile:[bundle pathForResource:(NSString*)fshRef ofType:nil] encoding:NSUTF8StringEncoding error:nil];
 		const char *fragmentShaderSourceCString = [fragmentShaderSource cStringUsingEncoding:NSUTF8StringEncoding];
 		createFragmentShader(fshReference, fragmentShaderSourceCString);
 	}

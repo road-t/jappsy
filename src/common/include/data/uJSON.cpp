@@ -3875,7 +3875,7 @@ JSONObject::~JSONObject() {
 	}
 }
 
-int32_t JsonNode::count() {
+int32_t JsonNode::count() const {
 	if (type == JSON_TYPE_ARRAY) {
 		return value.a.c;
 	} else if (type == JSON_TYPE_OBJECT) {
@@ -3884,23 +3884,23 @@ int32_t JsonNode::count() {
 		return 1;
 }
 
-JsonNode** JsonNode::keys() throw(const char*) {
+const struct JsonNode** JsonNode::keys() const throw(const char*) {
 	if (type == JSON_TYPE_OBJECT) {
-		return value.o.k;
+		return (const struct JsonNode**)value.o.k;
 	} else
 		throw eConvert;
 }
 
-JsonNode** JsonNode::items() {
+const struct JsonNode** JsonNode::items() const {
 	if (type == JSON_TYPE_ARRAY) {
-		return value.a.v;
+		return (const struct JsonNode**)value.a.v;
 	} else if (type == JSON_TYPE_OBJECT) {
-		return value.o.v;
+		return (const struct JsonNode**)value.o.v;
 	} else
-		return &it;
+		return (const struct JsonNode**)&it;
 }
 
-JsonNode* JsonNode::get(int index) throw(const char*) {
+const struct JsonNode* JsonNode::get(int index) const throw(const char*) {
 	if (type == JSON_TYPE_ARRAY) {
 		if ((index >= 0) && (index < value.a.c)) {
 			return value.a.v[index];
@@ -3915,7 +3915,7 @@ JsonNode* JsonNode::get(int index) throw(const char*) {
 		throw eConvert;
 }
 
-JsonNode* JsonNode::getKey(int index) throw(const char*) {
+const struct JsonNode* JsonNode::getKey(int index) const throw(const char*) {
 	if (type == JSON_TYPE_OBJECT) {
 		if ((index >= 0) && (index < value.o.c)) {
 			return value.o.k[index];
@@ -3925,7 +3925,7 @@ JsonNode* JsonNode::getKey(int index) throw(const char*) {
 		throw eConvert;
 }
 
-JsonNode* JsonNode::get(const CString& key) throw(const char*) {
+const struct JsonNode* JsonNode::get(const CString& key) const throw(const char*) {
 	if (type == JSON_TYPE_OBJECT) {
 		for (int i = 0; i < value.o.c; i++) {
 			if (value.o.k[i]->type == JSON_TYPE_STRING) {
@@ -3959,7 +3959,7 @@ JsonNode* JsonNode::get(const CString& key) throw(const char*) {
 		throw eConvert;
 }
 
-CString JsonNode::toString() throw(const char*) {
+CString JsonNode::toString() const throw(const char*) {
 	switch (type) {
 		case JSON_TYPE_NULL:
 			return L"null";
@@ -3978,7 +3978,7 @@ CString JsonNode::toString() throw(const char*) {
 	}
 }
 
-double JsonNode::toDouble() throw(const char*) {
+double JsonNode::toDouble() const throw(const char*) {
 	switch (type) {
 		case JSON_TYPE_NULL:
 			return NAN;
@@ -3997,7 +3997,7 @@ double JsonNode::toDouble() throw(const char*) {
 	}
 }
 
-int64_t JsonNode::toInt() throw(const char*) {
+int64_t JsonNode::toInt() const throw(const char*) {
 	switch (type) {
 		case JSON_TYPE_NULL:
 			return 0;
@@ -4016,7 +4016,7 @@ int64_t JsonNode::toInt() throw(const char*) {
 	}
 }
 
-bool JsonNode::toBoolean() throw(const char*) {
+bool JsonNode::toBoolean() const throw(const char*) {
 	switch (type) {
 		case JSON_TYPE_NULL:
 			return 0;
@@ -4032,6 +4032,70 @@ bool JsonNode::toBoolean() throw(const char*) {
 			return value.cs->operator bool();
 		default:
 			throw eConvert;
+	}
+}
+
+CString JsonNode::optString(int index, const CString& fallback) const {
+	try {
+		return get(index)->toString();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+CString JsonNode::optString(const CString& key, const CString& fallback) const {
+	try {
+		return get(key)->toString();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+double JsonNode::optDouble(int index, double fallback) const {
+	try {
+		return get(index)->toDouble();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+double JsonNode::optDouble(const CString& key, double fallback) const {
+	try {
+		return get(key)->toDouble();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+int64_t JsonNode::optInt(int index, int64_t fallback) const {
+	try {
+		return get(index)->toInt();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+int64_t JsonNode::optInt(const CString& key, int64_t fallback) const {
+	try {
+		return get(key)->toInt();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+bool JsonNode::optBoolean(int index, bool fallback) const {
+	try {
+		return get(index)->toBoolean();
+	} catch(...) {
+		return fallback;
+	}
+}
+
+bool JsonNode::optBoolean(const CString& key, bool fallback) const {
+	try {
+		return get(key)->toBoolean();
+	} catch(...) {
+		return fallback;
 	}
 }
 

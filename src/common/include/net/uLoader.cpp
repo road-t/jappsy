@@ -141,13 +141,13 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->file, true, -1, 5, user, onhttp_data, onhttp_error, onhttp_retry);
+					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"json") == 0) ||
 					(info->ext.compareToIgnoreCase(L"vsh") == 0) ||
 					(info->ext.compareToIgnoreCase(L"fsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->file, true, -1, 5, user, onhttp_text, onhttp_error, onhttp_retry);
+					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry);
 				} else {
 					// Unknown File Type
 					// Fake OK

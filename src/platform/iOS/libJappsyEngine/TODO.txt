@@ -2,3 +2,8 @@ port GLModel.createCoin from JavaScript
 найти лики где не удаляются логи памяти при загрузке ресурсов
 
 допилить GLModel и продолжить остальное недостающее для отображения моделей
+
+
+GLObject trackEvent eventHandler
+GLFunc
+GLScene startParticlesGroup

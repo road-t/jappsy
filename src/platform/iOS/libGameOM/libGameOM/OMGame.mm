@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-#include "OMEngine.h"
+#include "OMGame.h"
+#include "OMView.h"
 
-#include <opengl/uOpenGL.h>
+//#include <data/uObject.h>
+//#include <data/uString.h>
+//#include <opengl/uOpenGL.h>
 #include <opengl/uGLRender.h>
-#include <core/uSystem.h>
+//#include <core/uSystem.h>
 
 static int color = 0;
 
-void OMEngine::onFrame(GLRender* context) {
+void OMGame::onFrame(GLRender* context) {
     float c = (float)color / 255.0f;
     glClearColor(0.0f, c, 0.0f, 1.0f);
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -43,19 +46,19 @@ void OMEngine::onFrame(GLRender* context) {
      */
 }
 
-void OMEngine::onTouch(const wchar_t* event) {
+void OMGame::onTouch(const wchar_t* event) {
     
 }
 
-void OMEngine::onFile(const CString& url, void* object) {
+void OMGame::onFile(const CString& url, void* object) {
     CString::format(L"FILE: %ls", (wchar_t*)url).log();
 }
 
-void OMEngine::onStatus(const LoaderStatus& status) {
+void OMGame::onStatus(const LoaderStatus& status) {
     CString::format(L"STATUS: %d / %d", status.count, status.total).log();
 }
 
-void OMEngine::onReady() {
+void OMGame::onReady() {
     CString::format(L"READY!").log();
     
     // Подготавливаем шейдеры
@@ -64,7 +67,23 @@ void OMEngine::onReady() {
         #include "OMShaders.res"
     ;
     
-    if (!context->createShaders(sOMShadersRes)) {
+    //NSBundle* bundle = [NSBundle bundleWithIdentifier:@"com.jappsy.libGameOM"];
+    NSBundle* bundle = [NSBundle mainBundle];
+    void* library = (__bridge void*)bundle;
+    
+    if (!context->createShaders(sOMShadersRes, library)) {
+        shutdown();
+    }
+    
+    if (!context->createModels("{}", library)) {
+        shutdown();
+    }
+    
+    const char *sOMSpritesRes =
+        #include "OMSprites.res"
+    ;
+    
+    if (!context->createSprites(sOMSpritesRes)) {
         shutdown();
     }
     
@@ -72,29 +91,14 @@ void OMEngine::onReady() {
     ready = true;
 }
 
-void OMEngine::onError(const CString& error) {
+void OMGame::onError(const CString& error) {
     CString::format(L"ERROR: %ls", (wchar_t*)error).log();
 }
 
-#include <data/uVector.h>
-#include <data/uString.h>
-
-OMEngine::OMEngine() {
+OMGame::OMGame() {
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
-    
-    Vector<CString&> test;
-    test.push(L"asdasd");
-    
-    Vector<void*> test2;
-    test2.push(NULL);
-    
-    Vector<int> test5;
-    test5.items();
-    test5.push(1);
- 
-    //sOMLoadRes = "{\"groups\":{\"shaders\":{\"vsh_main\":\"shaders/vsh_main.jsh\"}}}";
     
     this->setBasePath(L"https://www.cox.ru/res/om/");
     this->load(sOMLoadRes);

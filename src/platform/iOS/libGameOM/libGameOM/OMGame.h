@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UGLDRAWING_H
-#define JAPPSY_UGLDRAWING_H
+#ifndef OMGAME_H
+#define OMGAME_H
 
-#include <opengl/uOpenGL.h>
-#include <data/uObject.h>
-#include <data/uVector.h>
-#include <opengl/uGLSceneObject.h>
+#include <opengl/uGLEngine.h>
+#include <event/uMotionEvent.h>
+#include <data/uStream.h>
+#include <net/uLoader.h>
+#include <opengl/uGLPaint.h>
+#include "OMBars.h"
 
-class GLRender;
-
-class GLDrawing : public GLSceneObject {
+class OMGame : public GLEngine {
 public:
-	GLRender* context = NULL;
-	
-	GLDrawing(GLRender* context);
-	~GLDrawing();
+    OMGame();
+    
+    GLPaint m_paint;
+    Bars bars;
+    
+    bool ready = false;
+    
+    void onFrame(GLRender* context);
+    void onTouch(const wchar_t* event);
+    void onFile(const CString& url, void* object);
+    void onStatus(const LoaderStatus& status);
+    void onReady();
+    void onError(const CString& error);
 };
 
-class GLDrawings : public CObject {
-private:
-	GLRender* context = NULL;
-	VectorMap<CString&, GLDrawing*> list;
-	
-public:
-	GLDrawings(GLRender* context) throw(const char*);
-	~GLDrawings();
-	
-	GLDrawing* get(const CString& key) throw(const char*);
-	GLDrawing* create(const CString& key) throw(const char*);
-};
-
-#endif //JAPPSY_UGLDRAWING_H
+#endif //OMGAME_H

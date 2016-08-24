@@ -37,10 +37,11 @@ private:
 	GLfloat falloff = 0;
 	bool fixed = false;
 	GLLightStyle style = GLLightStyle::DIRECT;
-	bool active = true;
 	bool invalid = true;
 	
 public:
+	bool active = true;
+
 	Vec3 position3fv;
 	Vec3 target3fv;
 	Mat4 light16fv;
@@ -59,9 +60,10 @@ public:
 class GLLights : public CObject {
 private:
 	GLScene* scene = NULL;
-	VectorMap<CString&, GLLight*> list;
 
 public:
+	VectorMap<CString&, GLLight*> list;
+
 	GLLights(GLScene* scene) throw(const char*);
 	~GLLights();
 	

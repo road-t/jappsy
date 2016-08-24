@@ -79,7 +79,7 @@ public:
 private:
 	// loader internal data
 #ifdef DEBUG
-	int loadSpeed = 1;
+	int loadSpeed = 5;
 #else
 	int loadSpeed = 5;
 #endif

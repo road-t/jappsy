@@ -211,9 +211,10 @@ public:
 	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
 	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
 	
-	bool createShaders(JSONObject shaders) throw(const char*);
-	void createSprites(JSONObject sprites) throw(const char*);
-	void createDrawings(JSONObject drawings) throw(const char*);
+	bool createShaders(JSONObject shaders, void* library = NULL) throw(const char*);
+	bool createModels(JSONObject models, void* library = NULL) throw(const char*);
+	bool createSprites(JSONObject sprites) throw(const char*);
+	bool createDrawings(JSONObject drawings) throw(const char*);
 };
 
 #endif //JAPPSY_UGLRENDER_H

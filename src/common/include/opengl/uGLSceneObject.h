@@ -14,29 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef OMENGINE_H
-#define OMENGINE_H
+#ifndef JAPPSY_UGLSCENEOBJECT_H
+#define JAPPSY_UGLSCENEOBJECT_H
 
-#include <opengl/uGLEngine.h>
-#include <event/uMotionEvent.h>
-#include <data/uStream.h>
-#include <net/uLoader.h>
-#include <opengl/uGLPaint.h>
+#include <platform.h>
+#include <data/uObject.h>
 
-class OMEngine : public GLEngine {
+class GLObject;
+
+class GLSceneObject : public CObject {
 public:
-    OMEngine();
-    
-    GLPaint m_paint;
-    
-    bool ready = false;
-    
-    void onFrame(GLRender* context);
-    void onTouch(const wchar_t* event);
-    void onFile(const CString& url, void* object);
-    void onStatus(const LoaderStatus& status);
-    void onReady();
-    void onError(const CString& error);
+	virtual inline void render(GLObject* object, const GLfloat* time = NULL) {}
 };
 
-#endif //OMENGINE_H
+#endif //JAPPSY_UGLSCENEOBJECT_H

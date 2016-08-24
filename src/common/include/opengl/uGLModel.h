@@ -23,6 +23,7 @@
 #include <data/uVector.h>
 #include <opengl/uGLObjectData.h>
 #include <opengl/uGLObject.h>
+#include <opengl/uGLSceneObject.h>
 
 class GLRender;
 
@@ -329,7 +330,7 @@ public:
 
 //===============================
 
-class GLModel : public CObject {
+class GLModel : public GLSceneObject {
 public:
 	GLRender* context = NULL;
 	Vector<GLMaterial*> materials;
@@ -344,7 +345,9 @@ public:
 	
 	void parseJson(ModelJsonParser* parser) throw(const char*);
 	
-	void render(const GLObject* object);
+	void render(GLObject* object, const GLfloat* time = NULL);
+	
+	bool checkReady();
 };
 
 //===============================
@@ -352,9 +355,10 @@ public:
 class GLModels : public CObject {
 private:
 	GLRender* context = NULL;
-	VectorMap<CString&, GLModel*> list;
 
 public:
+	VectorMap<CString&, GLModel*> list;
+
 	GLModels(GLRender* context) throw(const char*);
 	~GLModels();
 	

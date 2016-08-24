@@ -1359,6 +1359,7 @@ Java_com_jappsy_core_Memory_toIntArray(JNIEnv *env, jclass type, jobject memory)
 
 #include <new>
 
+/*
 #if MEMORY_LOG == 1
 
 void* operator new(std::size_t n) throw(std::bad_alloc) {
@@ -1425,3 +1426,4 @@ void operator delete[](void* mem) throw() {
 }
 
 #endif
+*/

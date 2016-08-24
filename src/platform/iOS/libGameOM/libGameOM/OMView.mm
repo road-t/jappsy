@@ -16,7 +16,7 @@
 
 #import "OMView.h"
 
-#include "OMEngine.h"
+#include "OMGame.h"
 #include <core/uMemory.h>
 
 @implementation OMView
@@ -24,8 +24,8 @@
 - (BOOL) onStart
 {
     if ([super onStart]) {
-        OMEngine* omEngine = new OMEngine();
-        [self engine:omEngine];
+        OMGame* OMGame = new class OMGame();
+        [self engine:OMGame];
         
         return YES;
     }

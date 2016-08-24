@@ -223,9 +223,9 @@ extern "C" {
 	void Vec3Random(GLfloat* d, GLfloat x, GLfloat y, GLfloat z) {
 		GLfloat l;
 		do {
-			d[0] = (GLfloat)rand() / RAND_MAX - x;
-			d[1] = (GLfloat)rand() / RAND_MAX - y;
-			d[2] = (GLfloat)rand() / RAND_MAX - z;
+			d[0] = (GLfloat)rand() / (GLfloat)(RAND_MAX) - x;
+			d[1] = (GLfloat)rand() / (GLfloat)(RAND_MAX) - y;
+			d[2] = (GLfloat)rand() / (GLfloat)(RAND_MAX) - z;
 			l = sqrtf(d[0]*d[0]+d[1]*d[1]+d[2]*d[2]);
 		} while (l < 0.01);
 		d[0]/=l;d[1]/=l;d[2]/=l;

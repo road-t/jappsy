@@ -230,7 +230,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		
 		glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 		glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(x1, y1, x2, y2), GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(shaderSquareFill->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(shaderSquareFill->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(shaderSquareFill->aVertexPosition);
 		
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -256,7 +256,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		
 		glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 		glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(x1-half, y1-half, x2+half, y2+half), GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(shaderSquareStroke->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glVertexAttribPointer(shaderSquareStroke->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(shaderSquareStroke->aVertexPosition);
 		
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -282,12 +282,12 @@ void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(x1, y1, x2, y2), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(shaderSquareTexture->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(shaderSquareTexture->aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(shaderSquareTexture->aVertexPosition);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_textureBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(0, 0, 1, 1), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(shaderSquareTexture->aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(shaderSquareTexture->aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(shaderSquareTexture->aTextureCoord);
 	
 	GLuint index = textures->get((wchar_t*)key)->bind(0, shaderSquareTexture->uTexture);
@@ -329,12 +329,12 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(x1, y1, x2, y2), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(aVertexPosition);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_textureBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(0, 0, 1, 1), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(aTextureCoord);
 	
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -378,12 +378,12 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
  
 	glBindBuffer(GL_ARRAY_BUFFER, m_squareBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(x1, y1, x2, y2), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(aVertexPosition, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(aVertexPosition);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, m_textureBuffer);
 	glBufferData(GL_ARRAY_BUFFER, 8 * sizeof(GLfloat), makeRect(0, 0, 1, 1), GL_DYNAMIC_DRAW);
-	glVertexAttribPointer(aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(aTextureCoord, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(aTextureCoord);
 	
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -395,28 +395,29 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 	glDisable(GL_BLEND);
 }
 
-bool GLRender::createShaders(JSONObject shaders) throw(const char*) {
+bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char*) {
 	{
 		if (shaders.root != NULL) {
 			int32_t count = shaders.root->count();
 			if (count > 0) {
 				try {
-					JsonNode** keys = shaders.root->keys();
-					JsonNode** items = shaders.root->items();
+					const struct JsonNode** keys = shaders.root->keys();
+					const struct JsonNode** items = shaders.root->items();
 					for (int i = 0; i < count; i++) {
 						CString key = keys[i]->toString();
 						
 						int32_t subcount = items[i]->count();
 						if (subcount >= 2) {
-							JsonNode** subitems = items[i]->items();
+							const struct JsonNode** subitems = items[i]->items();
 
 							CString vsh = subitems[0]->toString();
 							CString fsh = subitems[1]->toString();
 							
-							this->shaders->createShader(key, (wchar_t*)vsh, (wchar_t*)fsh);
+							this->shaders->createShader(key, (wchar_t*)vsh, (wchar_t*)fsh, library);
 						}
 					}
 				} catch (...) {
+					return false;
 				}
 			}
 		}
@@ -513,10 +514,72 @@ bool GLRender::createShaders(JSONObject shaders) throw(const char*) {
 	return true;
 }
 
-void GLRender::createSprites(JSONObject sprites) throw(const char*) {
+bool GLRender::createModels(JSONObject models, void* library) throw(const char*) {
+#warning create models from json
 	
+	int32_t count = this->models->list.count();
+	GLModel** items = this->models->list.items();
+	for (int i = 0; i < count; i++) {
+		if (!items[i]->checkReady()) {
+			return false;
+		}
+	}
+	
+	return true;
 }
 
-void GLRender::createDrawings(JSONObject drawings) throw(const char*) {
+bool GLRender::createSprites(JSONObject sprites) throw(const char*) {
+	if (sprites.root != NULL) {
+		int32_t count = sprites.root->count();
+		if (count > 0) {
+			try {
+				const struct JsonNode** keys = sprites.root->keys();
+				const struct JsonNode** items = sprites.root->items();
+				for (int i = 0; i < count; i++) {
+					const struct JsonNode* info = items[i];
+					if (info->isArray()) {
+						CString key = keys[i]->toString();
+					
+						CString textureKey = info->get(0)->toString();
+						Vec2 size;
+						size.x = info->get(1)->get(0)->toDouble();
+						size.y = info->get(1)->get(1)->toDouble();
+						int frames = info->optInt(3, 1);
+						
+						Vec2 textureOfs;
+						Vec2* first = NULL;
+						try {
+							if (info->get(2)->isArray()) {
+								first = &textureOfs;
+								first->x = info->get(2)->get(0)->toDouble();
+								first->y = info->get(2)->get(1)->toDouble();
+							}
+						} catch (...) {
+						}
+						
+						Vec2 textureStep;
+						Vec2* next = NULL;
+						try {
+							if (info->get(4)->isArray()) {
+								next = &textureStep;
+								next->x = info->get(4)->get(0)->toDouble();
+								next->y = info->get(4)->get(1)->toDouble();
+							}
+						} catch (...) {
+						}
+						
+						this->sprites->createSprite(key, textureKey, size, frames, first, next);
+					}
+				}
+			} catch (...) {
+				return false;
+			}
+		}
+	}
 	
+	return true;
+}
+
+bool GLRender::createDrawings(JSONObject drawings) throw(const char*) {
+	return true;
 }

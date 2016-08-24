@@ -40,7 +40,7 @@ public:
 	~GLShader();
 	
 	bool checkReady();
-	GLuint bind(GLint index, GLint uniform);
+	GLuint bind(GLint index, GLint uniform = -1);
 	GLuint bind(GLint index, Vector<GLint>& uniforms);
 };
 
@@ -71,7 +71,7 @@ public: // Thread Safe
 
 	GLShader* createVertexShader(const CString& key, const char* vertexShaderSource) throw(const char*);
 	GLShader* createFragmentShader(const CString& key, const char* fragmentShaderSource) throw(const char*);
-	GLShader* createShader(const CString& key, const wchar_t* vshReference, const wchar_t* fshReference) throw(const char*);
+	GLShader* createShader(const CString& key, const wchar_t* vshReference, const wchar_t* fshReference, void* library = NULL) throw(const char*);
 };
 
 #endif //JAPPSY_UGLSHADER_H

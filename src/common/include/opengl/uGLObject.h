@@ -21,28 +21,44 @@
 #include <data/uObject.h>
 #include <data/uString.h>
 #include <data/uVector.h>
+#include <opengl/uGLSceneObject.h>
 
-class GLRender;
+class GLScene;
 
 class GLObject : public CObject {
 public:
-	GLRender* context = NULL;
+	GLScene* scene = NULL;
+	CString key;
 	
-	GLObject(GLRender* context);
+	GLSceneObject* object = NULL;
+	bool visible = true;
+	const GLfloat* time = NULL;
+	
+	Mat4 modelMatrix;
+	Mat4 objectMatrix;
+	
+	GLObject(GLScene* context, const CString& key);
 	~GLObject();
+	
+	GLObject* setModel(const CString& key) throw(const char*);
+	GLObject* setFunc(const CString& key) throw(const char*);
+	GLObject* setParticleSystem(const CString& key) throw(const char*);
+	GLObject* setDrawing(const CString& key, const GLfloat* time = NULL) throw(const char*);
+	
+	void render();
 };
 
 class GLObjects : public CObject {
 private:
-	GLRender* context;
+	GLScene* scene;
 	VectorMap<CString&, GLObject*> list;
 	
 public:
-	GLObjects(GLRender* context) throw(const char*);
+	GLObjects(GLScene* context) throw(const char*);
 	~GLObjects();
 	
 	GLObject* get(const CString& key) throw(const char*);
-	GLObject* create(const CString& key) throw(const char*);
+	GLObject* createObject(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLOBJECT_H

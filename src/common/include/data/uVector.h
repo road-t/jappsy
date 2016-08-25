@@ -309,6 +309,7 @@ public:
 			memFree(m_items);
 			m_items = NULL;
 			m_count = 0;
+			m_size = 0;
 			return;
 		}
 		
@@ -454,6 +455,7 @@ public:
 			memFree(m_items);
 			m_items = NULL;
 			m_count = 0;
+			m_size = 0;
 			return;
 		}
 		
@@ -478,6 +480,16 @@ public:
 	virtual inline void push(const Type* value) throw(const char*) {
 		resize(m_count + 1);
 		m_items[m_count - 1] = (Type*)value;
+	}
+	
+	virtual inline void push(const Vector<Type*>& list) throw(const char*) {
+		int32_t count = list.count();
+		Type** items = list.items();
+		int32_t ofs = m_count;
+		resize(m_count + count);
+		for (int i = 0; i < count; i++) {
+			m_items[ofs + i] = items[i];
+		}
 	}
 	
 	virtual inline void unshift(const Type* value) throw(const char*) {
@@ -622,6 +634,7 @@ public:
 			memFree(m_items);
 			m_items = NULL;
 			m_count = 0;
+			m_size = 0;
 			return;
 		}
 		

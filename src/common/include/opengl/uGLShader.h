@@ -28,6 +28,7 @@ class GLRender;
 class GLShader : public CObject {
 public:
 	GLRender* context = NULL;
+	CString key;
 	
 	GLObjectData* vsh;
 	GLObjectData* fsh;
@@ -36,7 +37,7 @@ public:
 	Vector<GLuint> handles;
 	Vector<GLint> handles1iv;
 	
-	GLShader(GLRender* context, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
+	GLShader(GLRender* context, const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	~GLShader();
 	
 	bool checkReady();

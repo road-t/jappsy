@@ -37,7 +37,10 @@
 	#include <opengl/opengl.h>
 #endif
 
+#include <math.h>
+
 #define clamp(v, min, max)	((v < min) ? min : ((v > max) ? max : v))
+#define modulef(v, divider)	((GLfloat)(v) - floorf((GLfloat)(v) / (GLfloat)(divider)) * (GLfloat)(divider))
 
 #if defined(__IOS__)
 	#define glBindVertexArray glBindVertexArrayOES

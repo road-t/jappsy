@@ -55,7 +55,7 @@ public:
 	
 	Vector<GLObject*>* createLayer() throw(const char*);
 	GLObject* createLayerObject(Vector<GLObject*>* layer, const CString& key) throw(const char*);
-	GLObject* createLayerDrawing(Vector<GLObject*>* layer, const CString& key, const GLfloat* time = NULL) throw(const char*);
+	GLObject* createLayerDrawing(Vector<GLObject*>* layer, const CString& key, const GLfloat time = NAN) throw(const char*);
 	
 	void update();
 	void render();

@@ -68,11 +68,11 @@ bool GLTouchScreen::checkBounds(float x, float y) {
 	return true;
 }
 
-void GLTouchScreen::trackEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
+void GLTouchScreen::trackEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData) {
 	// TODO: this.trackList.push({ x: x, y: y, w: w, h: h, name: name, callback: callback });
 }
 
-void GLTouchScreen::clickEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback) {
+void GLTouchScreen::clickEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData) {
 	// TODO: this.clickList.push({ x: x, y: y, w: w, h: h, name: name, callback: callback });
 }
 

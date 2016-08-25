@@ -816,6 +816,7 @@ extern "C" {
 		if (j == NULL) {
 			return NULL;
 		}
+		bzero(j, sizeof(struct JsonNode));
 		
 		j->parent = parent;
 		j->type = type;
@@ -834,6 +835,7 @@ extern "C" {
 		if (j == NULL) {
 			return NULL;
 		}
+		bzero(j, sizeof(struct JsonNode));
 		
 		j->parent = parent;
 		j->type = type;
@@ -2145,7 +2147,6 @@ extern "C" {
 				json_rev;
 				struct JsonNode* value = json_parse_node(ctx, ptrptr, node, level);
 				if (value == NULL) {
-					json_err(JSON_ERROR_OUTOFMEMORY);
 					return false;
 				}
 				if (!JsonArrayAdd(node, value)) {

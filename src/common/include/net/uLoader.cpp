@@ -141,13 +141,13 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry);
+					HTTPClient::Request(info->uri, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"json") == 0) ||
 					(info->ext.compareToIgnoreCase(L"vsh") == 0) ||
 					(info->ext.compareToIgnoreCase(L"fsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->file, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry);
+					HTTPClient::Request(info->uri, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry, onhttp_release);
 				} else {
 					// Unknown File Type
 					// Fake OK
@@ -175,7 +175,7 @@ void Loader::update() {
 		} else {
 			if (onready != NULL) {
 				try {
-					onready(userData);
+					(void)MainThreadSync(onready, userData);
 				} catch (const char* e) {
 					lastError = e;
 					if (onerror != NULL) onerror(lastError, userData);
@@ -220,7 +220,7 @@ void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, char* valu
 		uri->absolutePath((wchar_t*)(loader->basePath));
 	
 		if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
-			Loader::File* info = new Loader::File(uri->uri(), uri->ext(), key, loader->subgroup);
+			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, loader->subgroup);
 			loader->list.push(info);
 			AtomicIncrement(&(loader->status.total));
 		}
@@ -260,15 +260,17 @@ Loader::Info::~Info() {
 	delete info;
 }
 
+void Loader::onhttp_release(void* userData) {
+	Info* info = (Info*)userData;
+	delete info;
+}
+
 bool Loader::onhttp_text(const CString& url, Stream* stream, void* userData) {
 	Info* info = (Info*)userData;
 	
 	bool result = false;
 	try {
 		result = info->loader->onText(info->info, stream);
-		if (result) {
-			delete info;
-		}
 	} catch (...) {
 	}
 	
@@ -281,9 +283,6 @@ bool Loader::onhttp_data(const CString& url, Stream* stream, void* userData) {
 	bool result = false;
 	try {
 		result = info->loader->onData(info->info, stream);
-		if (result) {
-			delete info;
-		}
 	} catch (...) {
 	}
 	
@@ -297,8 +296,6 @@ void Loader::onhttp_error(const CString& url, const CString& error, void* userDa
 		info->loader->onError(info->info, error);
 	} catch (...) {
 	}
-	
-	delete info;
 }
 
 bool Loader::onhttp_retry(const CString& url, void* userData) {
@@ -321,7 +318,7 @@ bool Loader::onText(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = context->shaders->createVertexShader((wchar_t*)info->key, (char*)stream->getBuffer());
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->file, shader, userData);
+			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
@@ -329,7 +326,7 @@ bool Loader::onText(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = context->shaders->createFragmentShader((wchar_t*)info->key, (char*)stream->getBuffer());
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->file, shader, userData);
+			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
@@ -337,13 +334,13 @@ bool Loader::onText(const File* info, Stream* stream) {
 		try {
 			GLModel* model = context->models->createModel((wchar_t*)info->key, (char*)stream->getBuffer());
 			onLoad(info, model);
-			if (onfile != NULL) onfile(info->file, model, userData);
+			if (onfile != NULL) onfile(info->uri, model, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info->file, stream, userData);
+		if (onfile != NULL) onfile(info->uri, stream, userData);
 	}
 	return true;
 }
@@ -356,7 +353,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 		try {
 			GLTexture* texture = GLReader::createTexture(context, info->key, stream);
 			onLoad(info, texture);
-			if (onfile != NULL) onfile(info->file, texture, userData);
+			if (onfile != NULL) onfile(info->uri, texture, userData);
 		} catch (...) {
 			return false;
 		}
@@ -364,13 +361,13 @@ bool Loader::onData(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = GLReader::createShader(context, info->key, stream);
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->file, shader, userData);
+			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info->file, stream, userData);
+		if (onfile != NULL) onfile(info->uri, stream, userData);
 	}
 	return true;
 }
@@ -378,7 +375,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 void Loader::onError(const File* info, const CString& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
-	lastError = info->file;
+	lastError = info->uri;
 }
 
 bool Loader::onRetry(const File* info) {

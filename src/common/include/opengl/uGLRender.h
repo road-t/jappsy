@@ -35,6 +35,7 @@
 #include <opengl/uGLModel.h>
 #include <opengl/uGLParticle.h>
 #include <opengl/uGLDrawing.h>
+#include <opengl/uGLFunc.h>
 
 class GLSpriteShader : public CObject {
 public:
@@ -171,6 +172,7 @@ public:
 	GLModels* models = NULL;
 	GLParticles* particles = NULL;
 	GLDrawings* drawings = NULL;
+	GLFuncs* funcs = NULL;
 	
 	uint32_t lightsMaxCount = 6;
 	

@@ -5,5 +5,4 @@ port GLModel.createCoin from JavaScript
 
 
 GLObject trackEvent eventHandler
-GLFunc
 GLScene startParticlesGroup

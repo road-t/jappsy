@@ -22,29 +22,34 @@ void onFrameCallback(GLRender* context, void* userData) {
 	engine->onFrame(context);
 }
 
-void onTouchCallback(const wchar_t* event, void* userData) {
+void* onTouchCallback(const CString& event, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
 	engine->onTouch(event);
+	return NULL;
 }
 
-void onFileCallback(const CString& url, void* object, void* userData) {
+void* onFileCallback(const CString& url, void* object, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
 	engine->onFile(url, object);
+	return NULL;
 }
 
-void onStatusCallback(const LoaderStatus& status, void* userData) {
+void* onStatusCallback(const LoaderStatus& status, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
 	engine->onStatus(status);
+	return NULL;
 }
 
-void onReadyCallback(void* userData) {
+void* onReadyCallback(void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
 	engine->onReady();
+	return NULL;
 }
 
-void onErrorCallback(const CString& error, void* userData) {
+void* onErrorCallback(const CString& error, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
 	engine->onError(error);
+	return NULL;
 }
 
 GLEngine::GLEngine() {
@@ -56,6 +61,7 @@ GLEngine::~GLEngine() {
 	if (context != NULL) {
 		delete context;
 	}
+	delete cache;
 }
 
 void GLEngine::shutdown() {

@@ -23,13 +23,21 @@
 #include <opengl/uGLSceneObject.h>
 
 class GLRender;
+class GLEngine;
 
 class GLFunc : public GLSceneObject {
 public:
+	typedef void (*onFuncCallback)(GLEngine* engine);
+
+private:
 	GLRender* context = NULL;
+	onFuncCallback onfunc = NULL;
 	
-	GLFunc(GLRender* context);
+public:
+	GLFunc(GLRender* context, onFuncCallback callback);
 	~GLFunc();
+	
+	void render(GLObject* object, const GLfloat time = NAN);
 };
 
 class GLFuncs : public CObject {
@@ -42,7 +50,7 @@ public:
 	~GLFuncs();
 	
 	GLFunc* get(const CString& key) throw(const char*);
-	GLFunc* create(const CString& key) throw(const char*);
+	GLFunc* createFunc(const CString& key, GLFunc::onFuncCallback callback) throw(const char*);
 };
 
 #endif //JAPPSY_UGLFUNC_H

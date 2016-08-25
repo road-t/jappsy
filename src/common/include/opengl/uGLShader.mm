@@ -19,8 +19,9 @@
 #include <core/uMemory.h>
 #include <core/uSystem.h>
 
-GLShader::GLShader(GLRender* context, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
+GLShader::GLShader(GLRender* context, const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	this->context = context;
+	this->key = key;
 	this->vsh = vsh;
 	this->fsh = fsh;
 	this->program = program;
@@ -219,7 +220,7 @@ GLShader* GLShaders::get(const CString& key) throw(const char*) {
 GLShader* GLShaders::createShader(const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*) {
 	try {
 		list.removedelete(key);
-		GLShader* shader = new GLShader(context, vsh, fsh, program, textures);
+		GLShader* shader = new GLShader(context, key, vsh, fsh, program, textures);
 		try {
 			list.put(key, shader);
 		} catch (...) {

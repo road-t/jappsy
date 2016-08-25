@@ -42,11 +42,9 @@ R"JAPPSYRAWSTRING(
         },
         "models": {
             "ball":						"models/ball.json",
-/*
             "cap":						"models/cap.json",
             "separator":				"models/separator.json",
             "bar":						"models/bar.json",
-*/
         },
     }
 }

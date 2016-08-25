@@ -89,7 +89,7 @@ GLObject* GLScene::createLayerObject(Vector<GLObject*>* layer, const CString& ke
 	return object;
 }
 
-GLObject* GLScene::createLayerDrawing(Vector<GLObject*>* layer, const CString& key, const GLfloat* time) throw(const char*) {
+GLObject* GLScene::createLayerDrawing(Vector<GLObject*>* layer, const CString& key, const GLfloat time) throw(const char*) {
 	GLObject* object = objects->createObject(key);
 	layer->push(object);
 	object->setDrawing(key, time);

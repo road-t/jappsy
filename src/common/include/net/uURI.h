@@ -53,6 +53,8 @@ public:
 	inline const CString& absolutePath() { return absolutePath(NULL); }
 	const CString& uri();
 	inline const CString ext() { return m_ext; }
+	inline const CString path() { return m_path; }
+	inline const CString file() { return m_file; }
 };
 
 #endif //JAPPSY_UURI_H

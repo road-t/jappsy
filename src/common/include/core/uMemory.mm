@@ -755,7 +755,7 @@ void _mmfree(void* mem) {
         if (hHeap != 0)
             HeapFree(hHeap, 0, mem);
     #else
-        free(ptr);
+        free(mem);
 #endif
     }
 }

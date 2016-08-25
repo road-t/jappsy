@@ -16,6 +16,9 @@
 
 #include "uHTTPClient.h"
 #include <core/uSystem.h>
+#include <core/uCache.h>
+#include <net/uLoader.h>
+#include <opengl/uGLRender.h>
 
 class HTTPRequest {
 public:
@@ -28,32 +31,53 @@ public:
 	HTTPClient::onStreamCallback onstream = NULL;
 	HTTPClient::onErrorCallback onerror = NULL;
 	HTTPClient::onRetryCallback onretry = NULL;
+	HTTPClient::onReleaseCallback onrelease = NULL;
 	
 	static void run(HTTPRequest* request) throw(const char*);
 };
 
 #if defined(__IOS__)
 
-Stream* NSDataToStream(NSData* data) throw(const char*) {
-	NSUInteger size = [data length];
-	uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
-	if (streamptr != NULL) {
-		memcpy(streamptr, [data bytes], size);
-		*((wchar_t*)(streamptr + size)) = L'\0';
-		try {
-			return new Stream(streamptr, size, true);
-		} catch (...) {
-			memFree(streamptr);
-			throw;
+Stream* HttpLoadCache(void* userData) {
+	try {
+		Loader::Info* info = (Loader::Info*)userData;
+		if (info->loader->context->engine->cache != NULL) {
+			return info->loader->context->engine->cache->getData(info->info->path, info->info->file);
 		}
-	} else
-		throw eOutOfMemory;
+	} catch (...) {
+	}
+	return NULL;
+}
+
+void HttpSaveCache(Stream* stream, void* userData) {
+	try {
+		Loader::Info* info = (Loader::Info*)userData;
+		if (info->loader->context->engine->cache != NULL) {
+			info->loader->context->engine->cache->addData(info->info->path, info->info->file, stream);
+		}
+	} catch (...) {
+	}
 }
 
 void* HttpSync(void* threadData) {
 	HTTPRequest *http = (HTTPRequest*)threadData;
 	@autoreleasepool {
 		__sync_synchronize();
+		
+		Stream* stream = HttpLoadCache(http->userData);
+		if (stream != NULL) {
+			try {
+				bool result = http->onstream(http->url, stream, http->userData);
+				delete stream;
+				if (result) {
+					http->onrelease(http->userData);
+					memDelete(http);
+					return NULL;
+				}
+			} catch (...) {
+				delete stream;
+			}
+		}
 		
 		NSURL *url = [NSURL URLWithString:(NSString*)(http->url)];
 		// FIXED: Decrease Memory Leaking
@@ -73,6 +97,9 @@ void* HttpSync(void* threadData) {
 				try {
 					Stream* stream = NSDataToStream(data);
 					bool result = http->onstream(http->url, stream, http->userData);
+					if (result) {
+						HttpSaveCache(stream, http->userData);
+					}
 					delete stream;
 					if (result) {
 						break;
@@ -93,6 +120,7 @@ void* HttpSync(void* threadData) {
 			[NSThread sleepForTimeInterval:1];
 		} while (true);
 		
+		http->onrelease(http->userData);
 		memDelete(http);
 	}
 	
@@ -104,6 +132,21 @@ void* HttpAsync(void* threadData) {
 	@autoreleasepool {
 		__sync_synchronize();
 		
+		Stream* stream = HttpLoadCache(http->userData);
+		if (stream != NULL) {
+			try {
+				bool result = http->onstream(http->url, stream, http->userData);
+				delete stream;
+				if (result) {
+					http->onrelease(http->userData);
+					memDelete(http);
+					return NULL;
+				}
+			} catch (...) {
+				delete stream;
+			}
+		}
+
 		NSURL *url = [NSURL URLWithString:(NSString*)(http->url)];
 		// FIXED: Decrease Memory Leaking
 		//url = [url URLByAppendingQueryString:[NSString stringWithFormat:@"_nocache=%lld+%d", System.nanoTime(), arc4random()]];
@@ -122,6 +165,9 @@ void* HttpAsync(void* threadData) {
 						try {
 							Stream* stream = NSDataToStream(data);
 							bool result = http->onstream(http->url, stream, http->userData);
+							if (result) {
+								HttpSaveCache(stream, http->userData);
+							}
 							delete stream;
 							if (result) {
 								break;
@@ -142,6 +188,7 @@ void* HttpAsync(void* threadData) {
 					}
 				} while (false);
 				if (!repeat) {
+					http->onrelease(http->userData);
 					memDelete(http);
 				}
 			}
@@ -156,7 +203,7 @@ void* HttpAsync(void* threadData) {
 
 #endif
 
-void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry) throw(const char*) {
+void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onReleaseCallback onrelease) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -170,6 +217,7 @@ void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeo
 	http->onstream = onstream;
 	http->onerror = onerror;
 	http->onretry = onretry;
+	http->onrelease = onrelease;
 
 	if (http->threaded) {
 		if (IsMainThread()) {

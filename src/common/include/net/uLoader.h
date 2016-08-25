@@ -39,13 +39,17 @@ class Loader : public CObject {
 private:
 	class File : public CObject {
 	public:
+		CString path;
 		CString file;
+		CString uri;
 		CString ext;
 		CString key;
 		CString group;
 		
-		inline File(const CString& file, const CString& ext, const CString& key, const CString& group) {
+		inline File(const CString& path, const CString& file, const CString& uri, const CString& ext, const CString& key, const CString& group) {
+			this->path = path;
 			this->file = file;
+			this->uri = uri;
 			this->ext = ext;
 			this->key = key;
 			this->group = group;
@@ -64,10 +68,10 @@ public:
 	
 public:
 	// loader callback types
-	typedef void (*onFileCallback)(const CString& url, void* object, void* userData);
-	typedef void (*onStatusCallback)(const LoaderStatus& status, void* userData);
-	typedef void (*onReadyCallback)(void* userData);
-	typedef void (*onErrorCallback)(const CString& error, void* userData);
+	typedef void* (*onFileCallback)(const CString& url, void* object, void* userData);
+	typedef void* (*onStatusCallback)(const LoaderStatus& status, void* userData);
+	typedef void* (*onReadyCallback)(void* userData);
+	typedef void* (*onErrorCallback)(const CString& error, void* userData);
 
 	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
@@ -79,7 +83,7 @@ public:
 private:
 	// loader internal data
 #ifdef DEBUG
-	int loadSpeed = 5;
+	int loadSpeed = 1;
 #else
 	int loadSpeed = 5;
 #endif
@@ -101,6 +105,7 @@ private:
 	static bool onhttp_data(const CString& url, Stream* stream, void* userData);
 	static void onhttp_error(const CString& url, const CString& error, void* userData);
 	static bool onhttp_retry(const CString& url, void* userData);
+	static void onhttp_release(void* userData);
 	
 	bool onText(const File* info, Stream* stream);
 	bool onData(const File* info, Stream* stream);
@@ -117,11 +122,9 @@ private:
 	static void onjson_group(struct JsonContext* ctx, const char* key, void* target);
 	static void onjson_subgroup(struct JsonContext* ctx, const char* key, void* target);
 	static void onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target);
-
-private:
-	GLRender* context = NULL;
 	
 public:
+	GLRender* context = NULL;
 	
 	CString basePath;
 

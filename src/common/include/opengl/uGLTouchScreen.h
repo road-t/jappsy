@@ -21,24 +21,27 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <event/uMotionEvent.h>
+#include <data/uVector.h>
 
 class GLRender;
 
 class GLTouchEvent {
 public:
-	typedef bool (*Callback)(const wchar_t* event, void* userData);
+	typedef bool (*Callback)(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData);
 
 	float x;
 	float y;
 	float w;
 	float h;
-	wchar_t* name;
+	CString& name;
+	void* userData;
+	
 	Callback onEvent;
 };
 
 class GLTouchScreen : public CObject {
 public:
-	typedef void (*onTouchCallback)(const wchar_t* event, void* userData);
+	typedef void* (*onTouchCallback)(const CString& event, void* userData);
 
 private:
 	GLRender* context = NULL;
@@ -87,8 +90,8 @@ public:
 	
 	void update();
 	
-	void trackEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback);
-	void clickEvent(const wchar_t* name, float x, float y, float w, float h, GLTouchEvent::Callback callback);
+	void trackEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData);
+	void clickEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData);
 	
 	void onTimeout();
 

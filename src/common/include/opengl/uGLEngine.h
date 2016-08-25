@@ -20,6 +20,7 @@
 #include <data/uObject.h>
 #include <event/uMotionEvent.h>
 #include <net/uLoader.h>
+#include <core/uCache.h>
 
 class GLRender;
 
@@ -28,6 +29,8 @@ protected:
 	GLRender* context = NULL;
 	
 public:
+	Cache* cache = NULL;
+
 	GLEngine();
 	~GLEngine();
 	
@@ -41,7 +44,7 @@ public:
 	void onTouch(MotionEvent* event);
 
 	virtual void onFrame(GLRender* context) {}
-	virtual void onTouch(const wchar_t* event) {}
+	virtual void onTouch(const CString& event) {}
 	virtual void onFile(const CString& url, void* object) {}
 	virtual void onStatus(const LoaderStatus& status) {}
 	virtual void onReady() {}

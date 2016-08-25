@@ -22,17 +22,32 @@
 #include <data/uString.h>
 #include <data/uVector.h>
 #include <opengl/uGLSceneObject.h>
+#include <opengl/uGLFunc.h>
 
 class GLScene;
+class GLDrawing;
+
+enum GLObjectType {
+	OBJECT_NONE,
+	OBJECT_MODEL,
+	OBJECT_FUNC,
+	OBJECT_PARTICLE,
+	OBJECT_DRAWING
+};
 
 class GLObject : public CObject {
 public:
 	GLScene* scene = NULL;
 	CString key;
 	
+	GLObjectType objectType = OBJECT_NONE;
 	GLSceneObject* object = NULL;
 	bool visible = true;
-	const GLfloat* time = NULL;
+	GLfloat time = NAN;
+	
+	typedef bool (*onEventCallback)(GLEngine* engine, const CString& event, GLDrawing* drawing);
+	static bool eventHandler(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData);
+	onEventCallback onevent = NULL;
 	
 	Mat4 modelMatrix;
 	Mat4 objectMatrix;
@@ -41,9 +56,11 @@ public:
 	~GLObject();
 	
 	GLObject* setModel(const CString& key) throw(const char*);
-	GLObject* setFunc(const CString& key) throw(const char*);
+	GLObject* setFunc(GLFunc::onFuncCallback callback) throw(const char*);
 	GLObject* setParticleSystem(const CString& key) throw(const char*);
-	GLObject* setDrawing(const CString& key, const GLfloat* time = NULL) throw(const char*);
+	GLObject* setDrawing(const CString& key, const GLfloat time = NAN) throw(const char*);
+	
+	void trackEvent(onEventCallback callback);
 	
 	void render();
 };
@@ -59,6 +76,7 @@ public:
 	
 	GLObject* get(const CString& key) throw(const char*);
 	GLObject* createObject(const CString& key) throw(const char*);
+	void trackEvents(const Vector<GLObject*>& group, GLObject::onEventCallback onevent);
 };
 
 #endif //JAPPSY_UGLOBJECT_H

@@ -69,6 +69,7 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	models = new GLModels(this);
 	particles = new GLParticles(this);
 	drawings = new GLDrawings(this);
+	funcs = new GLFuncs(this);
 	
 	cameras->createCamera(L"gui")->size(width, height)->layer(0, 0);
 	lightsMaxCount = 6;
@@ -132,6 +133,7 @@ GLRender::~GLRender() {
 		delete shaderSquareTexture;
 	}
 	
+	delete funcs;
 	delete drawings;
 	delete particles;
 	delete models;
@@ -472,7 +474,7 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 			shaderModel->uModelViewProjectionMatrix = glGetUniformLocation(program, "uModelViewProjectionMatrix");
 			shaderModel->uModelViewMatrix = glGetUniformLocation(program, "uModelViewMatrix");
 			shaderModel->uNormalMatrix = glGetUniformLocation(program, "uNormalMatrix");
-				
+			
 			shaderModel->uAmbientLightColor = glGetUniformLocation(program, "uAmbientLightColor");
 				
 			shaderModel->uLightsCount = glGetUniformLocation(program, "uLightsCount");
@@ -581,5 +583,48 @@ bool GLRender::createSprites(JSONObject sprites) throw(const char*) {
 }
 
 bool GLRender::createDrawings(JSONObject drawings) throw(const char*) {
+	if (drawings.root != NULL) {
+		int32_t count = drawings.root->count();
+		if (count > 0) {
+			try {
+				const struct JsonNode** keys = drawings.root->keys();
+				const struct JsonNode** items = drawings.root->items();
+				for (int i = 0; i < count; i++) {
+					const struct JsonNode* info = items[i];
+					if (info->isArray()) {
+						CString key = keys[i]->toString();
+						
+						CString spriteKey = info->get(0)->toString();
+						Vec2 position;
+						position.x = info->get(1)->get(0)->toDouble();
+						position.y = info->get(1)->get(1)->toDouble();
+						
+						Vector<GLshort> frameIndexes;
+						try {
+							const struct JsonNode* frames = info->get(2);
+							if (frames->isArray()) {
+								int32_t count = frames->count();
+								const struct JsonNode** items = frames->items();
+								for (int j = 0; j < count; j++) {
+									frameIndexes.push( items[j]->toInt() );
+								}
+							} else {
+								frameIndexes.push( frames->toInt() );
+							}
+						} catch (...) {
+						}
+						if (frameIndexes.count() == 0) {
+							frameIndexes.push(0);
+						}
+						
+						this->drawings->createDrawing(key, spriteKey, position, &frameIndexes, NULL);
+					}
+				}
+			} catch (...) {
+				return false;
+			}
+		}
+	}
+
 	return true;
 }

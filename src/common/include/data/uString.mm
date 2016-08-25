@@ -1021,7 +1021,7 @@ CString::CString(const NSString* string) throw(const char*) {
 		if (length > 0) {
 			this->setLength(length);
 			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-			this->setSize(newSize);
+			this->setSize(newSize + sizeof(wchar_t));
 		} else {
 			this->setLength(0);
 		}
@@ -1034,7 +1034,7 @@ CString& CString::operator =(const NSString* string) throw(const char*) {
 		if (length > 0) {
 			this->setLength(length);
 			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data, this->m_size);
-			this->setSize(newSize);
+			this->setSize(newSize + sizeof(wchar_t));
 		} else {
 			this->setLength(0);
 		}
@@ -1051,7 +1051,7 @@ CString& CString::concat(const NSString* string) throw(const char*) {
 		if (length > 0) {
 			this->setLength(prevLength + length);
 			uint32_t newSize = utf8_towcs(string.UTF8String, this->m_data + prevLength, (length+1) * sizeof(wchar_t));
-			this->setSize(newSize);
+			this->setSize(newSize + sizeof(wchar_t));
 		}
 	}
 	return *this;

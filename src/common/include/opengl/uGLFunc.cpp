@@ -18,12 +18,17 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-GLFunc::GLFunc(GLRender* context) {
+GLFunc::GLFunc(GLRender* context, onFuncCallback callback) {
 	this->context = context;
+	this->onfunc = callback;
 }
 
 GLFunc::~GLFunc() {
 	this->context = NULL;
+}
+
+void GLFunc::render(GLObject* object, const GLfloat time) {
+	onfunc(context->engine);
 }
 
 GLFuncs::GLFuncs(GLRender* context) throw(const char*) {
@@ -42,10 +47,10 @@ GLFunc* GLFuncs::get(const CString& key) throw(const char*) {
 	return list.get(key);
 }
 
-GLFunc* GLFuncs::create(const CString& key) throw(const char*) {
+GLFunc* GLFuncs::createFunc(const CString& key, GLFunc::onFuncCallback callback) throw(const char*) {
 	try {
 		list.removedelete(key);
-		GLFunc* func = new GLFunc(context);
+		GLFunc* func = new GLFunc(context, callback);
 		try {
 			list.put(key, func);
 		} catch (...) {

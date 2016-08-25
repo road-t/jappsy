@@ -55,17 +55,17 @@ public:
 	GLPaint(const GLPaint& paint);
 	
 	GLPaint& setSDFColors(const uint32_t* colors, uint32_t count);
-	inline GLPaint& setAntialias(bool antialias);
-	inline GLPaint& setTypeface(const GLTypeface& typeface);
-	inline GLPaint& setSize(GLfloat size);
-	inline GLPaint& setAlignX(GLAlignX align);
-	inline GLPaint& setAlignY(GLAlignY align);
+	GLPaint& setAntialias(bool antialias);
+	GLPaint& setTypeface(const GLTypeface& typeface);
+	GLPaint& setSize(GLfloat size);
+	GLPaint& setAlignX(GLAlignX align);
+	GLPaint& setAlignY(GLAlignY align);
 	GLPaint& setColor(uint32_t color);
 	GLPaint& setLight(GLfloat light, GLfloat alpha);
 	GLPaint& setStroke(GLfloat width, uint32_t color);
 	GLPaint& setAlpha(uint8_t alpha);
 	GLPaint& setShadow(GLfloat width, GLfloat dx, GLfloat dy, uint32_t color);
-	inline GLPaint& setScale(GLfloat scale);
+	GLPaint& setScale(GLfloat scale);
 };
 
 #endif //JAPPSY_UGLPAINT_H

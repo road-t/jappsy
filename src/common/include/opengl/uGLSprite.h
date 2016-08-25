@@ -43,7 +43,8 @@ public:
 	
 	Vec2 getPosition(const Vec2& position, const GLPaint* paint = NULL);
 	
-	void render(const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat* time = NULL);
+	void render(const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN);
+	void renderNumber(const Vec2& position, GLfloat step, const CString& value);
 };
 
 class GLSprites : public CObject {
@@ -58,7 +59,7 @@ public:
 	GLSprite* get(const CString& key) throw(const char*);
 	GLSprite* createSprite(const CString& key, const CString& textureKey, const Vec2& size, const GLuint frames = 1, const Vec2* first = NULL, const Vec2* next = NULL) throw(const char*);
 	
-	inline void renderSprite(const CString& key, const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat* time = NULL) { list.get(key)->render(position, frame, paint, time); }
+	inline void renderSprite(const CString& key, const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN) { list.get(key)->render(position, frame, paint, time); }
 	
 	void renderSpriteNumber(const CString& key, const Vec2& position, GLfloat step, const CString& value);
 };

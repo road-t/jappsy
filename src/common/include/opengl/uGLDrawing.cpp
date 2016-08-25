@@ -18,12 +18,80 @@
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-GLDrawing::GLDrawing(GLRender* context) {
+GLDrawing::GLDrawing(GLRender* context, const CString& key, const CString& spriteKey, const Vec2& position, const Vector<GLshort>* frameIndexes, const GLPaint* paint) throw(const char*) {
 	this->context = context;
+	this->key = key;
+	this->sprite = context->sprites->get(spriteKey);
+	if (paint != NULL) {
+		this->paint = new GLPaint(*paint);
+	} else {
+		this->paint = new GLPaint();
+		this->paint->setColor(0xFFFFFFFF).setAlignX(GLAlignX::LEFT).setAlignY(GLAlignY::TOP);
+	}
+	this->position.v[0] = position.v[0];
+	this->position.v[1] = position.v[1];
+	
+	if (frameIndexes != NULL) {
+		int32_t count = frameIndexes->count();
+		GLshort* items = frameIndexes->items();
+		if (count == 0) {
+			background = 0;
+		} else if (count == 1) {
+			background = items[0];
+		} else if (count > 2) {
+			normal = items[0];
+			hover = items[1];
+			click = items[2];
+			if (count > 3) {
+				foreground = items[3];
+			}
+		} else {
+			throw eInvalidParams;
+		}
+	} else {
+		background = 0;
+	}
 }
 
 GLDrawing::~GLDrawing() {
-	this->context = NULL;
+	context = NULL;
+	if (animation != NULL) {
+		delete animation;
+	}
+}
+
+void GLDrawing::setPaint(const GLPaint& paint) throw(const char*) {
+	if (this->paint != NULL) {
+		delete this->paint;
+	}
+	this->paint = new GLPaint(paint);
+}
+
+void GLDrawing::render(GLObject* object, const GLfloat time) {
+	if (animation != NULL)
+		animation->update();
+	
+	if (background >= 0)
+		sprite->render(position, background, paint, time);
+	if (pressed) {
+		if (click >= 0)
+			sprite->render(position, click, paint, time);
+		else if (normal >= 0)
+			sprite->render(position, normal, paint, time);
+	} else if (hovered) {
+		if (hover >= 0)
+			sprite->render(position, hover, paint, time);
+		else if (normal >= 0)
+			sprite->render(position, normal, paint, time);
+	} else if (normal >= 0) {
+		sprite->render(position, normal, paint, time);
+	}
+	
+	if (onrender != NULL)
+		onrender(context->engine, this);
+	
+	if (foreground >= 0)
+		sprite->render(position, foreground, paint, time);
 }
 
 GLDrawings::GLDrawings(GLRender* context) throw(const char*) {
@@ -42,10 +110,10 @@ GLDrawing* GLDrawings::get(const CString& key) throw(const char*) {
 	return list.get(key);
 }
 
-GLDrawing* GLDrawings::create(const CString& key) throw(const char*) {
+GLDrawing* GLDrawings::createDrawing(const CString& key, const CString& spriteKey, const Vec2& position, const Vector<GLshort>* frameIndexes, const GLPaint* paint) throw(const char*) {
 	try {
 		list.removedelete(key);
-		GLDrawing* drawing = new GLDrawing(context);
+		GLDrawing* drawing = new GLDrawing(context, key, spriteKey, position, frameIndexes, paint);
 		try {
 			list.put(key, drawing);
 		} catch (...) {
@@ -56,4 +124,9 @@ GLDrawing* GLDrawings::create(const CString& key) throw(const char*) {
 	} catch (...) {
 		throw;
 	}
+}
+
+void GLDrawings::renderDrawing(const CString& key, GLfloat time) {
+	GLDrawing* drawing = list.get(key);
+	drawing->render(NULL, time);
 }

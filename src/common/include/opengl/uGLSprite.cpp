@@ -155,7 +155,7 @@ Vec2 GLSprite::getPosition(const Vec2& position, const GLPaint* paint) {
 	return {x, y};
 }
 
-void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* paint, const GLfloat* time) {
+void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* paint, const GLfloat time) {
 	GLSpriteShader* shader = context->shaderSprite;
 	GLCamera* cam = context->cameras->gui;
 	cam->update();
@@ -169,8 +169,8 @@ void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* p
 		glUniform4fv(shader->uLight, 1, context->light.v);
 	}
 	
-	if (time != NULL) {
-		glUniform1f(shader->uTime, *time);
+	if (!isnan(time)) {
+		glUniform1f(shader->uTime, time);
 	} else {
 		GLfloat time = (GLfloat)(currentTimeMillis()) / 2000.0;
 		glUniform1f(shader->uTime, time - floorf(time));
@@ -198,6 +198,23 @@ void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* p
 	glDisableVertexAttribArray(shader->aTextureCoord);
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GLSprite::renderNumber(const Vec2& position, GLfloat step, const CString& value) {
+	wchar_t* s = (wchar_t*)value;
+	int p = value.m_length - 1;
+	Vec2 pos = position;
+	if (step > 0) {
+		pos[0] += step * p;
+	} else {
+		pos[0] += step * 2.0;
+		step = -step;
+	}
+	for (; p >= 0; p--) {
+		int v = (int)(s[p]) - 48;
+		render(pos, v);
+		pos.x -= step;
+	}
 }
 
 GLSprites::GLSprites(GLRender* context) throw(const char*) {
@@ -233,19 +250,5 @@ GLSprite* GLSprites::createSprite(const CString& key, const CString& textureKey,
 }
 
 void GLSprites::renderSpriteNumber(const CString& key, const Vec2& position, GLfloat step, const CString& value) {
-	wchar_t* s = (wchar_t*)value;
-	int p = value.m_length - 1;
-	Vec2 pos = position;
-	if (step > 0) {
-		pos[0] += step * p;
-	} else {
-		pos[0] += step * 2.0;
-		step = -step;
-	}
-	GLSprite* sprite = list.get(key);
-	for (; p >= 0; p--) {
-		int v = (int)(s[p]) - 48;
-		sprite->render(pos, v);
-		pos.x -= step;
-	}
+	list.get(key)->renderNumber(position, step, value);
 }

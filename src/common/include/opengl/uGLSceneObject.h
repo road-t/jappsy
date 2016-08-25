@@ -24,7 +24,7 @@ class GLObject;
 
 class GLSceneObject : public CObject {
 public:
-	virtual inline void render(GLObject* object, const GLfloat* time = NULL) {}
+	virtual inline void render(GLObject* object, const GLfloat time = NAN) {}
 };
 
 #endif //JAPPSY_UGLSCENEOBJECT_H

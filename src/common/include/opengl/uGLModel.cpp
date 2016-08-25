@@ -27,6 +27,7 @@ GLMaterialTexture::~GLMaterialTexture() {
 }
 
 GLMaterialTexture::GLMaterialTexture(GLRender* context, const CString& textureReference) throw(const char*) {
+	this->context = context;
 	texture1iv = 0;
 
 	if (textureReference.m_length > 0) {
@@ -51,7 +52,7 @@ bool GLMaterialTexture::checkReady() {
 	if ((this->texture != NULL) && (this->texture->isReference())) {
 		GLTexture* texture;
 		try {
-			texture = context->textures->get((wchar_t*)(this->texture->getTarget()));
+			texture = context->textures->get(this->texture->getTarget());
 		} catch (...) {
 			return false;
 		}
@@ -111,18 +112,18 @@ void GLMaterial::update() {
 	items[3] = opacity.value;
 	
 	Vec3SetV(items + 4, diffuse.color.v);
-	items[7] = (diffuse.texture == null) ? 0 : diffuse.blend;
+	items[7] = (diffuse.texture == NULL) ? 0 : diffuse.blend;
 	
 	Vec3SetV(items + 8, specular.color.v);
-	items[11] = (specular.texture == null) ? 0 : specular.blend;
+	items[11] = (specular.texture == NULL) ? 0 : specular.blend;
 	
 	Vec3SetV(items + 12, emissive.color.v);
-	items[15] = (emissive.texture == null) ? 0 : emissive.blend;
+	items[15] = (emissive.texture == NULL) ? 0 : emissive.blend;
 	
 	items[16] = shininess.value;
 	items[17] = shininess.percent;
 	items[18] = 0.0; // unused
-	items[19] = (opacity.texture == null) ? 0 : opacity.blend;
+	items[19] = (opacity.texture == NULL) ? 0 : opacity.blend;
 }
 
 //===============================
@@ -222,13 +223,13 @@ void GLModelMesh::render(GLRender* context, GLModel* model) const {
 		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
 	}
 	glActiveTexture(GL_TEXTURE1);
-	if (mat->specular.texture != null) {
+	if (mat->specular.texture != NULL) {
 		glBindTexture(GL_TEXTURE_2D, mat->specular.texture->texture1iv);
 	} else {
 		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
 	}
 	glActiveTexture(GL_TEXTURE2);
-	if (mat->emissive.texture != null) {
+	if (mat->emissive.texture != NULL) {
 		glBindTexture(GL_TEXTURE_2D, mat->emissive.texture->texture1iv);
 	} else {
 		glBindTexture(GL_TEXTURE_2D, context->textures->defaultTextureHandle);
@@ -286,7 +287,7 @@ GLuint GLModel::insertMaterial(GLMaterial* material) throw(const char*) {
 	return materials.search(material);
 }
 
-void GLModel::render(GLObject* object, const GLfloat* time) {
+void GLModel::render(GLObject* object, const GLfloat time) {
 	GLScene* scene = object->scene;
 	GLModelShader* shader = context->shaderModel;
 	
@@ -296,7 +297,7 @@ void GLModel::render(GLObject* object, const GLfloat* time) {
 	
 	glUniform3fv(shader->uAmbientLightColor, 1, scene->ambient.v);
 	glUniform1i(shader->uLightsCount, scene->lights1i);
-	glUniformMatrix4fv(shader->uLights, scene->lights1i, false, scene->lights16fvv);
+	glUniformMatrix4fv(shader->uLights, scene->lights1i, GL_FALSE, scene->lights16fvv);
 	
 	glEnableVertexAttribArray(shader->aVertexPosition);
 	glEnableVertexAttribArray(shader->aTextureCoord);
@@ -307,9 +308,9 @@ void GLModel::render(GLObject* object, const GLfloat* time) {
 	scene->modelView16fv.multiply(scene->camera->view16fv, object->objectMatrix).multiply(object->modelMatrix);
 	scene->modelViewProjection16fv.multiply(scene->camera->projection16fv, scene->modelView16fv);
 	scene->normal16fv.inverse(scene->modelView16fv).transpose();
-	glUniformMatrix4fv(shader->uModelViewProjectionMatrix, 1, false, scene->modelViewProjection16fv.v);
-	glUniformMatrix4fv(shader->uModelViewMatrix, 1, false, scene->modelView16fv.v);
-	glUniformMatrix4fv(shader->uNormalMatrix, 1, false, scene->normal16fv.v);
+	glUniformMatrix4fv(shader->uModelViewProjectionMatrix, 1, GL_FALSE, scene->modelViewProjection16fv.v);
+	glUniformMatrix4fv(shader->uModelViewMatrix, 1, GL_FALSE, scene->modelView16fv.v);
+	glUniformMatrix4fv(shader->uNormalMatrix, 1, GL_FALSE, scene->normal16fv.v);
 	
 	rootnode->render(context, this);
 	
@@ -840,6 +841,7 @@ void GLModels::onjson_material_end(struct JsonContext* ctx, const int index, voi
 
 		try {
 			GLMaterial* material = data->material;
+			material->update();
 			parentdata->materials.push(material);
 		} catch (...) {
 			memDelete(data);
@@ -961,8 +963,9 @@ void GLModels::onjson_material_property_array_start(struct JsonContext* ctx, con
 }
 
 void GLModels::onjson_material_property_value_start(struct JsonContext* ctx, const char* key, void* target) {
-	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
+	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
 	
+	data->value.clear();
 	ctx->callbacks->onarray.onnumber = onjson_material_property_value_number;
 	ctx->callbacks->onobject.onarrayend = onjson_material_property_value_end;
 }

@@ -20,11 +20,11 @@
 #include <platform.h>
 
 #ifdef DEBUG
-	#define MEMORY_LOG	1			// Log Memory Operations
+	#define MEMORY_LOG	0			// Log Memory Operations
 #else
 	#define MEMORY_LOG	0
 #endif
-#define MM_VIRTUAL	1			// Use Virtual Memory Caching
+#define MM_VIRTUAL	0			// Use Virtual Memory Caching
 
 #ifdef __cplusplus
 extern "C" {

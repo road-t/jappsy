@@ -124,7 +124,7 @@ extern "C" {
 		inline GLshort& operator [](int index) { return i[index]; }
 		inline operator GLshort*() const { return (GLshort*)i; }
 
-		inline Vec3i& operator =(const Vec3i& v) { this->i[0] = i[0]; this->i[1] = i[1]; this->i[2] = i[2]; return *this; }
+		inline Vec3i& operator =(const Vec3i& v) { this->i[0] = v.i[0]; this->i[1] = v.i[1]; this->i[2] = v.i[2]; return *this; }
 	};
 	
 	struct Vec3 {

@@ -54,8 +54,8 @@ bool GLRender::isExtensionSupported(const char *extension) {
 
 GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch) {
 	this->engine = engine;
-//	this->width = width;
-//	this->height = height;
+	this->width = width;
+	this->height = height;
 	
 	frame = new GLFrame(engine, this, onframe, engine);
 	touchScreen = new GLTouchScreen(this, ontouch, engine);

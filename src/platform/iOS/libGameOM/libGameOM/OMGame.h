@@ -93,6 +93,8 @@ public:
         
         Vector<GLObject*> btnlist;
         Vector<GLObject*> dbllist;
+        
+        Vector<GLObject*> rocketslist;
     } groups;
 
     GLPaint paint;

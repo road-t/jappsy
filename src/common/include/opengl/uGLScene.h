@@ -52,6 +52,7 @@ public:
 	
 	GLScene* rotateGroup(Vector<GLObject*>& group, const Vec3& vec, GLfloat angle, bool permanent = false);
 	GLScene* visibleGroup(Vector<GLObject*>& group, bool visible);
+	void startParticlesGroup(Vector<GLObject*>& group, int repeat);
 	
 	Vector<GLObject*>* createLayer() throw(const char*);
 	GLObject* createLayerObject(Vector<GLObject*>* layer, const CString& key) throw(const char*);

@@ -24,25 +24,65 @@
 
 class GLRender;
 
-class GLParticle : public GLSceneObject {
+class GLParticle : public CObject {
+public:
+	CString style;
+	
+	Vec3 position = { 0, 0, 0 };
+	Vec3 velocity = { 0, 0, 0 };
+	Vec3 acceleration = { 0, 0, 0 };
+	GLfloat size = 1.0;
+	uint64_t startFrame = 0;
+	uint64_t lifeFrame = 0;
+	
+	GLParticle();
+	~GLParticle();
+};
+
+class GLParticleSystem : public GLSceneObject {
 public:
 	GLRender* context = NULL;
+	CString key;
+	Vector<GLParticle*> list;
 	
-	GLParticle(GLRender* context);
-	~GLParticle();
+	uint64_t startFrame = 0;
+	uint64_t maxFrame = 0;
+	int32_t repeat = -1;
+	uint64_t startFrameRange = 1;
+	
+	Vec3 color = { 1.0, 1.0, 1.0 };
+	Vec3 colorRange = { -0.5, -0.5, -0.5 };
+	
+	GLuint vertexBuffer = 0;
+	GLuint textureBuffer = 0;
+	GLuint velocityBuffer = 0;
+	GLuint accelBuffer = 0;
+	GLuint timeBuffer = 0;
+	GLuint indexBuffer = 0;
+	GLuint indexCount = 0;
+	
+	GLParticleSystem(GLRender* context, const CString& key);
+	~GLParticleSystem();
+	
+	GLParticle* createRocket(uint64_t startFrame, const Vec3& position) throw(const char*);
+	GLParticle* createFlare(uint64_t startFrame, const Vec3& position) throw(const char*);
+	GLParticle* createSubFlare(uint64_t startFrame, const Vec3& position, const Vec3& velocity) throw(const char*);
+	
+	void generate() throw(const char*);
+	void render(GLObject* object, const GLfloat time = NAN);
 };
 
 class GLParticles : public CObject {
 private:
 	GLRender* context;
-	VectorMap<CString&, GLParticle*> list;
+	VectorMap<CString&, GLParticleSystem*> list;
 	
 public:
 	GLParticles(GLRender* context) throw(const char*);
 	~GLParticles();
 	
-	GLParticle* get(const CString& key) throw(const char*);
-	GLParticle* create(const CString& key) throw(const char*);
+	GLParticleSystem* get(const CString& key) throw(const char*);
+	GLParticleSystem* createParticleSystem(const CString& key) throw(const char*);
 };
 
 #endif //JAPPSY_UGLPARTICLE_H

@@ -88,7 +88,7 @@ void GLDrawing::render(GLObject* object, const GLfloat time) {
 	}
 	
 	if (onrender != NULL)
-		onrender(context->engine, this);
+		onrender(context->engine, (GLDrawing*)this);
 	
 	if (foreground >= 0)
 		sprite->render(position, foreground, paint, time);

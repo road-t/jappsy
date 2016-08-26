@@ -72,6 +72,23 @@ GLScene* GLScene::visibleGroup(Vector<GLObject*>& group, bool visible) {
 	return this;
 }
 
+void GLScene::startParticlesGroup(Vector<GLObject*>& group, int repeat) {
+	uint64_t currentFrame = ((currentTimeMillis() / 10) * 6) / 10;
+	
+	int32_t count = group.count();
+	GLObject** items = group.items();
+	for (int i = 0; i < count; i++) {
+		if (items[i]->objectType == OBJECT_PARTICLE) {
+			GLParticleSystem* s = (GLParticleSystem*)(items[i]->object);
+			if (s->startFrame == 0) {
+				s->startFrame = currentFrame + rand() % s->startFrameRange;
+			}
+			s->repeat = repeat;
+			s->color.random(s->colorRange);
+		}
+	}
+}
+
 Vector<GLObject*>* GLScene::createLayer() throw(const char*) {
 	Vector<GLObject*>* layer = new Vector<GLObject*>();
 	try {

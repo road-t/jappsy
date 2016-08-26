@@ -162,7 +162,7 @@ void GLModelNode::insertMesh(GLModelMesh* mesh) throw(const char*) {
 		throw eInvalidParams;
 }
 
-void GLModelNode::render(GLRender* context, GLModel* model) const {
+void GLModelNode::render(GLRender* context, const GLModel* model) const {
 	int32_t count;
 	count = nodes.count();
 	if (count > 0) {
@@ -201,7 +201,7 @@ GLModelMesh::~GLModelMesh() {
 	glDeleteBuffers(1, &indexes);
 }
 
-void GLModelMesh::render(GLRender* context, GLModel* model) const {
+void GLModelMesh::render(GLRender* context, const GLModel* model) {
 	context->shaderModel;
 	
 	GLMaterial* mat = model->materials.get(material);
@@ -1203,6 +1203,7 @@ void GLModelMesh::parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& mat
 				memFree(vdst);
 				throw;
 			}
+			memFree(vdst);
 		}
 		
 		glGenBuffers(1, &normalsBuffer);
@@ -1226,6 +1227,7 @@ void GLModelMesh::parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& mat
 				memFree(vdst);
 				throw;
 			}
+			memFree(vdst);
 		}
 		
 		glGenBuffers(1, &textureBuffer);

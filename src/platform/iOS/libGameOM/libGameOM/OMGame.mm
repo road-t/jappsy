@@ -162,8 +162,7 @@ void OMGame::onFrame(GLRender* context) {
                         freespinTime = currentTime;
                         
                         LOG("Запуск феерверков");
-#warning Particles
-//                        scene->startParticlesGroup(rocketslist, 1);
+                        scene->startParticlesGroup(groups.rocketslist, 1);
                     } else if (sum > 0) {
                         CString::format(L"Приз +%d", sum).log();
                         prizeTimeout = currentTime + 4000; // Время отображения приза
@@ -864,25 +863,21 @@ void OMGame::onReady() {
     Vector<GLObject*>* buttonLayer = scene->createLayer();
     Vector<GLObject*>* blackLayer = scene->createLayer();
     
-    /*
     { // Феерверки
-        this.rocketslist = [];
-        
-        for (var i = 0; i < 10; i++) {
-            var name = "rocket" + i;
-            var s = this.context.particles.createParticleSystem(name);
-            s.createRocket(0, new Vec3([0,0,0]));
-            s.generate();
-            this.rocketslist.push(name);
+        for (int i = 0; i < 10; i++) {
+            CString name = L"rocket"; name += i;
+            GLParticleSystem* s = context->particles->createParticleSystem(name);
+            s->createRocket(0, Vec3( {0,0,0} ));
+            s->generate();
             
-            var p = new Vec3().subtract(scene.camera.target, [0,250,0]);
-            scene.createLayerObject(rocketLayer, name).setParticleSystem(name)->objectMatrix.translate(p);
+            Vec3 p; p.subtract(scene->camera->target, {0,250,0});
+            scene->createLayerObject(rocketLayer, name)->setParticleSystem(name)->objectMatrix.translate(p);
+            groups.rocketslist.push( scene->objects->get(name) );
         }
         
-        //scene.startParticlesGroup(this.rocketslist, 2);
-        scene.visibleGroup(this.rocketslist, true);
+        //scene->startParticlesGroup(groups.rocketslist, 2); // test on start
+        scene->visibleGroup(groups.rocketslist, true);
     }
-    */
     
     { // Модели
         scene->createLayerObject(modelLayer, L"ball_0")->setModel(L"ball")->objectMatrix.translate( {1.947, 620.468, -252.468} );
@@ -1031,8 +1026,8 @@ void OMGame::onReady() {
     dbl_sun = context->drawings->get(L"dbl_sun");
     dbl_moon = context->drawings->get(L"dbl_moon");
 
-    //updateStage(STAGE_BARS, NULL, 0, true);
-    updateStage(STAGE_DOUBLE, NULL, 0, true);
+    updateStage(STAGE_BARS, NULL, 0, true);
+    //updateStage(STAGE_DOUBLE, NULL, 0, true);
     doubleReset(this);
     
     trackBarData1.game = this;

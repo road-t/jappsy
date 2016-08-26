@@ -293,7 +293,7 @@ public:
 	
 	void parseJson(ModelJsonParserNodeData* node, Vector<ModelJsonParserMeshData*>& meshes, Mat4& rootmat);
 	
-	void render(GLRender* context, GLModel* model) const;
+	void render(GLRender* context, const GLModel* model) const;
 };
 
 class GLModelMesh : public CObject {
@@ -325,7 +325,7 @@ public:
 	
 	void parseJson(ModelJsonParserMeshData* mesh, Mat4& matN, Mat4& matV);
 	
-	void render(GLRender* context, GLModel* model) const;
+	void render(GLRender* context, const GLModel* model);
 };
 
 //===============================

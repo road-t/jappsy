@@ -12,9 +12,15 @@
                         <viewControllerLayoutGuide type="top" id="jcX-57-ECS"/>
                         <viewControllerLayoutGuide type="bottom" id="cf7-Fi-8Us"/>
                     </layoutGuides>
-                    <view key="view" contentMode="center" id="pKD-hw-zOh" customClass="ExampleJappsyView">
+                    <view key="view" contentMode="center" id="pKD-hw-zOh">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="center" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="XEN-yY-UEv" customClass="ExampleJappsyView">
+                                <rect key="frame" x="20" y="20" width="192" height="108"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </view>
+                        </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
                 </viewController>

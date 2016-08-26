@@ -31,8 +31,8 @@ public:
 	GLEngine* engine = NULL;
 	GLRender* context = NULL;
 	
-	GLint width;
-	GLint height;
+	GLfloat width;
+	GLfloat height;
 	
 	uint64_t currentTime;
 	uint64_t lastFrame;

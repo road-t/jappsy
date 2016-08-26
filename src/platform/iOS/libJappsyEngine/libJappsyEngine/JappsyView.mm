@@ -27,6 +27,7 @@
     EAGLContext* _context;
     NSInteger _interval;
     CADisplayLink* _displayLink;
+	GLfloat viewScale;
 }
 
 @property(nonatomic,retain)NSMutableArray* activeTouches;
@@ -74,17 +75,17 @@
 - (void) didMoveToWindow
 {
 	// AutoScale Pixels
-	GLfloat scale = [[UIScreen mainScreen] scale];
-	GLfloat dpi = scale * 160.0f;
+	static GLfloat screenScale = [[UIScreen mainScreen] scale];
+	GLfloat dpi = screenScale * 160.0f;
 	CGRect screen = [[UIScreen mainScreen] bounds];
-	GLfloat width = screen.size.width * scale;
-	GLfloat height = screen.size.height * scale;
+	GLfloat width = screen.size.width * screenScale;
+	GLfloat height = screen.size.height * screenScale;
 	GLfloat max = (width > height) ? width : height;
-	GLfloat viewScale = 1.0;
+	viewScale = 1.0;
 	if (max > 1920) {
 		viewScale = self.window.screen.nativeScale; // enable pixel scale for big screens
 	} else {
-		viewScale = scale; // disable pixel scale for small screens
+		viewScale = screenScale; // disable pixel scale for small screens
 	}
 	GLfloat diag = (float)(round(sqrt(width * width + height * height) * 2.0f / dpi) / 2.0f);
 	
@@ -235,8 +236,8 @@ static int32_t pointerId = 1;
 		
 		if (pointer != NULL) {
 			CGPoint pos = [touch locationInView:self];
-			pointer->x = pos.x;
-			pointer->y = pos.y;
+			pointer->x = pos.x * viewScale;
+			pointer->y = pos.y * viewScale;
 			pointer->event = MotionEvent::ACTION_DOWN;
 			pointer->time = currentTimeMillis();
 		}
@@ -262,8 +263,8 @@ static int32_t pointerId = 1;
 		if (index != NSNotFound) {
 			MotionPointer* pointer = motionEvent.getPointer(index);
 			CGPoint pos = [touch locationInView:self];
-			pointer->x = pos.x;
-			pointer->y = pos.y;
+			pointer->x = pos.x * viewScale;
+			pointer->y = pos.y * viewScale;
 			pointer->event = MotionEvent::ACTION_MOVE;
 			pointer->time = currentTimeMillis();
 		}
@@ -289,8 +290,8 @@ static int32_t pointerId = 1;
 		if (index != NSNotFound) {
 			MotionPointer* pointer = motionEvent.getPointer(index);
 			CGPoint pos = [touch locationInView:self];
-			pointer->x = pos.x;
-			pointer->y = pos.y;
+			pointer->x = pos.x * viewScale;
+			pointer->y = pos.y * viewScale;
 			pointer->event = MotionEvent::ACTION_UP;
 			pointer->time = currentTimeMillis();
 		}

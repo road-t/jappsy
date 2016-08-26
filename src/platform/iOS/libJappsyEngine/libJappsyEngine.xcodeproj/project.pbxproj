@@ -20,7 +20,7 @@
 		C30578281D54BBA000171EFC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578271D54BBA000171EFC /* Foundation.framework */; };
 		C305782A1D54BBAB00171EFC /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C30578291D54BBAB00171EFC /* OpenGLES.framework */; };
 		C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C305782B1D54BBBB00171EFC /* UIKit.framework */; };
-		C30578371D54C73B00171EFC /* platform.m in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.m */; };
+		C30578371D54C73B00171EFC /* platform.mm in Sources */ = {isa = PBXBuildFile; fileRef = C30578361D54C73B00171EFC /* platform.mm */; };
 		C30578401D54CBAB00171EFC /* uMemory.mm in Sources */ = {isa = PBXBuildFile; fileRef = C305783F1D54CBAB00171EFC /* uMemory.mm */; };
 		C310C7A51D6CE9C20031E73A /* uGLSceneObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C310C7A41D6CE9C20031E73A /* uGLSceneObject.h */; };
 		C310C7B81D6D435D0031E73A /* uCache.h in Headers */ = {isa = PBXBuildFile; fileRef = C310C7B61D6D435D0031E73A /* uCache.h */; };
@@ -115,7 +115,7 @@
 		C30578271D54BBA000171EFC /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		C30578291D54BBAB00171EFC /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		C305782B1D54BBBB00171EFC /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		C30578361D54C73B00171EFC /* platform.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = platform.m; sourceTree = "<group>"; };
+		C30578361D54C73B00171EFC /* platform.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = platform.mm; sourceTree = "<group>"; };
 		C305783F1D54CBAB00171EFC /* uMemory.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uMemory.mm; sourceTree = "<group>"; };
 		C310C7A41D6CE9C20031E73A /* uGLSceneObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSceneObject.h; sourceTree = "<group>"; };
 		C310C7B61D6D435D0031E73A /* uCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uCache.h; sourceTree = "<group>"; };
@@ -226,7 +226,7 @@
 				C30577C91D54BA9C00171EFC /* core */,
 				C3401C5E1D668B70009B223D /* jappsy.cpp */,
 				C30577E21D54BA9C00171EFC /* jappsy.h */,
-				C30578361D54C73B00171EFC /* platform.m */,
+				C30578361D54C73B00171EFC /* platform.mm */,
 				C30577E91D54BA9C00171EFC /* platform.h */,
 			);
 			name = include;
@@ -540,7 +540,7 @@
 				C34FDA3A1D5BDAB60022FF71 /* uGLEngine.cpp in Sources */,
 				C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */,
 				C310C7BC1D6E080E0031E73A /* uGLAnimation.cpp in Sources */,
-				C30578371D54C73B00171EFC /* platform.m in Sources */,
+				C30578371D54C73B00171EFC /* platform.mm in Sources */,
 				C3FFBADD1D62FF360099AD22 /* uHTTPClient.mm in Sources */,
 				C35900CB1D6542C700C1D154 /* uGLFunc.cpp in Sources */,
 				C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */,

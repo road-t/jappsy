@@ -23,6 +23,7 @@
 #include <data/uVector.h>
 #include <opengl/uGLSceneObject.h>
 #include <opengl/uGLFunc.h>
+#include <opengl/uGLTouchScreen.h>
 
 class GLScene;
 class GLDrawing;
@@ -46,7 +47,7 @@ public:
 	GLfloat time = NAN;
 	
 	typedef bool (*onEventCallback)(GLEngine* engine, const CString& event, GLDrawing* drawing);
-	static bool eventHandler(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData);
+	static bool eventHandler(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
 	onEventCallback onevent = NULL;
 	
 	Mat4 modelMatrix;

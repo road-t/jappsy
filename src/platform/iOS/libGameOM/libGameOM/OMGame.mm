@@ -346,17 +346,6 @@ void OMGame::onFrame(GLRender* context) {
         }
         
         scene->render();
-/*
-        context->drawRect(0, 0, 500, 500, paint);
-        
-        context->drawTexture(100, 100, 400, 400, L"mramor.png");
-        
-        uint64_t time = currentTimeMillis();
-        GLfloat worldTime = (GLfloat)(time % 86400000) / 86400000.0;
-        context->drawEffectMobile(0, 0, 500, 500, L"mobile_effect_sun1", 0.5, worldTime);
-        
-        context->sprites->renderSpriteNumber("num", {970-4, 100}, 42, 123456);
- */
         
         static int fpscounter = 0;
         fpscounter++;
@@ -365,6 +354,10 @@ void OMGame::onFrame(GLRender* context) {
             CString::format(L"FPS: %d", context->frame->fps).log();
         }
     }
+}
+
+void OMGame::onResize(int width, int height) {
+    context->touchScreen->update(1920, 1080); // independent size
 }
 
 void OMGame::onTouch(const CString& event) {
@@ -381,7 +374,7 @@ void OMGame::onTouch(const CString& event) {
     }
 }
 
-bool OMGame::onTrackBar(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData) {
+bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData) {
     TrackBarData* data = (TrackBarData*)userData;
     OMGame* game = data->game;
     int index = data->index;
@@ -392,9 +385,9 @@ bool OMGame::onTrackBar(const CString& event, const Vec2& cur, const Vec2& delta
             
             game->bars.clear();
             if (event == L"move") {
-                game->bars.rotation[index].userMove(-delta.x / 4.0);
+                game->bars.rotation[index].userMove(-delta->x / 4.0);
             } else if (event == L"leave") {
-                game->bars.rotation[index].userRotate(-delta.x / 4.0, speed.x * 250.0);
+                game->bars.rotation[index].userRotate(-delta->x / 4.0, speed->x * 250.0);
             }
             return true;
         }

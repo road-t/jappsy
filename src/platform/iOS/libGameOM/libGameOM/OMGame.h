@@ -119,9 +119,10 @@ public:
     TrackBarData trackBarData3 = { NULL, 3 };
     
     void onFrame(GLRender* context);
+    void onResize(int width, int height);
     void onTouch(const CString& event);
     
-    static bool onTrackBar(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData);
+    static bool onTrackBar(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
     static bool onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* drawing);
     
     void doubleSelect(int index);

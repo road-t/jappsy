@@ -58,7 +58,7 @@ GLObject* GLObject::setDrawing(const CString& key, const GLfloat time) throw(con
 	return this;
 }
 
-bool GLObject::eventHandler(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData) {
+bool GLObject::eventHandler(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData) {
 	GLObject* object= (GLObject*)userData;
 	if (object->visible) {
 		return object->onevent(object->scene->context->engine, event, (GLDrawing*)(object->object));

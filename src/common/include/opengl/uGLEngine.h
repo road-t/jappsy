@@ -44,6 +44,7 @@ public:
 	void onTouch(MotionEvent* event);
 
 	virtual void onFrame(GLRender* context) {}
+	virtual void onResize(int width, int height) {}
 	virtual void onTouch(const CString& event) {}
 	virtual void onFile(const CString& url, void* object) {}
 	virtual void onStatus(const LoaderStatus& status) {}

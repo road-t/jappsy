@@ -25,18 +25,68 @@
 
 class GLRender;
 
-class GLTouchEvent {
+class GLTouchPoint : public CObject {
 public:
-	typedef bool (*Callback)(const CString& event, const Vec2& cur, const Vec2& delta, const Vec2& speed, void* userData);
+	union {
+		struct {
+			GLfloat x;
+			GLfloat y;
+		};
+		
+		GLfloat v[2];
+	};
+	
+	uint64_t time;
+	
+	inline GLTouchPoint() { }
+	
+	inline GLTouchPoint(const GLfloat x, const GLfloat y, const uint64_t time) {
+		this->x = x;
+		this->y = y;
+		this->time = time;
+	}
+	
+	inline void update(const GLfloat x, const GLfloat y, const uint64_t time) {
+		this->x = x;
+		this->y = y;
+		this->time = time;
+	}
+	
+	GLTouchPoint& operator =(const GLTouchPoint& point) {
+		this->x = point.x;
+		this->y = point.y;
+		this->time = point.time;
+		return *this;
+	}
+	
+	bool operator ==(const GLTouchPoint& point) {
+		return (this->x == point.x) && (this->y == point.y) && (this->time == point.time);
+	}
+};
 
-	float x;
-	float y;
-	float w;
-	float h;
-	CString& name;
+class GLTouchObject : public CObject {
+public:
+	typedef bool (*Callback)(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
+	
+	CString name;
+	
+	GLfloat x;
+	GLfloat y;
+	GLfloat w;
+	GLfloat h;
+	
+	Callback onevent;
 	void* userData;
 	
-	Callback onEvent;
+	inline GLTouchObject(const CString& name, const GLfloat x, const GLfloat y, const GLfloat w, const GLfloat h, Callback callback, void* userData) {
+		this->name = name;
+		this->x = x;
+		this->y = y;
+		this->w = w;
+		this->h = h;
+		this->onevent = callback;
+		this->userData = userData;
+	}
 };
 
 class GLTouchScreen : public CObject {
@@ -48,37 +98,41 @@ private:
 	onTouchCallback onTouch = NULL;
 	void* userData;
 
+	GLfloat width;
+	GLfloat height;
+	
 	GLfloat recordDistance;
 	GLfloat minimalDistance;
 	GLfloat swipeDistance;
-	GLTouchEvent* clickList;
-	GLTouchEvent* trackList;
+	Vector<GLTouchObject*> clickList;
+	Vector<GLTouchObject*> trackList;
 	
-	GLTouchEvent* trackLast;
-	GLfloat trackSpeed;
-	GLTouchEvent* trackingList;
-	GLTouchEvent* trackingLast;
+	GLTouchPoint cur;
+	GLTouchPoint* trackLast = NULL;
+	GLTouchPoint trackSpeed;
+	Vector<GLTouchObject*> trackingList;
+	Vector<GLTouchPoint> trackingLast;
 	
-	GLTouchEvent* touchList;
-	GLTouchEvent* touchLast;
-	bool touchCancel;
-	uint64_t touchStart;
+	Vector<Vec3> touchList;
+	Vec3 _touchLast;
+	Vec3* touchLast = NULL;
+	bool touchCancel = false;
+	uint64_t touchStart = 0;
 	
-	uint64_t touchTime;
-	bool touchDown;
-	uint64_t mouseTime;
-	bool mouseDown;
-	uint64_t mouseRepeatTime;
-	void* touchTimeout;
+	uint64_t touchTime = 0;
+	bool touchDown = false;
+	uint64_t mouseTime = 0;
+	bool mouseDown = false;
+	uint64_t mouseRepeatTime = 0;
+	uint64_t touchTimeout = 0;
 	
-	void setTimeout(int delay);
-	void clearTimeout();
-
 	bool checkBounds(float x, float y);
 
 	bool canStartTouch();
 	bool canStartMouse();
 	
+	void checkTimeout();
+
 	void analyze(float x, float y);
 	void recordTrack(float x, float y, bool stop);
 	void record(float x, float y);
@@ -86,15 +140,11 @@ public:
 	GLTouchScreen(GLRender* context, onTouchCallback callback, void* userData);
 	~GLTouchScreen();
 	
-	void release();
+	void update(float width, float height);
 	
-	void update();
+	void trackEvent(const CString& name, float x, float y, float w, float h, GLTouchObject::Callback callback, void* userData);
+	void clickEvent(const CString& name, float x, float y, float w, float h, GLTouchObject::Callback callback, void* userData);
 	
-	void trackEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData);
-	void clickEvent(const CString& name, float x, float y, float w, float h, GLTouchEvent::Callback callback, void* userData);
-	
-	void onTimeout();
-
 	void onTouchStart(MotionEvent* event);
 	void onTouchEnd(MotionEvent* event);
 	void onTouchMove(MotionEvent* event);

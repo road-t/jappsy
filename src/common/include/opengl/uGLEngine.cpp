@@ -81,6 +81,7 @@ void GLEngine::onRender() {
 }
 
 void GLEngine::onUpdate(int width, int height) {
+	onResize(width, height);
 	context->frame->width = width;
 	context->frame->height = height;
 }

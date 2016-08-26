@@ -114,9 +114,9 @@ public:
         int index;
     };
     
-    TrackBarData trackBarData1 = { NULL, 1 };
-    TrackBarData trackBarData2 = { NULL, 2 };
-    TrackBarData trackBarData3 = { NULL, 3 };
+    TrackBarData trackBarData1 = { NULL, 0 };
+    TrackBarData trackBarData2 = { NULL, 1 };
+    TrackBarData trackBarData3 = { NULL, 2 };
     
     void onFrame(GLRender* context);
     void onResize(int width, int height);

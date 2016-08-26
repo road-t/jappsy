@@ -384,9 +384,9 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
             GLScene* scene = game->scene;
             
             game->bars.clear();
-            if (event == L"move") {
+            if (event.startsWith(L"move")) {
                 game->bars.rotation[index].userMove(-delta->x / 4.0);
-            } else if (event == L"leave") {
+            } else if (event.startsWith(L"leave")) {
                 game->bars.rotation[index].userRotate(-delta->x / 4.0, speed->x * 250.0);
             }
             return true;
@@ -399,11 +399,11 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
 bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* drawing) {
     OMGame* game = (OMGame*)engine;
     if (game->nextTimeout == 0) {
-        if (event.indexOf("enter ") == 0) {
+        if (event.startsWith("enter ")) {
             GLAnimation::createBlink(drawing, 1.0, 1.5, 500);
             CString::format(L"Нажата кнопка %ls", (wchar_t*)event).log();
-        } else if (event.indexOf("move ") == 0) {
-        } else if (event.indexOf("leave ") == 0) {
+        } else if (event.startsWith("move ")) {
+        } else if (event.startsWith("leave ")) {
         } else {
             CString::format(L"Действие по кнопке %ls", (wchar_t*)event).log();
             if (event == "click btn_auto") {
@@ -827,6 +827,7 @@ void OMGame::onReady() {
     if (!context->createDrawings(sOMDrawingsRes)) {
         shutdown();
     }
+    
     context->drawings->get(L"text_sequence")->setPaint(paintSpriteLeftCenter);
     context->drawings->get(L"dbl_sun")->setPaint(paintSpriteCenter);
     context->drawings->get(L"dbl_moon")->setPaint(paintSpriteCenter);
@@ -1033,9 +1034,12 @@ void OMGame::onReady() {
     updateStage(STAGE_BARS, NULL, 0, true);
     doubleReset(this);
     
-    context->touchScreen->trackEvent("bar1", 276, 192, 456, 720, onTrackBar, &groups.barlist1);
-    context->touchScreen->trackEvent("bar2", 732, 192, 456, 720, onTrackBar, &groups.barlist2);
-    context->touchScreen->trackEvent("bar3", 1188, 192, 456, 720, onTrackBar, &groups.barlist3);
+    trackBarData1.game = this;
+    trackBarData2.game = this;
+    trackBarData3.game = this;
+    context->touchScreen->trackEvent("bar1", 276, 192, 456, 720, onTrackBar, &trackBarData1);
+    context->touchScreen->trackEvent("bar2", 732, 192, 456, 720, onTrackBar, &trackBarData2);
+    context->touchScreen->trackEvent("bar3", 1188, 192, 456, 720, onTrackBar, &trackBarData3);
     
     ready = true;
 }
@@ -1057,6 +1061,12 @@ OMGame::OMGame() {
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
+    
+    paint.setColor(0x80FF0000).setStroke(3, 0x800000FF);
+    paintShadow.setColor(0x80000000);
+    paintSwitch.setColor(0x00000000);
+    paintSpriteCenter.setColor(0xFFFFFFFF).setAlignX(GLAlignX::CENTER).setAlignY(GLAlignY::MIDDLE);
+    paintSpriteLeftCenter.setColor(0xFFFFFFFF).setAlignX(GLAlignX::LEFT).setAlignY(GLAlignY::MIDDLE);
     
     this->setBasePath(L"https://www.cox.ru/res/om/");
     this->load(sOMLoadRes);

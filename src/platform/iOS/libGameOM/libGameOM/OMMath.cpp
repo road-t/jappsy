@@ -21,7 +21,7 @@ void Rotation::start(GLfloat* target) {
     if (target == NULL) {
         accel = randomf() * (speedup.maxAccel - speedup.minAccel) + speedup.minAccel;
     } else {
-        accel = Rotation::Angle(*target);
+        this->target = Rotation::Angle(*target);
     }
     state = RotationState::RS_NONE;
     stopped = false;
@@ -76,9 +76,9 @@ void Rotation::userMove(GLfloat delta) {
 
 void Rotation::userRotate(GLfloat delta, GLfloat speed) {
     rotate += delta;
-    speed = fabsf(speed);
-    if (speed > speedup.maxSpeed)
-        speed = speedup.maxSpeed;
+    this->speed = fabsf(speed);
+    if (this->speed > speedup.maxSpeed)
+        this->speed = speedup.maxSpeed;
     accel = randomf() * (Rotation::slowdown.maxAccel - Rotation::slowdown.minAccel) + Rotation::slowdown.minAccel;
     state = (speed > 0.0) ? RS_BACKWARD : RS_FORWARD;
     updated = true;
@@ -330,7 +330,7 @@ void Rotation::generateBars(Rotation* bars, int grace) {
 }
 
 #define tempseqlen  18
-static int tempseq[tempseqlen] = { 0, -4, 0, 4, 0, -8, 0, 0, 0, 0, 0, 8, 0, 0, 44, 88, 444, 888 };
+static int tempseq[tempseqlen] = { 4, -4, 0, 4, 0, -8, 0, 0, 0, 0, 0, 8, 0, 0, 44, 88, 444, 888 };
 static int tempofs = 0;
 #define graceslen   9
 static int graces[graceslen] = { 0, 4, 8, -4, -8, 44, 88, 444, 888 };

@@ -416,12 +416,13 @@ void GLTouchScreen::analyze(float x, float y) {
 
 void GLTouchScreen::recordTrack(float x, float y, bool stop) {
 	uint64_t time = currentTimeMillis();
-	
-	cur.update(x, y, time);
+
+	GLTouchPoint cur(x, y, time);
 	
 	if (trackLast == NULL) {
 		trackSpeed.update(0, 0, 0);
-		trackLast = &cur;
+		_trackLast = cur;
+		trackLast = &_trackLast;
 	} else {
 		uint64_t elapsed = (time - trackLast->time);
 		if (elapsed > 50) {
@@ -432,7 +433,8 @@ void GLTouchScreen::recordTrack(float x, float y, bool stop) {
 				GLfloat ys = ((y - trackLast->y) + trackSpeed.y * trackSpeed.time) / (elapsed + trackSpeed.time);
 				trackSpeed.update(xs, ys, elapsed);
 			}
-			trackLast = &cur;
+			_trackLast = cur;
+			trackLast = &_trackLast;
 		}
 	}
 	

@@ -21,6 +21,7 @@
 #include <opengl/uGLEngine.h>
 #include <core/uMemory.h>
 #include <jappsy.h>
+#include <platform.h>
 
 @interface JappsyView () {
 	GLContext* _renderer;
@@ -82,11 +83,15 @@
 	GLfloat height = screen.size.height * screenScale;
 	GLfloat max = (width > height) ? width : height;
 	viewScale = 1.0;
+#if !defined(__SIMULATOR__)
 	if (max > 1920) {
 		viewScale = self.window.screen.nativeScale; // enable pixel scale for big screens
 	} else {
 		viewScale = screenScale; // disable pixel scale for small screens
 	}
+#else
+	viewScale = 1.0;
+#endif
 	GLfloat diag = (float)(round(sqrt(width * width + height * height) * 2.0f / dpi) / 2.0f);
 	
 	self.contentScaleFactor = viewScale;

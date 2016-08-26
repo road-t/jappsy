@@ -146,9 +146,9 @@ Vec2 GLSprite::getPosition(const Vec2& position, const GLPaint* paint) {
 			x -= width;
 		}
 		if (paint->m_alignY == GLAlignY::MIDDLE) {
-			x -= (GLfloat)height / 2.0;
+			y -= (GLfloat)height / 2.0;
 		} else if (paint->m_alignY > GLAlignY::MIDDLE) {
-			x -= height;
+			y -= height;
 		}
 	}
 	

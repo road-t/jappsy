@@ -53,7 +53,7 @@ public:
     GLfloat rotate = 0.0;
     GLfloat speed = 0.0;
     GLfloat accel = 0.0;
-    GLfloat time = 0.0;
+    uint64_t time = 0;
     GLfloat target = -1;
     Rotation* prev = NULL;
     bool stopped = true;

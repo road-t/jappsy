@@ -107,7 +107,7 @@ private:
 	Vector<GLTouchObject*> clickList;
 	Vector<GLTouchObject*> trackList;
 	
-	GLTouchPoint cur;
+	GLTouchPoint _trackLast;
 	GLTouchPoint* trackLast = NULL;
 	GLTouchPoint trackSpeed;
 	Vector<GLTouchObject*> trackingList;

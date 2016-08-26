@@ -676,7 +676,7 @@ void OMGame::drawSplash(GLEngine* engine) {
         game->text_sequence->render();
         GLfloat x = 900;
         if (game->stage == STAGE_DOUBLE_SHOW) {
-            uint64_t ofs = (currentTime - game->doubleShowTimeout + 3000) / 2000;
+            GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->doubleShowTimeout) + 3000) / 2000.0;
             if (ofs > 1) ofs = 1;
             game->paintSpriteLeftCenter.setLight(ofs, ofs);
             game->sequence->render( {x - 176 + ofs * 176, 178+152/2}, game->conf.dblindex, &game->paintSpriteLeftCenter );
@@ -719,7 +719,7 @@ void OMGame::drawEffectsDouble(GLEngine* engine) {
     OMGame* game = (OMGame*)engine;
     GLRender* context = game->scene->context;
     
-    bool mobile = false;
+    bool mobile = true;
     int index = game->conf.dblindex;
     
     uint64_t currentTime = currentTimeMillis();
@@ -727,9 +727,9 @@ void OMGame::drawEffectsDouble(GLEngine* engine) {
     
     GLfloat localTime;
     if (game->stage != STAGE_DOUBLE_HIDE) {
-        localTime = (GLfloat)((currentTime - game->localTime) % 86400000) / 86400000.0;
+        localTime = (GLfloat)(((int64_t)currentTime - (int64_t)(game->localTime)) % 86400000) / 86400000.0;
     } else {
-        localTime = (GLfloat)((game->localTime - currentTime) % 86400000) / 86400000.0;
+        localTime = (GLfloat)(((int64_t)(game->localTime) - (int64_t)currentTime) % 86400000) / 86400000.0;
     }
     
     if ((game->stage == STAGE_DOUBLE) || (game->stage == STAGE_DOUBLE_WAIT) || ((game->stage == STAGE_DOUBLE_TAKE) && (game->conf.doubleout != 0))) {
@@ -775,8 +775,8 @@ void OMGame::drawEffectSwitch(GLEngine* engine) {
     
     if (game->nextTime != 0) {
         uint64_t currentTime = currentTimeMillis();
-        GLfloat ofs = (GLfloat)(currentTime - game->nextTime) / 500.0;
-        if (ofs >= 1) {
+        GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->nextTime)) / 500.0;
+        if (ofs >= 1.0) {
             game->nextTime = 0;
         } else {
             game->paintSwitch.setLight(0, 1.0 - clamp(fabsf(ofs), 0.0, 1.0));
@@ -902,7 +902,7 @@ void OMGame::onReady() {
         scene->createLayerObject(modelLayer, L"separator_11")->setModel(L"separator")->objectMatrix.translate( {316.914, 252.739, -248.473} );
         scene->createLayerObject(modelLayer, L"bar_12")->setModel(L"bar")->objectMatrix.translate( {317.207, 179.488, -249.692} );
         scene->createLayerObject(modelLayer, L"separator_12")->setModel(L"separator")->objectMatrix.translate( {316.914, 106.063, -248.473} );
-        
+
         scene->createLayerObject(modelLayer, L"ball_2")->setModel(L"ball")->objectMatrix.translate( {626.263, 620.468, -252.468} );
         scene->createLayerObject(modelLayer, L"cap_2")->setModel(L"cap")->objectMatrix.translate( {628.436, 572.537, -249.301} );
         scene->createLayerObject(modelLayer, L"bar_20")->setModel(L"bar")->objectMatrix.translate( {632.114, 477.718, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 180));
@@ -1031,7 +1031,8 @@ void OMGame::onReady() {
     dbl_sun = context->drawings->get(L"dbl_sun");
     dbl_moon = context->drawings->get(L"dbl_moon");
 
-    updateStage(STAGE_BARS, NULL, 0, true);
+    //updateStage(STAGE_BARS, NULL, 0, true);
+    updateStage(STAGE_DOUBLE, NULL, 0, true);
     doubleReset(this);
     
     trackBarData1.game = this;

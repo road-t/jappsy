@@ -576,3 +576,28 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+Vec2::Vec2(const Vec3& v) {
+	this->v[0] = v.v[0]; this->v[1] = v.v[1];
+}
+
+Vec2& Vec2::operator =(const Vec3& v) {
+	this->v[0] = v.v[0]; this->v[1] = v.v[1]; return *this;
+}
+
+Vec2::Vec2(const Vec4& v) {
+	this->v[0] = v.v[0]; this->v[1] = v.v[1];
+}
+
+Vec2& Vec2::operator =(const Vec4& v) {
+	this->v[0] = v.v[0]; this->v[1] = v.v[1]; return *this;
+}
+
+Vec3::Vec3(const Vec4& v) {
+	Vec3SetV(this->v, v.v);
+}
+
+Vec3& Vec3::operator =(const Vec4& v) {
+	Vec3SetV(this->v, v.v); return *this;
+}
+

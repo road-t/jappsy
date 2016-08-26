@@ -102,9 +102,16 @@ extern "C" {
 		inline Vec2() { }
 		inline Vec2(const GLfloat x, const GLfloat y) { v[0] = x; v[1] = y; }
 		inline Vec2(const GLfloat v[2]) { this->v[0] = v[0]; this->v[1] = v[1]; }
+		inline Vec2(const Vec2& v) { this->v[0] = v.v[0]; this->v[1] = v.v[1]; }
+		Vec2(const Vec3& v);
+		Vec2(const Vec4& v);
 
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
+		
+		inline Vec2& operator =(const Vec2& v) { this->v[0] = v.v[0]; this->v[1] = v.v[1]; return *this; }
+		Vec2& operator =(const Vec3& v);
+		Vec2& operator =(const Vec4& v);
 	};
 	
 	struct Vec3i {
@@ -116,6 +123,8 @@ extern "C" {
 
 		inline GLshort& operator [](int index) { return i[index]; }
 		inline operator GLshort*() const { return (GLshort*)i; }
+
+		inline Vec3i& operator =(const Vec3i& v) { this->i[0] = i[0]; this->i[1] = i[1]; this->i[2] = i[2]; return *this; }
 	};
 	
 	struct Vec3 {
@@ -144,6 +153,8 @@ extern "C" {
 		inline Vec3() { }
 		inline Vec3(const GLfloat x, const GLfloat y, const GLfloat z) { v[0] = x; v[1] = y; v[2] = z; }
 		inline Vec3(const GLfloat v[3]) { Vec3SetV(this->v, v); }
+		inline Vec3(const Vec3& v) { Vec3SetV(this->v, v.v); }
+		Vec3(const Vec4& v);
 		
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
@@ -184,6 +195,9 @@ extern "C" {
 		Vec3& transformNormal(const Mat4& m);
 		Vec3& transformNormal(const Vec3& v, const Mat4& m);
 		inline Vec3& random(const Vec3& v) { Vec3Random(this->v, v.x, v.y, v.z); return *this; }
+
+		inline Vec3& operator =(const Vec3& v) { Vec3SetV(this->v, v.v); return *this; }
+		Vec3& operator =(const Vec4& v);
 	};
 	
 	struct Vec4 {
@@ -215,6 +229,7 @@ extern "C" {
 		inline Vec4() { }
 		inline Vec4(const GLfloat x, const GLfloat y, const GLfloat z, const GLfloat w) { v[0] = x; v[1] = y; v[2] = z; v[3] = w; }
 		inline Vec4(const GLfloat v[4]) { Vec4SetV(this->v, v); }
+		inline Vec4(const Vec4& v) { Vec4SetV(this->v, v.v); }
 
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() const { return (GLfloat*)v; }
@@ -245,10 +260,16 @@ extern "C" {
 		inline Vec4& divide(const Vec4& a, const Vec4& b) { Vec4DivideV(this->v, a.v, b.v); return *this; }
 		inline Vec4& normalize() { Vec4Normalize(this->v, this->v); return *this; }
 		inline Vec4& normalize(const Vec4& v) { Vec4Normalize(this->v, v.v); return *this; }
+
+		inline Vec4& operator =(const Vec4& v) { Vec4SetV(this->v, v.v); return *this; }
 	};
 	
 	struct Mat4 {
 		GLfloat v[16];
+		
+		inline Mat4() { Mat4Identity(this->v); }
+		inline Mat4(const GLfloat v[16]) { Mat4SetV(this->v, v); }
+		inline Mat4(const Mat4& m) { Mat4SetV(this->v, m.v); }
 		
 		inline GLfloat& operator [](int index) { return v[index]; }
 		inline operator GLfloat*() { return v; }
@@ -273,6 +294,8 @@ extern "C" {
 		inline Mat4& transpose(const Mat4& m) { Mat4Transpose(this->v, m.v); return *this; }
 		inline Mat4& multiply(const Mat4& m) { Mat4Multiply(this->v, this->v, m.v); return *this; }
 		inline Mat4& multiply(const Mat4& a, const Mat4& b) { Mat4Multiply(this->v, a.v, b.v); return *this; }
+
+		inline Mat4& operator =(const Mat4& m) { Mat4SetV(this->v, m.v); return *this; }
 	};
 	
 #ifdef __cplusplus

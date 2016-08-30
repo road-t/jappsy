@@ -419,10 +419,11 @@ GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReferenc
 	GLObjectData* vsh = NULL;
 	GLObjectData* fsh = NULL;
 	Vector<GLObjectData*> textures;
-	
+
+#if defined(__IOS__)
 	if (vshReference[0] == L'@') {
 		CString vshRef = vshReference + 1;
-		
+
 		NSBundle* bundle = [NSBundle mainBundle];
 		if (library != NULL) {
 			bundle = (__bridge NSBundle*)library;
@@ -445,6 +446,7 @@ GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReferenc
 		const char *fragmentShaderSourceCString = [fragmentShaderSource cStringUsingEncoding:NSUTF8StringEncoding];
 		createFragmentShader(fshReference, fragmentShaderSourceCString);
 	}
+#endif
 	
 	try {
 		vsh = memNew(vsh, GLObjectData(context));

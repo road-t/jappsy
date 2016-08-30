@@ -141,15 +141,15 @@ Java_com_jappsy_cipher_MD5_unicode(JNIEnv *env, jclass type, jstring s_) {
     struct tMD5 md5;
     md5_init(&md5);
 
-    jsize size = (*env)->GetStringLength(env, s_) * 2;
+    jsize size = env->GetStringLength(s_) * 2;
 
     //__android_log_print(ANDROID_LOG_INFO, "JNI", "Size: %d", size);
 
-    const jchar* buffer = (*env)->GetStringCritical(env, s_, NULL);
+    const jchar* buffer = env->GetStringCritical(s_, NULL);
     if (buffer != NULL) {
         if (size > 0)
             md5_update(&md5, (uint8_t*)buffer, (uint32_t)size);
-        (*env)->ReleaseStringCritical(env, s_, buffer);
+        env->ReleaseStringCritical(s_, buffer);
     }
 
     md5_final(&md5);
@@ -167,7 +167,7 @@ Java_com_jappsy_cipher_MD5_unicode(JNIEnv *env, jclass type, jstring s_) {
         res[i * 2 + 1] = (jchar)chl;
     }
 
-    return (*env)->NewString(env, res, 32);
+    return env->NewString(res, 32);
 }
 
 JNIEXPORT jstring JNICALL
@@ -175,15 +175,15 @@ Java_com_jappsy_cipher_MD5_utf8(JNIEnv *env, jclass type, jstring s_) {
     struct tMD5 md5;
     md5_init(&md5);
 
-    jsize size = (*env)->GetStringUTFLength(env, s_);
+    jsize size = env->GetStringUTFLength(s_);
 
     //__android_log_print(ANDROID_LOG_INFO, "JNI", "Size: %d", size);
 
-    const char *buffer = (*env)->GetStringUTFChars(env, s_, 0);
+    const char *buffer = env->GetStringUTFChars(s_, 0);
     if (buffer != NULL) {
         if (size > 0)
             md5_update(&md5, (uint8_t*)buffer, (uint32_t)size);
-        (*env)->ReleaseStringUTFChars(env, s_, buffer);
+        env->ReleaseStringUTFChars(s_, buffer);
     }
 
     md5_final(&md5);
@@ -201,7 +201,7 @@ Java_com_jappsy_cipher_MD5_utf8(JNIEnv *env, jclass type, jstring s_) {
         res[i * 2 + 1] = (jchar)chl;
     }
 
-    return (*env)->NewString(env, res, 32);
+    return env->NewString(res, 32);
 }
 
 #endif

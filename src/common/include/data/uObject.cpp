@@ -26,7 +26,7 @@ void CObject::threadLock() const {
 		spinLock();
 		if ((AtomicCompareExchangePtr((void**)&m_thread, thread, NULL) == NULL) ||
 			(AtomicCompareExchangePtr((void**)&m_thread, thread, thread) == thread)) {
-			AtomicIncrement(&m_lockCount);
+			AtomicIncrement((volatile int32_t*)&m_lockCount);
 			spinUnlock();
 			break;
 		}
@@ -41,7 +41,7 @@ bool CObject::threadLockTry() const {
 	spinLock();
 	if ((AtomicCompareExchangePtr((void**)&m_thread, thread, NULL) == NULL) ||
 		(AtomicCompareExchangePtr((void**)&m_thread, thread, thread) == thread)) {
-		AtomicIncrement(&m_lockCount);
+		AtomicIncrement((volatile int32_t*)&m_lockCount);
 		spinUnlock();
 		return true;
 	}
@@ -53,7 +53,7 @@ void CObject::threadUnlock() const {
 	void* thread = CurrentThreadId();
 	
 	spinLock();
-	if (AtomicDecrement(&m_lockCount) == 1) {
+	if (AtomicDecrement((volatile int32_t*)&m_lockCount) == 1) {
 		AtomicCompareExchangePtr((void**)&m_thread, NULL, thread);
 	}
 	spinUnlock();

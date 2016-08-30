@@ -40,7 +40,8 @@ extern "C" {
 class Cache {
 private:
 	uint64_t getMaxMemory();
-	uint64_t getTotalMemory();
+	uint64_t getUsedMemory();
+	uint64_t getFreeMemory();
 
 private:
 	bool mkdirs(const CString& createPath);

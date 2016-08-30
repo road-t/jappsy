@@ -285,7 +285,7 @@ uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len
 JNIEXPORT jint JNICALL
 Java_com_jappsy_cipher_CRC_crc7(JNIEnv *env, jclass type, jobject data, jlong offset, jlong len) {
     if ((data != NULL) && (len != 0)) {
-        jlong size = (*env)->GetDirectBufferCapacity(env, data);
+        jlong size = env->GetDirectBufferCapacity(data);
 
         LOG("native_crc7: size = %lld", size);
 
@@ -297,7 +297,7 @@ Java_com_jappsy_cipher_CRC_crc7(JNIEnv *env, jclass type, jobject data, jlong of
         LOG("native_crc7: len = %lld", len);
 
         if (len > 0) {
-            uint8_t *buffer = (uint8_t *) ((*env)->GetDirectBufferAddress(env, data));
+            uint8_t *buffer = (uint8_t *) (env->GetDirectBufferAddress(data));
             if (buffer != NULL)
                 return mmcrc7(0, buffer + offset, (uint32_t)len);
         }
@@ -308,13 +308,13 @@ Java_com_jappsy_cipher_CRC_crc7(JNIEnv *env, jclass type, jobject data, jlong of
 JNIEXPORT jint JNICALL
 Java_com_jappsy_cipher_CRC_crc16(JNIEnv *env, jclass type, jobject data, jlong offset, jlong len) {
     if ((data != NULL) && (len != 0)) {
-        jlong size = (*env)->GetDirectBufferCapacity(env, data);
+        jlong size = env->GetDirectBufferCapacity(data);
         if (len < 0)
             len = size - offset;
         else if (size < (offset + len))
             len = size - offset;
         if (len > 0) {
-            uint8_t *buffer = (uint8_t *) ((*env)->GetDirectBufferAddress(env, data));
+            uint8_t *buffer = (uint8_t *) (env->GetDirectBufferAddress(data));
             if (buffer != NULL)
                 return mmcrc16(0, buffer + offset, (uint32_t)len);
         }
@@ -325,13 +325,13 @@ Java_com_jappsy_cipher_CRC_crc16(JNIEnv *env, jclass type, jobject data, jlong o
 JNIEXPORT jint JNICALL
 Java_com_jappsy_cipher_CRC_crc32(JNIEnv *env, jclass type, jobject data, jlong offset, jlong len) {
     if ((data != NULL) && (len != 0)) {
-        jlong size = (*env)->GetDirectBufferCapacity(env, data);
+        jlong size = env->GetDirectBufferCapacity(data);
         if (len < 0)
             len = size - offset;
         else if (size < (offset + len))
             len = size - offset;
         if (len > 0) {
-            uint8_t *buffer = (uint8_t *) ((*env)->GetDirectBufferAddress(env, data));
+            uint8_t *buffer = (uint8_t *) (env->GetDirectBufferAddress(data));
             if (buffer != NULL)
                 return mmcrc32(0xFFFFFFFF, buffer + offset, (uint32_t)len);
         }

@@ -126,7 +126,8 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
     #else
 		struct timespec time;
 		struct timespec rem;
-		t.ms = ms;
+		time.tv_sec = ms / 1000;
+		time.tv_nsec = (int64_t)(ms % 1000) * 1000000LL;
 		nanosleep(&time, &rem);
     #endif
     }

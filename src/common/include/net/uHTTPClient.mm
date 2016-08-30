@@ -201,6 +201,16 @@ void* HttpAsync(void* threadData) {
 	return NULL;
 }
 
+#elif defined(__JNI__)
+
+void* HttpAsync(void* threadData) {
+	return NULL;
+}
+
+void* HttpSync(void* threadData) {
+	return NULL;
+}
+
 #endif
 
 void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onReleaseCallback onrelease) throw(const char*) {

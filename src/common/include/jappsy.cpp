@@ -18,9 +18,16 @@
 #include <core/uMemory.h>
 #include <core/uSystem.h>
 
-void jappsyInit() {
+CString* jappsyCacheDir = NULL;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void jappsyInit(const char* cacheDir) {
     mmInit();
     uSystemInit();
+    jappsyCacheDir = new CString(cacheDir);
 }
 
 void jappsyQuit() {
@@ -28,6 +35,11 @@ void jappsyQuit() {
     memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
+    delete jappsyCacheDir;
     uSystemQuit();
     mmQuit();
 }
+
+#ifdef __cplusplus
+}
+#endif

@@ -18,13 +18,18 @@
 #define JAPPSY_H
 
 #include <platform.h>
+#include <data/uString.h>
+
+#ifdef __cplusplus
+extern CString* jappsyCacheDir;
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Initialize all core static variables
-void jappsyInit();
+void jappsyInit(const char* cacheDir);
 
 // Deinitialize all core static variables
 void jappsyQuit();

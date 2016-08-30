@@ -29,7 +29,10 @@ OMView *omView = NULL;
 	
 	[self.window makeKeyAndVisible];
 	
-	jappsyInit();
+	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+	NSString *cacheDirectory = [paths objectAtIndex:0];
+
+	jappsyInit(cacheDirectory.UTF8String);
 	[omView onStart];
 	
     return YES;

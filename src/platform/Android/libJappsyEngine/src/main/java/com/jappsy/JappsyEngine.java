@@ -27,7 +27,7 @@ public class JappsyEngine {
 	 * Initialize JappsyEngine
 	 * @return false on error
 	 */
-	public static native boolean initialize();
+	public static native boolean initialize(final String cacheDir);
 
 	/**
 	 * Cleanup memory used by JappsyEngine

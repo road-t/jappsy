@@ -44,11 +44,13 @@ Java_com_jappsy_JappsyEngine_mallinfo(JNIEnv *env, jclass type) {
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type) {
+Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type, jstring cacheDir) {
 	static uint16_t x = 0x0001;
 	jint result = (jint)*((uint8_t*)&x);
 
-	jappsyInit();
+	const char *nativeString = (*env)->GetStringUTFChars(env, cacheDir, 0);
+	jappsyInit(nativeString);
+	(*env)->ReleaseStringUTFChars(env, cacheDir, nativeString);
 
 	if (result == 0) {
 		__android_log_print(ANDROID_LOG_ERROR, "JNI", "Unsupported Platform!");

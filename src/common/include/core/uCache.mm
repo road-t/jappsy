@@ -77,7 +77,7 @@ uint64_t Cache::getUsedMemory() {
 #endif
 }
 
-uint64_t getFreeMemory() {
+uint64_t Cache::getFreeMemory() {
 #if defined(__IOS__)
 	return getMaxMemory() - getUsedMemory();
 #elif defined(__JNI__)

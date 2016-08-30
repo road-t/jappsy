@@ -33,7 +33,7 @@ public class JappsyApplication extends Application {
     @Override public void onCreate() {
         super.onCreate();
 
-        if (JappsyEngine.initialize())
+        if (JappsyEngine.initialize(this.getCacheDir().getAbsolutePath()))
             JappsyEngine.m_initialized = true;
 
         Log.d(TAG, "Start");

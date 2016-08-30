@@ -15,7 +15,9 @@
  */
 
 #include "OMGame.h"
-#include "OMView.h"
+#if defined(__IOS__)
+    #include "OMView.h"
+#endif
 
 #include <opengl/uGLRender.h>
 #include <core/uSystem.h>
@@ -786,10 +788,14 @@ void OMGame::drawEffectSwitch(GLEngine* engine) {
 
 void OMGame::onReady() {
     CString::format(L"READY!").log();
-    
+
+#if defined(__IOS__)
     //NSBundle* bundle = [NSBundle bundleWithIdentifier:@"com.jappsy.libGameOM"];
     NSBundle* bundle = [NSBundle mainBundle];
     void* library = (__bridge void*)bundle;
+#else
+	void* library = NULL;
+#endif
     
     // Подготавливаем шейдеры
     
@@ -1045,25 +1051,33 @@ void OMGame::onError(const CString& error) {
 }
 
 OMGame::OMGame() {
+    LOG("OMGame > Setup Cache");
+
     cache = new Cache(L"om");
-    
+
+    LOG("OMGame > Demo Double Sequence Init");
     conf.sequence.growstep(5);
     conf.sequence.push(1);
     conf.sequence.push(1);
     conf.sequence.push(0);
     conf.sequence.push(0);
     conf.sequence.push(0);
-    
+
+    LOG("OMGame > Json Config For Load");
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
-    
+
+    LOG("OMGame > Setup GLPaint's");
     paint.setColor(0x80FF0000).setStroke(3, 0x800000FF);
     paintShadow.setColor(0x80000000);
     paintSwitch.setColor(0x00000000);
     paintSpriteCenter.setColor(0xFFFFFFFF).setAlignX(GLAlignX::CENTER).setAlignY(GLAlignY::MIDDLE);
     paintSpriteLeftCenter.setColor(0xFFFFFFFF).setAlignX(GLAlignX::LEFT).setAlignY(GLAlignY::MIDDLE);
-    
+
+    LOG("OMGame > Setup Base URL");
     this->setBasePath(L"https://www.cox.ru/res/om/");
+
+    LOG("OMGame > Start Loading");
     this->load(sOMLoadRes);
 }

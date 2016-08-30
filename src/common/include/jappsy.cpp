@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 void jappsyInit(const char* cacheDir) {
-    LOG("Jappsy Init");
+    LOG("Jappsy Init > Cache %s", cacheDir);
 
     mmInit();
     uSystemInit();

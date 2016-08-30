@@ -32,6 +32,15 @@ model {
             }
         }
     }
+    android.packagingOptions {
+        pickFirst 'lib/armeabi/libJappsyEngine-jni.so'
+        pickFirst 'lib/armeabi-v7a/libJappsyEngine-jni.so'
+        pickFirst 'lib/arm64-v8a/libJappsyEngine-jni.so'
+        pickFirst 'lib/mips/libJappsyEngine-jni.so'
+        pickFirst 'lib/mips64/libJappsyEngine-jni.so'
+        pickFirst 'lib/x86/libJappsyEngine-jni.so'
+        pickFirst 'lib/x86_64/libJappsyEngine-jni.so'
+    }
     android.sources {
         main {
             java {

@@ -27,7 +27,7 @@ model {
 			}
 		}
 		ndk {
-			moduleName "libGameOM-jni"
+			moduleName "GameOM-jni"
 			ldLibs.addAll(["android", "log", "GLESv2"])
 			cppFlags.addAll(["-fexceptions"])
 			cppFlags.addAll(["-std=c++11"])
@@ -43,7 +43,7 @@ model {
 		main {
 			jni {
 				dependencies {
-					project ":libJappsyEngine" linkage "static"
+					project ":libJappsyEngine" linkage "shared"
 					project ":libz" linkage "static"
 				}
 			}

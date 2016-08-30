@@ -20,7 +20,7 @@ public class JappsyEngine {
 	public static boolean m_initialized = false;
 
 	static {
-		System.loadLibrary("libJappsyEngine-jni");
+		System.loadLibrary("JappsyEngine-jni");
 	}
 
 	/**

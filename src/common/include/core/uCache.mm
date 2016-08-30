@@ -15,6 +15,7 @@
  */
 
 #include "uCache.h"
+#include <jappsy.h>
 
 #if defined(__IOS__)
 #import <mach/mach.h>
@@ -130,12 +131,14 @@ bool Cache::mkdirs(const CString& createPath) {
 	for (p = str + 1; *p; p++) {
 		if (*p == '/') {
 			*p = 0;
-			mkdir(str, S_IRWXU);
+			LOG("mkdir %s", str);
+			mkdir(str, S_IRWXU | S_IRWXG | S_IXOTH);
 			*p = '/';
 		}
 	}
 
-	mkdir(str, S_IRWXU);
+	LOG("mkdir %s", str);
+	mkdir(str, S_IRWXU | S_IRWXG | S_IXOTH);
 
 	mmfree(str);
 	return true;
@@ -149,13 +152,30 @@ CString Cache::getDiskCacheDir(const CString& uniqueName) {
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 	NSString *cacheDirectory = [paths objectAtIndex:0];
 	NSString *createPath = [cacheDirectory stringByAppendingPathComponent:uniqueName];
-	
-	return mkdirs(createPath) ? CString(createPath) : L"";
 #elif defined(__JNI__)
-	#warning TODO
+	CString createPath = *jappsyCacheDir;
+	if (createPath.endsWith(L"/")) {
+		if (uniqueName.startsWith(L"/")) {
+			createPath.setLength(createPath.m_length - 1);
+			createPath += uniqueName;
+		} else {
+			createPath += uniqueName;
+		}
+	} else {
+		if (uniqueName.startsWith(L"/")) {
+			createPath += uniqueName;
+		} else {
+			createPath += L"/";
+			createPath += uniqueName;
+		}
+	}
+	if (!createPath.endsWith(L"/")) {
+		createPath += L"/";
+	}
 #else
 	#error Unsupported platform!
 #endif
+	return mkdirs(createPath) ? CString(createPath) : L"";
 }
 
 void Cache::deleteRecursive(const CString& directory) {
@@ -177,8 +197,10 @@ void Cache::deleteRecursive(const CString& directory) {
 }
 
 Cache::Cache(const CString& cacheDir) {
+	LOG("Cache > Create %ls", (wchar_t*)cacheDir);
 	uint64_t maxMemory = getMaxMemory() / 10 - getUsedMemory();
 	uint64_t cacheSize = 128 * 1024 * 1024; // maxMemory?
+	LOG("Cache > Size %lld", cacheSize);
 	
 	m_dataCacheMaxSize = cacheSize / 2;
 	m_dataCacheSize = 0;

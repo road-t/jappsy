@@ -22,21 +22,7 @@
 
 #include <malloc.h>
 #include <jappsy.h>
-#include <opengl/uGLEngine.h>
-
-static int color = 0;
-
-class OMEngine : public GLEngine {
-public:
-	void onFrame(GLRender* context) {
-		float c = (float) color / 255.0f;
-		glClearColor(0.0f, c, 0.0f, 1.0f);
-		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-
-		color++;
-		if (color >= 256) color = 0;
-	}
-};
+#include "include/OMGame.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +33,7 @@ Java_com_jappsy_OMEngine_onCreate(JNIEnv *env, jclass type) {
 	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onCreate");
 
 	try {
-		OMEngine *engine = new OMEngine();
+		OMGame *engine = new OMGame();
 		return (jlong) (intptr_t) (engine);
 	} catch (...) {
 		return (jlong) NULL;

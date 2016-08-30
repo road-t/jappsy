@@ -19,7 +19,7 @@ package com.jappsy;
 public class OMEngine {
 
 	static {
-		System.loadLibrary("libGameOM-jni");
+		System.loadLibrary("GameOM-jni");
 	}
 
 	public static native long onCreate();

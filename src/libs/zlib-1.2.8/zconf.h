@@ -408,11 +408,11 @@ typedef uLong FAR uLongf;
    typedef unsigned long z_crc_t;
 #endif
 
-#ifdef HAVE_UNISTD_H    /* may be set to #if 1 by ./configure */
+#if 1    /* was set to #if 1 by ./configure */
 #  define Z_HAVE_UNISTD_H
 #endif
 
-#ifdef HAVE_STDARG_H    /* may be set to #if 1 by ./configure */
+#if 1    /* was set to #if 1 by ./configure */
 #  define Z_HAVE_STDARG_H
 #endif
 
@@ -445,9 +445,6 @@ typedef uLong FAR uLongf;
 #endif
 
 #if defined(__WATCOMC__) && !defined(Z_HAVE_UNISTD_H)
-#  define Z_HAVE_UNISTD_H
-#endif
-#if defined(__APPLE__) && defined(__MACH__)
 #  define Z_HAVE_UNISTD_H
 #endif
 #ifndef Z_SOLO

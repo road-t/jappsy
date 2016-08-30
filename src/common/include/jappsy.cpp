@@ -25,6 +25,8 @@ extern "C" {
 #endif
 
 void jappsyInit(const char* cacheDir) {
+    LOG("Jappsy Init");
+
     mmInit();
     uSystemInit();
     jappsyCacheDir = new CString(cacheDir);
@@ -38,6 +40,8 @@ void jappsyQuit() {
     delete jappsyCacheDir;
     uSystemQuit();
     mmQuit();
+
+    LOG("Jappsy Quit");
 }
 
 #ifdef __cplusplus

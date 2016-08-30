@@ -1,5 +1,6 @@
-include ':app', ':libpng', ':libjpeg', ':libz', ':libJappsyEngine'
+include ':app', ':libpng', ':libjpeg', ':libz', ':libJappsyEngine', ':libGameOM'
 project(':libpng').projectDir = new File(settingsDir, '../libpng')
 project(':libjpeg').projectDir = new File(settingsDir, '../libjpeg')
 project(':libz').projectDir = new File(settingsDir, '../libz')
 project(':libJappsyEngine').projectDir = new File(settingsDir, '../libJappsyEngine')
+project(':libGameOM').projectDir = new File(settingsDir, '../libGameOM')

@@ -68,6 +68,10 @@ public class JappsyView extends GLSurfaceView {
 	 */
 	private int m_line;
 
+	protected long m_engine = 0;
+
+	private boolean m_stopping = false;
+
 	/**
 	 * SDK Dependent Methods
 	 */
@@ -159,6 +163,12 @@ public class JappsyView extends GLSurfaceView {
 
 	private static class ContextFactory implements GLSurfaceView.EGLContextFactory {
 		private static int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
+		private JappsyView m_view;
+
+		public ContextFactory(JappsyView view) {
+			m_view = view;
+		}
+
 		public EGLContext createContext(EGL10 egl, EGLDisplay display, EGLConfig eglConfig) {
 			Log.w(TAG, "creating OpenGL ES 2.0 context");
 			checkEglError("Before eglCreateContext", egl);
@@ -169,7 +179,7 @@ public class JappsyView extends GLSurfaceView {
 		}
 
 		public void destroyContext(EGL10 egl, EGLDisplay display, EGLContext context) {
-			JappsyEngine.onDestroy();
+			m_view.onStop();
 			egl.eglDestroyContext(display, context);
 		}
 	}
@@ -199,7 +209,7 @@ public class JappsyView extends GLSurfaceView {
 			m_methods = new MethodsGE16();
 		}
 
-		setEGLContextFactory(new ContextFactory());
+		setEGLContextFactory(new ContextFactory(this));
 		setPreserveEGLContextOnPause(true);
 		setRenderer(new Renderer());
 	}
@@ -226,32 +236,39 @@ public class JappsyView extends GLSurfaceView {
 		@Override
 		public void onSurfaceCreated(GL10 gl, EGLConfig config) {
 			if (m_created) {
-				JappsyEngine.onDestroy();
+				onStop();
 			}
-			JappsyEngine.onCreate();
+			onStart();
 			m_created = true;
 		}
 
 		@Override
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
-			JappsyEngine.onUpdate(width, height);
+			JappsyEngine.onUpdate(m_engine, width, height);
 		}
 
 		@Override
 		public void onDrawFrame(GL10 gl) {
-			JappsyEngine.onFrame();
+			JappsyEngine.onFrame(m_engine);
 		}
 	}
 
+	public void onStart() {
+		//m_engine = JappsyEngine.onCreate();
+	}
+
+	public void onStop() {
+		JappsyEngine.onDestroy(m_engine);
+		m_engine = 0;
+	}
+
 	@Override public void onResume() {
-		m_activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 		super.onResume();
-		JappsyEngine.onResume();
+		JappsyEngine.onResume(m_engine);
 	}
 
 	@Override public void onPause() {
-		JappsyEngine.onPause();
-		m_activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		JappsyEngine.onPause(m_engine);
 		super.onPause();
 	}
 
@@ -269,6 +286,7 @@ public class JappsyView extends GLSurfaceView {
 		target.setContentView(this);
 
 		m_methods.onEnterFullScreen();
+		m_activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
 	/**
@@ -276,6 +294,7 @@ public class JappsyView extends GLSurfaceView {
 	 */
 	public void exitFullscreen() {
 		m_methods.onExitFullScreen();
+		m_activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// Восстанавливаем содержимое
 		m_restoreActivity.setContentView(m_restoreView);

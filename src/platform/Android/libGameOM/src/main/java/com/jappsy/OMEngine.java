@@ -16,33 +16,12 @@
 
 package com.jappsy;
 
-public class JappsyEngine {
-	public static boolean m_initialized = false;
+public class OMEngine {
 
 	static {
-		System.loadLibrary("libJappsyEngine-jni");
+		System.loadLibrary("libGameOM-jni");
 	}
 
-	/**
-	 * Initialize JappsyEngine
-	 * @return false on error
-	 */
-	public static native boolean initialize(final String cacheDir);
-
-	/**
-	 * Cleanup memory used by JappsyEngine
-	 */
-	public static native void free();
-
-	/**
-	 * Debug native memory usage
-	 */
-	public static native void mallinfo();
-
 	public static native long onCreate();
-	public static native void onDestroy(long handle);
-	public static native void onUpdate(long handle, int width, int height);
-	public static native void onPause(long handle);
-	public static native void onResume(long handle);
-	public static native void onFrame(long handle);
+
 }

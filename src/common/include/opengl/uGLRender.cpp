@@ -91,9 +91,11 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	glGenBuffers(1, &m_indexBuffer);
 	
 	light.set(1.0);
+	LOG("GLRender Create");
 }
 
 GLRender::~GLRender() {
+	LOG("GLRender Destroy");
 	delete loader;
 	delete touchScreen;
 	delete frame;
@@ -113,7 +115,7 @@ GLRender::~GLRender() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 1, NULL, GL_STATIC_DRAW);
 	glDeleteBuffers(1, &m_indexBuffer);
-	
+
 	if (shaderSprite != NULL) {
 		delete shaderSprite;
 	}
@@ -132,7 +134,7 @@ GLRender::~GLRender() {
 	if (shaderSquareTexture != NULL) {
 		delete shaderSquareTexture;
 	}
-	
+
 	delete funcs;
 	delete drawings;
 	delete particles;

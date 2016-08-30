@@ -33,9 +33,6 @@ public class JappsyApplication extends Application {
     @Override public void onCreate() {
         super.onCreate();
 
-        if (JappsyEngine.initialize(this.getCacheDir().getAbsolutePath()))
-            JappsyEngine.m_initialized = true;
-
         Log.d(TAG, "Start");
 
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
@@ -43,6 +40,7 @@ public class JappsyApplication extends Application {
                 e.printStackTrace(); // not all Android versions will print the stack trace automatically
 
                 JappsyEngine.free();
+                JappsyEngine.m_initialized = false;
                 Log.d(TAG, "Exit");
 
                 if (JappsySendLog.extractLogToFile(getApplicationContext()) == null)

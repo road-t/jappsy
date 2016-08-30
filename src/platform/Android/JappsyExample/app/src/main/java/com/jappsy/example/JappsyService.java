@@ -277,6 +277,7 @@ public class JappsyService extends Service {
         Log.d(TAG, "onTaskRemoved");
 
         JappsyEngine.free();
+        JappsyEngine.m_initialized = false;
 
         /* EXAMPLE SERVICE RESTART ON APP CRASH
             Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());

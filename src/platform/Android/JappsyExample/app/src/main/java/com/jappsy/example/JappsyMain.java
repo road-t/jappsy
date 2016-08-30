@@ -24,17 +24,20 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.jappsy.JappsyEngine;
-import com.jappsy.JappsyView;
+import com.jappsy.OMView;
 
 public class JappsyMain extends Activity {
 
     private static final String TAG = "Activity";
-    private JappsyView m_view;
+    private OMView m_view;
 
     @Override public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate");
 
         super.onCreate(savedInstanceState);
+
+        if (JappsyEngine.initialize(getCacheDir().getAbsolutePath()))
+            JappsyEngine.m_initialized = true;
 
         if (!JappsyEngine.m_initialized) {
             finish();
@@ -46,7 +49,7 @@ public class JappsyMain extends Activity {
             return;
         }
 
-        m_view = JappsyView.create(this);
+        m_view = OMView.create(this);
 
         setContentView(m_view);
     }
@@ -64,7 +67,6 @@ public class JappsyMain extends Activity {
 
     @Override protected void onResume() {
         Log.d(TAG, "onResume");
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         super.onResume();
         m_view.onResume();
@@ -72,7 +74,6 @@ public class JappsyMain extends Activity {
 
     @Override protected void onPause() {
         Log.d(TAG, "onPause");
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         m_view.onPause();
         super.onPause();

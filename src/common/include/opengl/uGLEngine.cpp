@@ -61,7 +61,9 @@ GLEngine::~GLEngine() {
 	if (context != NULL) {
 		delete context;
 	}
-	delete cache;
+	if (cache != NULL) {
+		delete cache;
+	}
 }
 
 void GLEngine::shutdown() {

@@ -2427,7 +2427,7 @@ CString CString::substring(int start, int end) const {
 	} else {
 		pos = start;
 		if (pos >= len)
-			return StringNil;
+			return CString((const void*)StringNil);
 		
 		if ((end < 0) || (end > len)) {
 			len -= pos;
@@ -2932,7 +2932,7 @@ CString CString::format(const CString& string, ...) {
 	CString result;
 	if (result.vswprintf(string.m_data, arglist) == EOF) {
 		va_end(arglist);
-		return StringNil;
+		return CString((const void*)StringNil);
 	}
 
 	va_end(arglist);
@@ -2941,7 +2941,7 @@ CString CString::format(const CString& string, ...) {
 
 CString CString::format(const wchar_t* string, ...) {
 	if (string == NULL)
-		return StringNil;
+		return CString((const void*)StringNil);
 
 	uint32_t lenf = (uint32_t)wcs_strlen(string, NULL);
 	if (lenf == 0)
@@ -2952,7 +2952,7 @@ CString CString::format(const wchar_t* string, ...) {
 	CString result;
 	if (result.vswprintf(string, arglist) == EOF) {
 		va_end(arglist);
-		return StringNil;
+		return CString((const void*)StringNil);
 	}
 	va_end(arglist);
 	return result;

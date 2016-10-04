@@ -14,14 +14,10 @@
 		C34FD9D41D5BC9830022FF71 /* OMView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9D21D5BC9830022FF71 /* OMView.mm */; };
 		C3513FC81D762E7100DC6362 /* OMBars.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3513FBD1D762E7100DC6362 /* OMBars.cpp */; };
 		C3513FC91D762E7100DC6362 /* OMBars.h in Headers */ = {isa = PBXBuildFile; fileRef = C3513FBE1D762E7100DC6362 /* OMBars.h */; };
-		C3513FCA1D762E7100DC6362 /* OMDrawings.res in Resources */ = {isa = PBXBuildFile; fileRef = C3513FBF1D762E7100DC6362 /* OMDrawings.res */; };
 		C3513FCC1D762E7100DC6362 /* OMGame.h in Headers */ = {isa = PBXBuildFile; fileRef = C3513FC11D762E7100DC6362 /* OMGame.h */; };
 		C3513FCD1D762E7100DC6362 /* OMGame.mm in Sources */ = {isa = PBXBuildFile; fileRef = C3513FC21D762E7100DC6362 /* OMGame.mm */; };
-		C3513FCE1D762E7100DC6362 /* OMLoad.res in Resources */ = {isa = PBXBuildFile; fileRef = C3513FC31D762E7100DC6362 /* OMLoad.res */; };
 		C3513FCF1D762E7100DC6362 /* OMMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3513FC41D762E7100DC6362 /* OMMath.cpp */; };
 		C3513FD01D762E7100DC6362 /* OMMath.h in Headers */ = {isa = PBXBuildFile; fileRef = C3513FC51D762E7100DC6362 /* OMMath.h */; };
-		C3513FD11D762E7100DC6362 /* OMShaders.res in Resources */ = {isa = PBXBuildFile; fileRef = C3513FC61D762E7100DC6362 /* OMShaders.res */; };
-		C3513FD21D762E7100DC6362 /* OMSprites.res in Resources */ = {isa = PBXBuildFile; fileRef = C3513FC71D762E7100DC6362 /* OMSprites.res */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +38,7 @@
 		C3513FC51D762E7100DC6362 /* OMMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMMath.h; sourceTree = "<group>"; };
 		C3513FC61D762E7100DC6362 /* OMShaders.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMShaders.res; sourceTree = "<group>"; };
 		C3513FC71D762E7100DC6362 /* OMSprites.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMSprites.res; sourceTree = "<group>"; };
+		C35BCA0F1DA139C100C37558 /* OMPreload.res */ = {isa = PBXFileReference; lastKnownFileType = text; path = OMPreload.res; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +93,7 @@
 				C3513FBE1D762E7100DC6362 /* OMBars.h */,
 				C3513FC21D762E7100DC6362 /* OMGame.mm */,
 				C3513FC11D762E7100DC6362 /* OMGame.h */,
+				C35BCA0F1DA139C100C37558 /* OMPreload.res */,
 				C3513FC31D762E7100DC6362 /* OMLoad.res */,
 				C3513FC61D762E7100DC6362 /* OMShaders.res */,
 				C3513FC71D762E7100DC6362 /* OMSprites.res */,
@@ -177,10 +175,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3513FD11D762E7100DC6362 /* OMShaders.res in Resources */,
-				C3513FCE1D762E7100DC6362 /* OMLoad.res in Resources */,
-				C3513FCA1D762E7100DC6362 /* OMDrawings.res in Resources */,
-				C3513FD21D762E7100DC6362 /* OMSprites.res in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,7 +233,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -281,7 +275,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -301,7 +295,7 @@
 				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
 				INFOPLIST_FILE = libGameOM/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libGameOM;
@@ -320,7 +314,7 @@
 				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
 				INFOPLIST_FILE = libGameOM/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				MACH_O_TYPE = staticlib;
 				PRODUCT_BUNDLE_IDENTIFIER = com.jappsy.libGameOM;

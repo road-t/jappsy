@@ -43,6 +43,18 @@ mat4 getLight(int index) {
 	return uLights[0];
 }
 
+float ndot(vec3 a, vec3 b) {
+	return dot(a, b);
+	//vec3 na = normalize(a);
+	//vec3 nb = normalize(b);
+	//return (na.x * nb.x) + (na.y * nb.y) + (na.z * nb.z);// dot(v1, v2) / 3.1416;
+}
+
+vec3 nref(vec3 d, vec3 n) {
+	return normalize(reflect(d, n));
+	//return d - (2. * ndot(d, n) * n) / ndot(n, n);
+}
+
 mat3 calculateLight(mat4 mLight) {
 	mat3 result = mat3(0.);
 	
@@ -52,7 +64,7 @@ mat3 calculateLight(mat4 mLight) {
 	if (mLight[2].w == 0.) {
 		vec3 nLight = normalize(vLight);
 		
-		float angle = dot(normal, -nLight);
+		float angle = ndot(normal, normalize(-nLight));
 		// Double-Side ???
 		//if (angle < 0.) {
 		//	angle = -angle;
@@ -67,13 +79,13 @@ mat3 calculateLight(mat4 mLight) {
 			if (falloff > 0.) {
 				result[0][0] = angle * falloff;
 				result[1] = result[0][0] * mLight[2].rgb;
-				result[2] = pow(max(dot(reflect(nLight, normal), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
+				result[2] = pow(max(dot(normalize(reflect(nLight, normal)), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
 			}
 		}
 	} else if (mLight[2].w == 1.) {
 		vec3 nLight = normalize(vLight);
 		
-		float angle = dot(normal, -nLight);
+		float angle = dot(normal, normalize(-nLight));
 		
 		if (angle > 0.) {
 			float falloff = 1.;
@@ -84,13 +96,13 @@ mat3 calculateLight(mat4 mLight) {
 			if (falloff > 0.) {
 				result[0][0] = angle * falloff;
 				result[1] = result[0][0] * mLight[2].rgb;
-				result[2] = pow(max(dot(reflect(nLight, normal), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
+				result[2] = pow(max(dot(normalize(reflect(nLight, normal)), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
 			}
 		}
 	} else if (mLight[2].w == 2.) {
 		vec3 nLight = normalize(mLight[1].xyz - mLight[0].xyz);
 		
-		float angle = dot(normal, -nLight);
+		float angle = ndot(normal, normalize(-nLight));
 		if (angle > 0.) {
 			float falloff = 1.;
 			if (mLight[0].w > 0.) {
@@ -102,7 +114,7 @@ mat3 calculateLight(mat4 mLight) {
 			if (falloff > 0.) {
 				result[0][0] = angle * falloff;
 				result[1] = result[0][0] * mLight[2].rgb;
-				result[2] = pow(max(dot(reflect(nLight, normal), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
+				result[2] = pow(max(dot(normalize(reflect(nLight, normal)), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
 			}
 		}
 	}
@@ -122,7 +134,7 @@ void main(void) {
 	vec3 specularLight = vec3(0.);
 	
 	// Calculate Lights
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 2; i++) {
 		if (i < uLightsCount) {
 			mat3 rLight = calculateLight(getLight(i));
 			diffuse = diffuse + rLight[0][0];

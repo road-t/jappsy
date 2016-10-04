@@ -3820,10 +3820,113 @@ extern "C" {
 		return false;
 	}
 	
+	struct JsonNode* JsonClone(const struct JsonNode* node, struct JsonNode* parent) {
+		if (node == NULL)
+			return NULL;
+		
+		struct JsonNode* result = JsonCreate(parent, node->type, (parent == NULL) ? 0 : (parent->level + 1), NULL, 0);
+		
+		if (result == NULL)
+			return NULL;
+		
+		switch (node->type) {
+			case JSON_TYPE_NULL:
+				break;
+			case JSON_TYPE_BOOLEAN:
+				result->value.b = node->value.b;
+				break;
+			case JSON_TYPE_NUMBER:
+				result->value.n.is_float = node->value.n.is_float;
+				if (node->value.n.is_float) {
+					result->value.n.v.f = node->value.n.v.f;
+				} else {
+					result->value.n.v.i = node->value.n.v.i;
+				}
+				break;
+			case JSON_TYPE_STRING:
+				result->value.cs = memNew(result->value.cs, CString(*(node->value.cs)));
+				if (result->value.cs == NULL) {
+					JsonDestroy(result);
+					return NULL;
+				}
+				break;
+			case JSON_TYPE_ARRAY: {
+				for (int i = 0; i < node->value.a.c; i++) {
+					struct JsonNode* child = JsonClone(node->value.a.v[i], result);
+					if (child == NULL) {
+						JsonDestroy(result);
+						return NULL;
+					}
+					
+					if (!JsonArrayAdd(result, child)) {
+						JsonDestroy(child);
+						JsonDestroy(result);
+						return NULL;
+					}
+				}
+				break;
+			}
+			case JSON_TYPE_OBJECT: {
+				for (int i = 0; i < node->value.o.c; i++) {
+					struct JsonNode* childKey = JsonCreate(result, JSON_TYPE_STRING, result->level + 1, NULL, 0);
+					if (childKey == NULL) {
+						JsonDestroy(result);
+						return NULL;
+					}
+					
+					struct JsonNode* nodeKey = node->value.o.k[i];
+					switch (nodeKey->type) {
+						case JSON_TYPE_NULL:
+							childKey->value.cs = memNew(childKey->value.cs, CString(L"null"));
+							break;
+						case JSON_TYPE_BOOLEAN:
+							childKey->value.cs = memNew(childKey->value.cs, CString(nodeKey->value.b));
+							break;
+						case JSON_TYPE_NUMBER:
+							if (nodeKey->value.n.is_float) {
+								childKey->value.cs = memNew(childKey->value.cs, CString(nodeKey->value.n.v.f));
+							} else {
+								childKey->value.cs = memNew(childKey->value.cs, CString(nodeKey->value.n.v.i));
+							}
+							break;
+						case JSON_TYPE_STRING:
+							childKey->value.cs = memNew(childKey->value.cs, CString(*(nodeKey->value.cs)));
+							break;
+					}
+					
+					if (childKey->value.cs == NULL) {
+						JsonDestroy(result);
+						return NULL;
+					}
+					
+					struct JsonNode* child = JsonClone(node->value.o.v[i], result);
+					if (child == NULL) {
+						JsonDestroy(childKey);
+						JsonDestroy(result);
+						return NULL;
+					}
+					
+					if (!JsonObjectAdd(result, childKey, child)) {
+						JsonDestroy(childKey);
+						JsonDestroy(child);
+						JsonDestroy(result);
+						return NULL;
+					}
+				}
+				break;
+			}
+		}
+		
+		return result;
+	}
 
 #ifdef __cplusplus
 }
 #endif
+
+JSONObject::JSONObject() {
+	root = JsonCreate(NULL, JSON_TYPE_NULL, 0, NULL, 0);
+}
 
 JSONObject::JSONObject(const CString& json) {
 	if (json.m_length == 0)
@@ -3960,10 +4063,58 @@ const struct JsonNode* JsonNode::get(const CString& key) const throw(const char*
 		throw eConvert;
 }
 
+const struct JsonNode* JsonNode::opt(int index) const {
+	if (type == JSON_TYPE_ARRAY) {
+		if ((index >= 0) && (index < value.a.c)) {
+			return value.a.v[index];
+		}
+	} else if (type == JSON_TYPE_OBJECT) {
+		if ((index >= 0) && (index < value.o.c)) {
+			return value.o.v[index];
+		}
+	}
+	return NULL;
+}
+
+const struct JsonNode* JsonNode::opt(const CString& key) const {
+	if (type == JSON_TYPE_OBJECT) {
+		for (int i = 0; i < value.o.c; i++) {
+			if (value.o.k[i]->type == JSON_TYPE_STRING) {
+				if (key.equals(*(value.o.k[i]->value.cs))) {
+					return value.o.v[i];
+				}
+			} else if (value.o.k[i]->type == JSON_TYPE_BOOLEAN) {
+				if (value.o.k[i]->value.b) {
+					if (key.equalsIgnoreCase(L"true")) {
+						return value.o.v[i];
+					}
+				} else {
+					if (key.equalsIgnoreCase(L"false")) {
+						return value.o.v[i];
+					}
+				}
+			} else if (value.o.k[i]->type == JSON_TYPE_NUMBER) {
+				if (value.o.k[i]->value.n.is_float) {
+					if (key.equals(value.o.k[i]->value.n.v.f)) {
+						return value.o.v[i];
+					}
+				} else {
+					if (key.equals(value.o.k[i]->value.n.v.i)) {
+						return value.o.v[i];
+					}
+				}
+			}
+		}
+	}
+	return NULL;
+}
+
 CString JsonNode::toString() const throw(const char*) {
 	switch (type) {
+		/*
 		case JSON_TYPE_NULL:
 			return L"null";
+		 */
 		case JSON_TYPE_BOOLEAN:
 			return value.b;
 		case JSON_TYPE_NUMBER:
@@ -3981,8 +4132,10 @@ CString JsonNode::toString() const throw(const char*) {
 
 double JsonNode::toDouble() const throw(const char*) {
 	switch (type) {
+		/*
 		case JSON_TYPE_NULL:
 			return NAN;
+		 */
 		case JSON_TYPE_BOOLEAN:
 			return value.b ? 1.0 : 0.0;
 		case JSON_TYPE_NUMBER:
@@ -4000,8 +4153,10 @@ double JsonNode::toDouble() const throw(const char*) {
 
 int64_t JsonNode::toInt() const throw(const char*) {
 	switch (type) {
+		/*
 		case JSON_TYPE_NULL:
 			return 0;
+		 */
 		case JSON_TYPE_BOOLEAN:
 			return value.b ? 1 : 0;
 		case JSON_TYPE_NUMBER:
@@ -4019,8 +4174,10 @@ int64_t JsonNode::toInt() const throw(const char*) {
 
 bool JsonNode::toBoolean() const throw(const char*) {
 	switch (type) {
+		/*
 		case JSON_TYPE_NULL:
 			return 0;
+		 */
 		case JSON_TYPE_BOOLEAN:
 			return value.b;
 		case JSON_TYPE_NUMBER:
@@ -4100,7 +4257,517 @@ bool JsonNode::optBoolean(const CString& key, bool fallback) const {
 	}
 }
 
+void JsonNode::clear(JsonType type) throw(const char*) {
+	switch (this->type) {
+		case JSON_TYPE_OBJECT: {
+			for (int i = value.o.c - 1; i >= 0; i--) {
+				JsonDestroy(value.o.k[i]);
+				JsonDestroy(value.o.v[i]);
+			}
+			memFree(value.o.k);
+			memFree(value.o.v);
+			value.o.c = 0;
+			value.o.k = NULL;
+			value.o.v = NULL;
+			break;
+		}
+			
+		case JSON_TYPE_ARRAY: {
+			for (int i = value.a.c - 1; i >= 0; i--) {
+				JsonDestroy(value.a.v[i]);
+			}
+			memFree(value.a.v);
+			value.a.c = 0;
+			value.a.v = NULL;
+			break;
+		}
+			
+		case JSON_TYPE_STRING: {
+			if (value.cs != NULL) {
+				memDelete(value.cs);
+				value.cs = NULL;
+			}
+			break;
+		}
+	}
+	
+	value.n.v.i = 0;
+	this->type = type;
+}
+
+void JsonNode::fromString(const CString& value) throw(const char*) {
+	clear(JSON_TYPE_STRING);
+	
+	this->value.cs = memNew(this->value.cs, CString(value));
+	if (this->value.cs == NULL) {
+		throw eOutOfMemory;
+	}
+}
+
+void JsonNode::fromDouble(double value) throw(const char*) {
+	clear(JSON_TYPE_NUMBER);
+	
+	this->value.n.is_float = true;
+	this->value.n.v.f = value;
+}
+
+void JsonNode::fromInt(int64_t value) throw(const char*) {
+	clear(JSON_TYPE_NUMBER);
+	
+	this->value.n.is_float = false;
+	this->value.n.v.i = value;
+}
+
+void JsonNode::fromBoolean(bool value) throw(const char*) {
+	clear(JSON_TYPE_BOOLEAN);
+	
+	this->value.b = value;
+}
+
+struct JsonNode* JsonNode::createObject() throw(const char*) {
+	struct JsonNode* node = JsonCreate(NULL, JSON_TYPE_OBJECT, 0, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	return node;
+}
+
+struct JsonNode* JsonNode::createArray() throw(const char*) {
+	struct JsonNode* node = JsonCreate(NULL, JSON_TYPE_ARRAY, 0, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	return node;
+}
+
+void JsonNode::set(int index, struct JsonNode* object) throw(const char*) {
+	if (type != JSON_TYPE_ARRAY) {
+		throw eInvalidParams;
+	}
+	
+	int32_t level = this->level + 1;
+	uint32_t count = value.a.c - 1;
+	
+	object->level = level;
+	object->parent = this;
+	
+	if ((index < 0) || (count < index)) {
+		while (count < index) {
+			struct JsonNode* node = JsonCreate(this, JSON_TYPE_NULL, level, NULL, 0);
+			if ((node == NULL) || (!JsonArrayAdd(this, node))) {
+				throw eOutOfMemory;
+			}
+			count++;
+		}
+		
+		if (!JsonArrayAdd(this, object)) {
+			throw eOutOfMemory;
+		}
+	} else {
+		if (value.a.v[index] != NULL) {
+			JsonDestroy(value.a.v[index]);
+		}
+		
+		value.a.v[index] = object;
+	}
+}
+
+void JsonNode::set(const CString& key, struct JsonNode* object) throw(const char*) {
+	if (type != JSON_TYPE_OBJECT) {
+		throw eInvalidParams;
+	}
+	
+	int32_t level = this->level + 1;
+	
+	object->level = level;
+	object->parent = this;
+	
+	int index = -1;
+	
+	for (int i = 0; i < value.o.c; i++) {
+		if (value.o.k[i]->type == JSON_TYPE_STRING) {
+			if (key.equals(*(value.o.k[i]->value.cs))) {
+				index = i;
+				break;
+			}
+		} else if (value.o.k[i]->type == JSON_TYPE_BOOLEAN) {
+			if (value.o.k[i]->value.b) {
+				if (key.equalsIgnoreCase(L"true")) {
+					index = i;
+					break;
+				}
+			} else {
+				if (key.equalsIgnoreCase(L"false")) {
+					index = i;
+					break;
+				}
+			}
+		} else if (value.o.k[i]->type == JSON_TYPE_NUMBER) {
+			if (value.o.k[i]->value.n.is_float) {
+				if (key.equals(value.o.k[i]->value.n.v.f)) {
+					index = i;
+					break;
+				}
+			} else {
+				if (key.equals(value.o.k[i]->value.n.v.i)) {
+					index = i;
+					break;
+				}
+			}
+		}
+	}
+	
+	if (index < 0) {
+		struct JsonNode* nodeKey = JsonCreate(this, JSON_TYPE_STRING, level, NULL, 0);
+		if (nodeKey == NULL) {
+			throw eOutOfMemory;
+		}
+		
+		nodeKey->fromString(key);
+		
+		if (!JsonObjectAdd(this, nodeKey, object)) {
+			JsonDestroy(nodeKey);
+			throw eOutOfMemory;
+		}
+	} else {
+		if (value.o.v[index] != NULL) {
+			JsonDestroy(value.o.v[index]);
+		}
+		
+		value.o.v[index] = object;
+	}
+}
+
+void JsonNode::setString(int index, const CString& value) throw(const char*) {
+	if (type != JSON_TYPE_ARRAY) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_STRING, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromString(value);
+		set(index, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setString(const CString& key, const CString& value) throw(const char*) {
+	if (type != JSON_TYPE_OBJECT) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_STRING, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromString(value);
+		set(key, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setDouble(int index, double value) throw(const char*) {
+	if (type != JSON_TYPE_ARRAY) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_NUMBER, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromDouble(value);
+		set(index, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setDouble(const CString& key, double value) throw(const char*) {
+	if (type != JSON_TYPE_OBJECT) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_NUMBER, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromDouble(value);
+		set(key, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setInt(int index, int64_t value) throw(const char*) {
+	if (type != JSON_TYPE_ARRAY) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_NUMBER, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromInt(value);
+		set(index, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setInt(const CString& key, int64_t value) throw(const char*) {
+	if (type != JSON_TYPE_OBJECT) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_NUMBER, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromInt(value);
+		set(key, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setBoolean(int index, bool value) throw(const char*) {
+	if (type != JSON_TYPE_ARRAY) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_BOOLEAN, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromBoolean(value);
+		set(index, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
+void JsonNode::setBoolean(const CString& key, bool value) throw(const char*) {
+	if (type != JSON_TYPE_OBJECT) {
+		throw eInvalidParams;
+	}
+	
+	struct JsonNode* node = JsonCreate(this, JSON_TYPE_BOOLEAN, level + 1, NULL, 0);
+	if (node == NULL) {
+		throw eOutOfMemory;
+	}
+	
+	try {
+		node->fromBoolean(value);
+		set(key, node);
+	} catch(...) {
+		JsonDestroy(node);
+		throw;
+	}
+}
+
 CString JSON::encode(const CString& value) throw(const char*) {
-	// TODO: encode JSON string
-	return value;
+	wchar_t* str = (wchar_t*)value;
+	if (str == NULL) {
+		return value;
+	}
+#if __WCHAR_MAX__ > 0x10000
+	uint32_t size = utf32_toutf16_size((uint32_t*)str);
+	if (size == -1) {
+		throw eConvert;
+	}
+	uint16_t* utf16 = (uint16_t*)mmalloc(size);
+	if (utf16 == NULL) {
+		throw eOutOfMemory;
+	}
+	size = utf32_toutf16((uint32_t*)str, utf16, size);
+	uint32_t len = size >> 1;
+#else
+	uint16_t* utf16 = (uint16_t*)str;
+	uint32_t len = value.m_length;
+#endif
+	
+	CString res;
+	try {
+		uint16_t* ptr = utf16;
+		while (len-- > 0) {
+			uint16_t ch = *ptr;
+			if (ch == L'"') {
+				res.concat(L"\\\"");
+			} else if (ch == L'\\') {
+				res.concat(L"\\\\");
+			} else if (ch == L'/') {
+				res.concat(L"\\/");
+			} else if (ch == L'\b') {
+				res.concat(L"\\b");
+			} else if (ch == L'\f') {
+				res.concat(L"\\f");
+			} else if (ch == L'\n') {
+				res.concat(L"\\n");
+			} else if (ch == L'\r') {
+				res.concat(L"\\r");
+			} else if (ch == L'\t') {
+				res.concat(L"\\t");
+			} else if ((ch < 32) || (ch > 127)) {
+				res.concat(CString::format(L"\\u%04X", ch));
+			} else {
+				res.concat((wchar_t)ch);
+			}
+			ptr++;
+		}
+	} catch (...) {
+#if __WCHAR_MAX__ > 0x10000
+		mmfree(utf16);
+#endif
+		throw;
+	}
+	
+#if __WCHAR_MAX__ > 0x10000
+	mmfree(utf16);
+#endif
+
+	return res;
+}
+
+CString JSON::encode(const struct JsonNode* node) throw(const char*) {
+	try {
+		switch (node->type) {
+			case JSON_TYPE_OBJECT: {
+				CString res = L"{";
+				uint32_t count = node->value.o.c;
+				for (int i = 0; i < count; i++) {
+					if (i != 0) {
+						res.concat(L",");
+					}
+				
+					struct JsonNode* key = node->value.o.k[i];
+					switch (key->type) {
+						case JSON_TYPE_NULL:
+							res.concat(L"\"null\":");
+							break;
+						case JSON_TYPE_BOOLEAN:
+							res.concat(L"\"").concat(key->value.b).concat(L"\":");
+							break;
+						case JSON_TYPE_NUMBER:
+							if (key->value.n.is_float) {
+								res.concat(L"\"").concat(key->value.n.v.f).concat(L"\":");
+							} else {
+								res.concat(L"\"").concat(key->value.n.v.i).concat(L"\":");
+							}
+							break;
+						case JSON_TYPE_STRING:
+							res.concat(L"\"").concat(encode(*(key->value.cs))).concat(L"\":");
+							break;
+						default:
+							throw eConvert;
+					}
+
+					struct JsonNode* value = node->value.o.v[i];
+					switch (value->type) {
+						case JSON_TYPE_NULL:
+							res.concat(L"null");
+							break;
+						case JSON_TYPE_BOOLEAN:
+							res.concat(value->value.b);
+							break;
+						case JSON_TYPE_NUMBER:
+							if (value->value.n.is_float) {
+								res.concat(value->value.n.v.f);
+							} else {
+								res.concat(value->value.n.v.i);
+							}
+							break;
+						case JSON_TYPE_STRING:
+							res.concat(L"\"").concat(encode(*(value->value.cs))).concat(L"\"");
+							break;
+						default:
+							res.concat(encode(value));
+					}
+				}
+				res.concat(L"}");
+				return res;
+			}
+			
+			case JSON_TYPE_ARRAY: {
+				CString res = L"[";
+				uint32_t count = node->value.a.c;
+				for (int i = 0; i < count; i++) {
+					if (i != 0) {
+						res.concat(L",");
+					}
+				
+					struct JsonNode* value = node->value.a.v[i];
+					switch (value->type) {
+						case JSON_TYPE_NULL:
+							res.concat(L"null");
+							break;
+						case JSON_TYPE_BOOLEAN:
+							res.concat(value->value.b);
+							break;
+						case JSON_TYPE_NUMBER:
+							if (value->value.n.is_float) {
+								res.concat(value->value.n.v.f);
+							} else {
+								res.concat(value->value.n.v.i);
+							}
+							break;
+						case JSON_TYPE_STRING:
+							res.concat(L"\"").concat(encode(*(value->value.cs))).concat(L"\"");
+							break;
+						default:
+							res.concat(encode(value));
+					}
+				}
+				res.concat(L"]");
+				return res;
+			}
+			
+			case JSON_TYPE_STRING:
+				return CString(L"\"").concat(encode(*(node->value.cs))).concat(L"\"");
+			
+			case JSON_TYPE_NULL:
+				return L"null";
+			
+			case JSON_TYPE_BOOLEAN:
+				return node->value.b;
+			
+			case JSON_TYPE_NUMBER:
+				if (node->value.n.is_float) {
+					return node->value.n.v.f;
+				} else {
+					return node->value.n.v.i;
+				}
+			
+			default:
+				return CString((const void*)NULL);
+		}
+	} catch (...) {
+		throw;
+	}
 }

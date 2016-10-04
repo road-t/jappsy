@@ -161,16 +161,21 @@ extern "C" {
 		const struct JsonNode* get(int index) const throw(const char*);
 		const struct JsonNode* getKey(int index) const throw(const char*);
 		const struct JsonNode* get(const CString& key) const throw(const char*);
+		
+		const struct JsonNode* opt(int index) const;
+		const struct JsonNode* opt(const CString& key) const;
 
 		inline bool isNull() const { return type == JSON_TYPE_NULL; }
 		inline bool isObject() const { return type == JSON_TYPE_OBJECT; }
 		inline bool isArray() const { return type == JSON_TYPE_ARRAY; }
 		
+		// Get this node value
 		CString toString() const throw(const char*);
 		double toDouble() const throw(const char*);
 		int64_t toInt() const throw(const char*);
 		bool toBoolean() const throw(const char*);
 		
+		// Get object/array node value
 		CString optString(int index, const CString& fallback) const;
 		CString optString(const CString& key, const CString& fallback) const;
 		double optDouble(int index, double fallback = 0) const;
@@ -179,6 +184,31 @@ extern "C" {
 		int64_t optInt(const CString& key, int64_t fallback = 0) const;
 		bool optBoolean(int index, bool fallback = false) const;
 		bool optBoolean(const CString& key, bool fallback = false) const;
+
+		// Clear node to empty type
+		void clear(JsonType type = JSON_TYPE_NULL) throw(const char*);
+		
+		// Set this node value
+		void fromString(const CString& value) throw(const char*);
+		void fromDouble(double value) throw(const char*);
+		void fromInt(int64_t value) throw(const char*);
+		void fromBoolean(bool value) throw(const char*);
+		
+		// Create node
+		static struct JsonNode* createObject() throw(const char*);
+		static struct JsonNode* createArray() throw(const char*);
+		
+		// Set object/array node value
+		void set(int index, struct JsonNode* object) throw(const char*);
+		void set(const CString& key, struct JsonNode* object) throw(const char*);
+		void setString(int index, const CString& value) throw(const char*);
+		void setString(const CString& key, const CString& value) throw(const char*);
+		void setDouble(int index, double value) throw(const char*);
+		void setDouble(const CString& key, double value) throw(const char*);
+		void setInt(int index, int64_t value) throw(const char*);
+		void setInt(const CString& key, int64_t value) throw(const char*);
+		void setBoolean(int index, bool value) throw(const char*);
+		void setBoolean(const CString& key, bool value) throw(const char*);
 	};
 
 	bool JsonCheck(struct JsonContext* ctx, const char* json);
@@ -206,6 +236,8 @@ extern "C" {
 	
 	void JsonDebugError(const struct JsonContext& ctx, const char* json);
 	void JsonDebugErrorW(const struct JsonContext& ctx, const wchar_t* json);
+	
+	struct JsonNode* JsonClone(const struct JsonNode* node, struct JsonNode* parent = NULL);
 
 #ifdef __cplusplus
 }
@@ -220,52 +252,47 @@ class JSONObject : public CObject {
 public:
 	JsonNode* root = NULL;
 	
+	JSONObject();
 	JSONObject(const CString& json);
 	JSONObject(const wchar_t* json);
 	JSONObject(const char* json);
 	
 	~JSONObject();
+	
+	//JsonNode* opt(const CString& path);
 };
 
 class JSON {
-private:
-	inline static CString key(const CString& value) throw(const char*) {
-		if ((value.m_length > 0) && (value[0] == L'\"'))
-			return value;
-
-		return CString(L"\"").concat(value).concat(L"\"");
-	}
-	
-	
 public:
 	static CString encode(const CString& value) throw(const char*);
+	static CString encode(const struct JsonNode* node) throw(const char*);
 	
 //	inline static CString keyify(const CObject& object) throw(const char*) { return JSON::key(JSON::encode(object.toJSON())); }
 //	inline static CString keyify(const CObject* object) throw(const char*) { return JSON::key(JSON::encode(object->toJSON())); }
-	inline static CString keyify(const void* ptr) throw(const char*) { return JSON::key(JSON::encode(L"null")); }
-	inline static CString keyify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static CString keyify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static CString keyify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static CString keyify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static CString keyify(const bool value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const int8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const uint8_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const int16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const uint16_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const int32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const uint32_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const int64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const uint64_t value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const float value) throw(const char*) { return JSON::key(JSON::encode(value)); }
-	inline static CString keyify(const double value) throw(const char*) { return JSON::key(JSON::encode(value)); }
+	inline static CString keyify(const void* ptr) throw(const char*) { return L"\"null\""; }
+	inline static CString keyify(const wchar_t* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
+	inline static CString keyify(const char* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
+	inline static CString keyify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
+	inline static CString keyify(const wchar_t character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
+	inline static CString keyify(const bool value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const int8_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const uint8_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const int16_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const uint16_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const int32_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const uint32_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const int64_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const uint64_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const float value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
+	inline static CString keyify(const double value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
 	
 //	inline static CString stringify(const CObject& object) throw(const char*) { return object.toJSON(); }
 //	inline static CString stringify(const CObject* object) throw(const char*) { return object->toJSON(); }
 	inline static CString stringify(const void* ptr) throw(const char*) { return L"null"; }
-	inline static CString stringify(const wchar_t* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static CString stringify(const char* string) throw(const char*) { return JSON::key(JSON::encode(string)); }
-	inline static CString stringify(const char character) throw(const char*) { return JSON::key(JSON::encode(character)); }
-	inline static CString stringify(const wchar_t character) throw(const char*) { return JSON::key(JSON::encode(character)); }
+	inline static CString stringify(const wchar_t* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
+	inline static CString stringify(const char* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
+	inline static CString stringify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
+	inline static CString stringify(const wchar_t character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
 	inline static CString stringify(const bool value) throw(const char*) { return value; }
 	inline static CString stringify(const int8_t value) throw(const char*) { return value; }
 	inline static CString stringify(const uint8_t value) throw(const char*) { return value; }

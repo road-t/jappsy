@@ -37,6 +37,7 @@ public:
 	void shutdown();
 	
 	void setBasePath(const CString& basePath);
+	void preload(const char* json);
 	void load(const char* json);
 	
 	void onRender();
@@ -46,10 +47,15 @@ public:
 	virtual void onFrame(GLRender* context) {}
 	virtual void onResize(int width, int height) {}
 	virtual void onTouch(const CString& event) {}
-	virtual void onFile(const CString& url, void* object) {}
+
 	virtual void onStatus(const LoaderStatus& status) {}
-	virtual void onReady() {}
+	virtual void onFile(const Loader::File& info, void* object) {}
 	virtual void onError(const CString& error) {}
+	virtual void onRetry() {}
+	
+	virtual void onPreload() {}
+	virtual void onLoad() {}
+	virtual void onFatal(const CString& error) {}
 };
 
 #endif //JAPPSY_UGLENGINE_H

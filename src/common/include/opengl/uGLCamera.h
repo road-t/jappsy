@@ -28,6 +28,7 @@ public:
 	constexpr static uint32_t PERSPECTIVE = 0;
 	constexpr static uint32_t ORTHOGRAPHIC = 1;
 	constexpr static uint32_t LAYER = 2;
+	constexpr static uint32_t BACKGROUND = 3;
 
 	GLRender* context = NULL;
 	CString key;
@@ -37,6 +38,7 @@ public:
 	GLfloat fov;
 	GLfloat width;
 	GLfloat height;
+	GLfloat ratio;
 	GLfloat min;
 	GLfloat max;
 	uint32_t style;
@@ -54,6 +56,7 @@ public:
 	GLCamera* perspective(GLfloat fov, GLfloat min, GLfloat max);
 	GLCamera* ortho(GLfloat min, GLfloat max);
 	GLCamera* layer(GLfloat offsetX, GLfloat offsetY);
+	GLCamera* background();
 	
 	GLCamera* lookAt(const Vec3& position, const Vec3& target, const Vec3& head);
 	GLCamera* rotate(const Vec3& vec, GLfloat angle);
@@ -68,12 +71,15 @@ private:
 
 public:
 	GLCamera* gui = NULL;
+	GLCamera* background = NULL;
 	
 	GLCameras(GLRender* context) throw(const char*);
 	~GLCameras();
 	
 	GLCamera* get(const CString& key) throw(const char*);
 	GLCamera* createCamera(const CString& key) throw(const char*);
+	
+	void forceUpdate();
 };
 
 #endif //JAPPSY_UGLCAMERA_H

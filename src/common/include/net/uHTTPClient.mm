@@ -27,10 +27,13 @@ public:
 	bool threaded = false;
 	int retry = 0;
 	int timeout = 30;
+	char* post = NULL;
+	bool cache = true;
 	
 	HTTPClient::onStreamCallback onstream = NULL;
 	HTTPClient::onErrorCallback onerror = NULL;
 	HTTPClient::onRetryCallback onretry = NULL;
+	HTTPClient::onFatalCallback onfatal = NULL;
 	HTTPClient::onReleaseCallback onrelease = NULL;
 	
 	static void run(HTTPRequest* request) throw(const char*);
@@ -64,18 +67,22 @@ void* HttpSync(void* threadData) {
 	@autoreleasepool {
 		__sync_synchronize();
 		
-		Stream* stream = HttpLoadCache(http->userData);
-		if (stream != NULL) {
-			try {
-				bool result = http->onstream(http->url, stream, http->userData);
-				delete stream;
-				if (result) {
-					http->onrelease(http->userData);
-					memDelete(http);
-					return NULL;
+		Stream* stream = NULL;
+		
+		if (http->cache) {
+			stream = HttpLoadCache(http->userData);
+			if (stream != NULL) {
+				try {
+					bool result = http->onstream(http->url, stream, http->userData);
+					delete stream;
+					if (result) {
+						http->onrelease(http->userData);
+						memDelete(http);
+						return NULL;
+					}
+				} catch (...) {
+					delete stream;
 				}
-			} catch (...) {
-				delete stream;
 			}
 		}
 		
@@ -84,9 +91,16 @@ void* HttpSync(void* threadData) {
 		//url = [url URLByAppendingQueryString:[NSString stringWithFormat:@"_nocache=%lld+%d", System.nanoTime(), arc4random()]];
 		
 		NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-		[request setHTTPMethod:@"GET"];
+		if (http->post != NULL) {
+			[request setHTTPMethod:@"POST"];
+			[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+			[request setHTTPBody:[NSData dataWithBytes:http->post length:strlen(http->post)]];
+		} else {
+			[request setHTTPMethod:@"GET"];
+		}
 		[request setTimeoutInterval:(http->timeout)];
 		[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
+		
 		
 		do {
 			NSURLResponse *response = nil;
@@ -107,17 +121,21 @@ void* HttpSync(void* threadData) {
 				} catch (...) {
 				}
 			}
+			int timeout = 1000;
+			if (http->onerror != NULL) {
+				timeout = http->onerror(http->url, [error localizedDescription], http->userData);
+			}
 			if (http->retry > 0) {
 				if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-					http->onerror(http->url, L"Shutdown", http->userData);
+					http->onfatal(http->url, L"Shutdown", http->userData);
 					break;
 				}
 				http->retry--;
 			} else if (http->retry == 0) {
-				http->onerror(http->url, [error localizedDescription], http->userData);
+				http->onfatal(http->url, [error localizedDescription], http->userData);
 				break;
 			}
-			[NSThread sleepForTimeInterval:1];
+			systemSleep(timeout);
 		} while (true);
 		
 		http->onrelease(http->userData);
@@ -132,18 +150,22 @@ void* HttpAsync(void* threadData) {
 	@autoreleasepool {
 		__sync_synchronize();
 		
-		Stream* stream = HttpLoadCache(http->userData);
-		if (stream != NULL) {
-			try {
-				bool result = http->onstream(http->url, stream, http->userData);
-				delete stream;
-				if (result) {
-					http->onrelease(http->userData);
-					memDelete(http);
-					return NULL;
+		Stream* stream = NULL;
+		
+		if (http->cache) {
+			stream = HttpLoadCache(http->userData);
+			if (stream != NULL) {
+				try {
+					bool result = http->onstream(http->url, stream, http->userData);
+					delete stream;
+					if (result) {
+						http->onrelease(http->userData);
+						memDelete(http);
+						return NULL;
+					}
+				} catch (...) {
+					delete stream;
 				}
-			} catch (...) {
-				delete stream;
 			}
 		}
 
@@ -152,13 +174,20 @@ void* HttpAsync(void* threadData) {
 		//url = [url URLByAppendingQueryString:[NSString stringWithFormat:@"_nocache=%lld+%d", System.nanoTime(), arc4random()]];
 		
 		NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:url];
-		[request setHTTPMethod:@"GET"];
+		if (http->post != NULL) {
+			[request setHTTPMethod:@"POST"];
+			[request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+			[request setHTTPBody:[NSData dataWithBytes:http->post length:strlen(http->post)]];
+		} else {
+			[request setHTTPMethod:@"GET"];
+		}
 		[request setTimeoutInterval:(http->timeout)];
 		[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
 		
 		NSOperationQueue *queue = [[NSOperationQueue alloc] init];
 		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
 			bool repeat = false;
+			int timeout = 1000;
 			@autoreleasepool {
 				do {
 					if (data != nil) {
@@ -175,15 +204,18 @@ void* HttpAsync(void* threadData) {
 						} catch (...) {
 						}
 					}
+					if (http->onerror != NULL) {
+						timeout = http->onerror(http->url, [error localizedDescription], http->userData);
+					}
 					if (http->retry > 0) {
 						if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-							http->onerror(http->url, L"Shutdown", http->userData);
+							http->onfatal(http->url, L"Shutdown", http->userData);
 							break;
 						}
 						http->retry--;
 						repeat = true;
 					} else if (http->retry == 0) {
-						http->onerror(http->url, [error localizedDescription], http->userData);
+						http->onfatal(http->url, [error localizedDescription], http->userData);
 						break;
 					}
 				} while (false);
@@ -193,6 +225,7 @@ void* HttpAsync(void* threadData) {
 				}
 			}
 			if (repeat) {
+				systemSleep(timeout);
 				(void)MainThreadAsync(HttpAsync, NULL, http);
 			}
 		}];
@@ -213,7 +246,7 @@ void* HttpSync(void* threadData) {
 
 #endif
 
-void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onReleaseCallback onrelease) throw(const char*) {
+void HTTPClient::Request(const CString& url, char* post, bool threaded, int retry, int timeout, bool cache, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onFatalCallback onfatal, onReleaseCallback onrelease) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
 	if (http == NULL)
 		throw eOutOfMemory;
@@ -222,11 +255,14 @@ void HTTPClient::Request(const CString& url, bool threaded, int retry, int timeo
 	http->threaded = threaded;
 	http->retry = retry;
 	http->timeout = timeout;
+	http->post = post;
+	http->cache = cache;
 	http->userData = userData;
 	
 	http->onstream = onstream;
 	http->onerror = onerror;
 	http->onretry = onretry;
+	http->onfatal = onfatal;
 	http->onrelease = onrelease;
 
 	if (http->threaded) {

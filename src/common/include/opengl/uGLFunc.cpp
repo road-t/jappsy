@@ -27,7 +27,7 @@ GLFunc::~GLFunc() {
 	this->context = NULL;
 }
 
-void GLFunc::render(GLObject* object, const GLfloat time) {
+void GLFunc::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	onfunc(context->engine);
 }
 

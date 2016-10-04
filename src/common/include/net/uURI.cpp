@@ -398,6 +398,8 @@ const CString& URI::absolutePath(const wchar_t* basePath) {
 			if (m_path != NULL) {
 				if (m_path[0] == L'/') {
 					path = (m_path + 1);
+				} else if ((m_path[0] == L'.') && (m_path[1] == L'/')) {
+					path = (m_path + 2);
 				} else {
 					path = m_path;
 				}
@@ -410,7 +412,14 @@ const CString& URI::absolutePath(const wchar_t* basePath) {
 			}
 			
 			if (basePath != NULL) {
-				_absolutePath->concat(basePath);
+				if ((m_path[0] == L'.') && (m_path[1] == L'/')) {
+					URI* baseUri = new URI(basePath);
+					_absolutePath->concat(baseUri->scheme());
+					_absolutePath->concat(baseUri->server());
+					delete baseUri;
+				} else {
+					_absolutePath->concat(basePath);
+				}
 			} else {
 				_absolutePath->concat(this->basePath);
 			}

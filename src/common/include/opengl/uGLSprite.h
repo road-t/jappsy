@@ -22,6 +22,7 @@
 #include <data/uVector.h>
 #include <opengl/uGLTexture.h>
 #include <opengl/uGLPaint.h>
+#include <opengl/uGLCamera.h>
 
 class GLRender;
 
@@ -43,7 +44,7 @@ public:
 	
 	Vec2 getPosition(const Vec2& position, const GLPaint* paint = NULL);
 	
-	void render(const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN);
+	void render(const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN, GLCamera* camera = NULL);
 	void renderNumber(const Vec2& position, GLfloat step, const CString& value);
 };
 
@@ -59,7 +60,7 @@ public:
 	GLSprite* get(const CString& key) throw(const char*);
 	GLSprite* createSprite(const CString& key, const CString& textureKey, const Vec2& size, const GLuint frames = 1, const Vec2* first = NULL, const Vec2* next = NULL) throw(const char*);
 	
-	inline void renderSprite(const CString& key, const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN) { list.get(key)->render(position, frame, paint, time); }
+	inline void renderSprite(const CString& key, const Vec2& position, const GLuint frame, const GLPaint* paint = NULL, const GLfloat time = NAN, GLCamera* camera = NULL) { list.get(key)->render(position, frame, paint, time, camera); }
 	
 	void renderSpriteNumber(const CString& key, const Vec2& position, GLfloat step, const CString& value);
 };

@@ -155,9 +155,9 @@ Vec2 GLSprite::getPosition(const Vec2& position, const GLPaint* paint) {
 	return {x, y};
 }
 
-void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* paint, const GLfloat time) {
+void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* paint, const GLfloat time, GLCamera* camera) {
 	GLSpriteShader* shader = context->shaderSprite;
-	GLCamera* cam = context->cameras->gui;
+	GLCamera* cam = (camera != NULL) ? camera : context->cameras->gui;
 	cam->update();
 	
 	glEnable(GL_BLEND);

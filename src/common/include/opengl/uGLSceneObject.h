@@ -19,12 +19,13 @@
 
 #include <platform.h>
 #include <data/uObject.h>
+#include <opengl/uGLCamera.h>
 
 class GLObject;
 
 class GLSceneObject : public CObject {
 public:
-	virtual inline void render(GLObject* object, const GLfloat time = NAN) {}
+	virtual inline void render(GLObject* object, const GLfloat time = NAN, GLCamera* camera = NULL) {}
 };
 
 #endif //JAPPSY_UGLSCENEOBJECT_H

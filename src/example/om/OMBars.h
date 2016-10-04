@@ -84,6 +84,8 @@ public:
     bool stopped();
     void start();
     int stopRandom();
+    int stop(wchar_t* ofs); // 3 числа в строке от 0 до 7
+    int stopCancel();
     int calculate();
     
     void renderEffects(GLRender* context);

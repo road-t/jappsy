@@ -67,31 +67,31 @@ void GLDrawing::setPaint(const GLPaint& paint) throw(const char*) {
 	this->paint = new GLPaint(paint);
 }
 
-void GLDrawing::render(GLObject* object, const GLfloat time) {
+void GLDrawing::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	if (animation != NULL)
 		animation->update();
 	
 	if (background >= 0)
-		sprite->render(position, background, paint, time);
+		sprite->render(position, background, paint, time, camera);
 	if (pressed) {
 		if (click >= 0)
-			sprite->render(position, click, paint, time);
+			sprite->render(position, click, paint, time, camera);
 		else if (normal >= 0)
-			sprite->render(position, normal, paint, time);
+			sprite->render(position, normal, paint, time, camera);
 	} else if (hovered) {
 		if (hover >= 0)
-			sprite->render(position, hover, paint, time);
+			sprite->render(position, hover, paint, time, camera);
 		else if (normal >= 0)
-			sprite->render(position, normal, paint, time);
+			sprite->render(position, normal, paint, time, camera);
 	} else if (normal >= 0) {
-		sprite->render(position, normal, paint, time);
+		sprite->render(position, normal, paint, time, camera);
 	}
 	
 	if (onrender != NULL)
 		onrender(context->engine, (GLDrawing*)this);
 	
 	if (foreground >= 0)
-		sprite->render(position, foreground, paint, time);
+		sprite->render(position, foreground, paint, time, camera);
 }
 
 GLDrawings::GLDrawings(GLRender* context) throw(const char*) {
@@ -126,7 +126,7 @@ GLDrawing* GLDrawings::createDrawing(const CString& key, const CString& spriteKe
 	}
 }
 
-void GLDrawings::renderDrawing(const CString& key, GLfloat time) {
+void GLDrawings::renderDrawing(const CString& key, GLfloat time, GLCamera* camera) {
 	GLDrawing* drawing = list.get(key);
-	drawing->render(NULL, time);
+	drawing->render(NULL, time, camera);
 }

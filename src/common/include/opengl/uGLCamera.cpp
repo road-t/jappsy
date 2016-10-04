@@ -30,11 +30,12 @@ GLCamera::GLCamera(GLRender* context, const CString& key) {
 	fov = 45;
 	width = 1920;
 	height = 1080;
+	ratio = width / height;
 	min = 0.1;
 	max = 1000;
 	style = PERSPECTIVE;
 	invalid = true;
-	scale = 0.01;
+	scale = 0.001;
 }
 
 GLCamera* GLCamera::invalidate() {
@@ -45,6 +46,7 @@ GLCamera* GLCamera::invalidate() {
 GLCamera* GLCamera::size(GLfloat width, GLfloat height) {
 	this->width = width;
 	this->height = height;
+	this->ratio = width / height;
 	invalid = true;
 	return this;
 }
@@ -74,6 +76,13 @@ GLCamera* GLCamera::layer(GLfloat offsetX, GLfloat offsetY) {
 	return this;
 }
 
+GLCamera* GLCamera::background() {
+	target.x = target.y = 0;
+	style = BACKGROUND;
+	invalid = true;
+	return this;
+}
+
 GLCamera* GLCamera::lookAt(const Vec3& position, const Vec3& target, const Vec3& head) {
 	this->position.set(position);
 	this->target.set(target);
@@ -92,7 +101,7 @@ GLCamera* GLCamera::rotate(const Vec3& vec, GLfloat angle) {
 
 bool GLCamera::update() {
 	if (invalid) {
-		if (style == LAYER) {
+		if ((style == LAYER) || (style == BACKGROUND)) {
 			projection16fv.set(0);
 			projection16fv[0] = 2.0f / width;
 			projection16fv[5] = -2.0f / height;
@@ -120,6 +129,10 @@ bool GLCamera::update() {
 			}
 			
 			view16fv.lookAt(position, target, head);
+		}
+		
+		if (style != BACKGROUND) {
+			projection16fv.multiply(context->ratio16fv, projection16fv);
 		}
 		
 		invalid = false;
@@ -158,7 +171,17 @@ GLCamera* GLCameras::createCamera(const CString& key) throw(const char*) {
 		}
 		if (key == L"gui") {
 			gui = cam;
+		} else if (key == L"background") {
+			background = cam;
 		}
 		return cam;
+	}
+}
+
+void GLCameras::forceUpdate() {
+	int32_t count = list.count();
+	GLCamera** items = list.items();
+	for (int i = 0; i < count; i++) {
+		items[i]->invalid = true;
 	}
 }

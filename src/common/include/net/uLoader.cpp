@@ -22,11 +22,36 @@
 #include <opengl/uGLRender.h>
 #include <opengl/uGLReader.h>
 
-void Loader::setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror) {
-	this->onfile = onfile;
+Loader::File::~File() {
+	if (this->query != NULL) {
+		delete this->query;
+		this->query = NULL;
+	}
+	if (this->post != NULL) {
+		memFree(this->post);
+		this->post = NULL;
+	}
+}
+
+Loader::Info::Info(Loader* loader, File* info) {
+	this->loader = loader;
+	this->info = info;
+	if ((info->onquery != NULL) && (info->query != NULL) && (info->post == NULL)) {
+		info->post = info->onquery(info->query);
+	}
+}
+
+Loader::Info::~Info() {
+	delete info;
+}
+
+void Loader::setCallbacks(onStatusCallback onstatus, onFileCallback onfile, onErrorCallback onerror, onRetryCallback onretry, onReadyCallback onready, onFatalCallback onfatal) {
 	this->onstatus = onstatus;
-	this->onready = onready;
+	this->onfile = onfile;
 	this->onerror = onerror;
+	this->onretry = onretry;
+	this->onready = onready;
+	this->onfatal = onfatal;
 }
 
 void Loader::release() {
@@ -141,13 +166,13 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, true, 3, 5, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"json") == 0) ||
 					(info->ext.compareToIgnoreCase(L"vsh") == 0) ||
 					(info->ext.compareToIgnoreCase(L"fsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, true, 3, 5, user, onhttp_text, onhttp_error, onhttp_retry, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_text, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else {
 					// Unknown File Type
 					// Fake OK
@@ -168,22 +193,29 @@ void Loader::update() {
 		}
 		if (AtomicGet(&(status.left)) > 0) {
 			checkUpdate(15);
+			unlock();
 		} else if (count == 0) {
 			checkUpdate(15);
+			unlock();
 		} else if (AtomicGet(&(status.error)) > 0) {
-			if (onerror != NULL) onerror(lastError, userData);
+			if (onfatal != NULL) onfatal(lastError, userData);
+			unlock();
 		} else {
+			unlock();
 			if (onready != NULL) {
 				try {
 					(void)MainThreadSync(onready, userData);
 				} catch (const char* e) {
+					lock();
 					lastError = e;
-					if (onerror != NULL) onerror(lastError, userData);
+					if (onfatal != NULL) onfatal(lastError, userData);
+					unlock();
 				}
 			}
 		}
+	} else {
+		unlock();
 	}
-	unlock();
 }
 
 void Loader::run() {
@@ -220,7 +252,7 @@ void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, char* valu
 		uri->absolutePath((wchar_t*)(loader->basePath));
 	
 		if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
-			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, loader->subgroup);
+			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, loader->subgroup, true);
 			loader->list.push(info);
 			AtomicIncrement(&(loader->status.total));
 		}
@@ -233,6 +265,7 @@ void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, char* valu
 }
 
 void Loader::load(const char* json) throw(const char*) {
+	lock();
 	if (json == NULL)
 		throw eNullPointer;
 	
@@ -242,22 +275,58 @@ void Loader::load(const char* json) throw(const char*) {
 	JsonClearCallbacks(&callbacks, this);
 	callbacks.onrootstart = onjson_root_start;
 	if (!JsonCall(&ctx, json)) {
+		unlock();
 #ifdef DEBUG
 		JsonDebugError(ctx, json);
 #endif
 		throw eConvert;
 	}
+	unlock();
 	
 	run();
 }
 
-Loader::Info::Info(Loader* loader, File* info) {
-	this->loader = loader;
-	this->info = info;
-}
+void Loader::query(const CString& path, const CString& message, File::onQueryCallback onquery) {
+	URI* uri = new URI((wchar_t*)path);
+	
+	lock();
+	try {
+		uri->absolutePath((wchar_t*)(basePath));
+		CString file = uri->uri();
 
-Loader::Info::~Info() {
-	delete info;
+		int count = list.count();
+		File** items = list.items();
+		for (int i = 0; i < count; i++) {
+			if (items[i]->uri.equals(file)) {
+				if (items[i]->query == NULL) {
+					items[i]->query = new Vector<CString&>();
+				}
+				items[i]->onquery = onquery;
+				items[i]->query->push(message);
+				unlock();
+				delete uri;
+				return;
+			}
+		}
+	
+		Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), "query", "api", false);
+		if (info->query == NULL) {
+			info->query = new Vector<CString&>();
+		}
+		info->onquery = onquery;
+		info->query->push(message);
+		list.push(info);
+		AtomicIncrement(&(status.total));
+	} catch(...) {
+		unlock();
+		delete uri;
+		throw;
+	}
+	unlock();
+	
+	delete uri;
+	
+	run();
 }
 
 void Loader::onhttp_release(void* userData) {
@@ -289,13 +358,15 @@ bool Loader::onhttp_data(const CString& url, Stream* stream, void* userData) {
 	return result;
 }
 
-void Loader::onhttp_error(const CString& url, const CString& error, void* userData) {
+int Loader::onhttp_error(const CString& url, const CString& error, void* userData) {
 	Info* info = (Info*)userData;
 	
 	try {
-		info->loader->onError(info->info, error);
+		return info->loader->onError(info->info, error);
 	} catch (...) {
 	}
+	
+	return 30000;
 }
 
 bool Loader::onhttp_retry(const CString& url, void* userData) {
@@ -310,6 +381,15 @@ bool Loader::onhttp_retry(const CString& url, void* userData) {
 	return result;
 }
 
+void Loader::onhttp_fatal(const CString& url, const CString& error, void* userData) {
+	Info* info = (Info*)userData;
+	
+	try {
+		info->loader->onFatal(info->info, error);
+	} catch (...) {
+	}
+}
+
 bool Loader::onText(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
@@ -318,7 +398,6 @@ bool Loader::onText(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = context->shaders->createVertexShader((wchar_t*)info->key, (char*)stream->getBuffer());
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
@@ -326,21 +405,33 @@ bool Loader::onText(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = context->shaders->createFragmentShader((wchar_t*)info->key, (char*)stream->getBuffer());
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
-	} else if ((info->ext.compareToIgnoreCase(L"json") == 0) && (info->group.compareToIgnoreCase(L"models") == 0)) {
-		try {
-			GLModel* model = context->models->createModel((wchar_t*)info->key, (char*)stream->getBuffer());
-			onLoad(info, model);
-			if (onfile != NULL) onfile(info->uri, model, userData);
-		} catch (...) {
-			return false;
+	} else if (info->ext.compareToIgnoreCase(L"json") == 0) {
+		if (info->group.compareToIgnoreCase(L"models") == 0) {
+			try {
+				GLModel* model = context->models->createModel((wchar_t*)info->key, (char*)stream->getBuffer());
+				onLoad(info, model);
+			} catch (...) {
+				return false;
+			}
+		} else {
+			try {
+				JSONObject* json = memNew(json, JSONObject((char*)stream->getBuffer()));
+				try {
+					onLoad(info, json);
+				} catch (...) {
+					memDelete(json);
+					return false;
+				}
+				memDelete(json);
+			} catch (...) {
+				onLoad(info, NULL);
+			}
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info->uri, stream, userData);
 	}
 	return true;
 }
@@ -353,7 +444,6 @@ bool Loader::onData(const File* info, Stream* stream) {
 		try {
 			GLTexture* texture = GLReader::createTexture(context, info->key, stream);
 			onLoad(info, texture);
-			if (onfile != NULL) onfile(info->uri, texture, userData);
 		} catch (...) {
 			return false;
 		}
@@ -361,18 +451,44 @@ bool Loader::onData(const File* info, Stream* stream) {
 		try {
 			GLShader* shader = GLReader::createShader(context, info->key, stream);
 			onLoad(info, shader);
-			if (onfile != NULL) onfile(info->uri, shader, userData);
 		} catch (...) {
 			return false;
 		}
 	} else {
 		onLoad(info, stream);
-		if (onfile != NULL) onfile(info->uri, stream, userData);
 	}
 	return true;
 }
 
-void Loader::onError(const File* info, const CString& error) {
+void Loader::onLoad(const File* info, void* object) {
+	__sync_synchronize();
+	
+	// Тут можно добавить result как в джаве, но он не нужен в си
+	
+	AtomicIncrement(&(status.count));
+	AtomicDecrement(&(status.left));
+	if ((info->retry != 0) && (AtomicSub(&(status.error), info->retry) == info->retry)) {
+		if (onretry != NULL) onretry(userData);
+	}
+	AtomicSet(&(status.update), true);
+
+	if (onfile != NULL) onfile(*info, object, userData);
+}
+
+int Loader::onError(const File* info, const CString& error) {
+	AtomicIncrement(&(status.error));
+	((File*)info)->retry++;
+	lastError = info->uri;
+
+	if (onerror != NULL) onerror(lastError, userData);
+	
+	int timeout = info->retry * 500;
+	if (timeout > 60000) timeout = 60000;
+	
+	return timeout;
+}
+
+void Loader::onFatal(const File* info, const CString& error) {
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
 	lastError = info->uri;
@@ -384,14 +500,3 @@ bool Loader::onRetry(const File* info) {
 	
 	return true;
 }
-
-void Loader::onLoad(const File* info, void* object) {
-	__sync_synchronize();
-
-	// Тут можно добавить result как в джаве, но он не нужен в си
-
-	AtomicIncrement(&(status.count));
-	AtomicDecrement(&(status.left));
-	AtomicSet(&(status.update), true);
-}
-

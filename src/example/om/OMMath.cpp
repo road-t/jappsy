@@ -67,6 +67,14 @@ void Rotation::check() {
     }
 }
 
+void Rotation::reset(GLfloat ofs) {
+    rotate = Rotation::Angle(ofs);
+    speed = 0.0;
+    accel = 0.0;
+    target = -1.0;
+    updated = true;
+}
+
 void Rotation::userMove(GLfloat delta) {
     rotate += delta;
     speed = 0.0;
@@ -150,7 +158,7 @@ int Rotation::offset() {
 }
 
 bool Rotation::stoppedBars(Rotation* bars) {
-    if ((bars[0].speed == 0) && (bars[1].speed == 0) && (bars[2].speed == 0)) {
+    if ((bars[0].speed == 0) && (bars[1].speed == 0) && (bars[2].speed == 0) && (bars[0].accel == 0) && (bars[1].accel == 0) && (bars[2].accel == 0)) {
         if ((!bars[0].stopped) && (!bars[1].stopped) && (!bars[2].stopped)) {
             bars[0].stopped = bars[1].stopped = bars[2].stopped = true;
             if ((bars[0].state == RS_NONE) && (bars[1].state == RS_NONE) && (bars[2].state == RS_NONE)) {
@@ -168,10 +176,10 @@ bool Rotation::updateBars(Rotation* bars, uint64_t* time) {
     return res1 || res2 || res3;
 }
 
-int Rotation::calculateBars(Rotation* bars, int* mask) {
-    int ofs1 = bars[0].offset();
-    int ofs2 = bars[1].offset();
-    int ofs3 = bars[2].offset();
+int Rotation::calculate(int* ofs, int* mask) {
+    int ofs1 = ofs[0];
+    int ofs2 = ofs[1];
+    int ofs3 = ofs[2];
     if (ofs1 == 1) { // S1 ? ?
         if (ofs2 == 1) { // S1 S1 ?
             if (ofs3 == 1) { // S1 S1 S1
@@ -285,6 +293,14 @@ int Rotation::calculateBars(Rotation* bars, int* mask) {
     }
     mask[0] = mask[1] = mask[2] = 0;
     return 0;
+}
+
+int Rotation::calculateBars(Rotation* bars, int* mask) {
+    int ofs[3];
+    ofs[0] = bars[0].offset();
+    ofs[1] = bars[1].offset();
+    ofs[2] = bars[2].offset();
+    return calculate(ofs, mask);
 }
 
 void Rotation::generateBars(Rotation* bars, int grace) {

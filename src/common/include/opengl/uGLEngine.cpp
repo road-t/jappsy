@@ -28,9 +28,9 @@ void* onTouchCallback(const CString& event, void* userData) {
 	return NULL;
 }
 
-void* onFileCallback(const CString& url, void* object, void* userData) {
+void* onFileCallback(const Loader::File& info, void* object, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onFile(url, object);
+	engine->onFile(info, object);
 	return NULL;
 }
 
@@ -40,9 +40,15 @@ void* onStatusCallback(const LoaderStatus& status, void* userData) {
 	return NULL;
 }
 
-void* onReadyCallback(void* userData) {
+void* onPreloadCallback(void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onReady();
+	engine->onPreload();
+	return NULL;
+}
+
+void* onLoadCallback(void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onLoad();
 	return NULL;
 }
 
@@ -52,9 +58,20 @@ void* onErrorCallback(const CString& error, void* userData) {
 	return NULL;
 }
 
+void* onRetryCallback(void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onRetry();
+	return NULL;
+}
+
+void* onFatalCallback(const CString& error, void* userData) {
+	GLEngine* engine = (GLEngine*)userData;
+	engine->onFatal(error);
+	return NULL;
+}
+
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
-	context->loader->setCallbacks(onFileCallback, onStatusCallback, onReadyCallback, onErrorCallback);
 }
 
 GLEngine::~GLEngine() {
@@ -68,13 +85,21 @@ GLEngine::~GLEngine() {
 
 void GLEngine::shutdown() {
 	context->loader->release();
+	
+	// TODO: Функция вызывается в ОМ для завершения игры, но при этом завершение не происходит... (разобраться)
 }
 
 void GLEngine::setBasePath(const CString& basePath) {
 	context->loader->basePath = basePath;
 }
 
+void GLEngine::preload(const char* json) {
+	context->loader->setCallbacks(onStatusCallback, onFileCallback, onErrorCallback, onRetryCallback, onPreloadCallback, onFatalCallback);
+	context->loader->load(json);
+}
+
 void GLEngine::load(const char* json) {
+	context->loader->setCallbacks(onStatusCallback, onFileCallback, onErrorCallback, onRetryCallback, onLoadCallback, onFatalCallback);
 	context->loader->load(json);
 }
 
@@ -86,6 +111,7 @@ void GLEngine::onUpdate(int width, int height) {
 	onResize(width, height);
 	context->frame->width = width;
 	context->frame->height = height;
+	context->updateRatio(width, height);
 }
 
 void GLEngine::onTouch(MotionEvent* event) {

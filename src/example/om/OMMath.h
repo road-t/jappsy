@@ -67,6 +67,7 @@ public:
     
     void start(GLfloat* target = NULL);
     void check();
+    void reset(GLfloat ofs);
     void userMove(GLfloat delta);
     void userRotate(GLfloat delta, GLfloat speed);
     bool update(uint64_t* time = NULL);
@@ -74,6 +75,7 @@ public:
     
     static bool stoppedBars(Rotation* bars);
     static bool updateBars(Rotation* bars, uint64_t* time = NULL);
+    static int calculate(int* ofs, int* mask);
     static int calculateBars(Rotation* bars, int* mask);
     static void generateBars(Rotation* bars, int grace);
     static int generateGrace(Rotation* bars);

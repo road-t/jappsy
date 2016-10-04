@@ -23,36 +23,39 @@
 #include <net/uLoader.h>
 #include <opengl/uGLPaint.h>
 #include <data/uVector.h>
+#include <data/uJSON.h>
 #include "OMBars.h"
+
+//#define OMDEMO
 
 enum OMGameStage {
     STAGE_UNKNOWN = -1,
-    STAGE_BARS_WAIT = 0,		// Барабаны во время кручения (ожидаем ответ сервера)
-    STAGE_BARS_STOP = 1,		// Барабаны останавливаются
-    STAGE_BARS_PRIZE = 2,		// Барабаны остановились (показываем выигрыш)
-    STAGE_BARS_FREE = 3,		// Барабаны остановились (показываем бонус фриспин)
-    STAGE_BARS_USER = 4,		// Барабаны остановились (ожидаем выбор пользователя)
-    STAGE_BARS_TAKE = 5,		// Барабаны забираем накопления в общий счет
-    STAGE_BARS = 6,				// Барабаны до кручения
-    STAGE_DOUBLE_WAIT = 7,		// Удвоение (ожидаем ответ сервера)
-    STAGE_DOUBLE_SHOW = 8,		// Удвоение показ результата
-    STAGE_DOUBLE_HIDE = 9,		// Удвоение скрытие результата
-    STAGE_DOUBLE_TAKE = 10,		// Удвоение возврат в барабаны
-    STAGE_DOUBLE = 11,			// Удвоение (ожидаем выбор пользователя)
+    STAGE_BARS_WAIT = 10,		// Барабаны во время кручения (ожидаем ответ сервера)
+    STAGE_BARS_STOP = 11,		// Барабаны останавливаются
+    STAGE_BARS_PRIZE = 12,		// Барабаны остановились (показываем выигрыш)
+    STAGE_BARS_FREE = 13,		// Барабаны остановились (показываем бонус фриспин)
+    STAGE_BARS_USER = 14,		// Барабаны остановились (ожидаем выбор пользователя)
+    STAGE_BARS_TAKE = 15,		// Барабаны забираем накопления в общий счет
+    STAGE_BARS = 19,			// Барабаны до кручения
+    STAGE_DOUBLE_WAIT = 20,		// Удвоение (ожидаем ответ сервера)
+    STAGE_DOUBLE_SHOW = 21,		// Удвоение показ результата
+    STAGE_DOUBLE_HIDE = 22,		// Удвоение скрытие результата
+    STAGE_DOUBLE_TAKE = 23,		// Удвоение возврат в барабаны
+    STAGE_DOUBLE = 29,			// Удвоение (ожидаем выбор пользователя)
 };
     
 class OMGame : public GLEngine {
 public:
     GLScene* scene = NULL;              // У нас всего одна сцена игровая с разными активными слоями
 
-    bool ready = false;                 // Готовность всех ресурсов после загрузки
+    int ready = 0;                      // Готовность всех ресурсов после загрузки
     
     typedef void (*onNextCallback)(OMGame* engine);
     
     OMGameStage stage = STAGE_UNKNOWN;
     uint64_t nextTime = 0;
     uint64_t nextTimeout = 0;
-    OMGameStage nextStage = STAGE_BARS;
+    OMGameStage nextStage = STAGE_UNKNOWN;
     onNextCallback nextCallback = NULL;
     
     uint64_t prizeTimeout = 0;          // Таймаут показа приза
@@ -67,13 +70,14 @@ public:
     uint64_t localTime = 0;             // Локальное время для эффектов
     
     struct {
-        int32_t points = 1000;		// Current Points
-        int32_t bet = 99;			// Current Bet
-        int32_t prize = 0;			// Current Spin Prize
-        int32_t prizefree = 0;		// Current Free Spin Prize
-        int32_t total = 0;			// Total Free Spins Prize
-        int32_t doublein = 10;		// Double In Prize
-        int32_t doubleout = 20;		// Double Out Prize
+        GLfloat points = 0;         // Current Points
+        GLfloat pointsin = 0;       // Current Points In (won part)
+        GLfloat bet = 1;			// Current Bet
+        GLfloat prize = 0;			// Current Spin Prize
+        GLfloat prizefree = 0;		// Current Free Spin Prize
+        GLfloat total = 0;			// Total Free Spins Prize
+        GLfloat doublein = 0;		// Double In Prize
+        GLfloat doubleout = 0;		// Double Out Prize
         int32_t spin = 0;			// Current Spin
         int32_t free = 0;			// Total Free Spins
         jbool autospin = false;		// Auto Spin
@@ -81,6 +85,14 @@ public:
         int32_t dblselect = 0;
         int32_t dblindex = 0;
     } conf;
+    
+#ifndef OMDEMO
+    int32_t nextAsk = -1;               // Server Sync
+    JsonNode* queryConfig = NULL;
+    JsonNode* serverConfig = NULL;
+    JsonNode* nextServerConfig = NULL;
+    uint64_t nextConfigUpdate = 0;
+#endif
     
     struct {
         Vector<GLObject*> barlist;
@@ -93,21 +105,34 @@ public:
         
         Vector<GLObject*> btnlist;
         Vector<GLObject*> dbllist;
+        Vector<GLObject*> donlist;
         
         Vector<GLObject*> rocketslist;
     } groups;
-
+    
+    jbool donlistSwitch = false;
+    
     GLPaint paint;
+    GLPaint paintLoading;
     GLPaint paintShadow;
     GLPaint paintSwitch;
     GLPaint paintSpriteCenter;
     GLPaint paintSpriteLeftCenter;
 
     OMGame();
+    ~OMGame();
+    
+    int32_t mantra = 0;
+    void* activeMantra = NULL;
+    
+    void playMantra();
     
     Bars bars;
 
-    void startBars(bool freespin);
+    void updateGrace(GLfloat diff);
+    
+    void startBars(bool freespin, bool query = true);
+    void updateSounds(OMGameStage stage);
     void updateStage(OMGameStage stage, onNextCallback callback = NULL, uint64_t timeout = 0, bool fade = false);
     void updateStageVisibility();
     
@@ -120,6 +145,13 @@ public:
     TrackBarData trackBarData2 = { NULL, 1 };
     TrackBarData trackBarData3 = { NULL, 2 };
     
+    struct {
+        int32_t count = 0;
+        int32_t total = 0;
+        
+        int32_t query = 0; // счетчик запросов для определения обработанных запросов хода
+    } status;
+    
     void onFrame(GLRender* context);
     void onResize(int width, int height);
     void onTouch(const CString& event);
@@ -127,19 +159,18 @@ public:
     static bool onTrackBar(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
     static bool onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* drawing);
     
-    void doubleSelect(int index);
+    void doubleSelect(int index, bool query = true);
     static void doubleReset(OMGame* engine);
     static bool onDoubleEvent(GLEngine* engine, const CString& event, GLDrawing* drawing);
     
-    GLSprite* num_sm;
+    void renderNumber12pt(const Vec2& position, GLfloat value, int direction, const wchar_t* prefix = NULL);
+    void renderValue12pt(const Vec2& position, const CString& value, int direction);
+    void renderNumber18pt(const Vec2& position, GLfloat value, int direction, const wchar_t* prefix = NULL);
+    
     static void renderButtonGrace(GLEngine* engine, GLDrawing* drawing);
     static void renderButtonDonate(GLEngine* engine, GLDrawing* drawing);
+    static void renderButtonSelectDonate(GLEngine* engine, GLDrawing* drawing);
     static void renderButtonDouble(GLEngine* engine, GLDrawing* drawing);
-    
-    void onFile(const CString& url, void* object);
-    void onStatus(const LoaderStatus& status);
-    void onReady();
-    void onError(const CString& error);
     
     /// GLFunc
     
@@ -151,7 +182,10 @@ public:
     
     /// GLFunc
     
-    GLSprite* num;
+    GLSprite* num_12pt;
+    GLSprite* num_12pt_sub;
+    GLSprite* num_18pt;
+    GLSprite* num_18pt_sub;
     
     GLDrawing* text_om;
     GLDrawing* text_mani;
@@ -188,6 +222,25 @@ public:
     
     GLDrawing* dbl_sun;
     GLDrawing* dbl_moon;
+    
+    ///
+    
+#ifndef OMDEMO
+    void updateConfig();
+    void queryGenerateBars();
+    void queryGenerateDouble(int index);
+    void queryTake();
+    bool onUpdateConfig(OMGameStage action = STAGE_UNKNOWN);
+#endif
+
+    void onStatus(const LoaderStatus& status);
+    void onFile(const Loader::File& info, void* object);
+    void onError(const CString& error);
+    void onRetry();
+
+    void onPreload();
+    void onLoad();
+    void onFatal(const CString& error);
 };
 
 #endif //OMGAME_H

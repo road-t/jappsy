@@ -37,7 +37,7 @@ public:
 	GLFunc(GLRender* context, onFuncCallback callback);
 	~GLFunc();
 	
-	void render(GLObject* object, const GLfloat time = NAN);
+	void render(GLObject* object, const GLfloat time = NAN, GLCamera* camera = NULL);
 };
 
 class GLFuncs : public CObject {

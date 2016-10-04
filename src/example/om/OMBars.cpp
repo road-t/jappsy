@@ -56,6 +56,34 @@ int Bars::stopRandom() {
     return sum;
 }
 
+int Bars::stop(wchar_t* ofs) {
+    GLfloat target;
+    
+    target = (GLfloat)(((uint32_t)(ofs[0]) - 48) * 45);
+    rotation[0].start(&target);
+
+    target = (GLfloat)(((uint32_t)(ofs[1]) - 48) * 45);
+    rotation[1].start(&target);
+
+    target = (GLfloat)(((uint32_t)(ofs[2]) - 48) * 45);
+    rotation[2].start(&target);
+    
+    clear();
+    
+    int mask[3] = {0, 0, 0};
+    int bars[3];
+    bars[0] = rotation[0].offset();
+    bars[1] = rotation[1].offset();
+    bars[2] = rotation[2].offset();
+    return Rotation::calculate(bars, mask);
+}
+
+int Bars::stopCancel() {
+    Rotation::generateBars(rotation, 0);
+    clear();
+    return 0;
+}
+
 int Bars::calculate() {
     int sum = Rotation::calculateBars(rotation, mask);
     
@@ -67,9 +95,9 @@ int Bars::calculate() {
             int ofs = rotation[i].offset();
             CString key;
             if ((ofs == 0) || (ofs == 2) || (ofs == 6)) {
-                key = mobile ? L"mobile_effect_moon1" : L"effect_moon1";
+                key = mobile ? L"q1_effect_moon1" : L"q0_effect_moon1";
             } else if ((ofs == 1) || (ofs == 3) || (ofs == 5)) {
-                key = mobile ? L"mobile_effect_sun1" : L"effect_sun1";
+                key = mobile ? L"q1_effect_sun1" : L"q0_effect_sun1";
             }
             int x = 960+(i-1)*456;
             int y = 572;

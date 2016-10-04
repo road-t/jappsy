@@ -36,24 +36,40 @@ struct LoaderStatus {
 };
 
 class Loader : public CObject {
-private:
+public:
 	class File : public CObject {
 	public:
+		// Вызывается при формировании пост запроса
+		typedef char* (*onQueryCallback)(const Vector<CString&>* query);
+
 		CString path;
 		CString file;
 		CString uri;
 		CString ext;
 		CString key;
 		CString group;
+		bool cache;
 		
-		inline File(const CString& path, const CString& file, const CString& uri, const CString& ext, const CString& key, const CString& group) {
+		onQueryCallback onquery;
+		Vector<CString&>* query;
+		char* post;
+		int retry;
+		
+		inline File(const CString& path, const CString& file, const CString& uri, const CString& ext, const CString& key, const CString& group, bool cache) {
 			this->path = path;
 			this->file = file;
 			this->uri = uri;
 			this->ext = ext;
 			this->key = key;
 			this->group = group;
+			this->cache = cache;
+			this->onquery = NULL;
+			this->query = NULL;
+			this->post = NULL;
+			this->retry = 0;
 		}
+		
+		~File();
 	};
 	
 public:
@@ -68,15 +84,26 @@ public:
 	
 public:
 	// loader callback types
-	typedef void* (*onFileCallback)(const CString& url, void* object, void* userData);
+	
+	// Вызывается периодически при изменении статуса загрузки
 	typedef void* (*onStatusCallback)(const LoaderStatus& status, void* userData);
-	typedef void* (*onReadyCallback)(void* userData);
+	// Вызывается после загрузки ресурса
+	typedef void* (*onFileCallback)(const File& info, void* object, void* userData);
+	// Вызывается при ошибке загрузки ресурса
 	typedef void* (*onErrorCallback)(const CString& error, void* userData);
+	// Вызывается при устранении всех ошибок загрузки (после повторных попыток)
+	typedef void* (*onRetryCallback)(void* userData);
+	// Вызывается после загрузки всех ресурсов
+	typedef void* (*onReadyCallback)(void* userData);
+	// Вызывается при фатальной ошибке загрузки
+	typedef void* (*onFatalCallback)(const CString& error, void* userData);
 
-	onFileCallback onfile = NULL;
 	onStatusCallback onstatus = NULL;
-	onReadyCallback onready = NULL;
+	onFileCallback onfile = NULL;
 	onErrorCallback onerror = NULL;
+	onRetryCallback onretry = NULL;
+	onReadyCallback onready = NULL;
+	onFatalCallback onfatal = NULL;
 	
 	void* userData = NULL;
 
@@ -103,14 +130,16 @@ private:
 	
 	static bool onhttp_text(const CString& url, Stream* stream, void* userData);
 	static bool onhttp_data(const CString& url, Stream* stream, void* userData);
-	static void onhttp_error(const CString& url, const CString& error, void* userData);
+	static int onhttp_error(const CString& url, const CString& error, void* userData);
 	static bool onhttp_retry(const CString& url, void* userData);
+	static void onhttp_fatal(const CString& url, const CString& error, void* userData);
 	static void onhttp_release(void* userData);
 	
 	bool onText(const File* info, Stream* stream);
 	bool onData(const File* info, Stream* stream);
 	void onLoad(const File* info, void* object);
-	void onError(const File* info, const CString& error);
+	int onError(const File* info, const CString& error);
+	void onFatal(const File* info, const CString& error);
 	bool onRetry(const File* info);
 	
 private:
@@ -136,8 +165,9 @@ public:
 	void release();
 	~Loader();
 	
-	void setCallbacks(onFileCallback onfile, onStatusCallback onstatus, onReadyCallback onready, onErrorCallback onerror);
+	void setCallbacks(onStatusCallback onstatus, onFileCallback onfile, onErrorCallback onerror, onRetryCallback onretry, onReadyCallback onready, onFatalCallback onfatal);
 	void load(const char* jsonconfig) throw(const char*);
+	void query(const CString& path, const CString& message, File::onQueryCallback onquery);
 };
 
 #endif //JAPPSY_ULOADER_H

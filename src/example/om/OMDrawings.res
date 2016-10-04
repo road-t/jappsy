@@ -34,6 +34,13 @@ R"JAPPSYRAWSTRING(
     "btn_sun": [ "buttons3", [1176, 928], [0, 0, 0, 4] ],
     "btn_moon": [ "buttons3", [1384, 928], [1, 1, 1, 5] ],
 
+    "btn_donate0": [ "donate", [344, 776], 0 ],
+    "btn_donate1": [ "donate", [552, 776], 0 ],
+    "btn_donate2": [ "donate", [760, 776], 0 ],
+    "btn_donate3": [ "donate", [968, 776], 0 ],
+    "btn_donate4": [ "donate", [1176, 776], 0 ],
+    "btn_donate5": [ "donate", [1384, 776], 0 ],
+
     "dbl_sun": [ "sunmoon", [440, 606], 0 ],
     "dbl_moon": [ "sunmoon", [1480, 606], 1 ],
     "question": [ "question", [960, 606], 0 ],

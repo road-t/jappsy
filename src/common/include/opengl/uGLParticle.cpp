@@ -267,7 +267,7 @@ void GLParticleSystem::generate() throw(const char*) {
 	}
 }
 
-void GLParticleSystem::render(GLObject* object, const GLfloat time) {
+void GLParticleSystem::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	if (startFrame == 0)
 		return;
 	

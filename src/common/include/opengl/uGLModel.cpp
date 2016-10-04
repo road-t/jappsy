@@ -287,7 +287,7 @@ GLuint GLModel::insertMaterial(GLMaterial* material) throw(const char*) {
 	return materials.search(material);
 }
 
-void GLModel::render(GLObject* object, const GLfloat time) {
+void GLModel::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	GLScene* scene = object->scene;
 	GLModelShader* shader = context->shaderModel;
 	

@@ -56,6 +56,8 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	this->engine = engine;
 	this->width = width;
 	this->height = height;
+	this->sceneRatio = this->ratio = (GLfloat)width / (GLfloat)height;
+	this->ratio16fv.identity();
 	
 	frame = new GLFrame(engine, this, onframe, engine);
 	touchScreen = new GLTouchScreen(this, ontouch, engine);
@@ -72,6 +74,7 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	funcs = new GLFuncs(this);
 	
 	cameras->createCamera(L"gui")->size(width, height)->layer(0, 0);
+	cameras->createCamera(L"background")->size(width, height)->background();
 	lightsMaxCount = 6;
 	
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
@@ -146,6 +149,27 @@ GLRender::~GLRender() {
 	delete textures;
 }
 
+void GLRender::updateRatio(GLfloat width, GLfloat height) {
+	GLfloat ratio = width / height;
+	if (this->ratio != ratio) {
+		if (this->sceneRatio > ratio) { // Экран уже чем требуется
+			this->ratio16fv[0] = 1.0;
+			this->ratio16fv[5] = ratio / this->sceneRatio;
+			this->ratio16fv[12] = 0.0;
+			this->ratio16fv[13] = 0.0;
+			this->ratio16fv[10] = this->ratio16fv[15] = 1.0;
+		} else { // Экран шире чем требуется
+			this->ratio16fv[0] = this->sceneRatio / ratio;
+			this->ratio16fv[5] = 1.0;
+			this->ratio16fv[12] = 0.0;
+			this->ratio16fv[13] = 0.0;
+			this->ratio16fv[10] = this->ratio16fv[15] = 1.0;
+		}
+		this->ratio = ratio;
+		this->cameras->forceUpdate();
+	}
+}
+
 void GLRender::resetBlend() {
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -214,8 +238,8 @@ void GLRender::fillDepth() {
 	glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint) {
-	GLCamera* cam = this->cameras->gui;
+void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint, GLCamera* camera) {
+	GLCamera* cam = (camera != NULL) ? camera : this->cameras->gui;
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 	
@@ -271,8 +295,8 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 	}
 }
 
-void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key) {
-	GLCamera* cam = this->cameras->gui;
+void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLCamera* camera) {
+	GLCamera* cam = (camera != NULL) ? camera : this->cameras->gui;
 	cam->update();
 	GLfloat* projection16fv = cam->projection16fv.v;
 	
@@ -399,14 +423,14 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 	glDisable(GL_BLEND);
 }
 
-bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char*) {
+bool GLRender::createShaders(JSONObject* shaders, void* library) throw(const char*) {
 	{
-		if (shaders.root != NULL) {
-			int32_t count = shaders.root->count();
+		if ((shaders != NULL) && (shaders->root != NULL)) {
+			int32_t count = shaders->root->count();
 			if (count > 0) {
 				try {
-					const struct JsonNode** keys = shaders.root->keys();
-					const struct JsonNode** items = shaders.root->items();
+					const struct JsonNode** keys = shaders->root->keys();
+					const struct JsonNode** items = shaders->root->items();
 					for (int i = 0; i < count; i++) {
 						CString key = keys[i]->toString();
 						
@@ -440,7 +464,7 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 		GLShader* shader = items[i];
 		GLuint program = shader->program;
 		
-		if (key.equals(L"sprite")) {
+		if (key.equals(L"q0_sprite")) {
 			shaderSprite = new GLSpriteShader(shader);
 			shaderSprite->program = program;
 				
@@ -452,7 +476,7 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 			
 			shaderSprite->uLight = glGetUniformLocation(program, "uLight");
 			shaderSprite->uTime = glGetUniformLocation(program, "uTime");
-		} else if (key.equals(L"particle")) {
+		} else if (key.equals(L"q0_particle")) {
 			shaderParticle = new GLParticleShader(shader);
 			shaderParticle->program = program;
 			
@@ -469,7 +493,7 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 			shaderParticle->aVelocity = glGetAttribLocation(program, "aVelocity");
 			shaderParticle->aAcceleration = glGetAttribLocation(program, "aAcceleration");
 			shaderParticle->aTime = glGetAttribLocation(program, "aTime");
-		} else if (key.equals(L"model")) {
+		} else if (key.equals(L"q0_model") || key.equals(L"q1_model")) {
 			shaderModel = new GLModelShader(shader);
 			shaderModel->program = program;
 
@@ -488,14 +512,14 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 			shaderModel->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
 			shaderModel->aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
 			shaderModel->aVertexNormal = glGetAttribLocation(program, "aVertexNormal");
-		} else if (key.equals(L"square_fill")) {
+		} else if (key.equals(L"q0_square_fill")) {
 			shaderSquareFill = new GLSquareFillShader(shader);
 			shaderSquareFill->program = program;
 
 			shaderSquareFill->uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
 			shaderSquareFill->uColor = glGetUniformLocation(program, "uColor");
 			shaderSquareFill->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-		} else if (key.equals(L"square_stroke")) {
+		} else if (key.equals(L"q0_square_stroke")) {
 			shaderSquareStroke = new GLSquareStrokeShader(shader);
 			shaderSquareStroke->program = program;
 
@@ -504,7 +528,7 @@ bool GLRender::createShaders(JSONObject shaders, void* library) throw(const char
 			shaderSquareStroke->uBorder = glGetUniformLocation(program, "uBorder");
 			shaderSquareStroke->uColor = glGetUniformLocation(program, "uColor");
 			shaderSquareStroke->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-		} else if (key.equals(L"square_texture")) {
+		} else if (key.equals(L"q0_square_texture")) {
 			shaderSquareTexture = new GLSquareTextureShader(shader);
 			shaderSquareTexture->program = program;
 

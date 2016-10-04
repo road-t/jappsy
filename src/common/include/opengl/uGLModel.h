@@ -345,7 +345,7 @@ public:
 	
 	void parseJson(ModelJsonParser* parser) throw(const char*);
 	
-	void render(GLObject* object, const GLfloat time = NAN);
+	void render(GLObject* object, const GLfloat time = NAN, GLCamera* camera = NULL);
 	
 	bool checkReady();
 };

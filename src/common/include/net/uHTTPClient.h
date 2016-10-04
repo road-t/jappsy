@@ -25,11 +25,12 @@
 class HTTPClient : public CObject {
 public:
 	typedef bool (*onStreamCallback)(const CString& url, Stream* stream, void* userData);
-	typedef void (*onErrorCallback)(const CString& url, const CString& error, void* userData);
+	typedef int (*onErrorCallback)(const CString& url, const CString& error, void* userData);
 	typedef bool (*onRetryCallback)(const CString& url, void* userData);
+	typedef void (*onFatalCallback)(const CString& url, const CString& error, void* userData);
 	typedef void (*onReleaseCallback)(void* userData);
 	
-	static void Request(const CString& url, bool threaded, int retry, int timeout, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onReleaseCallback onrelease) throw(const char*);
+	static void Request(const CString& url, char* post, bool threaded, int retry, int timeout, bool cache, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onFatalCallback onfatal, onReleaseCallback onrelease) throw(const char*);
 };
 
 #endif //JAPPSY_UHTTPCLIENT_H

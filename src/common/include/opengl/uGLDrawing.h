@@ -23,6 +23,7 @@
 #include <opengl/uGLAnimation.h>
 #include <opengl/uGLPaint.h>
 #include <opengl/uGLSprite.h>
+#include <opengl/uGLCamera.h>
 
 class GLRender;
 class GLEngine;
@@ -52,7 +53,7 @@ public:
 	
 	void setPaint(const GLPaint& paint) throw(const char*);
 	
-	void render(GLObject* object = NULL, const GLfloat time = NAN);
+	void render(GLObject* object = NULL, const GLfloat time = NAN, GLCamera* camera = NULL);
 };
 
 class GLDrawings : public CObject {
@@ -66,7 +67,7 @@ public:
 	
 	GLDrawing* get(const CString& key) throw(const char*);
 	GLDrawing* createDrawing(const CString& key, const CString& spriteKey, const Vec2& position, const Vector<GLshort>* frameIndexes = NULL, const GLPaint* paint = NULL) throw(const char*);
-	void renderDrawing(const CString& key, GLfloat time = NAN);
+	void renderDrawing(const CString& key, GLfloat time = NAN, GLCamera* camera = NULL);
 };
 
 #endif //JAPPSY_UGLDRAWING_H

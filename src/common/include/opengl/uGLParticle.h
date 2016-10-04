@@ -69,7 +69,7 @@ public:
 	GLParticle* createSubFlare(uint64_t startFrame, const Vec3& position, const Vec3& velocity) throw(const char*);
 	
 	void generate() throw(const char*);
-	void render(GLObject* object, const GLfloat time = NAN);
+	void render(GLObject* object, const GLfloat time = NAN, GLCamera* camera = NULL);
 };
 
 class GLParticles : public CObject {

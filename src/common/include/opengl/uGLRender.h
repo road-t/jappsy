@@ -155,6 +155,9 @@ public:
 	
 	uint32_t width;
 	uint32_t height;
+	GLfloat sceneRatio;
+	GLfloat ratio;
+	Mat4 ratio16fv;
 	
 	GLFrame* frame = NULL;
 	GLTouchScreen* touchScreen = NULL;
@@ -196,6 +199,8 @@ public:
 	GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch);
 	~GLRender();
 	
+	void updateRatio(GLfloat width, GLfloat height);
+	
 	void resetBlend();
 	void activeTexture(GLint index);
 	void cleanup(GLint index);
@@ -208,12 +213,12 @@ public:
 	void fillAlpha(uint8_t alpha);
 	void fillDepth();
 	
-	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint);
-	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key);
+	void drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GLPaint& paint, GLCamera* camera = NULL);
+	void drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLCamera* camera = NULL);
 	void drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
 	void drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime);
 	
-	bool createShaders(JSONObject shaders, void* library = NULL) throw(const char*);
+	bool createShaders(JSONObject* shaders = NULL, void* library = NULL) throw(const char*);
 	bool createModels(JSONObject models, void* library = NULL) throw(const char*);
 	bool createSprites(JSONObject sprites) throw(const char*);
 	bool createDrawings(JSONObject drawings) throw(const char*);

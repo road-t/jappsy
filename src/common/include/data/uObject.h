@@ -26,7 +26,7 @@ class CString;
 class CObject {
 protected:
 	volatile void* m_thread = 0;
-	volatile bool m_lock = false;
+	volatile jlock m_lock = 0;
 	volatile int32_t m_lockCount = 0;
 	
 	inline void spinLock() const { AtomicLock((volatile int32_t*)&m_lock); }

@@ -1,0 +1,37 @@
+Response (cache)
+
+GET /jappsy/modules/opengl/GLObject.js HTTP/1.1
+Host: om.jappsy.com
+User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://om.jappsy.com/?token=e994a237491a85ff72b9f737bbf47047cfbc6dbb0897ea1eea5e75338a4b13c3&locale=ru&sessid=b38a2651-c515-a145-b46f-a41388b39fc4
+X-Compress: 1
+Proxy-Authorization: 737ec3e480baf1fbb289cb79512b1297bbe7d4b991fec0a2d4c8ac58ed7dac1d
+Connection: keep-alive
+If-Modified-Since: Sat, 17 Sep 2016 18:11:19 GMT
+If-None-Match: "57dd8747-a5f"
+
+Response (nocache)
+
+HTTP/1.1 200 OK
+Date: Wed, 05 Oct 2016 05:27:33 GMT
+Content-Type: application/json;
+Transfer-Encoding: chunked
+Connection: keep-alive
+Expires: Mon, 26 Jul 1997 05:00:00 GMT
+Last-Modified: Wed, 05 Oct 2016 05:27:32 GMT
+Cache-Control: public, max-age=0
+Pragma: no-cache
+Server: Jappsy
+
+Request (check cache)
+
+HTTP/1.1 304 Not Modified
+Date: Wed, 05 Oct 2016 05:27:32 GMT
+Last-Modified: Sat, 17 Sep 2016 18:11:19 GMT
+Connection: keep-alive
+Etag: "57dd8747-a5f"
+Server: Jappsy
+Cache-Control: public, max-age=0

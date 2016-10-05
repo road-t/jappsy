@@ -18,6 +18,7 @@
 #include <core/uMemory.h>
 #include <data/uString.h>
 #include <cipher/uCipher.h>
+#include <core/uSystem.h>
 
 Stream::Stream(const wchar_t* data) throw(const char*) {
 	if (data != NULL) {
@@ -29,6 +30,7 @@ Stream::Stream(const wchar_t* data) throw(const char*) {
 			wcs_toutf8(data, (char*)m_buffer, size);
 			m_allocated = true;
 			m_size = size - 1;
+			m_modificationDate = currentTimeMillis();
 		}
 	}
 }
@@ -41,6 +43,7 @@ Stream::Stream(const char* data, bool autorelease) {
 			m_buffer = (uint8_t*)data;
 			m_size = size - 1;
 			m_allocated = autorelease;
+			m_modificationDate = currentTimeMillis();
 		}
 	}
 }
@@ -50,6 +53,7 @@ Stream::Stream(const void* data, uint32_t length, bool autorelease) {
 		m_buffer = (uint8_t*)data;
 		m_size = length;
 		m_allocated = autorelease;
+		m_modificationDate = currentTimeMillis();
 	}
 }
 

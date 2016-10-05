@@ -215,12 +215,21 @@ void Cache::addData(const CString& path, const CString& file, Stream* data) {
 #if defined(__IOS__)
 	AtomicLock(&m_DiskCacheLock);
 	
-	NSString *fileDir = [(NSString*)m_dataCacheDir stringByAppendingPathComponent:(NSString*)path];
+	NSString* fileDir = [(NSString*)m_dataCacheDir stringByAppendingPathComponent:(NSString*)path];
 	mkdirs(fileDir);
-	NSString *filePath = [fileDir stringByAppendingPathComponent:(NSString*)file];
+	NSString* filePath = [fileDir stringByAppendingPathComponent:(NSString*)file];
 	
 	NSData* fileData = [[NSData alloc] initWithBytes:data->getBuffer() length:data->getSize()];
-	[fileData writeToFile:filePath atomically:YES];
+	
+	uint64_t modificationDate = data->getModificationDate();
+	if (modificationDate == 0) {
+		[fileData writeToFile:filePath atomically:YES];
+	} else {
+		NSDate* date = [[NSDate alloc] initWithTimeIntervalSince1970:(NSTimeInterval)((double)(modificationDate)/1000.0)];
+		NSDictionary* attr = [NSDictionary dictionaryWithObjectsAndKeys: date, NSFileModificationDate, NULL];
+		NSFileManager* manager = [NSFileManager defaultManager];
+		[manager createFileAtPath:filePath contents:fileData attributes:attr];
+	}
 	
 	AtomicUnlock(&m_DiskCacheLock);
 #elif defined(__JNI__)
@@ -234,13 +243,23 @@ Stream* Cache::getData(const CString& path, const CString& file) {
 #if defined(__IOS__)
 	AtomicLock(&m_DiskCacheLock);
 	
-	NSString *filePath = [[(NSString*)m_dataCacheDir stringByAppendingPathComponent:(NSString*)path] stringByAppendingPathComponent:(NSString*)file];
-	if ([[NSFileManager defaultManager] fileExistsAtPath:filePath]) {
-		NSData* fileData = [[NSData alloc] initWithContentsOfFile:filePath];
+	NSString* filePath = [[(NSString*)m_dataCacheDir stringByAppendingPathComponent:(NSString*)path] stringByAppendingPathComponent:(NSString*)file];
+	NSFileManager* manager = [NSFileManager defaultManager];
+	if ([manager fileExistsAtPath:filePath]) {
+		//NSData* fileData = [[NSData alloc] initWithContentsOfFile:filePath];
+		NSData* fileData = [manager contentsAtPath:filePath];
+
+		NSError* error = nil;
+		NSDictionary* attr = [manager attributesOfItemAtPath:filePath error:&error];
+		NSDate* date = [attr fileModificationDate];
 		
 		AtomicUnlock(&m_DiskCacheLock);
 		
-		return NSDataToStream(fileData);
+		Stream* stream = NSDataToStream(fileData);
+		if (stream != NULL) {
+			stream->setModificationDate((uint64_t)floor([date timeIntervalSince1970] * 1000));
+		}
+		return stream;
 	}
 
 	AtomicUnlock(&m_DiskCacheLock);

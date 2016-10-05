@@ -534,7 +534,8 @@ void OMGame::onFrame(GLRender* context) {
 }
 
 void OMGame::onResize(int width, int height) {
-    context->touchScreen->update(1920, 1080); // independent size
+//    context->touchScreen->update(1920, 1080); // independent size
+    context->touchScreen->update(width, height);
 }
 
 void OMGame::onTouch(const CString& event) {

@@ -43,28 +43,17 @@ mat4 getLight(int index) {
 	return uLights[0];
 }
 
-float ndot(vec3 a, vec3 b) {
-	return dot(a, b);
-	//vec3 na = normalize(a);
-	//vec3 nb = normalize(b);
-	//return (na.x * nb.x) + (na.y * nb.y) + (na.z * nb.z);// dot(v1, v2) / 3.1416;
-}
-
-vec3 nref(vec3 d, vec3 n) {
-	return normalize(reflect(d, n));
-	//return d - (2. * ndot(d, n) * n) / ndot(n, n);
-}
-
 mat3 calculateLight(mat4 mLight) {
 	mat3 result = mat3(0.);
 	
 	vec3 normal = vNormal;
 	
 	vec3 vLight = vPosition - mLight[0].xyz;
+/*
 	if (mLight[2].w == 0.) {
 		vec3 nLight = normalize(vLight);
 		
-		float angle = ndot(normal, normalize(-nLight));
+		float angle = dot(normal, normalize(-nLight));
 		// Double-Side ???
 		//if (angle < 0.) {
 		//	angle = -angle;
@@ -83,6 +72,7 @@ mat3 calculateLight(mat4 mLight) {
 			}
 		}
 	} else if (mLight[2].w == 1.) {
+ */
 		vec3 nLight = normalize(vLight);
 		
 		float angle = dot(normal, normalize(-nLight));
@@ -99,10 +89,11 @@ mat3 calculateLight(mat4 mLight) {
 				result[2] = pow(max(dot(normalize(reflect(nLight, normal)), vec3(0.,0.,1.)), 0.) * falloff, uColors[4].r) * uColors[4].g * mLight[2].rgb;
 			}
 		}
+/*
 	} else if (mLight[2].w == 2.) {
 		vec3 nLight = normalize(mLight[1].xyz - mLight[0].xyz);
 		
-		float angle = ndot(normal, normalize(-nLight));
+		float angle = dot(normal, normalize(-nLight));
 		if (angle > 0.) {
 			float falloff = 1.;
 			if (mLight[0].w > 0.) {
@@ -118,6 +109,7 @@ mat3 calculateLight(mat4 mLight) {
 			}
 		}
 	}
+ */
 	
 	return result;
 }
@@ -134,6 +126,7 @@ void main(void) {
 	vec3 specularLight = vec3(0.);
 	
 	// Calculate Lights
+/*
 	for (int i = 0; i < 2; i++) {
 		if (i < uLightsCount) {
 			mat3 rLight = calculateLight(getLight(i));
@@ -142,6 +135,17 @@ void main(void) {
 			specularLight = specularLight + rLight[2];
 		}
 	}
+ */
+	
+	mat3 rLight = calculateLight(uLights[0]);
+	diffuse = diffuse + rLight[0][0];
+	diffuseLight = diffuseLight + rLight[1];
+	specularLight = specularLight + rLight[2];
+
+	rLight = calculateLight(uLights[1]);
+	diffuse = diffuse + rLight[0][0];
+	diffuseLight = diffuseLight + rLight[1];
+	specularLight = specularLight + rLight[2];
 
 	vColors[0] = uColors[1];
 	vColors[1] = uColors[2];

@@ -64,7 +64,7 @@ GLTouchScreen::~GLTouchScreen() {
 }
 
 void GLTouchScreen::update(float width, float height) {
-	GLfloat dimension = height < width ? height : width;
+	GLfloat dimension = context->height < context->width ? context->height : context->width;
 	recordDistance = dimension / 20.0f;
 	minimalDistance = dimension / 6.0f;
 	swipeDistance = dimension * 3.0f / 4.0f;
@@ -209,6 +209,14 @@ void GLTouchScreen::analyze(float x, float y) {
 	x = roundf(x * width / context->frame->width);
 	y = roundf(y * height / context->frame->height);
 	
+	if (context->sceneRatio > context->ratio) { // Экран уже чем треубется
+		x = roundf(x * context->width / width);
+		y = roundf((((y / height) - 0.5) * context->sceneRatio / context->ratio + 0.5) * context->height);
+	} else {
+		x = roundf((((x / width) - 0.5) * context->ratio / context->sceneRatio + 0.5) * context->width);
+		y = roundf(y * context->height / height);
+	}
+
 	recordTrack(x, y, true);
 	
 	if (touchTimeout != 0) {
@@ -441,7 +449,7 @@ void GLTouchScreen::recordTrack(float x, float y, bool stop) {
 	bool processed = false;
 	int32_t count = trackList.count();
 	GLTouchObject** items = trackList.items();
-	for (int i = count - 1; i >= 0; i--) {
+	for (int i = 0; i < count; i++) {
 		GLTouchObject* track = items[i];
 		int32_t idx = trackingList.search(track);
 		CString name;
@@ -490,6 +498,14 @@ void GLTouchScreen::record(float x, float y) {
 	x = roundf(x * width / context->frame->width);
 	y = roundf(y * height / context->frame->height);
 	
+	if (context->sceneRatio > context->ratio) { // Экран уже чем треубется
+		x = roundf(x * context->width / width);
+		y = roundf((((y / height) - 0.5) * context->sceneRatio / context->ratio + 0.5) * context->height);
+	} else {
+		x = roundf((((x / width) - 0.5) * context->ratio / context->sceneRatio + 0.5) * context->width);
+		y = roundf(y * context->height / height);
+	}
+
 	recordTrack(x, y, false);
 	
 	GLfloat dist = NAN;

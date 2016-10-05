@@ -26,12 +26,25 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+	
+	[self setNeedsStatusBarAppearanceUpdate];
+	self.view.backgroundColor = [UIColor blackColor];
 }
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+	return UIStatusBarStyleLightContent;
+}
+
+/*
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+	self.view.backgroundColor = [UIColor blackColor];
+}
+ */
 
 /*
 #pragma mark - Navigation

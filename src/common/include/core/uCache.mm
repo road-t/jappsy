@@ -231,6 +231,8 @@ void Cache::addData(const CString& path, const CString& file, Stream* data) {
 		[manager createFileAtPath:filePath contents:fileData attributes:attr];
 	}
 	
+	data->setSourcePath(filePath);
+	
 	AtomicUnlock(&m_DiskCacheLock);
 #elif defined(__JNI__)
 	#warning TODO
@@ -258,6 +260,7 @@ Stream* Cache::getData(const CString& path, const CString& file) {
 		Stream* stream = NSDataToStream(fileData);
 		if (stream != NULL) {
 			stream->setModificationDate((uint64_t)floor([date timeIntervalSince1970] * 1000));
+			stream->setSourcePath(filePath);
 		}
 		return stream;
 	}

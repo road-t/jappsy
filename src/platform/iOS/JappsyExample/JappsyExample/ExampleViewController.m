@@ -16,19 +16,155 @@
 
 #import "ExampleViewController.h"
 #import "ExampleJappsyView.h"
+#import "AppDelegate.h"
 
 @interface ExampleViewController ()
 
 @end
 
+NSArray* lastConstraintList = NULL;
+NSMutableArray* potrtaitConstraintList = NULL;
+NSMutableArray* landscapeConstraintList = NULL;
+
+NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutPriority priority) {
+	constraint.priority = priority;
+	return constraint;
+}
+
 @implementation ExampleViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
 	
+	// Root View
+	UIView *contentView = [[UIView alloc] init];
+	contentView.backgroundColor = [UIColor blackColor];
+	[contentView setTranslatesAutoresizingMaskIntoConstraints:NO];
+	self.view = contentView;
+	
+	// Top View
+	UIView *topView = [[UIView alloc] init];
+	topView.backgroundColor = [UIColor redColor];
+	[topView setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[self.view addSubview:topView];
+	
+	// Game View
+	if (omView == NULL) {
+		omView = [[OMView alloc] initWithFrame:CGRectMake(0,0,100,100)];
+		/*
+		if ([[UIDevice currentDevice].systemVersion floatValue] >= 9.0f) {
+			omView = [[OMView alloc] initWithFrame:[UIScreen mainScreen].bounds];
+		} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 70000
+			omView = [[OMView alloc] initWithFrame:[UIScreen mainScreen].applicationFrame];
+#endif
+		}
+		 */
+		
+		[omView setTranslatesAutoresizingMaskIntoConstraints:NO];
+		omView.backgroundColor = [UIColor blackColor];
+	}
+	[self.view addSubview:omView];
+/*
+	[self.view addConstraint:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[self.view addConstraint:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0.0]];
+	[self.view addConstraint:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+	[self.view addConstraint:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
+*/
+	
+	// Bottom View
+	UIView *bottomView = [[UIView alloc] init];
+	bottomView.backgroundColor = [UIColor blueColor];
+	[bottomView setTranslatesAutoresizingMaskIntoConstraints:NO];
+	[self.view addSubview:bottomView];
+	
+	// Constraints
+	potrtaitConstraintList = [[NSMutableArray alloc] init];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:100.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:topView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:omView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0]];
+
+	[potrtaitConstraintList addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:omView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0], 999)];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+	[potrtaitConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
+	
+	landscapeConstraintList = [[NSMutableArray alloc] init];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
+
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:omView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:100.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:topView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:omView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:300.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+	[landscapeConstraintList addObject:[NSLayoutConstraint constraintWithItem:bottomView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+	
+	UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
+	if (UIInterfaceOrientationIsPortrait(interfaceOrientation)) {
+		lastConstraintList = potrtaitConstraintList;
+	} else {
+		lastConstraintList = landscapeConstraintList;
+	}
+	[self.view addConstraints:lastConstraintList];
+
+	// Disable Animation Rotation and Keyboard
+	//[UIView setAnimationsEnabled:NO];
+	
+	// Keep Screen On
+	[[UIApplication sharedApplication] setIdleTimerDisabled:YES];
+	
+	// Black Background With White Status Bar
 	[self setNeedsStatusBarAppearanceUpdate];
 	self.view.backgroundColor = [UIColor blackColor];
+	
+	jappsyMixerInit();
+}
+
+- (void)awakeFromNib {
+	[super awakeFromNib];
+	
+	[[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
+}
+
+- (void)orientationChanged:(NSNotification *)notification {
+	UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
+	
+	if (deviceOrientation == UIDeviceOrientationFaceDown) {
+		[omView onPause];
+	} else if (deviceOrientation == UIDeviceOrientationFaceUp) {
+		[omView onResume];
+	} else {
+		if (deviceOrientation != UIDeviceOrientationUnknown) {
+			NSArray* nextConstraintList = NULL;
+			if (deviceOrientation != UIDeviceOrientationPortrait) {
+				nextConstraintList = landscapeConstraintList;
+			} else {
+				nextConstraintList = potrtaitConstraintList;
+			}
+			if (nextConstraintList != lastConstraintList) {
+				[self.view removeConstraints:lastConstraintList];
+				[self.view addConstraints:nextConstraintList];
+				lastConstraintList = nextConstraintList;
+			}
+		}
+	}
+}
+
+- (void)dealloc {
+	jappsyMixerQuit();
 }
 
 - (void)didReceiveMemoryWarning {

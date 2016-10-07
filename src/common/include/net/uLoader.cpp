@@ -22,6 +22,10 @@
 #include <opengl/uGLRender.h>
 #include <opengl/uGLReader.h>
 
+#ifdef __IOS__
+	#include <openal/uMixer.h>
+#endif
+
 Loader::File::~File() {
 	if (this->query != NULL) {
 		delete this->query;
@@ -156,12 +160,8 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
 					(info->ext.compareToIgnoreCase(L"ogg") == 0)
 				) {
-					// TODO: MP3 OGG Loader
-					// Fake OK
-					AtomicIncrement(&(status.count));
-					AtomicDecrement(&(status.left));
-					AtomicSet(&(status.update), true);
-					releaseInfo = true;
+					Info* user = new Info(this, info);
+					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
@@ -436,11 +436,65 @@ bool Loader::onText(const File* info, Stream* stream) {
 	return true;
 }
 
+struct PrepareAudioThread {
+	void* audio;
+	uint32_t size;
+	bool ready;
+	
+	GLSoundMixer* mixer;
+	const Loader::File* info;
+};
+
+void onAudioReadyCallback(void* audioHandle, uint32_t bufferSize, uint64_t audioSize, void* userData) {
+	PrepareAudioThread* thread = (PrepareAudioThread*)userData;
+	
+	thread->audio = audioHandle;
+	thread->size = bufferSize;
+	thread->ready = true;
+}
+
+void onAudioErrorCallback(void* userData) {
+	PrepareAudioThread* thread = (PrepareAudioThread*)userData;
+
+	thread->ready = false;
+}
+
+void* onCreateSoundCallback(void* userData) {
+	PrepareAudioThread* thread = (PrepareAudioThread*)userData;
+
+	try {
+		GLSound* sound = thread->mixer->createSound(thread->info->key, thread->audio, thread->size);
+		return sound;
+	} catch (...) {
+		destroyAudio(thread->audio);
+		throw;
+	}
+}
+
 bool Loader::onData(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
 	
-	if (info->ext.compareToIgnoreCase(L"jimg") == 0) {
+	if ((info->ext.compareToIgnoreCase(L"mp3") == 0) ||
+		(info->ext.compareToIgnoreCase(L"ogg") == 0)) {
+		try {
+#if defined(__IOS__)
+			PrepareAudioThread thread;
+			if (prepareAudio((NSString*)stream->getSourcePath(), &thread, false, onAudioReadyCallback, onAudioErrorCallback) && (thread.ready)) {
+				thread.mixer = context->mixer;
+				thread.info = info;
+				GLSound* sound = (GLSound*)MainThreadSync(onCreateSoundCallback, &thread);
+				onLoad(info, sound);
+			} else {
+				return false;
+			}
+#else if defined(__JNI__)
+	#error PrepareAudio
+#endif
+		} catch (...) {
+			return false;
+		}
+	} else if (info->ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
 			GLTexture* texture = GLReader::createTexture(context, info->key, stream);
 			onLoad(info, texture);

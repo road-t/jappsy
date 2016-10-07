@@ -12,6 +12,7 @@
 		C34FD9B01D5BBB7F0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */; };
 		C34FD9D31D5BC9830022FF71 /* OMView.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9D11D5BC9830022FF71 /* OMView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9D41D5BC9830022FF71 /* OMView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9D21D5BC9830022FF71 /* OMView.mm */; };
+		C35025941DA65B2000EFD3B0 /* OMHeaderView.h in Headers */ = {isa = PBXBuildFile; fileRef = C35025911DA65A6200EFD3B0 /* OMHeaderView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C3513FC81D762E7100DC6362 /* OMBars.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3513FBD1D762E7100DC6362 /* OMBars.cpp */; };
 		C3513FC91D762E7100DC6362 /* OMBars.h in Headers */ = {isa = PBXBuildFile; fileRef = C3513FBE1D762E7100DC6362 /* OMBars.h */; };
 		C3513FCC1D762E7100DC6362 /* OMGame.h in Headers */ = {isa = PBXBuildFile; fileRef = C3513FC11D762E7100DC6362 /* OMGame.h */; };
@@ -28,6 +29,8 @@
 		C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
 		C34FD9D11D5BC9830022FF71 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMView.h; sourceTree = "<group>"; };
 		C34FD9D21D5BC9830022FF71 /* OMView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMView.mm; sourceTree = "<group>"; };
+		C35025911DA65A6200EFD3B0 /* OMHeaderView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OMHeaderView.h; sourceTree = "<group>"; };
+		C35025921DA65A8100EFD3B0 /* OMHeaderView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMHeaderView.mm; sourceTree = "<group>"; };
 		C3513FBD1D762E7100DC6362 /* OMBars.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OMBars.cpp; sourceTree = "<group>"; };
 		C3513FBE1D762E7100DC6362 /* OMBars.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMBars.h; sourceTree = "<group>"; };
 		C3513FBF1D762E7100DC6362 /* OMDrawings.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMDrawings.res; sourceTree = "<group>"; };
@@ -80,6 +83,8 @@
 				C34FD9A91D5BBB220022FF71 /* Info.plist */,
 				C34FD9D11D5BC9830022FF71 /* OMView.h */,
 				C34FD9D21D5BC9830022FF71 /* OMView.mm */,
+				C35025911DA65A6200EFD3B0 /* OMHeaderView.h */,
+				C35025921DA65A8100EFD3B0 /* OMHeaderView.mm */,
 			);
 			path = libGameOM;
 			sourceTree = "<group>";
@@ -110,9 +115,10 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C3513FCC1D762E7100DC6362 /* OMGame.h in Headers */,
-				C3513FC91D762E7100DC6362 /* OMBars.h in Headers */,
 				C34FD9D31D5BC9830022FF71 /* OMView.h in Headers */,
+				C3513FCC1D762E7100DC6362 /* OMGame.h in Headers */,
+				C35025941DA65B2000EFD3B0 /* OMHeaderView.h in Headers */,
+				C3513FC91D762E7100DC6362 /* OMBars.h in Headers */,
 				C34FD9A81D5BBB220022FF71 /* libGameOM.h in Headers */,
 				C3513FD01D762E7100DC6362 /* OMMath.h in Headers */,
 			);

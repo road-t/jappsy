@@ -72,6 +72,7 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	particles = new GLParticles(this);
 	drawings = new GLDrawings(this);
 	funcs = new GLFuncs(this);
+	mixer = new GLSoundMixer(this);
 	
 	cameras->createCamera(L"gui")->size(width, height)->layer(0, 0);
 	cameras->createCamera(L"background")->size(width, height)->background();
@@ -138,6 +139,7 @@ GLRender::~GLRender() {
 		delete shaderSquareTexture;
 	}
 
+	delete mixer;
 	delete funcs;
 	delete drawings;
 	delete particles;

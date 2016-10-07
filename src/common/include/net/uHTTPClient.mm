@@ -291,23 +291,23 @@ void* HttpSync(void* threadData) {
 					if (data != nil) {
 						try {
 							Stream* stream = NSDataToStream(data);
-							bool result = http->onstream(http->url, stream, http->userData);
-							if (result) {
-								NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
-								NSString* modified = [headers valueForKey:@"Last-Modified"];
+
+							NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+							NSString* modified = [headers valueForKey:@"Last-Modified"];
+							if (modified == nil) {
+								modified = [headers valueForKey:@"Expires"];
 								if (modified == nil) {
-									modified = [headers valueForKey:@"Expires"];
-									if (modified == nil) {
-										modified = [headers valueForKey:@"Date"];
-									}
+									modified = [headers valueForKey:@"Date"];
 								}
-								
-								if (modified != nil) {
-									stream->setModificationDate(RFC2616toUTC(modified));
-								}
-								
-								HttpSaveCache(stream, http->userData);
 							}
+							
+							if (modified != nil) {
+								stream->setModificationDate(RFC2616toUTC(modified));
+							}
+							
+							HttpSaveCache(stream, http->userData);
+
+							bool result = http->onstream(http->url, stream, http->userData);
 							delete stream;
 							if (result) {
 								break;
@@ -433,23 +433,23 @@ void* HttpAsync(void* threadData) {
 							if (data != nil) {
 								try {
 									Stream* stream = NSDataToStream(data);
-									bool result = http->onstream(http->url, stream, http->userData);
-									if (result) {
-										NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
-										NSString* modified = [headers valueForKey:@"Last-Modified"];
-										if (modified == nil) {
-											modified = [headers valueForKey:@"Expires"];
-											if (modified == nil) {
-												modified = [headers valueForKey:@"Date"];
-											}
-										}
 
-										if (modified != nil) {
-											stream->setModificationDate(RFC2616toUTC(modified));
+									NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+									NSString* modified = [headers valueForKey:@"Last-Modified"];
+									if (modified == nil) {
+										modified = [headers valueForKey:@"Expires"];
+										if (modified == nil) {
+											modified = [headers valueForKey:@"Date"];
 										}
-										
-										HttpSaveCache(stream, http->userData);
 									}
+									
+									if (modified != nil) {
+										stream->setModificationDate(RFC2616toUTC(modified));
+									}
+									
+									HttpSaveCache(stream, http->userData);
+
+									bool result = http->onstream(http->url, stream, http->userData);
 									delete stream;
 									if (result) {
 										break;

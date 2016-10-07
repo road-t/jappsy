@@ -27,5 +27,10 @@ FOUNDATION_EXPORT const unsigned char libJappsyEngineVersionString[];
 FOUNDATION_EXPORT void jappsyInit(const char* cacheDir);
 FOUNDATION_EXPORT void jappsyQuit();
 
+FOUNDATION_EXPORT void jappsyMixerInit();
+FOUNDATION_EXPORT void jappsyMixerQuit();
+FOUNDATION_EXPORT void jappsyMixerPause();
+FOUNDATION_EXPORT void jappsyMixerResume();
+
 #import <libJappsyEngine/JappsyView.h>
 

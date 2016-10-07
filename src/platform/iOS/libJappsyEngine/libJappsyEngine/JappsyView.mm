@@ -47,6 +47,58 @@
     return [CAEAGLLayer class];
 }
 
+- (instancetype) init {
+	if ((self = [super init])) {
+		CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
+		
+		eaglLayer.opaque = TRUE;
+		eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+										[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+										kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+		
+		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+		
+		_renderer = NULL;
+		_running = FALSE;
+		_stopping = FALSE;
+		_interval = 1;
+		_displayLink = nil;
+		
+		// Touch Init
+		[self setMultipleTouchEnabled:YES];
+		[self setExclusiveTouch:YES];
+		self.activeTouches = [[NSMutableArray alloc] init];
+	}
+	
+	return self;
+}
+
+- (instancetype) initWithFrame:(CGRect)frame {
+	if ((self = [super initWithFrame:frame])) {
+		CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
+		
+		eaglLayer.opaque = TRUE;
+		eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
+										[NSNumber numberWithBool:FALSE], kEAGLDrawablePropertyRetainedBacking,
+										kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, nil];
+		
+		_context = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
+		
+		_renderer = NULL;
+		_running = FALSE;
+		_stopping = FALSE;
+		_interval = 1;
+		_displayLink = nil;
+		
+		// Touch Init
+		[self setMultipleTouchEnabled:YES];
+		[self setExclusiveTouch:YES];
+		self.activeTouches = [[NSMutableArray alloc] init];
+	}
+	
+	return self;
+}
+
 - (instancetype) initWithCoder:(NSCoder*)coder {
     if ((self = [super initWithCoder:coder])) {
         CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;

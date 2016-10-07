@@ -36,6 +36,7 @@
 #include <opengl/uGLParticle.h>
 #include <opengl/uGLDrawing.h>
 #include <opengl/uGLFunc.h>
+#include <opengl/uGLSound.h>
 
 class GLSpriteShader : public CObject {
 public:
@@ -176,6 +177,7 @@ public:
 	GLParticles* particles = NULL;
 	GLDrawings* drawings = NULL;
 	GLFuncs* funcs = NULL;
+	GLSoundMixer* mixer = NULL;
 	
 	uint32_t lightsMaxCount = 6;
 	

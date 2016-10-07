@@ -652,7 +652,8 @@ public:
 		
 		if (count == 0) {
 			for (int i = 0; i < m_count; i++) {
-				delete m_items[i];
+				if (m_items[i] != NULL)
+					delete m_items[i];
 			}
 			memFree(m_items);
 			m_items = NULL;
@@ -763,6 +764,8 @@ public:
 			delete m_items[index];
 			if ((m_count > 0) && (index < (m_count - 1))) {
 				memmove(m_items + index, m_items + index + 1, (m_count - index - 1) * sizeof(Type*));
+			} else if (m_count == 1) {
+				m_items[index] = NULL;
 			}
 			resize(m_count - 1);
 			return result;

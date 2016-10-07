@@ -18,6 +18,10 @@
 #include <core/uMemory.h>
 #include <core/uSystem.h>
 
+#ifdef __IOS__
+	#include <openal/uMixer.h>
+#endif
+
 CString* jappsyCacheDir = NULL;
 
 #ifdef __cplusplus
@@ -42,6 +46,30 @@ void jappsyQuit() {
     mmQuit();
 
     LOG("Jappsy Quit");
+}
+
+void jappsyMixerInit() {
+#ifdef __IOS__
+	initAudioPlayer();
+#endif
+}
+	
+void jappsyMixerQuit() {
+#ifdef __IOS__
+	shutdownAudioPlayer();
+#endif
+}
+	
+void jappsyMixerPause() {
+#ifdef __IOS__
+	pauseAudioPlayer();
+#endif
+}
+	
+void jappsyMixerResume() {
+#ifdef __IOS__
+	resumeAudioPlayer();
+#endif
 }
 
 #ifdef __cplusplus

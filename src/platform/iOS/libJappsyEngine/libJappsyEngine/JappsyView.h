@@ -22,6 +22,10 @@
 @property (nonatomic) NSInteger interval;
 @property (readonly, nonatomic, getter=isRunning) BOOL stopping;
 
+- (instancetype) init;
+- (instancetype) initWithFrame:(CGRect)frame;
+- (instancetype) initWithCoder:(NSCoder *)decoder;
+
 - (BOOL) onStart;
 - (BOOL) onStop;
 - (void) onResume;

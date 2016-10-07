@@ -123,7 +123,7 @@ public:
     ~OMGame();
     
     int32_t mantra = 0;
-    void* activeMantra = NULL;
+    GLSound* activeMantra = NULL;
     
     void playMantra();
     

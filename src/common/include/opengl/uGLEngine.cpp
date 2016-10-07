@@ -19,54 +19,108 @@
 
 void onFrameCallback(GLRender* context, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onFrame(context);
+	try {
+		engine->onFrame(context);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onFrame): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onFrame)");
+	}
 }
 
 void* onTouchCallback(const CString& event, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onTouch(event);
+	try {
+		engine->onTouch(event);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onTouch): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onTouch)");
+	}
 	return NULL;
 }
 
 void* onFileCallback(const Loader::File& info, void* object, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onFile(info, object);
+	try {
+		engine->onFile(info, object);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onFile): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onFile)");
+	}
 	return NULL;
 }
 
 void* onStatusCallback(const LoaderStatus& status, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onStatus(status);
+	try {
+		engine->onStatus(status);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onStatus): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onStatus)");
+	}
 	return NULL;
 }
 
 void* onPreloadCallback(void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onPreload();
+	try {
+		engine->onPreload();
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onPreload): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onPreload)");
+	}
 	return NULL;
 }
 
 void* onLoadCallback(void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onLoad();
+	try {
+		engine->onLoad();
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onLoad): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onLoad)");
+	}
 	return NULL;
 }
 
 void* onErrorCallback(const CString& error, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onError(error);
+	try {
+		engine->onError(error);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onError): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onError)");
+	}
 	return NULL;
 }
 
 void* onRetryCallback(void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onRetry();
+	try {
+		engine->onRetry();
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onRetry): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onRetry)");
+	}
 	return NULL;
 }
 
 void* onFatalCallback(const CString& error, void* userData) {
 	GLEngine* engine = (GLEngine*)userData;
-	engine->onFatal(error);
+	try {
+		engine->onFatal(error);
+	} catch (const char* e) {
+		LOG("Jappsy Engine Fatal Error (onFatal): %s", e);
+	} catch (...) {
+		LOG("Jappsy Engine Unknown Fatal Error (onFatal)");
+	}
 	return NULL;
 }
 

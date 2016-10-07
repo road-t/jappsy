@@ -19,6 +19,7 @@
 
 #include <platform.h>
 #include <data/uObject.h>
+#include <data/uString.h>
 
 class Stream : public CObject {
 private:
@@ -27,6 +28,8 @@ private:
 	uint32_t m_size = 0;
 	uint32_t m_position = 0;
 	uint64_t m_modificationDate = 0;
+	
+	CString m_sourcePath;
 	
 	inline static bool equalBytes(const Stream& a, const Stream& b) {
 		if (a.m_size != b.m_size)
@@ -61,8 +64,10 @@ public:
 	inline void* getBuffer() { return m_buffer; }
 	inline uint32_t getSize() { return m_size; }
 	inline uint64_t getModificationDate() { return m_modificationDate; }
+	inline const CString& getSourcePath() { return m_sourcePath; }
 	
 	inline void setModificationDate(uint64_t date) { m_modificationDate = date; }
+	inline void setSourcePath(const CString& path) { m_sourcePath = path; }
 	
 	inline void setPosition(uint32_t position) throw(const char*) { if (position > m_size) throw eOutOfRange; m_position = position; }
 	inline uint32_t getPosition() { return m_position; }

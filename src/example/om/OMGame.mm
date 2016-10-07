@@ -25,8 +25,8 @@
 
 void OMGame::playMantra() {
     rollTimeout = currentTimeMillis() + ((mantra == 0) ? 3900 : 1000);
-    //activeMantra = context->mixer->get(L"mantra_0" + mantra);
-    //activeMantra.mixPlay(false, 1.0, true, false);
+    activeMantra = context->mixer->get(CString::format(L"mantra_0%d", mantra));
+    activeMantra->mixPlay(false, 1.0, true, false);
     mantra++;
     if (mantra > 4) mantra = 0;
 }
@@ -78,15 +78,15 @@ void OMGame::startBars(bool freespin, bool query) {
         }
     }
     
-    //context.mixer.get("stone_move_long").mixPlayTimeout(true, 1.0, false, false, 500, 250);
+    context->mixer->get(L"stone_move_long")->mixPlayTimeout(true, 1.0, false, false, 500, 250);
     playMantra();
 }
 
 void OMGame::updateSounds(OMGameStage stage) {
     if (stage == STAGE_DOUBLE) {
-        //context.mixer.get("space").mixPlay(true, 1.0, true, false);
-    } else if ((stage <= STAGE_BARS) || (this->stage > STAGE_BARS)) {
-        //context.mixer.get("space").mixPlayTimeout(true, 1.0, false, false, 0, 500);
+        context->mixer->get(L"space")->mixPlay(true, 1.0, true, false);
+    } else if ((stage <= STAGE_BARS) && (this->stage > STAGE_BARS)) {
+        context->mixer->get(L"space")->mixPlayTimeout(true, 1.0, false, false, 0, 500);
     }
 }
 
@@ -244,29 +244,25 @@ void OMGame::onFrame(GLRender* context) {
                     }
                 }
                 
-                /*
-                if ((activeMantra != NULL) && (activeMantra.playing) && (activeMantra.left() > 0.25)) {
+                if ((activeMantra != NULL) && (activeMantra->mixPlaying())) {
                     // Пропустить проверку остановки барабанов
                 }
                 else
-                 */
                 if (bars.stopped()) {
                     int sum = bars.calculate();
                     //LOG("Check: " + sum);
                     LOG("Барабаны остановились");
                     
-                    /*
                     switch (sum) {
-                        case -8: context.mixer.get("sun_free_8").mixPlay(false, 1.0, true, false); break;
-                        case -4: context.mixer.get("moon_free_4").mixPlay(false, 1.0, true, false); break;
-                        case 4: context.mixer.get("moon_4").mixPlay(false, 1.0, true, false); break;
-                        case 8: context.mixer.get("moon_8").mixPlay(false, 1.0, true, false); break;
-                        case 44: context.mixer.get("moon_44").mixPlay(false, 1.0, true, false); break;
-                        case 88: context.mixer.get("moon_88").mixPlay(false, 1.0, true, false); break;
-                        case 444: context.mixer.get("moon_444").mixPlay(false, 1.0, true, false); break;
-                        case 888: context.mixer.get("moon_888").mixPlay(false, 1.0, true, false); break;
+                        case -8: context->mixer->get(L"sun_free_8")->mixPlay(false, 1.0, true, false); break;
+                        case -4: context->mixer->get(L"moon_free_4")->mixPlay(false, 1.0, true, false); break;
+                        case 4: context->mixer->get(L"moon_4")->mixPlay(false, 1.0, true, false); break;
+                        case 8: context->mixer->get(L"sun_8")->mixPlay(false, 1.0, true, false); break;
+                        case 44: context->mixer->get(L"moon_44")->mixPlay(false, 1.0, true, false); break;
+                        case 88: context->mixer->get(L"sun_88")->mixPlay(false, 1.0, true, false); break;
+                        case 444: context->mixer->get(L"moon_444")->mixPlay(false, 1.0, true, false); break;
+                        case 888: context->mixer->get(L"sun_888")->mixPlay(false, 1.0, true, false); break;
                     }
-                     */
                     
                     if (sum == 0) {
                         if (conf.free != 0) {
@@ -335,9 +331,9 @@ void OMGame::onFrame(GLRender* context) {
                     
                     if (stop) {
                         if (conf.dblindex == 0) {
-                            // context.mixer.get("sun_double").mixPlay(false, 1.0, true, false);
+                            context->mixer->get(L"sun_double")->mixPlay(false, 1.0, true, false);
                         } else {
-                            // context.mixer.get("moon_double").mixPlay(false, 1.0, true, false);
+                            context->mixer->get(L"moon_double")->mixPlay(false, 1.0, true, false);
                         }
                         
                         LOG("Удвоение - Открытие затмения");
@@ -515,7 +511,7 @@ void OMGame::onFrame(GLRender* context) {
         }
         
         scene->render();
-        //context.mixer.update();
+        context->mixer->update();
         
 #ifndef OMDEMO
         if ((nextConfigUpdate != 0) && (currentTime >= nextConfigUpdate)) {
@@ -566,11 +562,11 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
             game->bars.clear();
             if (event.startsWith(L"move")) {
                 game->bars.rotation[index].userMove(-delta->x / 4.0);
-                //context.mixer.get("stone_move_long").mixPlayTimeout(true, 1.0, false, false, 100, 100);
+                game->context->mixer->get(L"stone_move_long")->mixPlayTimeout(true, 1.0, false, false, 100, 100);
             } else if (event.startsWith(L"leave")) {
                 game->bars.rotation[index].userRotate(-delta->x / 4.0, speed->x * 250.0);
                 if (speed->x >= 1.0) {
-                    //context.mixer.get("stone_move_long").mixPlayTimeout(true, 1.0, false, false, 500, 250);
+                    game->context->mixer->get(L"stone_move_long")->mixPlayTimeout(true, 1.0, false, false, 500, 250);
                 }
             }
             return true;
@@ -586,7 +582,7 @@ bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* dr
         if (event.startsWith("enter ")) {
             GLAnimation::createBlink(drawing, 1.0, 1.5, 500);
             CString::format(L"Нажата кнопка %ls", (wchar_t*)event).log();
-            //context.mixer.get(L"button").mixPlay(false, 1.0, true, false);
+            game->context->mixer->get(L"button")->mixPlay(false, 1.0, true, false);
         } else if (event.startsWith("move ")) {
         } else if (event.startsWith("leave ")) {
         } else {
@@ -596,8 +592,8 @@ bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* dr
                     if (game->conf.points >= game->conf.bet) {
                         LOG("Включен автоспин");
                         game->conf.autospin = true;
-                        //context.mixer.get("button").mixStop();
-                        //context.mixer.get("auto").mixPlay(false, 1.0, true, false);
+                        game->context->mixer->get(L"button")->mixStop();
+                        game->context->mixer->get(L"auto")->mixPlay(false, 1.0, true, false);
                     }
                 }
             } else if (event == L"click btn_start") {
@@ -707,7 +703,7 @@ void OMGame::doubleSelect(int index, bool query) {
     
     LOG("Удвоение - Выбор сделан");
     
-    //context.mixer.get(L"space").mixPlay(true, 1.0, false, false);
+    context->mixer->get(L"space")->mixPlay(true, 1.0, false, false);
 }
 
 void OMGame::doubleReset(OMGame* engine) {
@@ -727,7 +723,7 @@ bool OMGame::onDoubleEvent(GLEngine* engine, const CString& event, GLDrawing* dr
         if (game->stage == STAGE_DOUBLE) {
             GLAnimation::createPingPong(drawing, 0.3, 1.0, 500);
             CString::format(L"Нажата кнопка %ls", (wchar_t*)event).log();
-            //context.mixer.get(L"button").mixPlay(false, 1.0, true, false);
+            game->context->mixer->get(L"button")->mixPlay(false, 1.0, true, false);
         }
     } else if (event.indexOf("move ") == 0) {
     } else if (event.indexOf("leave ") == 0) {

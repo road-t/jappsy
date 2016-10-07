@@ -14,7 +14,7 @@
                         <viewControllerLayoutGuide type="top" id="jcX-57-ECS"/>
                         <viewControllerLayoutGuide type="bottom" id="cf7-Fi-8Us"/>
                     </layoutGuides>
-                    <view key="view" contentMode="center" id="pKD-hw-zOh" customClass="ExampleJappsyView">
+                    <view key="view" contentMode="center" id="pKD-hw-zOh">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -22,7 +22,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="85S-3A-4p6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="899" y="196"/>
+            <point key="canvasLocation" x="898.39999999999998" y="195.6521739130435"/>
         </scene>
     </scenes>
 </document>

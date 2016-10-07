@@ -69,6 +69,13 @@
 		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
+		C35025841DA5411C00EFD3B0 /* uMixer.h in Headers */ = {isa = PBXBuildFile; fileRef = C35025821DA5411C00EFD3B0 /* uMixer.h */; };
+		C35025851DA5411C00EFD3B0 /* uMixer.m in Sources */ = {isa = PBXBuildFile; fileRef = C35025831DA5411C00EFD3B0 /* uMixer.m */; };
+		C35025881DA541DF00EFD3B0 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35025871DA541DF00EFD3B0 /* OpenAL.framework */; };
+		C350258A1DA541E500EFD3B0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35025891DA541E500EFD3B0 /* AVFoundation.framework */; };
+		C350258C1DA541EB00EFD3B0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C350258B1DA541EB00EFD3B0 /* AudioToolbox.framework */; };
+		C350258F1DA54C9E00EFD3B0 /* uGLSound.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C350258D1DA54C9E00EFD3B0 /* uGLSound.cpp */; };
+		C35025901DA54C9E00EFD3B0 /* uGLSound.h in Headers */ = {isa = PBXBuildFile; fileRef = C350258E1DA54C9E00EFD3B0 /* uGLSound.h */; };
 		C3506D5C1D5256FD005BC914 /* libJappsyEngine.h in Headers */ = {isa = PBXBuildFile; fileRef = C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C35272081D551BBE00F41198 /* uOpenGL.h in Headers */ = {isa = PBXBuildFile; fileRef = C35272071D551BBE00F41198 /* uOpenGL.h */; };
 		C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35272091D551E9F00F41198 /* QuartzCore.framework */; };
@@ -164,6 +171,13 @@
 		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
 		C34FDA5E1D5CB7350022FF71 /* uLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLoader.h; sourceTree = "<group>"; };
 		C34FDA6C1D5DDD0B0022FF71 /* uObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uObject.h; sourceTree = "<group>"; };
+		C35025821DA5411C00EFD3B0 /* uMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMixer.h; sourceTree = "<group>"; };
+		C35025831DA5411C00EFD3B0 /* uMixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uMixer.m; sourceTree = "<group>"; };
+		C35025871DA541DF00EFD3B0 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		C35025891DA541E500EFD3B0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		C350258B1DA541EB00EFD3B0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		C350258D1DA54C9E00EFD3B0 /* uGLSound.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLSound.cpp; sourceTree = "<group>"; };
+		C350258E1DA54C9E00EFD3B0 /* uGLSound.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLSound.h; sourceTree = "<group>"; };
 		C3506D581D5256FD005BC914 /* libJappsyEngine.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libJappsyEngine.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C3506D5B1D5256FD005BC914 /* libJappsyEngine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libJappsyEngine.h; sourceTree = "<group>"; };
 		C3506D5D1D5256FD005BC914 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -209,6 +223,9 @@
 				C305782C1D54BBBB00171EFC /* UIKit.framework in Frameworks */,
 				C352720A1D551E9F00F41198 /* QuartzCore.framework in Frameworks */,
 				C305782A1D54BBAB00171EFC /* OpenGLES.framework in Frameworks */,
+				C350258A1DA541E500EFD3B0 /* AVFoundation.framework in Frameworks */,
+				C350258C1DA541EB00EFD3B0 /* AudioToolbox.framework in Frameworks */,
+				C35025881DA541DF00EFD3B0 /* OpenAL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -221,6 +238,7 @@
 				C34FD98F1D5B926A0022FF71 /* event */,
 				C34FD9711D5B7C490022FF71 /* data */,
 				C34FDA4F1D5CABD30022FF71 /* net */,
+				C35025811DA5411C00EFD3B0 /* openal */,
 				C35271FC1D551B8400F41198 /* opengl */,
 				C30577BF1D54BA9C00171EFC /* cipher */,
 				C30577C91D54BA9C00171EFC /* core */,
@@ -266,10 +284,13 @@
 			isa = PBXGroup;
 			children = (
 				C341B29F1D569A8C00D2D70F /* libz.framework */,
-				C35272091D551E9F00F41198 /* QuartzCore.framework */,
 				C30578271D54BBA000171EFC /* Foundation.framework */,
 				C305782B1D54BBBB00171EFC /* UIKit.framework */,
+				C35272091D551E9F00F41198 /* QuartzCore.framework */,
 				C30578291D54BBAB00171EFC /* OpenGLES.framework */,
+				C35025891DA541E500EFD3B0 /* AVFoundation.framework */,
+				C350258B1DA541EB00EFD3B0 /* AudioToolbox.framework */,
+				C35025871DA541DF00EFD3B0 /* OpenAL.framework */,
 			);
 			name = libs;
 			sourceTree = "<group>";
@@ -315,6 +336,22 @@
 			path = net;
 			sourceTree = "<group>";
 		};
+		C35025811DA5411C00EFD3B0 /* openal */ = {
+			isa = PBXGroup;
+			children = (
+				C35025821DA5411C00EFD3B0 /* uMixer.h */,
+				C35025831DA5411C00EFD3B0 /* uMixer.m */,
+			);
+			path = openal;
+			sourceTree = "<group>";
+		};
+		C35025861DA541DF00EFD3B0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		C3506D4E1D5256FD005BC914 = {
 			isa = PBXGroup;
 			children = (
@@ -323,6 +360,7 @@
 				C30577BE1D54BA9C00171EFC /* include */,
 				C3506D5A1D5256FD005BC914 /* libJappsyEngine */,
 				C3506D591D5256FD005BC914 /* Products */,
+				C35025861DA541DF00EFD3B0 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 			usesTabs = 1;
@@ -351,6 +389,8 @@
 		C35271FC1D551B8400F41198 /* opengl */ = {
 			isa = PBXGroup;
 			children = (
+				C350258D1DA54C9E00EFD3B0 /* uGLSound.cpp */,
+				C350258E1DA54C9E00EFD3B0 /* uGLSound.h */,
 				C34FDA451D5C96DD0022FF71 /* uGLAlignX.h */,
 				C34FDA461D5C96DD0022FF71 /* uGLAlignY.h */,
 				C34FDA491D5C97AC0022FF71 /* uGLTypeface.h */,
@@ -407,12 +447,14 @@
 			files = (
 				C35900D61D6542C700C1D154 /* uGLScene.h in Headers */,
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
+				C35025901DA54C9E00EFD3B0 /* uGLSound.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
 				C310C7BD1D6E080E0031E73A /* uGLAnimation.h in Headers */,
 				C3FFBADC1D62FF360099AD22 /* uHTTPClient.h in Headers */,
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
 				C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */,
+				C35025841DA5411C00EFD3B0 /* uMixer.h in Headers */,
 				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
 				C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */,
@@ -546,8 +588,10 @@
 				C35900D51D6542C700C1D154 /* uGLScene.cpp in Sources */,
 				C34FD9921D5B926A0022FF71 /* uMotionEvent.cpp in Sources */,
 				C35900DB1D6542C700C1D154 /* uGLTexture.cpp in Sources */,
+				C350258F1DA54C9E00EFD3B0 /* uGLSound.cpp in Sources */,
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
+				C35025851DA5411C00EFD3B0 /* uMixer.m in Sources */,
 				C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */,
 				C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */,
 				C33F48841D674A1C00DD03A5 /* uMD5.cpp in Sources */,

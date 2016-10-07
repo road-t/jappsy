@@ -31,6 +31,7 @@ Stream::Stream(const wchar_t* data) throw(const char*) {
 			m_allocated = true;
 			m_size = size - 1;
 			m_modificationDate = currentTimeMillis();
+			m_sourcePath = (const void*)NULL;
 		}
 	}
 }
@@ -44,6 +45,7 @@ Stream::Stream(const char* data, bool autorelease) {
 			m_size = size - 1;
 			m_allocated = autorelease;
 			m_modificationDate = currentTimeMillis();
+			m_sourcePath = (const void*)NULL;
 		}
 	}
 }
@@ -54,6 +56,7 @@ Stream::Stream(const void* data, uint32_t length, bool autorelease) {
 		m_size = length;
 		m_allocated = autorelease;
 		m_modificationDate = currentTimeMillis();
+		m_sourcePath = (const void*)NULL;
 	}
 }
 

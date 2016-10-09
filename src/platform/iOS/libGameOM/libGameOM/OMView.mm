@@ -24,6 +24,7 @@
 
 @property(nonatomic)BOOL defaultPortrait;
 @property(nonatomic)BOOL portrait;
+@property(nonatomic)BOOL startup;
 
 @property(strong,nonatomic)UIWebView *calendarView;
 @property(strong,nonatomic)JappsyView *gameView;
@@ -59,8 +60,8 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [calendarView setOpaque:NO];
         calendarView.backgroundColor = [UIColor clearColor];
         [calendarView setTranslatesAutoresizingMaskIntoConstraints:NO];
-        //[calendarView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
-        [calendarView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://om.jappsy.com/?mobile"]]];
+        [calendarView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
+;
         [self addSubview:calendarView];
 
         gameView = [[JappsyView alloc] initWithFrame:CGRectMake(0,0,100,100)];
@@ -72,6 +73,8 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         portraitMinimized = NULL;
         landscapeNormal = NULL;
         landscapeMinimized = NULL;
+        
+        _startup = TRUE;
 
         [self setTranslatesAutoresizingMaskIntoConstraints:NO];
         self.backgroundColor = [UIColor blackColor];
@@ -92,7 +95,19 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
     [portraitNormal addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0], 997)];
 
     
-    portraitMinimized = landscapeMinimized = [[NSMutableArray alloc] init];
+    portraitMinimized = [[NSMutableArray alloc] init];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-10.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:-10.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0],999)];
+    [portraitMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],998)];
+    
+
+    landscapeMinimized = [[NSMutableArray alloc] init];
     [landscapeMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
     [landscapeMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
     [landscapeMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
@@ -103,6 +118,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
     [landscapeMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0],999)];
     [landscapeMinimized addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],998)];
 
+    
     landscapeNormal = [[NSMutableArray alloc] init];
     [landscapeNormal addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
     [landscapeNormal addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
@@ -136,16 +152,31 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [self onResume:false];
     } else {
         if (deviceOrientation != UIDeviceOrientationUnknown) {
-            if (deviceOrientation != UIDeviceOrientationPortrait) {
-                _portrait = false;
-                if (_defaultPortrait) {
-                    [gameView minimize:false animate:false];
+            if (_startup) {
+                _startup = FALSE;
+                if (deviceOrientation != UIDeviceOrientationPortrait) {
+                    _portrait = false;
+                    if (_defaultPortrait) {
+                        [gameView minimize:false animate:false];
+                    } else {
+                        [gameView minimize:true animate:false];
+                    }
                 } else {
-                    [gameView minimize:true animate:false];
+                    _portrait = true;
+                    [gameView minimize:false animate:false];
                 }
             } else {
-                _portrait = true;
-                [gameView minimize:false animate:false];
+                if (deviceOrientation != UIDeviceOrientationPortrait) {
+                    if (_portrait) {
+                        _portrait = false;
+                        [gameView minimize:[gameView minimized] animate:false];
+                    }
+                } else {
+                    if (!_portrait) {
+                        _portrait = true;
+                        [gameView minimize:[gameView minimized] animate:false];
+                    }
+                }
             }
         }
     }
@@ -207,6 +238,9 @@ void onMinimize(bool minimize, bool animate, void* userData) {
         OMGame* OMGame = new class OMGame();
         OMGame->setOnMinimize(onMinimize, (__bridge void*)self);
         [gameView engine:OMGame];
+        
+        CString path = CString::format(L"file://%ls", (wchar_t*)(OMGame->cache->getDataPath(L"mobile", L"mobile_RU.html")));
+        [calendarView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:(NSString*)path]]];
         
         return YES;
     }

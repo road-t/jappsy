@@ -36,6 +36,7 @@ private:
 	
 	CString* _scheme;
 	CString* _server;
+	CString* _path;
 	CString* _fullPath;
 	CString* _absolutePath;
 	CString* _uri;
@@ -48,12 +49,12 @@ public:
 	URI(const wchar_t* uri);
 	~URI();
 	
+	const CString& path();
 	const CString& fullPath();
 	const CString& absolutePath(const wchar_t* basePath);
 	inline const CString& absolutePath() { return absolutePath(NULL); }
 	const CString& uri();
 	inline const CString ext() { return m_ext; }
-	inline const CString path() { return m_path; }
 	inline const CString file() { return m_file; }
 };
 

@@ -296,6 +296,17 @@
 	}
 }
 
+- (BOOL) minimized {
+	if (_renderer == NULL)
+		return TRUE;
+	
+	if ((!_stopping) && (_running)) {
+		return _renderer->engine->minimized;
+	}
+	
+	return TRUE;
+}
+
 - (void) dealloc
 {
 	[self onStop];

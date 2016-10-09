@@ -63,6 +63,7 @@ public:
 	
 	void addData(const CString& path, const CString& file, Stream* data);
 	Stream* getData(const CString& path, const CString& file);
+	CString getDataPath(const CString& path, const CString& file);
 };
 
 #endif //JAPPSY_UCACHE_H

@@ -34,5 +34,6 @@
 - (void) engine:(void*)refEngine;
 
 - (void) minimize:(BOOL)minimize animate:(BOOL)animate;
+- (BOOL) minimized;
 
 @end

@@ -31,8 +31,6 @@ public:
 protected:
 	GLRender* context = NULL;
 	
-	bool minimized = false;
-
 	onMinimizeCallback onminimize;
 	void* onminimizeUserData = NULL;
 
@@ -47,6 +45,8 @@ public:
 	void setBasePath(const CString& basePath);
 	void preload(const char* json);
 	void load(const char* json);
+	
+	bool minimized = false;
 	
 	void minimize(bool minimize, bool animate);
 	void setOnMinimize(onMinimizeCallback onminimize = NULL, void* userData = NULL);

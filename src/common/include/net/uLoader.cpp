@@ -147,15 +147,14 @@ void Loader::update() {
 				bool releaseInfo = false;
 				AtomicSet(&(status.update), true);
 				AtomicIncrement(&(status.left));
-				if ((info->ext.compareToIgnoreCase(L"png") == 0) ||
+				if ((info->ext.compareToIgnoreCase(L"html") == 0) ||
+					(info->ext.compareToIgnoreCase(L"css") == 0) ||
+					(info->ext.compareToIgnoreCase(L"js") == 0) ||
+					(info->ext.compareToIgnoreCase(L"png") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jpg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jpeg") == 0)) {
-					// TODO: PNG JPG Loader not needed
-					// Fake OK
-					AtomicIncrement(&(status.count));
-					AtomicDecrement(&(status.left));
-					AtomicSet(&(status.update), true);
-					releaseInfo = true;
+					Info* user = new Info(this, info);
+					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
 					(info->ext.compareToIgnoreCase(L"ogg") == 0)

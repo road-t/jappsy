@@ -276,3 +276,22 @@ Stream* Cache::getData(const CString& path, const CString& file) {
 	#error Unsupported platform!
 #endif
 }
+
+CString Cache::getDataPath(const CString& path, const CString& file) {
+#if defined(__IOS__)
+	AtomicLock(&m_DiskCacheLock);
+	
+	NSString* filePath = [[(NSString*)m_dataCacheDir stringByAppendingPathComponent:(NSString*)path] stringByAppendingPathComponent:(NSString*)file];
+	
+	AtomicUnlock(&m_DiskCacheLock);
+	
+	return filePath;
+#elif defined(__JNI__)
+	#warning TODO
+	
+	return NULL;
+#else
+	#error Unsupported platform!
+#endif
+}
+

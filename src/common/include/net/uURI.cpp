@@ -23,6 +23,7 @@ const wchar_t* URI::basePath = L"http://localhost";
 URI::URI(const wchar_t* uri) {
 	_scheme = NULL;
 	_server = NULL;
+	_path = NULL;
 	_fullPath = NULL;
 	_absolutePath = NULL;
 	_uri = NULL;
@@ -294,6 +295,9 @@ URI::~URI() {
 	if (_server != NULL) {
 		delete _server;
 	}
+	if (_path != NULL) {
+		delete _path;
+	}
 	
 	if (m_scheme != NULL) {
 		memFree(m_scheme);
@@ -362,6 +366,27 @@ const CString& URI::server() {
 	return *_server;
 }
 
+const CString& URI::path() {
+	if (_path == NULL) {
+		_path = new CString();
+		if (m_path != NULL) {
+			if (m_path[0] == L'/') {
+				_path->operator=(m_path + 1);
+			} else if ((m_path[0] == L'.') && (m_path[1] == L'/')) {
+				_path->operator=(m_path + 2);
+			} else {
+				_path->operator=(m_path);
+			}
+		}
+		uint32_t len = _path->m_length;
+		if (len > 0) {
+			if (_path->charAt(len - 1) == L'/') {
+				_path->setLength(len - 1);
+			}
+		}
+	}
+	return *_path;
+}
 
 const CString& URI::fullPath() {
 	if (_fullPath == NULL) {
@@ -379,7 +404,7 @@ const CString& URI::fullPath() {
 		uint32_t len = _fullPath->m_length;
 		if (len > 0) {
 			if (_fullPath->charAt(len - 1) == L'/') {
-				_fullPath->m_length = len - 1;
+				_fullPath->setLength(len - 1);
 			}
 		}
 	}
@@ -394,22 +419,7 @@ const CString& URI::absolutePath(const wchar_t* basePath) {
 		_absolutePath = new CString();
 		
 		if ((m_scheme == NULL) || (m_host == NULL)) {
-			CString path;
-			if (m_path != NULL) {
-				if (m_path[0] == L'/') {
-					path = (m_path + 1);
-				} else if ((m_path[0] == L'.') && (m_path[1] == L'/')) {
-					path = (m_path + 2);
-				} else {
-					path = m_path;
-				}
-				uint32_t len = path.m_length;
-				if (len > 0) {
-					if (path.charAt(len - 1) == L'/') {
-						path.m_length = len - 1;
-					}
-				}
-			}
+			CString path = this->path();
 			
 			if (basePath != NULL) {
 				if ((m_path[0] == L'.') && (m_path[1] == L'/')) {
@@ -426,7 +436,7 @@ const CString& URI::absolutePath(const wchar_t* basePath) {
 			uint32_t len = _absolutePath->m_length;
 			if (len > 0) {
 				if (_absolutePath->charAt(len - 1) == L'/') {
-					_absolutePath->m_length = len - 1;
+					_absolutePath->setLength(len - 1);
 				}
 			}
 			if (path.m_length != 0) {

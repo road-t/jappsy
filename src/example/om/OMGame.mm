@@ -126,37 +126,41 @@ void OMGame::updateStageVisibility() {
     
     scene->visibleGroup(groups.btnlist, false);
     
-    Vector<GLObject*> buttons;
-    buttons.push( scene->objects->get(L"btn_rewards") );
-    buttons.push( scene->objects->get(L"btn_grace") );
-    buttons.push( scene->objects->get(L"btn_donate") );
-    if (stage <= STAGE_BARS) {
-        if (conf.autospin) {
-            buttons.push( scene->objects->get(L"btn_double") );
-            buttons.push( scene->objects->get(L"btn_stop") );
-            
-            donlistSwitch = false;
-        } else {
-            if (stage == STAGE_BARS) {
-                buttons.push( scene->objects->get(L"btn_auto") );
-                buttons.push( scene->objects->get(L"btn_info") );
-                buttons.push( scene->objects->get(L"btn_start") );
-            } else {
+    if (!minimized) {
+        Vector<GLObject*> buttons;
+        buttons.push( scene->objects->get(L"btn_rewards") );
+        buttons.push( scene->objects->get(L"btn_grace") );
+        buttons.push( scene->objects->get(L"btn_donate") );
+        if (stage <= STAGE_BARS) {
+            if (conf.autospin) {
                 buttons.push( scene->objects->get(L"btn_double") );
-                buttons.push( scene->objects->get(L"btn_take") );
-                
+                buttons.push( scene->objects->get(L"btn_stop") );
+            
                 donlistSwitch = false;
+            } else {
+                if (stage == STAGE_BARS) {
+                    buttons.push( scene->objects->get(L"btn_auto") );
+                    buttons.push( scene->objects->get(L"btn_info") );
+                    buttons.push( scene->objects->get(L"btn_start") );
+                } else {
+                    buttons.push( scene->objects->get(L"btn_double") );
+                    buttons.push( scene->objects->get(L"btn_take") );
+                
+                    donlistSwitch = false;
+                }
             }
-        }
-    } else if (stage <= STAGE_DOUBLE) {
-        buttons.push( scene->objects->get(L"btn_sun") );
-        buttons.push( scene->objects->get(L"btn_moon") );
-        buttons.push( scene->objects->get(L"btn_take") );
+        } else if (stage <= STAGE_DOUBLE) {
+            buttons.push( scene->objects->get(L"btn_sun") );
+            buttons.push( scene->objects->get(L"btn_moon") );
+            buttons.push( scene->objects->get(L"btn_take") );
         
-        donlistSwitch = false;
+            donlistSwitch = false;
+        }
+        scene->visibleGroup(buttons, true);
+        scene->visibleGroup(groups.donlist, donlistSwitch);
+    } else {
+        scene->visibleGroup(groups.donlist, false);
     }
-    scene->visibleGroup(buttons, true);
-    scene->visibleGroup(groups.donlist, donlistSwitch);
 }
 
 //static int color = 0;
@@ -529,13 +533,21 @@ void OMGame::onFrame(GLRender* context) {
     }
 }
 
-void OMGame::onResize(int width, int height) {
+void OMGame::onResize(int width, int height, bool minimized) {
 //    context->touchScreen->update(1920, 1080); // independent size
     context->touchScreen->update(width, height);
+    if (ready == 2) {
+        updateStageVisibility();
+    }
 }
 
 void OMGame::onTouch(const CString& event) {
     if (nextTimeout == 0) {
+        if (minimized) {
+            minimize(false, true);
+            return;
+        }
+        
         if (event.indexOf("click ") < 0) {
             event.log();
         }
@@ -546,6 +558,10 @@ void OMGame::onTouch(const CString& event) {
                     startBars(false);
                 }
             }
+        } else if ((event == L"swipe bottom") || (event == L"swipe long bottom")) {
+            if (!minimized) {
+                minimize(true, true);
+            }
         }
     }
 }
@@ -554,6 +570,10 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
     TrackBarData* data = (TrackBarData*)userData;
     OMGame* game = data->game;
     int index = data->index;
+    
+    if (game->minimized) {
+        return false;
+    }
     
     if (game->nextTimeout == 0) {
         if (game->stage == STAGE_BARS) {

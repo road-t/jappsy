@@ -14,8 +14,21 @@
  * limitations under the License.
  */
 
-#import <libJappsyEngine/libJappsyEngine.h>
+#import <UIKit/UIKit.h>
 
-@interface OMView : JappsyView
+@interface OMView : UIView
+
+- (instancetype) init;
+
+- (void) initConstraints:(UIViewController*)controller;
+
+- (void) orientationChanged:(NSNotification *)notification;
+
+- (BOOL) onStart;
+- (BOOL) onStop;
+- (void) onResume;
+- (void) onPause;
+
+- (void) onMinimize:(BOOL)minimize animate:(BOOL)animate;
 
 @end

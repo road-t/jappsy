@@ -25,9 +25,17 @@
 class GLRender;
 
 class GLEngine : public CObject {
+public:
+	typedef void (*onMinimizeCallback)(bool minimize, bool animate, void* userData);
+	
 protected:
 	GLRender* context = NULL;
 	
+	bool minimized = false;
+
+	onMinimizeCallback onminimize;
+	void* onminimizeUserData = NULL;
+
 public:
 	Cache* cache = NULL;
 
@@ -40,14 +48,17 @@ public:
 	void preload(const char* json);
 	void load(const char* json);
 	
+	void minimize(bool minimize, bool animate);
+	void setOnMinimize(onMinimizeCallback onminimize = NULL, void* userData = NULL);
+	
 	void onRender();
 	void onUpdate(int width, int height);
 	void onTouch(MotionEvent* event);
 
 	virtual void onFrame(GLRender* context) {}
-	virtual void onResize(int width, int height) {}
+	virtual void onResize(int width, int height, bool minimized) {}
 	virtual void onTouch(const CString& event) {}
-
+	
 	virtual void onStatus(const LoaderStatus& status) {}
 	virtual void onFile(const Loader::File& info, void* object) {}
 	virtual void onError(const CString& error) {}

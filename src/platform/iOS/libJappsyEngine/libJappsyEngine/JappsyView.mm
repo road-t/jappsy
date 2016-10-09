@@ -23,6 +23,11 @@
 #include <jappsy.h>
 #include <platform.h>
 
+#ifdef __IOS__
+	#include <openal/uMixer.h>
+#endif
+
+
 @interface JappsyView () {
 	GLContext* _renderer;
     EAGLContext* _context;
@@ -248,6 +253,9 @@
 {
 	if (!_stopping) {
 		if (!_running) {
+#ifdef __IOS__
+			resumeAudioPlayer();
+#endif
 			_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
 			[_displayLink setFrameInterval:_interval];
 			[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -263,7 +271,19 @@
 			[_displayLink invalidate];
 			_displayLink = nil;
 			_running = FALSE;
+#ifdef __IOS__
+			pauseAudioPlayer();
+#endif
 		}
+	}
+}
+
+- (void) minimize:(BOOL)minimize animate:(BOOL)animate {
+	if (_renderer == NULL)
+		return;
+
+	if ((!_stopping) && (_running)) {
+		_renderer->engine->minimize(minimize, animate);
 	}
 }
 

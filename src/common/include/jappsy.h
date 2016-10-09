@@ -34,11 +34,6 @@ void jappsyInit(const char* cacheDir);
 // Deinitialize all core static variables
 void jappsyQuit();
 
-void jappsyMixerInit();
-void jappsyMixerQuit();
-void jappsyMixerPause();
-void jappsyMixerResume();
-
 #ifdef __cplusplus
 }
 #endif

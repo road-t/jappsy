@@ -34,6 +34,9 @@ void jappsyInit(const char* cacheDir) {
     mmInit();
     uSystemInit();
     jappsyCacheDir = new CString(cacheDir);
+#ifdef __IOS__
+	initAudioPlayer();
+#endif
 }
 
 void jappsyQuit() {
@@ -41,35 +44,14 @@ void jappsyQuit() {
     memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
+#ifdef __IOS__
+	shutdownAudioPlayer();
+#endif
     delete jappsyCacheDir;
     uSystemQuit();
     mmQuit();
 
     LOG("Jappsy Quit");
-}
-
-void jappsyMixerInit() {
-#ifdef __IOS__
-	initAudioPlayer();
-#endif
-}
-	
-void jappsyMixerQuit() {
-#ifdef __IOS__
-	shutdownAudioPlayer();
-#endif
-}
-	
-void jappsyMixerPause() {
-#ifdef __IOS__
-	pauseAudioPlayer();
-#endif
-}
-	
-void jappsyMixerResume() {
-#ifdef __IOS__
-	resumeAudioPlayer();
-#endif
 }
 
 #ifdef __cplusplus

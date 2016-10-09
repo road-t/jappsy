@@ -153,9 +153,9 @@ public:
     } status;
     
     void onFrame(GLRender* context);
-    void onResize(int width, int height);
+    void onResize(int width, int height, bool minimized);
     void onTouch(const CString& event);
-    
+
     static bool onTrackBar(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
     static bool onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* drawing);
     

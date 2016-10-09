@@ -126,6 +126,7 @@ void* onFatalCallback(const CString& error, void* userData) {
 
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
+	onminimize = NULL;
 }
 
 GLEngine::~GLEngine() {
@@ -157,12 +158,23 @@ void GLEngine::load(const char* json) {
 	context->loader->load(json);
 }
 
+void GLEngine::minimize(bool minimize, bool animate) {
+	minimized = minimize;
+	if (onminimize != NULL)
+		onminimize(minimize, animate, onminimizeUserData);
+}
+
+void GLEngine::setOnMinimize(onMinimizeCallback onminimize, void* userData) {
+	this->onminimize = onminimize;
+	onminimizeUserData = userData;
+}
+
 void GLEngine::onRender() {
 	this->context->frame->loop();
 }
 
 void GLEngine::onUpdate(int width, int height) {
-	onResize(width, height);
+	onResize(width, height, minimized);
 	context->frame->width = width;
 	context->frame->height = height;
 	context->updateRatio(width, height);

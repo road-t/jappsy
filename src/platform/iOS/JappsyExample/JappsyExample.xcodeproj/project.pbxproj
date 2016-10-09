@@ -13,7 +13,6 @@
 		C310C7C11D6E80700031E73A /* vsh_3d.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7BF1D6E80700031E73A /* vsh_3d.vsh */; };
 		C3401C571D661CB9009B223D /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3401C561D661CB9009B223D /* libz.framework */; };
 		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
-		C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */; };
 		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
 		C34FD9D01D5BC7FB0022FF71 /* libGameOM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */; };
 		C3506D801D52575C005BC914 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D7F1D52575C005BC914 /* main.m */; };
@@ -31,8 +30,6 @@
 		C3401C561D661CB9009B223D /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
-		C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleJappsyView.h; sourceTree = "<group>"; };
-		C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleJappsyView.m; sourceTree = "<group>"; };
 		C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
 		C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libGameOM.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libGameOM.framework"; sourceTree = "<group>"; };
 		C3506D7B1D52575C005BC914 /* JappsyExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JappsyExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,8 +87,6 @@
 				C3506D821D52575C005BC914 /* AppDelegate.mm */,
 				C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */,
 				C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */,
-				C341B2B11D572CC100D2D70F /* ExampleJappsyView.h */,
-				C341B2B21D572CC100D2D70F /* ExampleJappsyView.m */,
 				C3506D8B1D52575C005BC914 /* Main.storyboard */,
 				C3506D8E1D52575C005BC914 /* Assets.xcassets */,
 				C3506D901D52575C005BC914 /* LaunchScreen.storyboard */,
@@ -141,6 +136,7 @@
 					C3506D7A1D52575C005BC914 = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeam = LGXN3MWZ8Y;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -184,7 +180,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C341B2B31D572CC100D2D70F /* ExampleJappsyView.m in Sources */,
 				C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */,
 				C3506D831D52575C005BC914 /* AppDelegate.mm in Sources */,
 				C3506D801D52575C005BC914 /* main.m in Sources */,
@@ -301,6 +296,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = LGXN3MWZ8Y;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
@@ -314,6 +310,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = LGXN3MWZ8Y;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.1;

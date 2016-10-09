@@ -26,8 +26,8 @@
 
 - (BOOL) onStart;
 - (BOOL) onStop;
-- (void) onResume;
-- (void) onPause;
+- (void) onResume:(BOOL)app;
+- (void) onPause:(BOOL)app;
 
 - (void) onMinimize:(BOOL)minimize animate:(BOOL)animate;
 

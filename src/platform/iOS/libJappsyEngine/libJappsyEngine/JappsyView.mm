@@ -34,6 +34,7 @@
     NSInteger _interval;
     CADisplayLink* _displayLink;
 	GLfloat viewScale;
+	bool _suspended;
 }
 
 @property(nonatomic,retain)NSMutableArray* activeTouches;
@@ -66,6 +67,7 @@
 		_renderer = NULL;
 		_running = FALSE;
 		_stopping = FALSE;
+		_suspended = TRUE;
 		_interval = 1;
 		_displayLink = nil;
 		
@@ -176,8 +178,8 @@
 		_interval = frameInterval;
 		
 		if (_running) {
-			[self onPause];
-			[self onResume];
+			[self onPause:true];
+			[self onResume:true];
 		}
 	}
 }
@@ -196,7 +198,7 @@
 		}
 		
 		if (_renderer != NULL) {
-			[self onResume];
+			[self onResume:true];
 			return YES;
 		}
 	}
@@ -218,7 +220,7 @@
 			memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
-			[self onPause];
+			[self onPause:true];
 		}
 	}
 	
@@ -234,7 +236,7 @@
 
 - (void) onShutdown
 {
-	[self onPause];
+	[self onPause:true];
 	
 	if (_renderer != NULL) {
 		memDelete(_renderer);
@@ -249,22 +251,25 @@
 	_stopping = NO;
 }
 
-- (void) onResume
+- (void) onResume:(BOOL)app
 {
 	if (!_stopping) {
 		if (!_running) {
+			if ((app) || (!_suspended)) {
 #ifdef __IOS__
-			resumeAudioPlayer();
+				resumeAudioPlayer();
 #endif
-			_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
-			[_displayLink setFrameInterval:_interval];
-			[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-			_running = TRUE;
+				_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
+				[_displayLink setFrameInterval:_interval];
+				[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+				_running = TRUE;
+				_suspended = FALSE;
+			}
 		}
 	}
 }
 
-- (void) onPause
+- (void) onPause:(BOOL)app
 {
 	if (!_stopping) {
 		if (_running) {
@@ -274,6 +279,10 @@
 #ifdef __IOS__
 			pauseAudioPlayer();
 #endif
+
+			if (app) {
+				_suspended = TRUE;
+			}
 		}
 	}
 }

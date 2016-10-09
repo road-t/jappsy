@@ -56,8 +56,10 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 - (instancetype) init {
     if ((self = [super init])) {
         calendarView = [[UIWebView alloc] init];
-        calendarView.backgroundColor = [UIColor blackColor];
+        [calendarView setOpaque:NO];
+        calendarView.backgroundColor = [UIColor clearColor];
         [calendarView setTranslatesAutoresizingMaskIntoConstraints:NO];
+        //[calendarView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
         [calendarView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://om.jappsy.com/?mobile"]]];
         [self addSubview:calendarView];
 
@@ -129,9 +131,9 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
     UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
     
     if (deviceOrientation == UIDeviceOrientationFaceDown) {
-        [self onPause];
+        [self onPause:false];
     } else if (deviceOrientation == UIDeviceOrientationFaceUp) {
-        [self onResume];
+        [self onResume:false];
     } else {
         if (deviceOrientation != UIDeviceOrientationUnknown) {
             if (deviceOrientation != UIDeviceOrientationPortrait) {
@@ -216,12 +218,12 @@ void onMinimize(bool minimize, bool animate, void* userData) {
     return [gameView onStop];
 }
 
-- (void) onResume {
-    [gameView onResume];
+- (void) onResume:(BOOL)app {
+    [gameView onResume:app];
 }
 
-- (void) onPause {
-    [gameView onPause];
+- (void) onPause:(BOOL)app {
+    [gameView onPause:app];
 }
 
 @end

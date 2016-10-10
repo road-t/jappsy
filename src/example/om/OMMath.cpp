@@ -348,8 +348,8 @@ void Rotation::generateBars(Rotation* bars, int grace) {
 #define tempseqlen  18
 static int tempseq[tempseqlen] = { 4, -4, 0, 4, 0, -8, 0, 0, 0, 0, 0, 8, 0, 0, 44, 88, 444, 888 };
 static int tempofs = 0;
-#define graceslen   9
-static int graces[graceslen] = { 0, 4, 8, -4, -8, 44, 88, 444, 888 };
+//#define graceslen   9
+//static int graces[graceslen] = { 0, 4, 8, -4, -8, 44, 88, 444, 888 };
 int Rotation::generateGrace(Rotation* bars) {
     int grace = 0;
     grace = tempseq[tempofs]; tempofs++; if (tempofs >= tempseqlen) tempofs = 0;

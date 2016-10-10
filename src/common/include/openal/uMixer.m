@@ -18,7 +18,7 @@
 #import <OpenAL/al.h>
 #import <OpenAl/alc.h>
 #import <AudioToolbox/AudioToolbox.h>
-#import <AVFoundation/AVAudioSession.h>
+#import <AVFoundation/AVFoundation.h>
 #import <UIKit/UIKit.h>
 #import <libkern/OSAtomic.h>
 #import <data/uString.h>
@@ -733,7 +733,7 @@ void dequeueBuffers(ALuint channel) {
 			bool requestPlay = false;
 			if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StateRelease, StateRelease)) {
 				if (activeChannel != -1) {
-					NSLog(@"Release %d on %d", buffer->sampleBuffer, activeChannel);
+					//NSLog(@"Release %d on %d", buffer->sampleBuffer, activeChannel);
 					alSourceStop(activeChannel);
 					alSourcei(activeChannel, AL_BUFFER, AL_NONE);
 					alSourcei(activeChannel, AL_LOOPING, AL_FALSE);
@@ -745,7 +745,7 @@ void dequeueBuffers(ALuint channel) {
 					[audioChannels addObject:[NSNumber numberWithUnsignedInt:activeChannel]];
 					AtomicDecrement(&activeCount);
 				} else {
-					NSLog(@"Release %d", buffer->sampleBuffer);
+					//NSLog(@"Release %d", buffer->sampleBuffer);
 					
 					audioStateEndThread((uint32_t*)&(buffer->atom_state));
 					
@@ -762,7 +762,7 @@ void dequeueBuffers(ALuint channel) {
 				break;
 			} else if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StateStop, StateStop)) {
 				if (activeChannel != -1) {
-					NSLog(@"Stop %d on %d", buffer->sampleBuffer, activeChannel);
+					//NSLog(@"Stop %d on %d", buffer->sampleBuffer, activeChannel);
 					alSourceStop(activeChannel);
 					alSourcei(activeChannel, AL_BUFFER, AL_NONE);
 					alSourcei(activeChannel, AL_LOOPING, AL_FALSE);
@@ -780,7 +780,7 @@ void dequeueBuffers(ALuint channel) {
 				break;
 			} else if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StatePause, StatePause)) {
 				if (activeChannel != -1) {
-					NSLog(@"Pause %d on %d", buffer->sampleBuffer, activeChannel);
+					//NSLog(@"Pause %d on %d", buffer->sampleBuffer, activeChannel);
 					alSourcePause(activeChannel);
 					
 					audioStateEndThread((uint32_t*)&(buffer->atom_state));
@@ -806,13 +806,13 @@ void dequeueBuffers(ALuint channel) {
 					alSourceStop(activeChannel);
 				}
 				alSourcePlay(activeChannel);
-				NSLog(@"Play %d on %d", buffer->sampleBuffer, activeChannel);
+				//NSLog(@"Play %d on %d", buffer->sampleBuffer, activeChannel);
 			}
 			
 			ALint status;
 			alGetSourcei(activeChannel, AL_SOURCE_STATE, &status);
 			if (status != AL_PLAYING) {
-				NSLog(@"AutoStop %d on %d", buffer->sampleBuffer, activeChannel);
+				//NSLog(@"AutoStop %d on %d", buffer->sampleBuffer, activeChannel);
 				audioStateCheckRequestAndStop((uint32_t*)&(buffer->atom_state), StatePlay | StatePause);
 				continue;
 			}
@@ -828,7 +828,7 @@ void dequeueBuffers(ALuint channel) {
 			bool requestPlay = false;
 			if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StateRelease, StateRelease)) {
 				if (activeChannel != -1) {
-					NSLog(@"Release %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+					//NSLog(@"Release %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 					dequeueBuffers(activeChannel);
 					
 					AtomicExchange(&(buffer->atom_activeBuffers[0]), 0);
@@ -843,7 +843,7 @@ void dequeueBuffers(ALuint channel) {
 					[audioChannels addObject:[NSNumber numberWithUnsignedInt:activeChannel]];
 					AtomicDecrement(&activeCount);
 				} else {
-					NSLog(@"Release %d,%d,%d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2]);
+					//NSLog(@"Release %d,%d,%d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2]);
 					
 					audioStateEndThread((uint32_t*)&(buffer->atom_state));
 					
@@ -860,7 +860,7 @@ void dequeueBuffers(ALuint channel) {
 				break;
 			} else if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StateStop, StateStop)) {
 				if (activeChannel != -1) {
-					NSLog(@"Stop %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+					//NSLog(@"Stop %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 					dequeueBuffers(activeChannel);
 					
 					AtomicExchange(&(buffer->atom_activeBuffers[0]), 0);
@@ -878,7 +878,7 @@ void dequeueBuffers(ALuint channel) {
 					AtomicDecrement(&activeCount);
 					unlockAudioPlayer();
 				} else {
-					NSLog(@"Stop %d,%d,%d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2]);
+					//NSLog(@"Stop %d,%d,%d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2]);
 					AtomicExchange(&(buffer->atom_currentFrame), 0);
 					ExtAudioFileSeek(buffer->handle, 0);
 					
@@ -887,7 +887,7 @@ void dequeueBuffers(ALuint channel) {
 				break;
 			} else if (audioStateCheckRequestAndWait((uint32_t*)&(buffer->atom_state), StatePause, StatePause)) {
 				if (activeChannel != -1) {
-					NSLog(@"Pause %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+					//NSLog(@"Pause %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 					alSourcePause(activeChannel);
 					
 					audioStateEndThread((uint32_t*)&(buffer->atom_state));
@@ -901,10 +901,10 @@ void dequeueBuffers(ALuint channel) {
 					alSourcef(activeChannel, AL_GAIN, AtomicCompareExchange(&(buffer->atom_volume), 0, 0) / 65536.0);
 					alSourcei(activeChannel, AL_LOOPING, AL_FALSE);
 					
-					NSLog(@"Dequeue %d", activeChannel);
+					//NSLog(@"Dequeue %d", activeChannel);
 					dequeueBuffers(activeChannel);
 					
-					NSLog(@"Queue %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+					//NSLog(@"Queue %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 					alSourceQueueBuffers(activeChannel, 3, (ALuint*)(buffer->sampleBuffers));
 				}
 				requestPlay = true;
@@ -918,7 +918,7 @@ void dequeueBuffers(ALuint channel) {
 			while (count > 0) {
 				ALuint sampleBuffer = -1;
 				alSourceUnqueueBuffers(activeChannel, 1, &sampleBuffer);
-				NSLog(@"Unqueue %d on %d", sampleBuffer, activeChannel);
+				//NSLog(@"Unqueue %d on %d", sampleBuffer, activeChannel);
 				if (sampleBuffer == 0) {
 					sleep(0);
 				} else if (buffer->sampleBuffers[0] == sampleBuffer) {
@@ -932,7 +932,7 @@ void dequeueBuffers(ALuint channel) {
 			}
 			
 			if (audioStateCheckRestart((uint32_t*)&(buffer->atom_state))) {
-				NSLog(@"Dequeue %d", activeChannel);
+				//NSLog(@"Dequeue %d", activeChannel);
 				dequeueBuffers(activeChannel);
 				
 				AtomicExchange(&(buffer->atom_activeBuffers[0]), 0);
@@ -968,7 +968,7 @@ void dequeueBuffers(ALuint channel) {
 				if (size == 0) {
 					ending = true;
 				} else {
-					NSLog(@"Queue %d on %d", buffer->sampleBuffers[index], activeChannel);
+					//NSLog(@"Queue %d on %d", buffer->sampleBuffers[index], activeChannel);
 					alSourceQueueBuffers(activeChannel, 1, (ALuint*)&(buffer->sampleBuffers[index]));
 					AtomicExchange(&(buffer->atom_activeBuffers[index]), 1);
 					if (count == 0) {
@@ -980,14 +980,14 @@ void dequeueBuffers(ALuint channel) {
 			
 			if (requestPlay) {
 				alSourcePlay(activeChannel);
-				NSLog(@"Play %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+				//NSLog(@"Play %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 			}
 			
 			if (count == 0) {
 				ALint status;
 				alGetSourcei(activeChannel, AL_SOURCE_STATE, &status);
 				if (status != AL_PLAYING) {
-					NSLog(@"AutoStop %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
+					//NSLog(@"AutoStop %d,%d,%d on %d", buffer->sampleBuffers[0], buffer->sampleBuffers[1], buffer->sampleBuffers[2], activeChannel);
 					audioStateCheckRequestAndStop((uint32_t*)&(buffer->atom_state), StatePlay | StatePause);
 					continue;
 				}

@@ -126,7 +126,7 @@ void* onFatalCallback(const CString& error, void* userData) {
 
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
-	onlayout = NULL;
+	onUpdateState = NULL;
 }
 
 GLEngine::~GLEngine() {
@@ -158,15 +158,14 @@ void GLEngine::load(const char* json) {
 	context->loader->load(json);
 }
 
-void GLEngine::layout(bool minimize, bool animate) {
-	minimized = minimize;
-	if (onlayout != NULL)
-		onlayout(minimize, animate, onlayoutUserData);
+void GLEngine::updateState(int state) {
+	if (onUpdateState != NULL)
+		onUpdateState(state, onUpdateStateUserData);
 }
 
-void GLEngine::setOnLayout(onLayoutCallback onlayout, void* userData) {
-	this->onlayout = onlayout;
-	onlayoutUserData = userData;
+void GLEngine::setOnUpdateState(onUpdateStateCallback onUpdateState, void* userData) {
+	this->onUpdateState = onUpdateState;
+	onUpdateStateUserData = userData;
 }
 
 void GLEngine::webLocation(int index, const CString& url) {
@@ -194,7 +193,7 @@ void GLEngine::onRender() {
 }
 
 void GLEngine::onUpdate(int width, int height) {
-	onResize(width, height, minimized);
+	onResize(width, height);
 	context->frame->width = width;
 	context->frame->height = height;
 	context->updateRatio(width, height);

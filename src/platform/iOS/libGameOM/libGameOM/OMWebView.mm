@@ -42,18 +42,6 @@
     _index = index;
 }
 
-- (void)loadRequest:(NSURLRequest *)request {
-    [super loadRequest:request];
-}
-
-- (void)loadHTMLString:(NSString *)string baseURL:(nullable NSURL *)baseURL {
-    [super loadHTMLString:string baseURL:baseURL];
-}
-
-- (void)loadData:(NSData *)data MIMEType:(NSString *)MIMEType textEncodingName:(NSString *)textEncodingName baseURL:(NSURL *)baseURL {
-    [super loadData:data MIMEType:MIMEType textEncodingName:textEncodingName baseURL:baseURL];
-}
-
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     NSString* url = [[request URL] absoluteString];
     if ([url hasPrefix:@"ios:"]) {

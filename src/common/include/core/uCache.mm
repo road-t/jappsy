@@ -198,7 +198,7 @@ void Cache::deleteRecursive(const CString& directory) {
 
 Cache::Cache(const CString& cacheDir) {
 	LOG("Cache > Create %ls", (wchar_t*)cacheDir);
-	uint64_t maxMemory = getMaxMemory() / 10 - getUsedMemory();
+	/*uint64_t maxMemory = getMaxMemory() / 10 - getUsedMemory();*/
 	uint64_t cacheSize = 128 * 1024 * 1024; // maxMemory?
 	LOG("Cache > Size %lld", cacheSize);
 	

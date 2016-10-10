@@ -876,6 +876,8 @@ extern "C" {
 					}
 					break;
 				}
+					
+				default:;
 			}
 			
 			memFree(j);
@@ -3193,7 +3195,7 @@ extern "C" {
 	
 	bool json_call_array_node(struct JsonContext* ctx, char** ptrptr, int index) {
 		char ch;
-		struct JsonNode* node = NULL;
+		/*struct JsonNode* node = NULL;*/
 		while (json_next != '\0') {
 			if (ch == '\"') {
 				if (ctx->callbacks->onarray.onstring != NULL) {
@@ -3427,7 +3429,7 @@ extern "C" {
 	
 	bool json_call_object_node(struct JsonContext* ctx, char** ptrptr, const char* key) {
 		char ch;
-		struct JsonNode* node = NULL;
+		/*struct JsonNode* node = NULL;*/
 		while (json_next != '\0') {
 			if (ch == '\"') {
 				if (ctx->callbacks->onobject.onstring != NULL) {
@@ -3892,6 +3894,7 @@ extern "C" {
 						case JSON_TYPE_STRING:
 							childKey->value.cs = memNew(childKey->value.cs, CString(*(nodeKey->value.cs)));
 							break;
+						default:;
 					}
 					
 					if (childKey->value.cs == NULL) {
@@ -4289,6 +4292,8 @@ void JsonNode::clear(JsonType type) throw(const char*) {
 			}
 			break;
 		}
+			
+		default:;
 	}
 	
 	value.n.v.i = 0;

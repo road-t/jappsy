@@ -33,6 +33,7 @@
 	} else {
 		self.view = omView;
 	}
+	[omView updateState:OMVIEW_SHOW];
 	
 	// Disable Animation Rotation and Keyboard
 	//[UIView setAnimationsEnabled:NO];
@@ -57,47 +58,6 @@
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
 	return UIStatusBarStyleLightContent;
-}
-
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
-}
-*/
-
-static int enterCount = 0;
-
--(BOOL)textView:(UITextView *)textView shouldChangeTextInRange:
-(NSRange)range replacementText:(NSString *)text{
-	if ([text isEqualToString:@"\n"]) {
-		enterCount++;
-		if (enterCount > 1) {
-			[textView resignFirstResponder];
-			return NO;
-		}
-	} else {
-		enterCount = 0;
-	}
-    return YES;
-}
--(void)textViewDidBeginEditing:(UITextView *)textView{
-    NSLog(@"Did begin editing");
-}
--(void)textViewDidChange:(UITextView *)textView{
-    NSLog(@"Did Change");
-    
-}
--(void)textViewDidEndEditing:(UITextView *)textView{
-    NSLog(@"Did End editing");
-    
-}
--(BOOL)textViewShouldEndEditing:(UITextView *)textView{
-    [textView resignFirstResponder];
-    return YES;
 }
 
 @end

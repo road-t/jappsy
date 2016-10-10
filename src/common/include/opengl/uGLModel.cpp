@@ -202,8 +202,6 @@ GLModelMesh::~GLModelMesh() {
 }
 
 void GLModelMesh::render(GLRender* context, const GLModel* model) {
-	context->shaderModel;
-	
 	GLMaterial* mat = model->materials.get(material);
 	glUniform4fv(context->shaderModel->uColors, mat->colors4fv.count() / 4, mat->colors4fv.items());
 	
@@ -293,7 +291,7 @@ void GLModel::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	
 	glEnable(GL_DEPTH_TEST);
 	
-	GLuint index = shader->shader->bind(0);
+	/*GLuint index = */(void)shader->shader->bind(0);
 	
 	glUniform3fv(shader->uAmbientLightColor, 1, scene->ambient.v);
 	glUniform1i(shader->uLightsCount, scene->lights1i);
@@ -391,7 +389,8 @@ GLModel* GLModels::createModel(const CString& key) throw(const char*) {
 
 //===============================
 
-#define ModelLog(fmt, ...) CString::format(fmt, ## __VA_ARGS__).log()
+//#define ModelLog(fmt, ...) CString::format(fmt, ## __VA_ARGS__).log()
+#define ModelLog(fmt, ...)
 
 void GLModels::onjson_root_start(struct JsonContext* ctx, void* target) {
 	//ModelJsonParser* parser = (ModelJsonParser*)target;
@@ -556,12 +555,12 @@ void GLModels::onjson_node_meshes_number(struct JsonContext* ctx, const int inde
 	if (number.is_float) {
 		data->meshes.push(number.v.f);
 	} else {
-		data->meshes.push(number.v.i);
+		data->meshes.push((uint32_t)number.v.i);
 	}
 }
 
 void GLModels::onjson_root_array_start(struct JsonContext* ctx, const char* key, void* target) {
-	ModelJsonParser* parser = (ModelJsonParser*)target;
+	/*ModelJsonParser* parser = (ModelJsonParser*)target;*/
 	
 	JsonClearCallbacks(ctx->callbacks, target);
 	if (strcmp(key, "meshes") == 0) {
@@ -572,7 +571,7 @@ void GLModels::onjson_root_array_start(struct JsonContext* ctx, const char* key,
 }
 
 void GLModels::onjson_meshes_start(struct JsonContext* ctx, const char* key, void* target) {
-	ModelJsonParser* parser = (ModelJsonParser*)target;
+	/*ModelJsonParser* parser = (ModelJsonParser*)target;*/
 
 	ModelLog(L"model.meshes");
 	
@@ -628,13 +627,13 @@ void GLModels::onjson_mesh_number(struct JsonContext* ctx, const char* key, cons
 		if (number.is_float) {
 			data->materialindex = number.v.f;
 		} else {
-			data->materialindex = number.v.i;
+			data->materialindex = (uint32_t)number.v.i;
 		}
 	}
 }
 
 void GLModels::onjson_mesh_array_start(struct JsonContext* ctx, const char* key, void* target) {
-	ModelJsonParserMeshData* data = (ModelJsonParserMeshData*)target;
+	/*ModelJsonParserMeshData* data = (ModelJsonParserMeshData*)target;*/
 
 	JsonClearCallbacks(ctx->callbacks, target);
 	if (strcmp(key, "vertices") == 0) {
@@ -771,7 +770,7 @@ void GLModels::onjson_faces_end(struct JsonContext* ctx, const char* key, void* 
 }
 
 void GLModels::onjson_triangle_start(struct JsonContext* ctx, const int index, void* target) {
-	ModelJsonParserMeshData* data = (ModelJsonParserMeshData*)target;
+	/*ModelJsonParserMeshData* data = (ModelJsonParserMeshData*)target;*/
 	
 	JsonClearCallbacks(ctx->callbacks, target);
 	ctx->callbacks->onarray.onnumber = onjson_triangle_number;
@@ -797,7 +796,7 @@ void GLModels::onjson_triangle_number(struct JsonContext* ctx, const int index, 
 }
 
 void GLModels::onjson_materials_start(struct JsonContext* ctx, const char* key, void* target) {
-	ModelJsonParser* parser = (ModelJsonParser*)target;
+	/*ModelJsonParser* parser = (ModelJsonParser*)target;*/
 	
 	ModelLog(L"model.materials");
 	
@@ -922,7 +921,7 @@ void GLModels::onjson_material_property_number(struct JsonContext* ctx, const ch
 		if (number.is_float) {
 			data->semantic = number.v.f;
 		} else {
-			data->semantic = number.v.i;
+			data->semantic = (uint32_t)number.v.i;
 		}
 	} else if (strcmp(key, "value") == 0) {
 		GLfloat value = (number.is_float ? number.v.f : number.v.i);

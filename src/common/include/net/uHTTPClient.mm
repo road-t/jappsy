@@ -181,7 +181,8 @@ uint64_t RFC2616toUTC(const CString& date) {
 	t.tm_min = minute;
 	t.tm_sec = second;
 	t.tm_wday = weekDay;
-	t.tm_zone = "UTC";
+	char UTC[] = "UTC";
+	t.tm_zone = UTC;
 	
 	return ((uint64_t)timegm(&t)) * 1000;
 }
@@ -195,6 +196,8 @@ CString UTCtoRFC2616(uint64_t time) {
 }
 
 #if defined(__IOS__)
+
+#import <UIKit/UIKit.h>
 
 Stream* HttpLoadCache(void* userData) {
 	try {
@@ -222,25 +225,8 @@ void* HttpSync(void* threadData) {
 	@autoreleasepool {
 		__sync_synchronize();
 		
-		Stream* stream = NULL;
-		
 		if (http->cache) {
 			http->cacheStream = HttpLoadCache(http->userData);
-			/*
-			if (stream != NULL) {
-				try {
-					bool result = http->onstream(http->url, stream, http->userData);
-					delete stream;
-					if (result) {
-						http->onrelease(http->userData);
-						memDelete(http);
-						return NULL;
-					}
-				} catch (...) {
-					delete stream;
-				}
-			}
-			 */
 		}
 		
 		NSURL *url = [NSURL URLWithString:(NSString*)(http->url)];
@@ -264,62 +250,144 @@ void* HttpSync(void* threadData) {
 		[request setTimeoutInterval:(http->timeout)];
 		[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
 		
+		volatile Stream* resultStream = NULL;
+		volatile CString* resultError = NULL;
+		
 		do {
-			NSURLResponse *response = nil;
-			NSError *error = nil;
-			NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-			
-			if (response != nil) {
-				NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-				int status = (int)[httpResponse statusCode];
+			if ([[UIDevice currentDevice].systemVersion floatValue] >= 9.0f) {
+				jlock sync = false;
 				
-				if (status == 304) { // Not Modified
-					if (http->cacheStream != NULL) {
-						try {
-							bool result = http->onstream(http->url, http->cacheStream, http->userData);
-							delete http->cacheStream;
-							http->cacheStream = NULL;
-							if (result) {
-								break;
-							}
-						} catch (...) {
-							delete http->cacheStream;
-							http->cacheStream = NULL;
-						}
-					}
-				} else if (status == 200) { // OK
-					if (data != nil) {
-						try {
-							Stream* stream = NSDataToStream(data);
-
-							NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
-							NSString* modified = [headers valueForKey:@"Last-Modified"];
-							if (modified == nil) {
-								modified = [headers valueForKey:@"Expires"];
-								if (modified == nil) {
-									modified = [headers valueForKey:@"Date"];
+				AtomicLock(&sync);
+				NSURLSessionDataTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+					__sync_synchronize();
+				
+					@autoreleasepool {
+						if (response != nil) {
+							NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+							int status = (int)[httpResponse statusCode];
+							
+							if (status == 304) { // Not Modified
+								if (http->cacheStream != NULL) {
+									AtomicSetPtr(&resultStream, http->cacheStream);
+								}
+							} else if (status == 200) { // OK
+								if (data != nil) {
+									try {
+										Stream* stream = NSDataToStream(data);
+										
+										NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+										NSString* modified = [headers valueForKey:@"Last-Modified"];
+										if (modified == nil) {
+											modified = [headers valueForKey:@"Expires"];
+											if (modified == nil) {
+												modified = [headers valueForKey:@"Date"];
+											}
+										}
+										
+										if (modified != nil) {
+											stream->setModificationDate(RFC2616toUTC(modified));
+										}
+										
+										HttpSaveCache(stream, http->userData);
+										
+										AtomicSetPtr(&resultStream, stream);
+									} catch (...) {
+									}
 								}
 							}
-							
-							if (modified != nil) {
-								stream->setModificationDate(RFC2616toUTC(modified));
-							}
-							
-							HttpSaveCache(stream, http->userData);
+						}
+						if (error != nil) {
+							AtomicSetPtr(&resultError, new CString([error localizedDescription]));
+						}
+					}
 
-							bool result = http->onstream(http->url, stream, http->userData);
-							delete stream;
-							if (result) {
-								break;
+					AtomicUnlock(&sync);
+				}];
+				[task resume];
+			
+				AtomicLock(&sync);
+				AtomicUnlock(&sync);
+				__sync_synchronize();
+			} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
+				NSURLResponse *response = nil;
+				NSError *error = nil;
+
+				NSData *data = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+			
+				if (response != nil) {
+					NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+					int status = (int)[httpResponse statusCode];
+				
+					if (status == 304) { // Not Modified
+						if (http->cacheStream != NULL) {
+							resultStream = http->cacheStream;
+						}
+					} else if (status == 200) { // OK
+						if (data != nil) {
+							try {
+								Stream* stream = NSDataToStream(data);
+								
+								NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+								NSString* modified = [headers valueForKey:@"Last-Modified"];
+								if (modified == nil) {
+									modified = [headers valueForKey:@"Expires"];
+									if (modified == nil) {
+										modified = [headers valueForKey:@"Date"];
+									}
+								}
+								
+								if (modified != nil) {
+									stream->setModificationDate(RFC2616toUTC(modified));
+								}
+							
+								HttpSaveCache(stream, http->userData);
+								
+								resultStream = stream;
+							} catch (...) {
 							}
-						} catch (...) {
 						}
 					}
 				}
+				if (error != nil) {
+					resultError = new CString([error localizedDescription]);
+				}
+#endif
 			}
+			
+			if (resultStream != NULL) {
+				if (resultStream == http->cacheStream) {
+					resultStream = NULL;
+					try {
+						bool result = http->onstream(http->url, http->cacheStream, http->userData);
+						delete http->cacheStream;
+						http->cacheStream = NULL;
+						if (result) {
+							break;
+						}
+					} catch (...) {
+						delete http->cacheStream;
+						http->cacheStream = NULL;
+					}
+				} else {
+					try {
+						bool result = http->onstream(http->url, (Stream*)resultStream, http->userData);
+						delete resultStream;
+						resultStream = NULL;
+						if (result) {
+							break;
+						}
+					} catch (...) {
+					}
+				}
+			}
+				
 			int timeout = 1000;
 			if (http->onerror != NULL) {
-				timeout = http->onerror(http->url, [error localizedDescription], http->userData);
+				if (resultError == NULL) {
+					resultError = new CString();
+				}
+				timeout = http->onerror(http->url, *((CString*)resultError), http->userData);
 			}
 			if (http->retry > 0) {
 				if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
@@ -341,9 +409,20 @@ void* HttpSync(void* threadData) {
 						http->cacheStream = NULL;
 					}
 				}
-				http->onfatal(http->url, [error localizedDescription], http->userData);
+				if (resultError == NULL) {
+					resultError = new CString();
+				}
+				http->onfatal(http->url, *((CString*)resultError), http->userData);
 				break;
 			}
+
+			if (resultStream != NULL) {
+				delete resultStream;
+			}
+			if (resultError != NULL) {
+				delete resultError;
+			}
+			
 			systemSleep(timeout);
 		} while (true);
 		
@@ -363,25 +442,8 @@ void* HttpAsync(void* threadData) {
 	@autoreleasepool {
 		__sync_synchronize();
 		
-		Stream* stream = NULL;
-		
 		if (http->cache) {
 			http->cacheStream = HttpLoadCache(http->userData);
-			/*
-			if (stream != NULL) {
-				try {
-					bool result = http->onstream(http->url, stream, http->userData);
-					delete stream;
-					if (result) {
-						http->onrelease(http->userData);
-						memDelete(http);
-						return NULL;
-					}
-				} catch (...) {
-					delete stream;
-				}
-			}
-			 */
 		}
 
 		NSURL *url = [NSURL URLWithString:(NSString*)(http->url)];
@@ -406,16 +468,71 @@ void* HttpAsync(void* threadData) {
 		[request setCachePolicy:NSURLRequestReloadIgnoringCacheData];
 		
 		NSOperationQueue *queue = [[NSOperationQueue alloc] init];
-		[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
-			bool repeat = false;
-			int timeout = 1000;
-			@autoreleasepool {
-				do {
-					if (response != nil) {
-						NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
-						int status = (int)[httpResponse statusCode];
-						
-						if (status == 304) { // Not Modified
+		if ([[UIDevice currentDevice].systemVersion floatValue] >= 9.0f) {
+			NSURLSessionDataTask* task = [[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+				bool repeat = false;
+				int timeout = 1000;
+				@autoreleasepool {
+					do {
+						if (response != nil) {
+							NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+							int status = (int)[httpResponse statusCode];
+							
+							if (status == 304) { // Not Modified
+								if (http->cacheStream != NULL) {
+									try {
+										bool result = http->onstream(http->url, http->cacheStream, http->userData);
+										delete http->cacheStream;
+										http->cacheStream = NULL;
+										if (result) {
+											break;
+										}
+									} catch (...) {
+										delete http->cacheStream;
+										http->cacheStream = NULL;
+									}
+								}
+							} else if (status == 200) { // OK
+								if (data != nil) {
+									try {
+										Stream* stream = NSDataToStream(data);
+										
+										NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+										NSString* modified = [headers valueForKey:@"Last-Modified"];
+										if (modified == nil) {
+											modified = [headers valueForKey:@"Expires"];
+											if (modified == nil) {
+												modified = [headers valueForKey:@"Date"];
+											}
+										}
+										
+										if (modified != nil) {
+											stream->setModificationDate(RFC2616toUTC(modified));
+										}
+										
+										HttpSaveCache(stream, http->userData);
+										
+										bool result = http->onstream(http->url, stream, http->userData);
+										delete stream;
+										if (result) {
+											break;
+										}
+									} catch (...) {
+									}
+								}
+							}
+						}
+						if (http->onerror != NULL) {
+							timeout = http->onerror(http->url, [error localizedDescription], http->userData);
+						}
+						if (http->retry > 0) {
+							if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+								http->onfatal(http->url, L"Shutdown", http->userData);
+								break;
+							}
+							http->retry--;
+							repeat = true;
+						} else if (http->retry == 0) {
 							if (http->cacheStream != NULL) {
 								try {
 									bool result = http->onstream(http->url, http->cacheStream, http->userData);
@@ -429,78 +546,124 @@ void* HttpAsync(void* threadData) {
 									http->cacheStream = NULL;
 								}
 							}
-						} else if (status == 200) { // OK
-							if (data != nil) {
-								try {
-									Stream* stream = NSDataToStream(data);
-
-									NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
-									NSString* modified = [headers valueForKey:@"Last-Modified"];
-									if (modified == nil) {
-										modified = [headers valueForKey:@"Expires"];
-										if (modified == nil) {
-											modified = [headers valueForKey:@"Date"];
+							http->onfatal(http->url, [error localizedDescription], http->userData);
+							break;
+						}
+					} while (false);
+					if (!repeat) {
+						http->onrelease(http->userData);
+						if (http->cacheStream != NULL) {
+							delete http->cacheStream;
+							http->cacheStream = NULL;
+						}
+						memDelete(http);
+					}
+				}
+				if (repeat) {
+					systemSleep(timeout);
+					(void)MainThreadAsync(HttpAsync, NULL, http);
+				}
+			}];
+			[task resume];
+		} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 90000
+			[NSURLConnection sendAsynchronousRequest:request queue:queue completionHandler:^(NSURLResponse *response, NSData *data, NSError *error) {
+				bool repeat = false;
+				int timeout = 1000;
+				@autoreleasepool {
+					do {
+						if (response != nil) {
+							NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+							int status = (int)[httpResponse statusCode];
+							
+							if (status == 304) { // Not Modified
+								if (http->cacheStream != NULL) {
+									try {
+										bool result = http->onstream(http->url, http->cacheStream, http->userData);
+										delete http->cacheStream;
+										http->cacheStream = NULL;
+										if (result) {
+											break;
 										}
+									} catch (...) {
+										delete http->cacheStream;
+										http->cacheStream = NULL;
 									}
-									
-									if (modified != nil) {
-										stream->setModificationDate(RFC2616toUTC(modified));
+								}
+							} else if (status == 200) { // OK
+								if (data != nil) {
+									try {
+										Stream* stream = NSDataToStream(data);
+										
+										NSDictionary* headers = [(NSHTTPURLResponse *)response allHeaderFields];
+										NSString* modified = [headers valueForKey:@"Last-Modified"];
+										if (modified == nil) {
+											modified = [headers valueForKey:@"Expires"];
+											if (modified == nil) {
+												modified = [headers valueForKey:@"Date"];
+											}
+										}
+										
+										if (modified != nil) {
+											stream->setModificationDate(RFC2616toUTC(modified));
+										}
+										
+										HttpSaveCache(stream, http->userData);
+										
+										bool result = http->onstream(http->url, stream, http->userData);
+										delete stream;
+										if (result) {
+											break;
+										}
+									} catch (...) {
 									}
-									
-									HttpSaveCache(stream, http->userData);
-
-									bool result = http->onstream(http->url, stream, http->userData);
-									delete stream;
+								}
+							}
+						}
+						if (http->onerror != NULL) {
+							timeout = http->onerror(http->url, [error localizedDescription], http->userData);
+						}
+						if (http->retry > 0) {
+							if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
+								http->onfatal(http->url, L"Shutdown", http->userData);
+								break;
+							}
+							http->retry--;
+							repeat = true;
+						} else if (http->retry == 0) {
+							if (http->cacheStream != NULL) {
+								try {
+									bool result = http->onstream(http->url, http->cacheStream, http->userData);
+									delete http->cacheStream;
+									http->cacheStream = NULL;
 									if (result) {
 										break;
 									}
 								} catch (...) {
+									delete http->cacheStream;
+									http->cacheStream = NULL;
 								}
 							}
-						}
-					}
-					if (http->onerror != NULL) {
-						timeout = http->onerror(http->url, [error localizedDescription], http->userData);
-					}
-					if (http->retry > 0) {
-						if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
-							http->onfatal(http->url, L"Shutdown", http->userData);
+							http->onfatal(http->url, [error localizedDescription], http->userData);
 							break;
 						}
-						http->retry--;
-						repeat = true;
-					} else if (http->retry == 0) {
+					} while (false);
+					if (!repeat) {
+						http->onrelease(http->userData);
 						if (http->cacheStream != NULL) {
-							try {
-								bool result = http->onstream(http->url, http->cacheStream, http->userData);
-								delete http->cacheStream;
-								http->cacheStream = NULL;
-								if (result) {
-									break;
-								}
-							} catch (...) {
-								delete http->cacheStream;
-								http->cacheStream = NULL;
-							}
+							delete http->cacheStream;
+							http->cacheStream = NULL;
 						}
-						http->onfatal(http->url, [error localizedDescription], http->userData);
-						break;
+						memDelete(http);
 					}
-				} while (false);
-				if (!repeat) {
-					http->onrelease(http->userData);
-					if (http->cacheStream != NULL) {
-						delete http->cacheStream;
-						http->cacheStream = NULL;
-					}
-					memDelete(http);
 				}
-			}
-			if (repeat) {
-				systemSleep(timeout);
-				(void)MainThreadAsync(HttpAsync, NULL, http);
-			}
-		}];
+				if (repeat) {
+					systemSleep(timeout);
+					(void)MainThreadAsync(HttpAsync, NULL, http);
+				}
+			}];
+#endif
+		}
 	}
 	
 	return NULL;

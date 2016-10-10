@@ -329,7 +329,7 @@ void GLTouchScreen::analyze(float x, float y) {
 					bool circle = true;
 					GLfloat drm = 0;
 					for (int i = 0; i < listlength; i++) {
-						GLfloat dr = floorf(fabsf((list[i].z / mr) - 1.0) * 100.0);
+						GLfloat dr = floorf(fabsf((list[i].z / mr) - 1.0f) * 100.0f);
 						if (dr > drm) drm = dr;
 						if (dr > 50.0) {
 							circle = false;

@@ -67,18 +67,9 @@
 
 @end
 
-enum {
-    OMVIEW_LOAD_ERROR = -2,
-    OMVIEW_LOAD = -1,
-    OMVIEW_GAME = 0,
-    OMVIEW_HELP = 1,
-    OMVIEW_ERROR = 2
-} OMViewState;
-
 @implementation OMView
 
 @synthesize engine;
-@synthesize state;
 
 @synthesize calendarView;
 @synthesize gameView;
@@ -121,6 +112,8 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 
 - (instancetype) init {
     if ((self = [super init])) {
+        engine = NULL;
+        
         calendarView = [[OMWebView alloc] init];
         [calendarView setOpaque:NO];
         calendarView.backgroundColor = [UIColor clearColor];
@@ -140,11 +133,14 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [helpView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
         [self addSubview:helpView];
         
+        const char *sOMLoadHtml =
+            #include "../../example/om/OMLoadHtml.res"
+        ;
         loadView = [[OMWebView alloc] init];
         [loadView setOpaque:NO];
         loadView.backgroundColor = [UIColor clearColor];
         [loadView setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [loadView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
+        [loadView loadHTMLString:(NSString*)CString(sOMLoadHtml) baseURL:nil];
         [self addSubview:loadView];
         
         errorView = [[OMWebView alloc] init];
@@ -163,7 +159,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         lpvError = lphError = llvError = llhError = NULL;
         
         _startup = TRUE;
-        state = OMVIEW_LOAD;
+        _state = OMVIEW_HIDE | OMVIEW_STOP | OMVIEW_RESUME | OMVIEW_LOAD;
 
         [self setTranslatesAutoresizingMaskIntoConstraints:NO];
         self.backgroundColor = [UIColor blackColor];
@@ -272,6 +268,8 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [layout addObjectsFromArray:lphHelp];
         [layout addObjectsFromArray:lpvLoad];
         [layout addObjectsFromArray:lphError];
+        
+        _state |= OMVIEW_RESTORE;
     } else {
         _defaultPortrait = FALSE;
         _portrait = FALSE;
@@ -282,6 +280,8 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [layout addObjectsFromArray:llhHelp];
         [layout addObjectsFromArray:llvLoad];
         [layout addObjectsFromArray:llhError];
+        
+        _state |= OMVIEW_MINIMIZE;
     }
 
     lastLayout = layout;
@@ -293,15 +293,16 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
     [helpView setHidden:YES];
     errorView.alpha = 0.0f;
     [errorView setHidden:YES];
+    [self setHidden:YES];
 }
 
 - (void) orientationChanged:(NSNotification *)notification {
     UIDeviceOrientation deviceOrientation = [UIDevice currentDevice].orientation;
     
     if (deviceOrientation == UIDeviceOrientationFaceDown) {
-        [self onPause:false];
+        [self updateState:OMVIEW_PAUSE];
     } else if (deviceOrientation == UIDeviceOrientationFaceUp) {
-        [self onResume:false];
+        [self updateState:OMVIEW_RESUME];
     } else {
         if (deviceOrientation != UIDeviceOrientationUnknown) {
             if (_startup) {
@@ -309,24 +310,24 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
                 if (deviceOrientation != UIDeviceOrientationPortrait) {
                     _portrait = false;
                     if (_defaultPortrait) {
-                        [gameView layout:false animate:false];
+                        [self updateState:OMVIEW_RESTORE];
                     } else {
-                        [gameView layout:true animate:false];
+                        [self updateState:OMVIEW_MINIMIZE];
                     }
                 } else {
                     _portrait = true;
-                    [gameView layout:false animate:false];
+                    [self updateState:OMVIEW_RESTORE];
                 }
             } else {
                 if (deviceOrientation != UIDeviceOrientationPortrait) {
                     if (_portrait) {
                         _portrait = false;
-                        [gameView layout:[gameView minimized] animate:false];
+                        [self updateState:OMVIEW_UPDATE];
                     }
                 } else {
                     if (!_portrait) {
                         _portrait = true;
-                        [gameView layout:[gameView minimized] animate:false];
+                        [self updateState:OMVIEW_UPDATE];
                     }
                 }
             }
@@ -334,146 +335,239 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
     }
 }
 
-void onLayout(bool minimize, bool animate, void* userData) {
-    OMView* omView = (__bridge OMView*)userData;
-    [omView onLayout:minimize animate:animate];
+struct onUpdateStateThreadData {
+    OMView* omView;
+    int state;
+};
+
+void* onUpdateStateThread(void* userData) {
+    onUpdateStateThreadData* thread = (onUpdateStateThreadData*)userData;
+    [thread->omView updateState:thread->state];
+    return NULL;
 }
 
-- (void) onLayout:(BOOL)minimize animate:(BOOL)animate {
-    layout = [[NSMutableArray alloc] init];
+void onUpdateState(int state, void* userData) {
+    onUpdateStateThreadData thread;
+    thread.omView = (__bridge OMView*)userData;
+    thread.state = state;
+    MainThreadSync(onUpdateStateThread, &thread);
+}
+
+- (void) updateState:(int)state {
+    int update = 0;
     
-    if (_portrait) {
-        if (minimize) {
-            [layout addObjectsFromArray:lpmCalendar];
-            [layout addObjectsFromArray:lpmGame];
-        } else {
-            [layout addObjectsFromArray:lpnCalendar];
-            [layout addObjectsFromArray:lpnGame];
-        }
-        switch (state) {
-            case OMVIEW_LOAD_ERROR:
-                [layout addObjectsFromArray:lphHelp];
-                [layout addObjectsFromArray:lpvLoad];
-                [layout addObjectsFromArray:lpvError];
-                break;
-            case OMVIEW_LOAD:
-                [layout addObjectsFromArray:lphHelp];
-                [layout addObjectsFromArray:lpvLoad];
-                [layout addObjectsFromArray:lphError];
-                break;
-            case OMVIEW_GAME:
-                [layout addObjectsFromArray:lphHelp];
-                [layout addObjectsFromArray:lphLoad];
-                [layout addObjectsFromArray:lphError];
-                break;
-            case OMVIEW_HELP:
-                [layout addObjectsFromArray:lpvHelp];
-                [layout addObjectsFromArray:lphLoad];
-                [layout addObjectsFromArray:lphError];
-                break;
-            case OMVIEW_ERROR:
-                [layout addObjectsFromArray:lphHelp];
-                [layout addObjectsFromArray:lphLoad];
-                [layout addObjectsFromArray:lpvError];
-                break;
-        }
-    } else {
-        if (minimize) {
-            [layout addObjectsFromArray:llmCalendar];
-            [layout addObjectsFromArray:llmGame];
-        } else {
-            [layout addObjectsFromArray:llnCalendar];
-            [layout addObjectsFromArray:llnGame];
-        }
-        switch (state) {
-            case OMVIEW_LOAD_ERROR:
-                [layout addObjectsFromArray:llhHelp];
-                [layout addObjectsFromArray:llvLoad];
-                [layout addObjectsFromArray:llvError];
-                break;
-            case OMVIEW_LOAD:
-                [layout addObjectsFromArray:llhHelp];
-                [layout addObjectsFromArray:llvLoad];
-                [layout addObjectsFromArray:llhError];
-                break;
-            case OMVIEW_GAME:
-                [layout addObjectsFromArray:llhHelp];
-                [layout addObjectsFromArray:llhLoad];
-                [layout addObjectsFromArray:llhError];
-                break;
-            case OMVIEW_HELP:
-                [layout addObjectsFromArray:llvHelp];
-                [layout addObjectsFromArray:llhLoad];
-                [layout addObjectsFromArray:llhError];
-                break;
-            case OMVIEW_ERROR:
-                [layout addObjectsFromArray:llhHelp];
-                [layout addObjectsFromArray:llhLoad];
-                [layout addObjectsFromArray:llvError];
-                break;
+    if ((state & OMVIEW_RUNNING) != (_state & OMVIEW_RUNNING)) {
+        if (state & OMVIEW_STOP) {
+            _state = (_state & (~OMVIEW_RUNNING)) | OMVIEW_STOP;
+            update |= OMVIEW_STOP;
+            state = state & (~OMVIEW_ANIMATE);
+        } else if (state & OMVIEW_RUN) {
+            _state = (_state & (~OMVIEW_RUNNING)) | OMVIEW_RUN;
+            update |= OMVIEW_RUN;
         }
     }
     
-    if ((lastLayout == NULL) || (![layout isEqualToArray:lastLayout])) {
-        if (animate) {
+    if ((state & OMVIEW_VISIBILITY) != (_state & OMVIEW_VISIBILITY)) {
+        if (state & OMVIEW_HIDE) {
+            _state = (_state & (~OMVIEW_VISIBILITY)) | OMVIEW_HIDE;
+            update |= OMVIEW_HIDE;
+        } else if (state & OMVIEW_SHOW) {
+            _state = (_state & (~OMVIEW_VISIBILITY)) | OMVIEW_SHOW;
+            update |= OMVIEW_SHOW;
+        }
+    }
+    
+    if ((state & OMVIEW_SUSPENDED) != (_state & OMVIEW_SUSPENDED)) {
+        if (state & OMVIEW_PAUSE) {
+            _state = (_state & (~OMVIEW_SUSPENDED)) | OMVIEW_PAUSE;
+            update |= OMVIEW_PAUSE;
+        } else if (state & OMVIEW_RESUME) {
+            _state = (_state & (~OMVIEW_SUSPENDED)) | OMVIEW_RESUME;
+            update |= OMVIEW_RESUME;
+        }
+    }
+    
+    if ((state & OMVIEW_MINIMIZED) != (_state & OMVIEW_MINIMIZED)) {
+        if (state & OMVIEW_MINIMIZE) {
+            _state = (_state & (~OMVIEW_MINIMIZED)) | OMVIEW_MINIMIZE;
+            update |= OMVIEW_MINIMIZE;
+            if (engine != NULL) {
+                engine->minimized = true;
+            }
+        } else if (state & OMVIEW_RESTORE) {
+            _state = (_state & (~OMVIEW_MINIMIZED)) | OMVIEW_RESTORE;
+            update |= OMVIEW_RESTORE;
+            if (engine != NULL) {
+                engine->minimized = false;
+            }
+        }
+    }
+    
+    if ( ((state & OMVIEW_ACTIVITY) != 0) && ((state & OMVIEW_ACTIVITY) != (_state & OMVIEW_ACTIVITY)) ) {
+        _state = (_state & (~OMVIEW_ACTIVITY)) | (state & OMVIEW_ACTIVITY);
+        update |= (state & OMVIEW_ACTIVITY);
+    }
+    
+    if ((state == OMVIEW_UPDATE) || (update != 0)) {
+        if ( ((_state & OMVIEW_STOP) != 0) || ((_state & OMVIEW_HIDE) != 0) || ((_state & OMVIEW_PAUSE) != 0) ) {
+            [gameView onPause];
+        } else {
+            [gameView onResume];
+        }
+        
+        int activity = (_state & OMVIEW_ACTIVITY);
+        
+        layout = [[NSMutableArray alloc] init];
+        
+        if (_portrait) {
+            if ((_state & OMVIEW_MINIMIZE) != 0) {
+                [layout addObjectsFromArray:lpmCalendar];
+                [layout addObjectsFromArray:lpmGame];
+            } else {
+                [layout addObjectsFromArray:lpnCalendar];
+                [layout addObjectsFromArray:lpnGame];
+            }
+            switch (activity) {
+                case OMVIEW_LOAD_ERROR:
+                    [layout addObjectsFromArray:lphHelp];
+                    [layout addObjectsFromArray:lpvLoad];
+                    [layout addObjectsFromArray:lpvError];
+                    break;
+                case OMVIEW_LOAD:
+                    [layout addObjectsFromArray:lphHelp];
+                    [layout addObjectsFromArray:lpvLoad];
+                    [layout addObjectsFromArray:lphError];
+                    break;
+                case OMVIEW_GAME:
+                    [layout addObjectsFromArray:lphHelp];
+                    [layout addObjectsFromArray:lphLoad];
+                    [layout addObjectsFromArray:lphError];
+                    break;
+                case OMVIEW_HELP:
+                    [layout addObjectsFromArray:lpvHelp];
+                    [layout addObjectsFromArray:lphLoad];
+                    [layout addObjectsFromArray:lphError];
+                    break;
+                case OMVIEW_ERROR:
+                    [layout addObjectsFromArray:lphHelp];
+                    [layout addObjectsFromArray:lphLoad];
+                    [layout addObjectsFromArray:lpvError];
+                    break;
+            }
+        } else {
+            if ((_state & OMVIEW_MINIMIZE) != 0) {
+                [layout addObjectsFromArray:llmCalendar];
+                [layout addObjectsFromArray:llmGame];
+            } else {
+                [layout addObjectsFromArray:llnCalendar];
+                [layout addObjectsFromArray:llnGame];
+            }
+            switch (activity) {
+                case OMVIEW_LOAD_ERROR:
+                    [layout addObjectsFromArray:llhHelp];
+                    [layout addObjectsFromArray:llvLoad];
+                    [layout addObjectsFromArray:llvError];
+                    break;
+                case OMVIEW_LOAD:
+                    [layout addObjectsFromArray:llhHelp];
+                    [layout addObjectsFromArray:llvLoad];
+                    [layout addObjectsFromArray:llhError];
+                    break;
+                case OMVIEW_GAME:
+                    [layout addObjectsFromArray:llhHelp];
+                    [layout addObjectsFromArray:llhLoad];
+                    [layout addObjectsFromArray:llhError];
+                    break;
+                case OMVIEW_HELP:
+                    [layout addObjectsFromArray:llvHelp];
+                    [layout addObjectsFromArray:llhLoad];
+                    [layout addObjectsFromArray:llhError];
+                    break;
+                case OMVIEW_ERROR:
+                    [layout addObjectsFromArray:llhHelp];
+                    [layout addObjectsFromArray:llhLoad];
+                    [layout addObjectsFromArray:llvError];
+                    break;
+            }
+        }
+        
+        if ((state & OMVIEW_ANIMATE) != 0) {
             [self layoutIfNeeded];
         } else {
-            if (minimize) {
+            if ((_state & OMVIEW_HIDE) != 0) {
+                [self setHidden:YES];
+            } else {
+                [self setHidden:NO];
+            }
+            
+            if ((_state & OMVIEW_MINIMIZE) != 0) {
                 gameView.alpha = 0.8f;
             } else {
                 gameView.alpha = 1.0f;
             }
-            switch (state) {
-                case OMVIEW_LOAD_ERROR:
-                    [calendarView setHidden:YES];
-                    [gameView setHidden:YES];
-                    helpView.alpha = 0.0f;
-                    [helpView setHidden:YES];
-                    loadView.alpha = 1.0f;
-                    [loadView setHidden:NO];
-                    errorView.alpha = 1.0f;
-                    [errorView setHidden:NO];
-                    break;
-                case OMVIEW_LOAD:
-                    [calendarView setHidden:YES];
-                    [gameView setHidden:YES];
-                    helpView.alpha = 0.0f;
-                    [helpView setHidden:YES];
-                    loadView.alpha = 1.0f;
-                    [loadView setHidden:NO];
-                    errorView.alpha = 0.0f;
-                    [errorView setHidden:YES];
-                    break;
-                case OMVIEW_GAME:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    helpView.alpha = 0.0f;
-                    [helpView setHidden:YES];
-                    loadView.alpha = 0.0f;
-                    [loadView setHidden:YES];
-                    errorView.alpha = 0.0f;
-                    [errorView setHidden:YES];
-                    break;
-                case OMVIEW_HELP:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    helpView.alpha = 1.0f;
-                    [helpView setHidden:NO];
-                    loadView.alpha = 0.0f;
-                    [loadView setHidden:YES];
-                    errorView.alpha = 0.0f;
-                    [errorView setHidden:YES];
-                    break;
-                case OMVIEW_ERROR:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    helpView.alpha = 0.0f;
-                    [helpView setHidden:YES];
-                    loadView.alpha = 0.0f;
-                    [loadView setHidden:YES];
-                    errorView.alpha = 1.0f;
-                    [errorView setHidden:NO];
-                    break;
+            
+            if ((_state & OMVIEW_PAUSE) != 0) {
+                [calendarView setHidden:YES];
+                [gameView setHidden:YES];
+                helpView.alpha = 0.0f;
+                [helpView setHidden:YES];
+                loadView.alpha = 0.0f;
+                [loadView setHidden:YES];
+                errorView.alpha = 0.0f;
+                [errorView setHidden:YES];
+            } else {
+                switch (activity) {
+                    case OMVIEW_LOAD_ERROR:
+                        [calendarView setHidden:YES];
+                        [gameView setHidden:YES];
+                        helpView.alpha = 0.0f;
+                        [helpView setHidden:YES];
+                        loadView.alpha = 1.0f;
+                        [loadView setHidden:NO];
+                        errorView.alpha = 1.0f;
+                        [errorView setHidden:NO];
+                        break;
+                    case OMVIEW_LOAD:
+                        [calendarView setHidden:YES];
+                        [gameView setHidden:YES];
+                        helpView.alpha = 0.0f;
+                        [helpView setHidden:YES];
+                        loadView.alpha = 1.0f;
+                        [loadView setHidden:NO];
+                        errorView.alpha = 0.0f;
+                        [errorView setHidden:YES];
+                        break;
+                    case OMVIEW_GAME:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        helpView.alpha = 0.0f;
+                        [helpView setHidden:YES];
+                        loadView.alpha = 0.0f;
+                        [loadView setHidden:YES];
+                        errorView.alpha = 0.0f;
+                        [errorView setHidden:YES];
+                        break;
+                    case OMVIEW_HELP:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        helpView.alpha = 1.0f;
+                        [helpView setHidden:NO];
+                        loadView.alpha = 0.0f;
+                        [loadView setHidden:YES];
+                        errorView.alpha = 0.0f;
+                        [errorView setHidden:YES];
+                        break;
+                    case OMVIEW_ERROR:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        helpView.alpha = 0.0f;
+                        [helpView setHidden:YES];
+                        loadView.alpha = 0.0f;
+                        [loadView setHidden:YES];
+                        errorView.alpha = 1.0f;
+                        [errorView setHidden:NO];
+                        break;
+                }
             }
         }
         
@@ -481,94 +575,121 @@ void onLayout(bool minimize, bool animate, void* userData) {
         [self addConstraints:layout];
         lastLayout = layout;
         
-        if (animate) {
-            switch (state) {
-                case OMVIEW_LOAD_ERROR:
-                    [loadView setHidden:NO];
-                    [errorView setHidden:NO];
-                    break;
-                case OMVIEW_LOAD:
-                    [loadView setHidden:NO];
-                    break;
-                case OMVIEW_GAME:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    break;
-                case OMVIEW_HELP:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    [helpView setHidden:NO];
-                    break;
-                case OMVIEW_ERROR:
-                    [calendarView setHidden:NO];
-                    [gameView setHidden:NO];
-                    [errorView setHidden:NO];
-                    break;
+        if ((state & OMVIEW_ANIMATE) != 0) {
+            if ((_state & OMVIEW_HIDE) != 0) {
+            } else {
+                [self setHidden:NO];
             }
 
+            if ((_state & OMVIEW_PAUSE) != 0) {
+            } else {
+                switch (activity) {
+                    case OMVIEW_LOAD_ERROR:
+                        [loadView setHidden:NO];
+                        [errorView setHidden:NO];
+                        break;
+                    case OMVIEW_LOAD:
+                        [loadView setHidden:NO];
+                        break;
+                    case OMVIEW_GAME:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        break;
+                    case OMVIEW_HELP:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        [helpView setHidden:NO];
+                        break;
+                    case OMVIEW_ERROR:
+                        [calendarView setHidden:NO];
+                        [gameView setHidden:NO];
+                        [errorView setHidden:NO];
+                        break;
+                }
+            }
+            
             [UIView animateWithDuration:0.3 animations:^{
-                if (minimize) {
+                if ((_state & OMVIEW_MINIMIZE) != 0) {
                     gameView.alpha = 0.8f;
                 } else {
                     gameView.alpha = 1.0f;
                 }
-
-                switch (state) {
-                    case OMVIEW_LOAD_ERROR:
-                        helpView.alpha = 0.0f;
-                        loadView.alpha = 1.0f;
-                        errorView.alpha = 1.0f;
-                        break;
-                    case OMVIEW_LOAD:
-                        helpView.alpha = 0.0f;
-                        loadView.alpha = 1.0f;
-                        errorView.alpha = 0.0f;
-                        break;
-                    case OMVIEW_GAME:
-                        helpView.alpha = 0.0f;
-                        loadView.alpha = 0.0f;
-                        errorView.alpha = 0.0f;
-                        break;
-                    case OMVIEW_HELP:
-                        helpView.alpha = 1.0f;
-                        loadView.alpha = 0.0f;
-                        errorView.alpha = 0.0f;
-                        break;
-                    case OMVIEW_ERROR:
-                        helpView.alpha = 0.0f;
-                        loadView.alpha = 0.0f;
-                        errorView.alpha = 1.0f;
-                        break;
+                
+                if ((_state & OMVIEW_PAUSE) != 0) {
+                    helpView.alpha = 0.0f;
+                    loadView.alpha = 0.0f;
+                    errorView.alpha = 0.0f;
+                } else {
+                    switch (activity) {
+                        case OMVIEW_LOAD_ERROR:
+                            helpView.alpha = 0.0f;
+                            loadView.alpha = 1.0f;
+                            errorView.alpha = 1.0f;
+                            break;
+                        case OMVIEW_LOAD:
+                            helpView.alpha = 0.0f;
+                            loadView.alpha = 1.0f;
+                            errorView.alpha = 0.0f;
+                            break;
+                        case OMVIEW_GAME:
+                            helpView.alpha = 0.0f;
+                            loadView.alpha = 0.0f;
+                            errorView.alpha = 0.0f;
+                            break;
+                        case OMVIEW_HELP:
+                            helpView.alpha = 1.0f;
+                            loadView.alpha = 0.0f;
+                            errorView.alpha = 0.0f;
+                            break;
+                        case OMVIEW_ERROR:
+                            helpView.alpha = 0.0f;
+                            loadView.alpha = 0.0f;
+                            errorView.alpha = 1.0f;
+                            break;
+                    }
                 }
-
+                
                 [self layoutIfNeeded];
             } completion: ^(BOOL finished) {
                 if (finished) {
-                    switch (state) {
-                        case OMVIEW_LOAD_ERROR:
-                            [calendarView setHidden:YES];
-                            [gameView setHidden:YES];
-                            [helpView setHidden:YES];
-                            break;
-                        case OMVIEW_LOAD:
-                            [calendarView setHidden:YES];
-                            [gameView setHidden:YES];
-                            [helpView setHidden:YES];
-                            [errorView setHidden:YES];
-                            break;
-                        case OMVIEW_GAME:
-                            [helpView setHidden:YES];
-                            [loadView setHidden:YES];
-                            [errorView setHidden:YES];
-                            break;
-                        case OMVIEW_HELP:
-                            [loadView setHidden:YES];
-                            [errorView setHidden:YES];
-                            break;
-                        case OMVIEW_ERROR:
-                            [helpView setHidden:YES];
-                            [loadView setHidden:YES];
-                            break;
+                    if ((_state & OMVIEW_HIDE) != 0) {
+                        [self setHidden:YES];
+                    } else {
+                    }
+
+                    if ((_state & OMVIEW_PAUSE) != 0) {
+                        [calendarView setHidden:YES];
+                        [gameView setHidden:YES];
+                        [helpView setHidden:YES];
+                        [loadView setHidden:YES];
+                        [errorView setHidden:YES];
+                    } else {
+                        switch (activity) {
+                            case OMVIEW_LOAD_ERROR:
+                                [calendarView setHidden:YES];
+                                [gameView setHidden:YES];
+                                [helpView setHidden:YES];
+                                break;
+                            case OMVIEW_LOAD:
+                                [calendarView setHidden:YES];
+                                [gameView setHidden:YES];
+                                [helpView setHidden:YES];
+                                [errorView setHidden:YES];
+                                break;
+                            case OMVIEW_GAME:
+                                [helpView setHidden:YES];
+                                [loadView setHidden:YES];
+                                [errorView setHidden:YES];
+                                break;
+                            case OMVIEW_HELP:
+                                [loadView setHidden:YES];
+                                [errorView setHidden:YES];
+                                break;
+                            case OMVIEW_ERROR:
+                                [helpView setHidden:YES];
+                                [loadView setHidden:YES];
+                                break;
+                        }
                     }
                 }
             }];
@@ -581,17 +702,36 @@ void onLocation(int index, const CString& url, void* userData) {
     [omView onLocation:index location:(NSString*)url];
 }
 
+struct onScriptThreadData {
+    OMView* omView;
+    int index;
+    CString* script;
+};
+
+void* onScriptThread(void* userData) {
+    onScriptThreadData* thread = (onScriptThreadData*)userData;
+    return new CString([thread->omView onScript:thread->index script:(NSString*)*(thread->script)]);
+}
+
 CString onScript(int index, const CString& script, void* userData) {
-    OMView* omView = (__bridge OMView*)userData;
-    return [omView onScript:index script:(NSString*)script];
+    onScriptThreadData thread;
+    thread.omView = (__bridge OMView*)userData;
+    thread.index = index;
+    thread.script = (CString*)&script;
+    CString* threadResult = (CString*)MainThreadSync(onScriptThread, &thread);
+    CString result = *threadResult;
+    delete threadResult;
+    return result;
 }
 
 - (void) onLocation:(int)index location:(NSString*)url {
     UIWebView* webView = NULL;
     
     switch (index) {
-        case 0: webView = calendarView; break;
-        case 1: webView = helpView; break;
+        case OMVIEW_GAME: webView = calendarView; break;
+        case OMVIEW_HELP: webView = helpView; break;
+        case OMVIEW_LOAD: webView = loadView; break;
+        case OMVIEW_ERROR: webView = errorView; break;
     }
     
     if (webView != NULL) {
@@ -603,8 +743,10 @@ CString onScript(int index, const CString& script, void* userData) {
     UIWebView* webView = NULL;
     
     switch (index) {
-        case 0: webView = calendarView; break;
-        case 1: webView = helpView; break;
+        case OMVIEW_GAME: webView = calendarView; break;
+        case OMVIEW_HELP: webView = helpView; break;
+        case OMVIEW_LOAD: webView = loadView; break;
+        case OMVIEW_ERROR: webView = errorView; break;
     }
     
     if (webView != NULL) {
@@ -617,11 +759,14 @@ CString onScript(int index, const CString& script, void* userData) {
 - (BOOL) onStart {
     if ([gameView onStart]) {
         engine = new class OMGame();
-        engine->setOnLayout(onLayout, (__bridge void*)self);
+        engine->setOnUpdateState(onUpdateState, (__bridge void*)self);
         engine->setWebCallbacks(onLocation, onScript, (__bridge void*)self);
         [gameView engine:engine];
-        [calendarView engine:engine index:0];
-        //[helpView engine:engine index:1];
+        [calendarView engine:engine index:OMVIEW_GAME];
+        [helpView engine:engine index:OMVIEW_HELP];
+        [loadView engine:engine index:OMVIEW_LOAD];
+        [errorView engine:engine index:OMVIEW_ERROR];
+        engine->minimized = ((_state & OMVIEW_MINIMIZE) != 0);
         
         return YES;
     }
@@ -631,14 +776,6 @@ CString onScript(int index, const CString& script, void* userData) {
 
 - (BOOL) onStop {
     return [gameView onStop];
-}
-
-- (void) onResume:(BOOL)app {
-    [gameView onResume:app];
-}
-
-- (void) onPause:(BOOL)app {
-    [gameView onPause:app];
 }
 
 @end

@@ -545,8 +545,6 @@ bool GLRender::createShaders(JSONObject* shaders, void* library) throw(const cha
 }
 
 bool GLRender::createModels(JSONObject models, void* library) throw(const char*) {
-#warning create models from json
-	
 	int32_t count = this->models->list.count();
 	GLModel** items = this->models->list.items();
 	for (int i = 0; i < count; i++) {
@@ -574,7 +572,7 @@ bool GLRender::createSprites(JSONObject sprites) throw(const char*) {
 						Vec2 size;
 						size.x = info->get(1)->get(0)->toDouble();
 						size.y = info->get(1)->get(1)->toDouble();
-						int frames = info->optInt(3, 1);
+						int frames = (int)info->optInt(3, 1);
 						
 						Vec2 textureOfs;
 						Vec2* first = NULL;

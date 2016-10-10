@@ -45,7 +45,7 @@ static const uint8_t crc7_lookup[256] = {
 };
 
 uint8_t mmcrc7(register uint8_t crc, void* data, register uint32_t len) {
-    register uint8_t* buf = (uint8_t*)data;
+    uint8_t* buf = (uint8_t*)data;
 
     while (len-- > 0) {
         crc = crc7_lookup[crc ^ (*buf)];
@@ -56,7 +56,7 @@ uint8_t mmcrc7(register uint8_t crc, void* data, register uint32_t len) {
 }
 
 uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len) {
-	register uint8_t* buf = (uint8_t*)data;
+	uint8_t* buf = (uint8_t*)data;
 
 #if defined(__X64__)
 	uint32_t aligned = len >> 3; len &= 7;
@@ -132,7 +132,7 @@ static const uint16_t crc16_lookup[256] = {
 };
 
 uint16_t mmcrc16(register uint16_t crc, void* data, register uint32_t len) {
-    register uint8_t* buf = (uint8_t*)data;
+    uint8_t* buf = (uint8_t*)data;
 
     while (len-- > 0) {
         crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (*buf)];
@@ -143,7 +143,7 @@ uint16_t mmcrc16(register uint16_t crc, void* data, register uint32_t len) {
 }
 
 uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len) {
-	register uint8_t* buf = (uint8_t*)data;
+	uint8_t* buf = (uint8_t*)data;
 	
 #if defined(__X64__)
 	uint32_t aligned = len >> 3; len &= 7;
@@ -230,7 +230,7 @@ static const uint32_t crc32_lookup[256] = {
 };
 
 uint32_t mmcrc32(register uint32_t crc, void* data, register uint32_t len) {
-    register uint8_t* buf = (uint8_t*)data;
+    uint8_t* buf = (uint8_t*)data;
 
     while (len-- > 0) {
         crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (*buf)];
@@ -241,7 +241,7 @@ uint32_t mmcrc32(register uint32_t crc, void* data, register uint32_t len) {
 }
 
 uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len) {
-	register uint8_t* buf = (uint8_t*)data;
+	uint8_t* buf = (uint8_t*)data;
 	
 #if defined(__X64__)
 	uint32_t aligned = len >> 3; len &= 7;

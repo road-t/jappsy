@@ -168,7 +168,7 @@ void OMGame::updateStageVisibility() {
 static const Vec3 barsRotateVector = Vec3({0.0, -1, 0.0}).normalize();
 
 void OMGame::onFrame(GLRender* context) {
-    glClearColor(0.4f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 /*
     float c = (float)color / 255.0f;
@@ -226,7 +226,7 @@ void OMGame::onFrame(GLRender* context) {
                         try {
                             CString ofs = serverConfig->get(L"state")->optString(L"last_bars_gen", L"").substring(conf.spin * 3, (conf.spin + 1) * 3);
                             if (ofs.m_length == 3) {
-                                int check = bars.stop((wchar_t*)ofs);
+                                /*int check = */bars.stop((wchar_t*)ofs);
                                 //LOG("Grace: " + check);
                                 stop = true;
                             }
@@ -278,7 +278,7 @@ void OMGame::onFrame(GLRender* context) {
                             updateStage(STAGE_BARS);
                         }
                     } else if (sum < 0) {
-                        LOG("Фриспин +" + (-sum));
+                        LOG("Фриспин +%d", (-sum));
                         prizeTimeout = currentTime + 8000; // Время отображения бонус фриспин
                         updateStage(STAGE_BARS_FREE);
                         
@@ -326,7 +326,7 @@ void OMGame::onFrame(GLRender* context) {
                     stop = true;
 #else
                     if ((status.query == 0) && (onUpdateConfig(STAGE_DOUBLE_SHOW))) {
-                        conf.dblindex = serverConfig->get(L"state")->optInt(L"last_double_gen", 0);
+                        conf.dblindex = (int32_t)serverConfig->get(L"state")->optInt(L"last_double_gen", 0);
                         stop = true;
                     } else {
                         // TODO: Сколько ждать ответа от сервера?
@@ -533,7 +533,7 @@ void OMGame::onFrame(GLRender* context) {
     }
 }
 
-void OMGame::onResize(int width, int height, bool minimized) {
+void OMGame::onResize(int width, int height) {
 //    context->touchScreen->update(1920, 1080); // independent size
     context->touchScreen->update(width, height);
     if (ready == 2) {
@@ -544,7 +544,7 @@ void OMGame::onResize(int width, int height, bool minimized) {
 void OMGame::onTouch(const CString& event) {
     if (nextTimeout == 0) {
         if (minimized) {
-            layout(false, true);
+            updateState(OMVIEW_RESTORE | OMVIEW_ANIMATE);
             return;
         }
         
@@ -560,7 +560,7 @@ void OMGame::onTouch(const CString& event) {
             }
         } else if ((event == L"swipe bottom") || (event == L"swipe long bottom")) {
             if (!minimized) {
-                layout(true, true);
+                updateState(OMVIEW_MINIMIZE | OMVIEW_ANIMATE);
             }
         }
     }
@@ -577,7 +577,7 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
     
     if (game->nextTimeout == 0) {
         if (game->stage == STAGE_BARS) {
-            GLScene* scene = game->scene;
+            //GLScene* scene = game->scene;
             
             game->bars.clear();
             if (event.startsWith(L"move")) {
@@ -894,7 +894,7 @@ void OMGame::renderButtonSelectDonate(GLEngine* engine, GLDrawing* drawing) {
 
 void OMGame::renderButtonDouble(GLEngine* engine, GLDrawing* drawing) {
     OMGame* game = (OMGame*)engine;
-    GLRender* context = game->context;
+    //GLRender* context = game->context;
     
     int state = 0;
     if (game->conf.autospin) {
@@ -919,7 +919,7 @@ void OMGame::renderButtonDouble(GLEngine* engine, GLDrawing* drawing) {
             state = 2;
         } else if (game->stage == STAGE_BARS_USER) {
             uint64_t currentTime = currentTimeMillis();
-            int doubleBlink = (currentTime - game->takeTime) / 500;
+            int doubleBlink = (int)((currentTime - game->takeTime) / 500);
             if ((doubleBlink & 1) == 0) {
                 state = 0;
             } else {
@@ -942,7 +942,7 @@ void OMGame::renderButtonDouble(GLEngine* engine, GLDrawing* drawing) {
         drawing->foreground = 5;
         if (game->conf.free != 0) {
             uint64_t currentTime = currentTimeMillis();
-            int freeBlink = (currentTime - game->freespinTime) / 500;
+            int freeBlink = (int)((currentTime - game->freespinTime) / 500);
             if ((freeBlink >= 8) || ((freeBlink & 1) == 0)) {
                 if (game->conf.spin == 0) {
                     game->renderValue12pt( {1576-7, 928+7}, CString::format(L"%d", game->conf.free), -1);
@@ -1010,7 +1010,7 @@ void OMGame::drawSplash(GLEngine* engine) {
         uint64_t currentTime = currentTimeMillis();
         int state = 0;
         if (game->stage == STAGE_DOUBLE_SHOW) {
-            int doubleBlink = (currentTime - game->doubleShowTimeout) / 500;
+            int doubleBlink = (int)((currentTime - game->doubleShowTimeout) / 500);
             if ((doubleBlink & 1) != 0) {
                 state = 1;
             }
@@ -1291,8 +1291,8 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
                 if ((state == NULL) || (state->opt(L"sync") == NULL)) {
                     return false;
                 }
-                int ask = nextServerConfig->optInt(L"ask", -1);
-                int sync = state->optInt(L"sync", -1);
+                int ask = (int)nextServerConfig->optInt(L"ask", -1);
+                int sync = (int)state->optInt(L"sync", -1);
                 if (ask != sync) {
                     // Синхронизация нарушена и ответ будет обработан по таймауту при переключении сцены
                     return false;
@@ -1317,8 +1317,8 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
                 // Неизвестный ответ
                 return false;
             } else {
-                int ask = nextServerConfig->optInt(L"ask", -1);
-                int sync = state->optInt(L"sync", -1);
+                int ask = (int)nextServerConfig->optInt(L"ask", -1);
+                int sync = (int)state->optInt(L"sync", -1);
                 
                 if (ask != sync) {
                     // Синхронизация нарушена
@@ -1348,13 +1348,13 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
             // Неизвестный ответ
             return false;
         }
-        int last_stage = state->optInt(L"last_stage", STAGE_UNKNOWN);
+        int last_stage = (int)state->optInt(L"last_stage", STAGE_UNKNOWN);
     
         if (restore) {
             //JSON::encode(serverConfig).log();
             
             // Поправляем синхронизацию
-            int sync = state->optInt(L"sync", -1);
+            int sync = (int)state->optInt(L"sync", -1);
             serverConfig->setInt(L"ask", sync);
         
             // Сброс локального конфига
@@ -1423,7 +1423,7 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
                 
                 // Имитируем приход ответа (который уже получен) и запускаем дабл без запроса на сервер
                 nextServerConfig = serverConfig;
-                doubleSelect(state->optInt(L"last_double_index", 0), false);
+                doubleSelect((int)state->optInt(L"last_double_index", 0), false);
             }
         } else if (action == STAGE_BARS_STOP) {
             conf.points = grace->optDouble(L"current_deposit", 0.0);
@@ -1462,7 +1462,7 @@ void* OnQueryCallback(void* userData) {
             if (thread->json->root->opt(L"ask") != NULL) {
                 const struct JsonNode* state = thread->json->root->opt(L"state");
                 if (state != NULL) {
-                    int sync = state->optInt(L"sync", -1);
+                    int sync = (int)state->optInt(L"sync", -1);
                     if (sync != -1) {
                         thread->game->nextAsk = sync;
                     }
@@ -1506,6 +1506,12 @@ void OMGame::onStatus(const LoaderStatus& status) {
     this->status.count = status.count;
     this->status.total = status.total;
     CString::format(L"STATUS: %d / %d", status.count, status.total).log();
+    
+    if (ready >= 1) {
+        webScript(OMVIEW_LOAD, CString::format(L"setPercent(%d);", status.count * 100 / status.total));
+    } else {
+        webScript(OMVIEW_LOAD, L"setPercent(0);");
+    }
 }
 
 void OMGame::onPreload() {
@@ -1809,7 +1815,7 @@ void OMGame::onLoad() {
     
         ready = 2;
         
-        webLocation(0, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
+        webLocation(OMVIEW_GAME, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
     }
     
 #ifndef OMDEMO
@@ -1837,8 +1843,8 @@ void OMGame::onLoad() {
                                 // При первом запросе просто обновляем конфиг с сервера
                                 updateStage(last_stage, onUpdateStageConfig, 0, false);
                             } else {
-                                int ask = nextServerConfig->optInt(L"ask", -1);
-                                int sync = state->optInt(L"sync", -1);
+                                int ask = (int)nextServerConfig->optInt(L"ask", -1);
+                                int sync = (int)state->optInt(L"sync", -1);
                                 
                                 if (ask != sync) {
                                     // При рассинхронизации запросов восстанавливаем игровую ситуацию
@@ -1882,6 +1888,24 @@ void OMGame::onFatal(const CString& error) {
     CString::format(L"ERROR: %ls", (wchar_t*)error).log();
 
     shutdown();
+}
+
+void OMGame::onWebLocation(int index, CString& location) {
+    if (location.equals(L"ios:close")) {
+        updateState(OMVIEW_HIDE | OMVIEW_ANIMATE);
+    }
+}
+
+void OMGame::onWebReady(int index) {
+    if (ready == 2) {
+        if (index == OMVIEW_GAME) {
+            updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
+        }
+    }
+}
+
+void OMGame::onWebFail(int index, CString& error) {
+    
 }
 
 OMGame::OMGame() {

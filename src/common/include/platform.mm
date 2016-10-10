@@ -29,7 +29,7 @@ void CNSLog(const char* format, ...) {
 	CString log;
 	log.vswprintf((wchar_t*)fmt, args);
 	
-	NSLog((NSString*)log);
+	NSLog(@"%@", (NSString*)log);
 	
 	va_end(args);
 }

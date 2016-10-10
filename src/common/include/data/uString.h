@@ -494,7 +494,6 @@ extern "C" {
 		
 		int vswprintf(const wchar_t* format, va_list arglist);
 		
-		static CString format(const CString& string, ...);
 		static CString format(const wchar_t* string, ...);
 		
 		CString md5() const throw(const char*);

@@ -26,7 +26,7 @@ class GLRender;
 
 class GLEngine : public CObject {
 public:
-	typedef void (*onLayoutCallback)(bool minimize, bool animate, void* userData);
+	typedef void (*onUpdateStateCallback)(int state, void* userData);
 	
 	typedef void (*onWebLocationCallback)(int index, const CString& url, void* userData);
 	typedef CString (*onWebScriptCallback)(int index, const CString& script, void* userData);
@@ -34,8 +34,8 @@ public:
 protected:
 	GLRender* context = NULL;
 	
-	onLayoutCallback onlayout;
-	void* onlayoutUserData = NULL;
+	onUpdateStateCallback onUpdateState;
+	void* onUpdateStateUserData = NULL;
 
 	onWebLocationCallback onweblocation;
 	onWebScriptCallback onwebscript;
@@ -53,12 +53,10 @@ public:
 	void preload(const char* json);
 	void load(const char* json);
 	
-	// Minimize
+	// State
 	
-	bool minimized = false;
-	
-	void layout(bool minimize, bool animate);
-	void setOnLayout(onLayoutCallback onlayout = NULL, void* userData = NULL);
+	void updateState(int state);
+	void setOnUpdateState(onUpdateStateCallback onUpdateState = NULL, void* userData = NULL);
 	
 	// Web
 	
@@ -77,7 +75,7 @@ public:
 	void onTouch(MotionEvent* event);
 
 	virtual void onFrame(GLRender* context) {}
-	virtual void onResize(int width, int height, bool minimized) {}
+	virtual void onResize(int width, int height) {}
 	virtual void onTouch(const CString& event) {}
 	
 	virtual void onStatus(const LoaderStatus& status) {}

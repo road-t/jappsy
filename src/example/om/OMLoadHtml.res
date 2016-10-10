@@ -1,3 +1,4 @@
+R"JAPPSYRAWSTRING(
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,8 +54,8 @@
 	}
 	
 	#canvas {
-		width: 3in;
-		height: 3in;
+		width: 1.5in;
+		height: 1.5in;
 	}
 		
 </style>
@@ -140,6 +141,10 @@
 		requestAnimFrame(onFrame);
 	}
 
+    function onClose() {
+        window.location = "ios:close";
+    }
+
 </script>
 
 </head>
@@ -148,14 +153,14 @@
 		<tr class="navigation">
 			<td>
 				<center id="navigation">Молитвенный барабан</center>
-				<div class="arrow-left"></div>
-				<div class="icon-calendar"></div>
+				<div class="arrow-left" onclick="onClose();"></div>
 			</td>
 		</tr>
-		<tr style="height: 100%; background: #222;">
+		<tr style="height: 100%; background: #111;">
 			<td>
 				<center><canvas id="canvas" width="300px" height="300px"></canvas></center>
 			</td>
 		</tr>
 	</table>
 </body>
+)JAPPSYRAWSTRING"

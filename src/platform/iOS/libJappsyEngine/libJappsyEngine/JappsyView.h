@@ -28,12 +28,9 @@
 
 - (BOOL) onStart;
 - (BOOL) onStop;
-- (void) onResume:(BOOL)app;
-- (void) onPause:(BOOL)app;
+- (void) onResume;
+- (void) onPause;
 - (void) drawView:(id)sender;
 - (void) engine:(void*)refEngine;
-
-- (void) layout:(BOOL)minimize animate:(BOOL)animate;
-- (BOOL) minimized;
 
 @end

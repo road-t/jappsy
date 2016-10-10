@@ -34,7 +34,6 @@
     NSInteger _interval;
     CADisplayLink* _displayLink;
 	GLfloat viewScale;
-	bool _suspended;
 }
 
 @property(nonatomic,retain)NSMutableArray* activeTouches;
@@ -67,7 +66,6 @@
 		_renderer = NULL;
 		_running = FALSE;
 		_stopping = FALSE;
-		_suspended = TRUE;
 		_interval = 1;
 		_displayLink = nil;
 		
@@ -134,15 +132,16 @@
 
 - (void) didMoveToWindow
 {
+#if !defined(__SIMULATOR__)
 	// AutoScale Pixels
-	static GLfloat screenScale = [[UIScreen mainScreen] scale];
-	GLfloat dpi = screenScale * 160.0f;
+	GLfloat screenScale = [[UIScreen mainScreen] scale];
+	/*GLfloat dpi = screenScale * 160.0f;*/
 	CGRect screen = [[UIScreen mainScreen] bounds];
 	GLfloat width = screen.size.width * screenScale;
 	GLfloat height = screen.size.height * screenScale;
 	GLfloat max = (width > height) ? width : height;
 	viewScale = 1.0;
-#if !defined(__SIMULATOR__)
+
 	if (max > 1920) {
 		viewScale = self.window.screen.nativeScale; // enable pixel scale for big screens
 	} else {
@@ -151,7 +150,7 @@
 #else
 	viewScale = 1.0;
 #endif
-	GLfloat diag = (float)(round(sqrt(width * width + height * height) * 2.0f / dpi) / 2.0f);
+	/*GLfloat diag = (float)(round(sqrt(width * width + height * height) * 2.0f / dpi) / 2.0f);*/
 	
 	self.contentScaleFactor = viewScale;
 }
@@ -159,8 +158,10 @@
 - (void) drawView:(id)sender
 {
 	if (_renderer != NULL) {
-		[EAGLContext setCurrentContext:_context];
-		_renderer->render();
+		if(![self isHidden]) {
+			[EAGLContext setCurrentContext:_context];
+			_renderer->render();
+		}
 	}
 }
 
@@ -178,8 +179,8 @@
 		_interval = frameInterval;
 		
 		if (_running) {
-			[self onPause:true];
-			[self onResume:true];
+			[self onPause];
+			[self onResume];
 		}
 	}
 }
@@ -198,7 +199,7 @@
 		}
 		
 		if (_renderer != NULL) {
-			[self onResume:true];
+			//[self onResume:true];
 			return YES;
 		}
 	}
@@ -220,7 +221,7 @@
 			memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
-			[self onPause:true];
+			[self onPause];
 		}
 	}
 	
@@ -236,7 +237,7 @@
 
 - (void) onShutdown
 {
-	[self onPause:true];
+	[self onPause];
 	
 	if (_renderer != NULL) {
 		memDelete(_renderer);
@@ -251,25 +252,28 @@
 	_stopping = NO;
 }
 
-- (void) onResume:(BOOL)app
+- (void) onResume
 {
 	if (!_stopping) {
 		if (!_running) {
-			if ((app) || (!_suspended)) {
 #ifdef __IOS__
-				resumeAudioPlayer();
+			resumeAudioPlayer();
 #endif
-				_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
+			_displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(drawView:)];
+			if ([[UIDevice currentDevice].systemVersion floatValue] >= 10.0f) {
+				[_displayLink setPreferredFramesPerSecond:60];
+			} else {
+#if __IPHONE_OS_VERSION_MIN_REQUIRED < 100000
 				[_displayLink setFrameInterval:_interval];
-				[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-				_running = TRUE;
-				_suspended = FALSE;
+#endif
 			}
+			[_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+			_running = TRUE;
 		}
 	}
 }
 
-- (void) onPause:(BOOL)app
+- (void) onPause
 {
 	if (!_stopping) {
 		if (_running) {
@@ -279,32 +283,8 @@
 #ifdef __IOS__
 			pauseAudioPlayer();
 #endif
-
-			if (app) {
-				_suspended = TRUE;
-			}
 		}
 	}
-}
-
-- (void) layout:(BOOL)minimize animate:(BOOL)animate {
-	if (_renderer == NULL)
-		return;
-
-	if ((!_stopping) && (_running)) {
-		_renderer->engine->layout(minimize, animate);
-	}
-}
-
-- (BOOL) minimized {
-	if (_renderer == NULL)
-		return TRUE;
-	
-	if ((!_stopping) && (_running)) {
-		return _renderer->engine->minimized;
-	}
-	
-	return TRUE;
 }
 
 - (void) dealloc

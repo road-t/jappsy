@@ -153,9 +153,11 @@ public:
     } status;
     
     void onFrame(GLRender* context);
-    void onResize(int width, int height, bool minimized);
+    void onResize(int width, int height);
     void onTouch(const CString& event);
-
+    
+    bool minimized = false;
+    
     static bool onTrackBar(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData);
     static bool onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* drawing);
     
@@ -241,6 +243,11 @@ public:
     void onPreload();
     void onLoad();
     void onFatal(const CString& error);
+    
+    void onWebLocation(int index, CString& location);
+    void onWebReady(int index);
+    void onWebFail(int index, CString& error);
+
 };
 
 #endif //OMGAME_H

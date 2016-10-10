@@ -755,7 +755,7 @@ extern "C" {
 		while (len-- > 0) {
 			char ch1 = *ptr1; ptr1++;
 			char ch2 = *ptr2; ptr2++;
-			uint32_t v1;
+			uint32_t v1 = 0;
 			uint32_t v2;
 			if (ch1 & 0x80) {
 				if (ch2 & 0x80) {
@@ -2692,11 +2692,11 @@ CString& CString::trim() {
 
 //==============================================================
 
-#define va_format(type) \
+#define va_format(type, casttype) \
 	int fmtLen = (int)((intptr_t)(++ptr) - (intptr_t)fmt) / sizeof(wchar_t); \
 	memcpy(format, fmt, fmtLen * sizeof(wchar_t)); \
 	format[fmtLen] = 0; \
-	type val = va_arg(arglist, type); \
+	casttype val = (casttype)va_arg(arglist, type); \
 	int resLen = ::swprintf(buffer, 64, format, val); \
 	if (resLen != EOF) { \
 		int ofs = m_length; \
@@ -2709,9 +2709,9 @@ CString& CString::trim() {
 	type* val = va_arg(arglist, type*); \
 	*val = m_length;
 
-#define va_concat(type) \
+#define va_concat(type, casttype) \
 	++ptr; \
-	type val = va_arg(arglist, type); \
+	casttype val = (casttype)va_arg(arglist, type); \
 	this->concat(val);
 
 int CString::vswprintf(const wchar_t* string, va_list arglist) {
@@ -2763,9 +2763,9 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 					if (ch == L'h') {
 						ch = *(++ptr);
 						if ((ch == L'd') || (ch == L'i')) {
-							va_format(int8_t);
+							va_format(int, int8_t);
 						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-							va_format(uint8_t);
+							va_format(int, uint8_t);
 						} else if (ch == L'n') {
 							va_store(int8_t);
 						} else {
@@ -2774,9 +2774,9 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 						}
 					} else {
 						if ((ch == L'd') || (ch == L'i')) {
-							va_format(int16_t);
+							va_format(int, int16_t);
 						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-							va_format(uint16_t);
+							va_format(int, uint16_t);
 						} else if (ch == L'n') {
 							va_store(int16_t);
 						} else {
@@ -2789,9 +2789,9 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 					if (ch == L'l') {
 						ch = *(++ptr);
 						if ((ch == L'd') || (ch == L'i')) {
-							va_format(int64_t);
+							va_format(int64_t, int64_t);
 						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-							va_format(uint64_t);
+							va_format(uint64_t, uint64_t);
 						} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
 							int fmtLen = (int)((intptr_t)ptr - (intptr_t)fmt);
 							memcpy(format, fmt, fmtLen * sizeof(wchar_t));
@@ -2813,13 +2813,13 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 						}
 					} else {
 						if ((ch == L'd') || (ch == L'i')) {
-							va_format(int32_t);
+							va_format(int32_t, int32_t);
 						} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-							va_format(uint32_t);
+							va_format(uint32_t, uint32_t);
 						} else if (ch == L'c') {
-							va_concat(wchar_t);
+							va_concat(int, wchar_t);
 						} else if (ch == L's') {
-							va_concat(wchar_t*);
+							va_concat(wchar_t*, wchar_t*);
 						} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
 							int fmtLen = (int)((intptr_t)ptr - (intptr_t)fmt);
 							memcpy(format, fmt, fmtLen * sizeof(wchar_t));
@@ -2842,9 +2842,9 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 				} else if (ch == L'j') {
 					ch = *(++ptr);
 					if ((ch == L'd') || (ch == L'i')) {
-						va_format(intmax_t);
+						va_format(intmax_t, intmax_t);
 					} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-						va_format(uintmax_t);
+						va_format(uintmax_t, uintmax_t);
 					} else if (ch == L'n') {
 						va_store(intmax_t);
 					} else {
@@ -2854,7 +2854,7 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 				} else if (ch == L'z') {
 					ch = *(++ptr);
 					if ((ch == L'd') || (ch == L'i') || (ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-						va_format(size_t);
+						va_format(size_t, size_t);
 					} else if (ch == L'n') {
 						va_store(size_t);
 					} else {
@@ -2864,7 +2864,7 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 				} else if (ch == L't') {
 					ch = *(++ptr);
 					if ((ch == L'd') || (ch == L'i') || (ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-						va_format(ptrdiff_t);
+						va_format(ptrdiff_t, ptrdiff_t);
 					} else if (ch == L'n') {
 						va_store(ptrdiff_t);
 					} else {
@@ -2874,28 +2874,28 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 				} else if (ch == L'L') {
 					ch = *(++ptr);
 					if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
-						va_format(long double);
+						va_format(long double, long double);
 					} else {
 						error = true;
 						break;
 					}
 				} else {
 					if ((ch == L'd') || (ch == L'i')) {
-						va_format(int32_t);
+						va_format(int32_t, int32_t);
 					} else if ((ch == L'u') || (ch == L'o') || (ch == L'x') || (ch == L'X')) {
-						va_format(uint32_t);
+						va_format(uint32_t, uint32_t);
 					} else if ((ch == L'f') || (ch == L'F') || (ch == L'e') || (ch == L'E') || (ch == L'g') || (ch == L'G') || (ch == L'a') || (ch == L'A')) {
-						va_format(double);
+						va_format(double, double);
 					} else if (ch == L'c') {
-						va_concat(char);
+						va_concat(int, char);
 					} else if (ch == L's') {
-						va_concat(char*);
+						va_concat(char*, char*);
 					} else if (ch == L'p') {
-						va_format(void*);
+						va_format(void*, void*);
 					} else if (ch == L'n') {
 						va_store(int32_t);
 					} else if (ch == L'@') {
-						va_concat(NSString*);
+						va_concat(NSString*, NSString*);
 					} else {
 						error = true;
 						break;
@@ -2920,23 +2920,6 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 	}
 	
 	return m_length;
-}
-
-CString CString::format(const CString& string, ...) {
-	if (string.m_length == 0)
-		return StringEmpty;
-
-	va_list arglist;
-	va_start(arglist, string);
-
-	CString result;
-	if (result.vswprintf(string.m_data, arglist) == EOF) {
-		va_end(arglist);
-		return CString((const void*)StringNil);
-	}
-
-	va_end(arglist);
-	return result;
 }
 
 CString CString::format(const wchar_t* string, ...) {

@@ -64,9 +64,6 @@ GLSprite::GLSprite(GLRender* context, const CString& key, const CString& texture
 		tw = th = 1;
 	}
 
-	GLfloat vec[8] = {0};
-	GLfloat tex[8] = {0};
-	GLshort ind[6] = {0};
 	Vector<GLfloat> vertices; vertices.growstep(8);
 	Vector<GLfloat> textures; textures.growstep(8);
 	Vector<GLshort> indexes; indexes.growstep(6);
@@ -109,13 +106,13 @@ GLSprite::GLSprite(GLRender* context, const CString& key, const CString& texture
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexes.count() * sizeof(GLshort), indexes.items(), GL_STATIC_DRAW);
 		CheckGLError();
 	} catch (...) {
-		if (vertexBuffer != NULL) {
+		if (vertexBuffer != 0) {
 			glDeleteBuffers(1, &vertexBuffer);
 		}
-		if (textureBuffer != NULL) {
+		if (textureBuffer != 0) {
 			glDeleteBuffers(1, &textureBuffer);
 		}
-		if (indexBuffer != NULL) {
+		if (indexBuffer != 0) {
 			glDeleteBuffers(1, &indexBuffer);
 		}
 		throw;

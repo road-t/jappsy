@@ -669,7 +669,7 @@ public:
 		}
 		
 		if (m_size != newSize) {
-			CString** newItems = memRealloc(CString*, newItems, m_items, newSize * sizeof(CString*));
+			Type** newItems = memRealloc(Type*, newItems, m_items, newSize * sizeof(Type*));
 			if (newItems == NULL)
 				throw eOutOfMemory;
 			

@@ -214,8 +214,8 @@ bool is_base64(const char* text) {
 char* base64_encode(const void* in, uint32_t insize, uint32_t* outsize) {
     uint32_t size = (uint32_t)div(insize + 2, 3).quot * 4;
     char* out = memAlloc(char,out,(size+1)); // zero termitaned string
-    register char* outBuf = out;
-    register uint8_t* inBuf = (uint8_t*)in;
+    char* outBuf = out;
+    uint8_t* inBuf = (uint8_t*)in;
     if (outsize) *outsize = size;
     while (insize > 0) {
         int n = (insize > 3) ? 3 : insize;
@@ -247,8 +247,8 @@ void* base64_decode(const char* in, uint32_t insize, uint32_t* outsize) {
     uint32_t size = (((insize * 3) << 1) >> 3);
     uint32_t bufsize = ((insize + 3) >> 2) * 3;
     void* out = memAlloc(void,out,bufsize + 1);
-    register uint8_t* outBuf = (uint8_t*)out;
-    register uint8_t* inBuf = (uint8_t*)in;
+    uint8_t* outBuf = (uint8_t*)out;
+    uint8_t* inBuf = (uint8_t*)in;
     if (outsize) *outsize = size;
     while (insize > 0) {
         int n = (insize > 4) ? 4 : insize;
@@ -287,8 +287,8 @@ bool is_base64_unicode(const wchar_t* text) {
 wchar_t* base64_encode_unicode(const void* in, uint32_t insize, uint32_t* outsize) {
     uint32_t size = (uint32_t)div(insize + 2, 3).quot * 4;
     wchar_t* out = memAlloc(wchar_t,out,(size+1) * 2); // zero termitaned string
-    register wchar_t* outBuf = out;
-    register uint8_t* inBuf = (uint8_t*)in;
+    wchar_t* outBuf = out;
+    uint8_t* inBuf = (uint8_t*)in;
     if (outsize) *outsize = size;
     while (insize > 0) {
         int n = (insize > 3) ? 3 : insize;
@@ -320,8 +320,8 @@ void* base64_decode_unicode(const wchar_t* in, uint32_t insize, uint32_t* outsiz
     uint32_t size = (((insize * 3) << 1) >> 3);
     uint32_t bufsize = ((insize + 3) >> 2) * 3;
     void* out = memAlloc(void,out,bufsize + 1);
-    register uint8_t* outBuf = (uint8_t*)out;
-    register uint16_t* inBuf = (uint16_t*)in;
+    uint8_t* outBuf = (uint8_t*)out;
+    uint16_t* inBuf = (uint16_t*)in;
     if (outsize) *outsize = size;
     while (insize > 0) {
         int n = (insize > 4) ? 4 : insize;

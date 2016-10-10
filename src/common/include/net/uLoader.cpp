@@ -487,7 +487,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 			} else {
 				return false;
 			}
-#else if defined(__JNI__)
+#elif defined(__JNI__)
 	#error PrepareAudio
 #endif
 		} catch (...) {

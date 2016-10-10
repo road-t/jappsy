@@ -16,6 +16,41 @@
 
 #import <UIKit/UIKit.h>
 
+#ifndef OMViewH
+#define OMViewH
+
+// При переходе в другой раздел приложения прячется игра
+#define OMVIEW_VISIBILITY   0x0300
+#define OMVIEW_HIDE         0x0100
+#define OMVIEW_SHOW         0x0200
+
+// При сворачивании приложения останавливается игра
+#define OMVIEW_RUNNING      0x0C00
+#define OMVIEW_STOP         0x0400
+#define OMVIEW_RUN          0x0800
+    
+// При перевороте экрана в низ останавливается игра и весь вывод на экран
+#define OMVIEW_SUSPENDED    0xC000
+#define OMVIEW_PAUSE        0x4000
+#define OMVIEW_RESUME       0x8000
+    
+#define OMVIEW_MINIMIZED    0x3000
+#define OMVIEW_MINIMIZE     0x1000
+#define OMVIEW_RESTORE      0x2000
+    
+#define OMVIEW_ANIMATE      0x10000
+    
+#define OMVIEW_UPDATE       0
+    
+#define OMVIEW_ACTIVITY     0x00FF
+#define OMVIEW_LOAD_ERROR   1
+#define OMVIEW_LOAD         2
+#define OMVIEW_GAME         3
+#define OMVIEW_HELP         4
+#define OMVIEW_ERROR        5
+
+#endif
+
 @interface OMView : UIView
 
 - (instancetype) init;
@@ -26,9 +61,9 @@
 
 - (BOOL) onStart;
 - (BOOL) onStop;
-- (void) onResume:(BOOL)app;
-- (void) onPause:(BOOL)app;
 
-- (void) onLayout:(BOOL)minimize animate:(BOOL)animate;
+- (void) onLayout:(BOOL)minimize state:(int)state animate:(BOOL)animate;
+
+- (void) updateState:(int)state;
 
 @end

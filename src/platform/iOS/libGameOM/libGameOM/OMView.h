@@ -62,8 +62,6 @@
 - (BOOL) onStart;
 - (BOOL) onStop;
 
-- (void) onLayout:(BOOL)minimize state:(int)state animate:(BOOL)animate;
-
 - (void) updateState:(int)state;
 
 @end

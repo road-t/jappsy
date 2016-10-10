@@ -544,7 +544,7 @@ void OMGame::onResize(int width, int height, bool minimized) {
 void OMGame::onTouch(const CString& event) {
     if (nextTimeout == 0) {
         if (minimized) {
-            minimize(false, true);
+            layout(false, true);
             return;
         }
         
@@ -560,7 +560,7 @@ void OMGame::onTouch(const CString& event) {
             }
         } else if ((event == L"swipe bottom") || (event == L"swipe long bottom")) {
             if (!minimized) {
-                minimize(true, true);
+                layout(true, true);
             }
         }
     }
@@ -1808,6 +1808,8 @@ void OMGame::onLoad() {
         context->touchScreen->trackEvent("bar3", 1188, 192, 456, 720, onTrackBar, &trackBarData3);
     
         ready = 2;
+        
+        webLocation(0, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
     }
     
 #ifndef OMDEMO

@@ -14,9 +14,33 @@
  * limitations under the License.
  */
 
-#import "OMHeaderView.h"
+#import "OMWebView.h"
 
-@implementation OMHeaderView
+#import <libJappsyEngine/libJappsyEngine.h>
+#include "OMGame.h"
+#include <core/uMemory.h>
+
+@interface OMWebView()
+
+@property(nonatomic)OMGame *engine;
+@property(nonatomic)int index;
+
+@end
+
+@implementation OMWebView
+
+- (instancetype) init {
+    if ((self = [super init])) {
+        [self setDelegate:self];
+        _engine = NULL;
+    }
+    return self;
+}
+
+- (void)engine:(void*)refEngine index:(int)index {
+    _engine = (OMGame*)refEngine;
+    _index = index;
+}
 
 - (void)loadRequest:(NSURLRequest *)request {
     [super loadRequest:request];
@@ -31,19 +55,33 @@
 }
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    return [super webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+    NSString* url = [[request URL] absoluteString];
+    if ([url hasPrefix:@"ios:"]) {
+        if (_engine != NULL) {
+            CString location = url;
+            _engine->onWebLocation(_index, location);
+        }
+        
+        return NO;
+    }
+    
+    return YES;
 }
 
 - (void)webViewDidStartLoad:(UIWebView *)webView {
-    [super webViewDidStartLoad:webView];
 }
 
 - (void)webViewDidFinishLoad:(UIWebView *)webView {
-    [super webViewDidFinishLoad:webView];
+    if (_engine != NULL) {
+        _engine->onWebReady(_index);
+    }
 }
 
 - (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    [super webView:webView didFailLoadWithError:error];
+    if (_engine != NULL) {
+        CString err = [error localizedDescription];
+        _engine->onWebFail(_index, err);
+    }
 }
 
 @end

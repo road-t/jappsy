@@ -287,12 +287,12 @@
 	}
 }
 
-- (void) minimize:(BOOL)minimize animate:(BOOL)animate {
+- (void) layout:(BOOL)minimize animate:(BOOL)animate {
 	if (_renderer == NULL)
 		return;
 
 	if ((!_stopping) && (_running)) {
-		_renderer->engine->minimize(minimize, animate);
+		_renderer->engine->layout(minimize, animate);
 	}
 }
 

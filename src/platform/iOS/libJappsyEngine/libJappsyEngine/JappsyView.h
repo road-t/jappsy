@@ -33,7 +33,7 @@
 - (void) drawView:(id)sender;
 - (void) engine:(void*)refEngine;
 
-- (void) minimize:(BOOL)minimize animate:(BOOL)animate;
+- (void) layout:(BOOL)minimize animate:(BOOL)animate;
 - (BOOL) minimized;
 
 @end

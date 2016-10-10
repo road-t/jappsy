@@ -126,7 +126,7 @@ void* onFatalCallback(const CString& error, void* userData) {
 
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
-	onminimize = NULL;
+	onlayout = NULL;
 }
 
 GLEngine::~GLEngine() {
@@ -158,15 +158,35 @@ void GLEngine::load(const char* json) {
 	context->loader->load(json);
 }
 
-void GLEngine::minimize(bool minimize, bool animate) {
+void GLEngine::layout(bool minimize, bool animate) {
 	minimized = minimize;
-	if (onminimize != NULL)
-		onminimize(minimize, animate, onminimizeUserData);
+	if (onlayout != NULL)
+		onlayout(minimize, animate, onlayoutUserData);
 }
 
-void GLEngine::setOnMinimize(onMinimizeCallback onminimize, void* userData) {
-	this->onminimize = onminimize;
-	onminimizeUserData = userData;
+void GLEngine::setOnLayout(onLayoutCallback onlayout, void* userData) {
+	this->onlayout = onlayout;
+	onlayoutUserData = userData;
+}
+
+void GLEngine::webLocation(int index, const CString& url) {
+	if (onweblocation) {
+		onweblocation(index, url, onwebUserData);
+	}
+}
+
+CString GLEngine::webScript(int index, const CString& script) {
+	if (onwebscript) {
+		return onwebscript(index, script, onwebUserData);
+	}
+	
+	return CString((const void*)NULL);
+}
+
+void GLEngine::setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptCallback onwebscript, void* userData) {
+	this->onweblocation = onweblocation;
+	this->onwebscript = onwebscript;
+	onwebUserData = userData;
 }
 
 void GLEngine::onRender() {

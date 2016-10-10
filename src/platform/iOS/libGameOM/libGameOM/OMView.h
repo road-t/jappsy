@@ -29,6 +29,6 @@
 - (void) onResume:(BOOL)app;
 - (void) onPause:(BOOL)app;
 
-- (void) onMinimize:(BOOL)minimize animate:(BOOL)animate;
+- (void) onLayout:(BOOL)minimize animate:(BOOL)animate;
 
 @end

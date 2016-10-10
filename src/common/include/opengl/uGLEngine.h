@@ -26,14 +26,21 @@ class GLRender;
 
 class GLEngine : public CObject {
 public:
-	typedef void (*onMinimizeCallback)(bool minimize, bool animate, void* userData);
+	typedef void (*onLayoutCallback)(bool minimize, bool animate, void* userData);
+	
+	typedef void (*onWebLocationCallback)(int index, const CString& url, void* userData);
+	typedef CString (*onWebScriptCallback)(int index, const CString& script, void* userData);
 	
 protected:
 	GLRender* context = NULL;
 	
-	onMinimizeCallback onminimize;
-	void* onminimizeUserData = NULL;
+	onLayoutCallback onlayout;
+	void* onlayoutUserData = NULL;
 
+	onWebLocationCallback onweblocation;
+	onWebScriptCallback onwebscript;
+	void* onwebUserData = NULL;
+	
 public:
 	Cache* cache = NULL;
 
@@ -46,10 +53,24 @@ public:
 	void preload(const char* json);
 	void load(const char* json);
 	
+	// Minimize
+	
 	bool minimized = false;
 	
-	void minimize(bool minimize, bool animate);
-	void setOnMinimize(onMinimizeCallback onminimize = NULL, void* userData = NULL);
+	void layout(bool minimize, bool animate);
+	void setOnLayout(onLayoutCallback onlayout = NULL, void* userData = NULL);
+	
+	// Web
+	
+	void webLocation(int index, const CString& url);
+	CString webScript(int index, const CString& script);
+	void setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptCallback onwebscript, void* userData);
+	
+	virtual void onWebLocation(int index, CString& location) { }
+	virtual void onWebReady(int index) { }
+	virtual void onWebFail(int index, CString& error) { }
+	
+	// Engine
 	
 	void onRender();
 	void onUpdate(int width, int height);

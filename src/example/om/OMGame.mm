@@ -1890,9 +1890,27 @@ void OMGame::onFatal(const CString& error) {
     shutdown();
 }
 
+void onCalendarDayLoad(const Loader::File* info, void* object, void* userData) {
+    int year = (int)(info->file.substring(3, 7));
+    int month = (int)(info->file.substring(7, 9));
+    int day = (int)(info->file.substring(9, 11));
+    
+    OMGame* game = (OMGame*)userData;
+    JSONObject* json = (JSONObject*)object;
+    CString data = JSON::encode(json->root);
+    
+    game->webScript(OMVIEW_GAME, CString::format(L"document.calendarDay.onquery('%ls', null, %ls, {year:%d, month:%d, day:%d})", (wchar_t*)(info->uri), (wchar_t*)(data), year, month, day));
+}
+
+bool onCalendarDayError(const Loader::File* info, void* userData) {
+    return true;
+}
+
 void OMGame::onWebLocation(int index, CString& location) {
     if (location.equals(L"ios:close")) {
         updateState(OMVIEW_HIDE | OMVIEW_ANIMATE);
+    } else if (location.startsWith(L"ios:calendarDay:")) {
+        context->loader->load(location.replace(L"ios:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
     }
 }
 

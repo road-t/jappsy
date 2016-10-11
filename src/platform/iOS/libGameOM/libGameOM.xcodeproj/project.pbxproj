@@ -24,6 +24,7 @@
 
 /* Begin PBXFileReference section */
 		C340852C1D67D3EA007D4835 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
+		C3416E611DAD08A500298835 /* OMErrorHtml.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMErrorHtml.res; sourceTree = "<group>"; };
 		C34FD9A41D5BBB220022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libGameOM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C34FD9A71D5BBB220022FF71 /* libGameOM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libGameOM.h; sourceTree = "<group>"; };
 		C34FD9A91D5BBB220022FF71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -106,6 +107,7 @@
 				C3513FC71D762E7100DC6362 /* OMSprites.res */,
 				C3513FBF1D762E7100DC6362 /* OMDrawings.res */,
 				C3E532941DABD6280088E699 /* OMLoadHtml.res */,
+				C3416E611DAD08A500298835 /* OMErrorHtml.res */,
 			);
 			name = om;
 			path = ../../../../example/om;

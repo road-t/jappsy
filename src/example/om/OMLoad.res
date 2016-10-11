@@ -74,6 +74,7 @@ R"JAPPSYRAWSTRING(
 
             "jquery.js":                "./mobile/includes/jquery-2.0.3.min.js",
             "scroll.js":                "./mobile/includes/scroll.js",
+            "ajax.js":                  "./mobile/includes/ajax.js",
 
             "arrow-left":               "./mobile/images/arrow-left.png",
             "arrow-right":              "./mobile/images/arrow-right.png",

@@ -41,6 +41,9 @@ public:
 	public:
 		// Вызывается при формировании пост запроса
 		typedef char* (*onQueryCallback)(const Vector<CString&>* query);
+		
+		typedef void (*onLoad)(const File* info, void* object, void* userData);
+		typedef bool (*onError)(const File* info, void* userData);
 
 		CString path;
 		CString file;
@@ -55,6 +58,10 @@ public:
 		char* post;
 		int retry;
 		
+		onLoad onload;
+		onError onerror;
+		void* userData;
+		
 		inline File(const CString& path, const CString& file, const CString& uri, const CString& ext, const CString& key, const CString& group, bool cache) {
 			this->path = path;
 			this->file = file;
@@ -67,6 +74,10 @@ public:
 			this->query = NULL;
 			this->post = NULL;
 			this->retry = 0;
+			
+			onload = NULL;
+			onerror = NULL;
+			userData = NULL;
 		}
 		
 		~File();
@@ -167,6 +178,7 @@ public:
 	
 	void setCallbacks(onStatusCallback onstatus, onFileCallback onfile, onErrorCallback onerror, onRetryCallback onretry, onReadyCallback onready, onFatalCallback onfatal);
 	void load(const char* jsonconfig) throw(const char*);
+	void load(const CString& path, const CString& group, const CString& key, File::onLoad onload = NULL, File::onError onerror = NULL, void* userData = NULL);
 	void query(const CString& path, const CString& message, File::onQueryCallback onquery);
 };
 

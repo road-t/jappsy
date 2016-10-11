@@ -134,20 +134,29 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [self addSubview:helpView];
         
         const char *sOMLoadHtml =
-            #include "../../example/om/OMLoadHtml.res"
+            #include "../../example/om/OMErrorHtml.res"
         ;
+        CString OMLoadHtml = sOMLoadHtml;
+        OMLoadHtml = OMLoadHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language
+        
         loadView = [[OMWebView alloc] init];
         [loadView setOpaque:NO];
         loadView.backgroundColor = [UIColor clearColor];
         [loadView setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [loadView loadHTMLString:(NSString*)CString(sOMLoadHtml) baseURL:nil];
+        [loadView loadHTMLString:(NSString*)OMLoadHtml baseURL:nil];
         [self addSubview:loadView];
+        
+        const char *sOMErrorHtml =
+            #include "../../example/om/OMLoadHtml.res"
+        ;
+        CString OMErrorHtml = sOMErrorHtml;
+        OMErrorHtml = OMErrorHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language
         
         errorView = [[OMWebView alloc] init];
         [errorView setOpaque:NO];
         errorView.backgroundColor = [UIColor clearColor];
         [errorView setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [errorView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
+        [errorView loadHTMLString:(NSString*)OMErrorHtml baseURL:nil];
         [self addSubview:errorView];
         
         lastLayout = NULL;

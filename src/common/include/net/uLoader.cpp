@@ -285,6 +285,28 @@ void Loader::load(const char* json) throw(const char*) {
 	run();
 }
 
+void Loader::load(const CString& path, const CString& group, const CString& key, File::onLoad onload, File::onError onerror, void* userData) {
+	lock();
+
+	URI* uri = new URI((wchar_t*)path);
+	try {
+		uri->absolutePath((wchar_t*)(basePath));
+
+		Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, group, true);
+		info->onload = onload;
+		info->onerror = onerror;
+		info->userData = userData;
+		list.push(info);
+		AtomicIncrement(&(status.total));
+	} catch (...) {
+	}
+	
+	delete uri;
+	unlock();
+	
+	run();
+}
+
 void Loader::query(const CString& path, const CString& message, File::onQueryCallback onquery) {
 	URI* uri = new URI((wchar_t*)path);
 	
@@ -516,6 +538,10 @@ bool Loader::onData(const File* info, Stream* stream) {
 void Loader::onLoad(const File* info, void* object) {
 	__sync_synchronize();
 	
+	if (info->onload != NULL) {
+		info->onload(info, object, info->userData);
+	}
+	
 	// Тут можно добавить result как в джаве, но он не нужен в си
 	
 	AtomicIncrement(&(status.count));
@@ -542,6 +568,13 @@ int Loader::onError(const File* info, const CString& error) {
 }
 
 void Loader::onFatal(const File* info, const CString& error) {
+	if (info->onerror != NULL) {
+		if (info->onerror(info, info->userData)) {
+			AtomicDecrement(&(status.left));
+			return;
+		}
+	}
+	
 	AtomicDecrement(&(status.left));
 	AtomicIncrement(&(status.error));
 	lastError = info->uri;

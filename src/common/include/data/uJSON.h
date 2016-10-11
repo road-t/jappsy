@@ -106,17 +106,8 @@ extern "C" {
 			};
 		} error;
 		
-		inline void seterror(JsonErrorType type, const char* ptr, const char* expected = NULL) {
-			error.type = type;
-			error.ptr = ptr;
-			error.expected = expected;
-		}
-
-		inline void wseterror(JsonErrorType type, const wchar_t* ptr, const wchar_t* expected = NULL) {
-			error.type = type;
-			error.wptr = ptr;
-			error.wexpected = expected;
-		}
+		void seterror(JsonErrorType type, const char* ptr, const char* expected = NULL);
+		void wseterror(JsonErrorType type, const wchar_t* ptr, const wchar_t* expected = NULL);
 		
 		struct JsonCallbacks* callbacks;
 	};

@@ -39,6 +39,24 @@ extern "C" {
 	#define json_err(type, ...)		ctx->seterror(type, *ptrptr, ## __VA_ARGS__)
 	#define jsonw_err(type, ...)	ctx->wseterror(type, *ptrptr, ## __VA_ARGS__)
 
+	void JsonContext::seterror(JsonErrorType type, const char* ptr, const char* expected) {
+		if (type != JSON_ERROR_NONE) {
+			LOG("JsonParser: Error");
+		}
+		error.type = type;
+		error.ptr = ptr;
+		error.expected = expected;
+	}
+	
+	void JsonContext::wseterror(JsonErrorType type, const wchar_t* ptr, const wchar_t* expected) {
+		if (type != JSON_ERROR_NONE) {
+			LOG("JsonParser: Error");
+		}
+		error.type = type;
+		error.wptr = ptr;
+		error.wexpected = expected;
+	}
+
 	bool json_check_number(struct JsonContext* ctx, char** ptrptr, int32_t level) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		char ch = json_cur;
@@ -1210,7 +1228,7 @@ extern "C" {
 							utf16 |= (uint16_t)(ch - '0');
 						} else if ((ch >= 'A') && (ch <= 'F')) {
 							utf16 |= (uint16_t)(ch - 'A' + 10);
-						} else if ((ch >= 'a') && (ch <= 'a')) {
+						} else if ((ch >= 'a') && (ch <= 'f')) {
 							utf16 |= (uint16_t)(ch - 'a' + 10);
 						} else {
 							json_err(JSON_ERROR_SYNTAX);
@@ -1241,7 +1259,7 @@ extern "C" {
 										utf16_2 |= (uint16_t)(ch - '0');
 									} else if ((ch >= 'A') && (ch <= 'F')) {
 										utf16_2 |= (uint16_t)(ch - 'A' + 10);
-									} else if ((ch >= 'a') && (ch <= 'a')) {
+									} else if ((ch >= 'a') && (ch <= 'f')) {
 										utf16_2 |= (uint16_t)(ch - 'a' + 10);
 									} else {
 										json_err(JSON_ERROR_SYNTAX);
@@ -1379,7 +1397,7 @@ extern "C" {
 							utf16 |= (uint16_t)(ch - '0');
 						} else if ((ch >= 'A') && (ch <= 'F')) {
 							utf16 |= (uint16_t)(ch - 'A' + 10);
-						} else if ((ch >= 'a') && (ch <= 'a')) {
+						} else if ((ch >= 'a') && (ch <= 'f')) {
 							utf16 |= (uint16_t)(ch - 'a' + 10);
 						} else {
 							json_err(JSON_ERROR_SYNTAX);
@@ -1413,7 +1431,7 @@ extern "C" {
 										utf16_2 |= (uint16_t)(ch - '0');
 									} else if ((ch >= 'A') && (ch <= 'F')) {
 										utf16_2 |= (uint16_t)(ch - 'A' + 10);
-									} else if ((ch >= 'a') && (ch <= 'a')) {
+									} else if ((ch >= 'a') && (ch <= 'f')) {
 										utf16_2 |= (uint16_t)(ch - 'a' + 10);
 									} else {
 										json_err(JSON_ERROR_SYNTAX);
@@ -1542,7 +1560,7 @@ extern "C" {
 							utf16 |= (uint16_t)(ch - L'0');
 						} else if ((ch >= L'A') && (ch <= L'F')) {
 							utf16 |= (uint16_t)(ch - L'A' + 10);
-						} else if ((ch >= L'a') && (ch <= L'a')) {
+						} else if ((ch >= L'a') && (ch <= L'f')) {
 							utf16 |= (uint16_t)(ch - L'a' + 10);
 						} else {
 							jsonw_err(JSON_ERROR_SYNTAX);
@@ -1573,7 +1591,7 @@ extern "C" {
 										utf16_2 |= (uint16_t)(ch - L'0');
 									} else if ((ch >= L'A') && (ch <= L'F')) {
 										utf16_2 |= (uint16_t)(ch - L'A' + 10);
-									} else if ((ch >= L'a') && (ch <= L'a')) {
+									} else if ((ch >= L'a') && (ch <= L'f')) {
 										utf16_2 |= (uint16_t)(ch - L'a' + 10);
 									} else {
 										jsonw_err(JSON_ERROR_SYNTAX);
@@ -1685,7 +1703,7 @@ extern "C" {
 							utf16 |= (uint16_t)(ch - L'0');
 						} else if ((ch >= L'A') && (ch <= L'F')) {
 							utf16 |= (uint16_t)(ch - L'A' + 10);
-						} else if ((ch >= L'a') && (ch <= L'a')) {
+						} else if ((ch >= L'a') && (ch <= L'f')) {
 							utf16 |= (uint16_t)(ch - L'a' + 10);
 						} else {
 							jsonw_err(JSON_ERROR_SYNTAX);
@@ -1719,7 +1737,7 @@ extern "C" {
 										utf16_2 |= (uint16_t)(ch - L'0');
 									} else if ((ch >= L'A') && (ch <= L'F')) {
 										utf16_2 |= (uint16_t)(ch - L'A' + 10);
-									} else if ((ch >= L'a') && (ch <= L'a')) {
+									} else if ((ch >= L'a') && (ch <= L'f')) {
 										utf16_2 |= (uint16_t)(ch - L'a' + 10);
 									} else {
 										jsonw_err(JSON_ERROR_SYNTAX);

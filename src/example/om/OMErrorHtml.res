@@ -12,7 +12,6 @@ R"JAPPSYRAWSTRING(
 
 	body {
         background: #000;
-        background-color: rgba(0,0,0,0.5);
 		width: 100%;
 		height: 100%;
 		padding: 0;
@@ -57,10 +56,6 @@ R"JAPPSYRAWSTRING(
         background-color: rgba(255,0,0,0.5);
         width: 100%;
         height: 1in;
-    }
-
-    .error td {
-        width: 100%;
     }
 
 </style>
@@ -110,13 +105,13 @@ R"JAPPSYRAWSTRING(
     <table cellspacing=0 cellpadding=0 border=0>
 		<tr class="navigation">
 			<td>
-				<center id="navigation">Молитвенный барабан asdasd</center>
+				<center id="navigation">Молитвенный барабан</center>
 				<div class="arrow-left" onclick="onClose();"></div>
 			</td>
 		</tr>
-		<tr style="height: 100%;">
+		<tr style="height: 100%; background: #111;">
 			<td>
-				<table class="error" cellspacing=0 cellpadding=0 border=0><tr><td id="error"><center>Ошибка подключения</center>AASD</td></tr></table>
+				<table class="error" cellspacing=0 cellpadding=0 border=0><tr><td><center id="error">Ошибка подключения</center></td></tr></table>
 			</td>
 		</tr>
 	</table>

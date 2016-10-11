@@ -154,24 +154,24 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jpg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jpeg") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
 					(info->ext.compareToIgnoreCase(L"ogg") == 0)
 				) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else if (
 					(info->ext.compareToIgnoreCase(L"json") == 0) ||
 					(info->ext.compareToIgnoreCase(L"vsh") == 0) ||
 					(info->ext.compareToIgnoreCase(L"fsh") == 0)) {
 					Info* user = new Info(this, info);
-					HTTPClient::Request(info->uri, info->post, true, 3, 5, info->cache, user, onhttp_text, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_text, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
 				} else {
 					// Unknown File Type
 					// Fake OK

@@ -1877,11 +1877,19 @@ void OMGame::onLoad() {
 void OMGame::onError(const CString& error) {
     CString::format(L"ERROR: %ls", (wchar_t*)error).log();
     
-    // $('.error').show();
+    if (ready < 2) {
+        updateState(OMVIEW_LOAD_ERROR | OMVIEW_ANIMATE);
+    } else {
+        updateState(OMVIEW_ERROR);
+    }
 }
 
 void OMGame::onRetry() {
-    // $('.error').hide();
+    if (ready < 2) {
+        updateState(OMVIEW_LOAD);
+    } else {
+        updateState(OMVIEW_GAME);
+    }
 }
 
 void OMGame::onFatal(const CString& error) {

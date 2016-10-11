@@ -548,6 +548,8 @@ void* HttpAsync(void* threadData) {
 							}
 							http->onfatal(http->url, [error localizedDescription], http->userData);
 							break;
+						} else {
+							repeat = true;
 						}
 					} while (false);
 					if (!repeat) {
@@ -646,6 +648,8 @@ void* HttpAsync(void* threadData) {
 							}
 							http->onfatal(http->url, [error localizedDescription], http->userData);
 							break;
+						} else {
+							repeat = true;
 						}
 					} while (false);
 					if (!repeat) {

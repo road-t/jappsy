@@ -134,7 +134,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [self addSubview:helpView];
         
         const char *sOMLoadHtml =
-            #include "../../example/om/OMErrorHtml.res"
+            #include "../../example/om/OMLoadHtml.res"
         ;
         CString OMLoadHtml = sOMLoadHtml;
         OMLoadHtml = OMLoadHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language
@@ -147,7 +147,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         [self addSubview:loadView];
         
         const char *sOMErrorHtml =
-            #include "../../example/om/OMLoadHtml.res"
+            #include "../../example/om/OMErrorHtml.res"
         ;
         CString OMErrorHtml = sOMErrorHtml;
         OMErrorHtml = OMErrorHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language

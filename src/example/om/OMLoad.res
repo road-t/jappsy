@@ -88,6 +88,7 @@ R"JAPPSYRAWSTRING(
             "grace-88":                 "./mobile/images/grace-88.png",
             "grace-44":                 "./mobile/images/grace-44.png",
             "icon-calendar":            "./mobile/images/icon-calendar.png",
+            "icon-menu":                "./mobile/images/icon-menu.png",
             "info-details":             "./mobile/images/info-details.png",
             "menu-background":          "./mobile/images/menu-background.png",
             "menu-background-select":   "./mobile/images/menu-background-select.png",

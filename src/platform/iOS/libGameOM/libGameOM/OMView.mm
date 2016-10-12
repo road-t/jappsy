@@ -119,6 +119,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         calendarView.backgroundColor = [UIColor clearColor];
         [calendarView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [calendarView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
+        calendarView.scrollView.bounces = NO;
         [self addSubview:calendarView];
 
         gameView = [[JappsyView alloc] initWithFrame:CGRectMake(0,0,100,100)];
@@ -131,6 +132,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         helpView.backgroundColor = [UIColor clearColor];
         [helpView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [helpView loadHTMLString:@"<!DOCTYPE html><html><head></head><body style=\"background:#000;\"></body></html>" baseURL:nil];
+        helpView.scrollView.bounces = NO;
         [self addSubview:helpView];
         
         const char *sOMLoadHtml =
@@ -144,6 +146,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         loadView.backgroundColor = [UIColor clearColor];
         [loadView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [loadView loadHTMLString:(NSString*)OMLoadHtml baseURL:nil];
+        loadView.scrollView.bounces = NO;
         [self addSubview:loadView];
         
         const char *sOMErrorHtml =
@@ -157,6 +160,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
         errorView.backgroundColor = [UIColor clearColor];
         [errorView setTranslatesAutoresizingMaskIntoConstraints:NO];
         [errorView loadHTMLString:(NSString*)OMErrorHtml baseURL:nil];
+        errorView.scrollView.bounces = NO;
         [self addSubview:errorView];
         
         lastLayout = NULL;
@@ -500,6 +504,22 @@ void onUpdateState(int state, void* userData) {
             }
         }
         
+        switch (activity) {
+            case OMVIEW_LOAD_ERROR:
+            case OMVIEW_ERROR:
+                [errorView becomeFirstResponder];
+                break;
+            case OMVIEW_LOAD:
+                [loadView becomeFirstResponder];
+                break;
+            case OMVIEW_GAME:
+                [calendarView becomeFirstResponder];
+                break;
+            case OMVIEW_HELP:
+                [helpView becomeFirstResponder];
+                break;
+        }
+
         if ((state & OMVIEW_ANIMATE) != 0) {
             [self layoutIfNeeded];
         } else {

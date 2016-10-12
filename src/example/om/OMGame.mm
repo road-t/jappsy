@@ -665,9 +665,11 @@ bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* dr
                     game->doubleSelect(1);
                 }
             } else if (event == L"click btn_info") {
-                //document.gameInfo.switchTo(0);
+                game->updateState(OMVIEW_HELP | OMVIEW_ANIMATE);
+                game->webScript(OMVIEW_HELP, L"document.gameInfo.switchTo(0, true);");
             } else if (event == L"click btn_rewards") {
-                //document.gameInfo.switchTo(1);
+                game->updateState(OMVIEW_HELP | OMVIEW_ANIMATE);
+                game->webScript(OMVIEW_HELP, L"document.gameInfo.switchTo(1, true);");
             } else if (event == L"click btn_donate") {
                 if (game->stage == STAGE_BARS) {
                     game->donlistSwitch = true;
@@ -1816,6 +1818,7 @@ void OMGame::onLoad() {
         ready = 2;
         
         webLocation(OMVIEW_GAME, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
+        webLocation(OMVIEW_HELP, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
     }
     
 #ifndef OMDEMO
@@ -1915,23 +1918,31 @@ bool onCalendarDayError(const Loader::File* info, void* userData) {
 }
 
 void OMGame::onWebLocation(int index, CString& location) {
-    if (location.equals(L"ios:close")) {
-        updateState(OMVIEW_HIDE | OMVIEW_ANIMATE);
+    if (location.equals(L"ios:init")) {
+        if (index == OMVIEW_GAME) {
+            webScript(OMVIEW_GAME, L"enableCalendarDay();");
+            updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
+        } else if (index == OMVIEW_HELP) {
+            webScript(OMVIEW_HELP, L"enableInfo();");
+        }
+    } else if (location.equals(L"ios:close")) {
+        if (index != OMVIEW_HELP) {
+            updateState(OMVIEW_HIDE | OMVIEW_ANIMATE);
+        } else {
+            updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
+        }
     } else if (location.startsWith(L"ios:calendarDay:")) {
         context->loader->load(location.replace(L"ios:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
     }
 }
 
 void OMGame::onWebReady(int index) {
-    if (ready == 2) {
-        if (index == OMVIEW_GAME) {
-            updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
-        }
-    }
+    LOG("webReady: %d", index);
 }
 
 void OMGame::onWebFail(int index, CString& error) {
-    
+    LOG("webFail: %d", index);
+    error.log();
 }
 
 OMGame::OMGame() {

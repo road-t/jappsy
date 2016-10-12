@@ -51,11 +51,11 @@
 
 #endif
 
+typedef void (*OMViewCloseCallback)(void* userData);
+
 @interface OMView : UIView
 
-- (instancetype) init;
-
-- (void) initConstraints:(UIViewController*)controller;
+- (instancetype) init:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData;
 
 - (void) orientationChanged:(NSNotification *)notification;
 

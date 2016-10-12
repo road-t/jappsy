@@ -30,6 +30,7 @@
 #define kMusicBufferSize 4096
 
 static OSSpinLock audioPlayerLock = 0;
+static jbool audioPaused = true;
 
 void lockAudioPlayer() {
 	OSSpinLockLock((OSSpinLock*)&(audioPlayerLock));
@@ -47,6 +48,8 @@ static NSMutableArray *audioBuffers = nil;
 static volatile int32_t activeCount = 0;
 
 void pauseAudioPlayer() {
+	lockAudioPlayer();
+	AtomicSet(&audioPaused, true);
 	alcMakeContextCurrent(NULL);
 	
 	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f) {
@@ -57,9 +60,11 @@ void pauseAudioPlayer() {
 		AudioSessionSetActive(false);
 #endif
 	}
+	unlockAudioPlayer();
 }
 
 void resumeAudioPlayer() {
+	lockAudioPlayer();
 	if ([[UIDevice currentDevice].systemVersion floatValue] >= 7.0f) {
 		NSError *error = nil;
 		AVAudioSession *session = [AVAudioSession sharedInstance];
@@ -71,6 +76,8 @@ void resumeAudioPlayer() {
 	}
 	
 	alcMakeContextCurrent(openALContext);
+	AtomicSet(&audioPaused, false);
+	unlockAudioPlayer();
 }
 
 void AudioPlayerInterruptionListenerCallback(void* user_data, UInt32 interruption_state) {

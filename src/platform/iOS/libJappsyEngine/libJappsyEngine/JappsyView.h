@@ -16,6 +16,8 @@
 
 #import <UIKit/UIKit.h>
 
+NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutPriority priority);
+
 @interface JappsyView : UIView
 
 @property (readonly, nonatomic, getter=isRunning) BOOL running;

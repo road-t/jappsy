@@ -29,7 +29,7 @@ public:
 	typedef void (*onUpdateStateCallback)(int state, void* userData);
 	
 	typedef void (*onWebLocationCallback)(int index, const CString& url, void* userData);
-	typedef CString (*onWebScriptCallback)(int index, const CString& script, void* userData);
+	typedef void (*onWebScriptCallback)(int index, const CString& script, void* userData);
 	
 protected:
 	GLRender* context = NULL;
@@ -61,7 +61,7 @@ public:
 	// Web
 	
 	void webLocation(int index, const CString& url);
-	CString webScript(int index, const CString& script);
+	void webScript(int index, const CString& script);
 	void setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptCallback onwebscript, void* userData);
 	
 	virtual void onWebLocation(int index, CString& location) { }

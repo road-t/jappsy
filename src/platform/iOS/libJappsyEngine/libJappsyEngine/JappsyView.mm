@@ -23,10 +23,12 @@
 #include <jappsy.h>
 #include <platform.h>
 
-#ifdef __IOS__
-	#include <openal/uMixer.h>
-#endif
+#include <openal/uMixer.h>
 
+NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutPriority priority) {
+	constraint.priority = priority;
+	return constraint;
+}
 
 @interface JappsyView () {
 	GLContext* _renderer;

@@ -70,7 +70,7 @@ R"JAPPSYRAWSTRING(
         },
 
         "web": {
-            "mobile.html":              "./mobile/mobile_RU.html",
+            "mobile.html":              "./mobile/mobile.html",
 
             "jquery.js":                "./mobile/includes/jquery-2.0.3.min.js",
             "scroll.js":                "./mobile/includes/scroll.js",
@@ -89,6 +89,7 @@ R"JAPPSYRAWSTRING(
             "grace-44":                 "./mobile/images/grace-44.png",
             "icon-calendar":            "./mobile/images/icon-calendar.png",
             "icon-menu":                "./mobile/images/icon-menu.png",
+            "icon-close":               "./mobile/images/icon-close.png",
             "info-details":             "./mobile/images/info-details.png",
             "menu-background":          "./mobile/images/menu-background.png",
             "menu-background-select":   "./mobile/images/menu-background-select.png",

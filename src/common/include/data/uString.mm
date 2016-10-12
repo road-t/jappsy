@@ -2978,6 +2978,8 @@ CString CString::toJSON() const {
 	return CString(L"\"").concat(*this).concat(L"\"");
 }
 
+#ifdef DEBUG
+
 void CString::log() const {
 	wchar_t* wstr = (wchar_t*)m_data;
 	if (wstr == NULL)
@@ -2997,6 +2999,8 @@ void CString::log() const {
 	
 	memFree(str);
 }
+
+#endif
 
 //==============================================================
 

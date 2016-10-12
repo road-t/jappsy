@@ -498,7 +498,9 @@ extern "C" {
 		
 		CString md5() const throw(const char*);
 
+#ifdef DEBUG
 		void log() const;
+#endif
 	};
 
 #endif

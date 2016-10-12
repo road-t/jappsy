@@ -41,7 +41,7 @@ Loader::Info::Info(Loader* loader, File* info) {
 	this->loader = loader;
 	this->info = info;
 	if ((info->onquery != NULL) && (info->query != NULL) && (info->post == NULL)) {
-		info->post = info->onquery(info->query);
+		info->post = info->onquery(loader, info->query);
 	}
 }
 
@@ -285,26 +285,58 @@ void Loader::load(const char* json) throw(const char*) {
 	run();
 }
 
-void Loader::load(const CString& path, const CString& group, const CString& key, File::onLoad onload, File::onError onerror, void* userData) {
-	lock();
+class LoadThreadData {
+public:
+	Loader* loader;
+	CString path;
+	CString group;
+	CString key;
+	Loader::File::onLoad onload;
+	Loader::File::onError onerror;
+	void* userData;
+};
 
-	URI* uri = new URI((wchar_t*)path);
+void* Loader::loadThread(void* userData) {
+	LoadThreadData* thread = (LoadThreadData*)userData;
+	
 	try {
-		uri->absolutePath((wchar_t*)(basePath));
-
-		Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, group, true);
-		info->onload = onload;
-		info->onerror = onerror;
-		info->userData = userData;
-		list.push(info);
-		AtomicIncrement(&(status.total));
+		thread->loader->lock();
+	
+		URI* uri = new URI((wchar_t*)thread->path);
+		try {
+			uri->absolutePath((wchar_t*)(thread->loader->basePath));
+		
+			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), thread->key, thread->group, true);
+			info->onload = thread->onload;
+			info->onerror = thread->onerror;
+			info->userData = thread->userData;
+			thread->loader->list.push(info);
+			AtomicIncrement(&(thread->loader->status.total));
+		} catch (...) {
+		}
+	
+		delete uri;
+		thread->loader->unlock();
+	
+		thread->loader->run();
 	} catch (...) {
 	}
 	
-	delete uri;
-	unlock();
+	memDelete(thread);
 	
-	run();
+	return NULL;
+}
+
+void Loader::load(const CString& path, const CString& group, const CString& key, File::onLoad onload, File::onError onerror, void* userData) {
+	LoadThreadData* thread = memNew(thread, LoadThreadData);
+	thread->loader = this;
+	thread->path = path;
+	thread->group = group;
+	thread->key = key;
+	thread->onload = onload;
+	thread->onerror = onerror;
+	thread->userData = userData;
+	MainThreadAsync(loadThread, NULL, thread);
 }
 
 void Loader::query(const CString& path, const CString& message, File::onQueryCallback onquery) {

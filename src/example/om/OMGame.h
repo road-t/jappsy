@@ -119,7 +119,12 @@ public:
     GLPaint paintSpriteCenter;
     GLPaint paintSpriteLeftCenter;
 
-    OMGame();
+    CString token;
+    CString sessid;
+    CString devid;
+    CString locale;
+    
+    OMGame(const CString& token, const CString& sessid, const CString& devid, const CString& locale);
     ~OMGame();
     
     int32_t mantra = 0;
@@ -243,6 +248,9 @@ public:
     void onPreload();
     void onLoad();
     void onFatal(const CString& error);
+    
+    jlock lockCalendarDay = false;
+    jlock lockCalendarMonth = false;
     
     void onWebLocation(int index, CString& location);
     void onWebReady(int index);

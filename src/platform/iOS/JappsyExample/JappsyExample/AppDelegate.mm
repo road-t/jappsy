@@ -38,8 +38,6 @@ OMView *omView = NULL;
 	NSString *cacheDirectory = [paths objectAtIndex:0];
 
 	jappsyInit(cacheDirectory.UTF8String);
-	[omView onStart];
-	[omView updateState:OMVIEW_RUN];
 	
     return YES;
 }
@@ -48,32 +46,42 @@ OMView *omView = NULL;
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 
-	[omView updateState:OMVIEW_STOP];
+	if (omView != NULL) {
+		[omView updateState:OMVIEW_STOP];
+	}
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application {
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
 
-	[omView updateState:OMVIEW_STOP];
+	if (omView != NULL) {
+		[omView updateState:OMVIEW_STOP];
+	}
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application {
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
 
-	[omView updateState:OMVIEW_RUN];
+	if (omView != NULL) {
+		[omView updateState:OMVIEW_RUN];
+	}
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application {
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 
-	[omView updateState:OMVIEW_RUN];
+	if (omView != NULL) {
+		[omView updateState:OMVIEW_RUN];
+	}
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 
-	[omView onStop];
+	if (omView != NULL) {
+		[omView onStop];
+	}
 }
 
 #pragma mark -
@@ -84,7 +92,9 @@ OMView *omView = NULL;
 	 Free up as much memory as possible by purging cached data objects that can be recreated (or reloaded from disk) later.
 	 */
 	
-	[omView onStop];
+	if (omView != NULL) {
+		[omView onStop];
+	}
 }
 	 
 @end

@@ -35,7 +35,6 @@ void OMGame::updateGrace(GLfloat diff) {
     if (isnan(diff)) diff = 0.0;
 
     if (diff != 0.0) {
-        conf.points += diff;
         if (diff >= 0.0) {
             conf.pointsin += diff;
         } else {
@@ -44,13 +43,14 @@ void OMGame::updateGrace(GLfloat diff) {
                 conf.pointsin += (diff - left);
             }
         }
+        conf.points += diff;
     }
     
     CString ss = CString::format(L"GAINED GRACE: %.2f", conf.pointsin);
     ss = ss.replace(L".", L"<small>.");
     ss.concat(L"</small>");
     
-    //$('.rewards-grace').html(ss);
+    webScript(OMVIEW_HELP, CString::format(L"updateGrace('%ls');", (wchar_t*)ss));
 }
 
 void OMGame::startBars(bool freespin, bool query) {
@@ -95,6 +95,7 @@ void OMGame::updateStage(OMGameStage stage, onNextCallback callback, uint64_t ti
     nextTime = fade ? nextTimeout : 0;
     
     if (timeout == 0) {
+        /*
         updateSounds(this->nextStage);
         
         this->stage = stage;
@@ -106,6 +107,10 @@ void OMGame::updateStage(OMGameStage stage, onNextCallback callback, uint64_t ti
         
         if (callback)
             callback(this);
+         */
+        this->nextTimeout = nextTimeout;
+        nextStage = stage;
+        nextCallback = callback;
     } else {
         this->nextTimeout = nextTimeout;
         nextStage = stage;
@@ -528,7 +533,8 @@ void OMGame::onFrame(GLRender* context) {
         fpscounter++;
         if (fpscounter >= 10) {
             fpscounter = 0;
-            CString::format(L"FPS: %d", context->frame->fps).log();
+
+            LOG("FPS: %d", context->frame->fps);
         }
     }
 }
@@ -1139,7 +1145,7 @@ void OMGame::drawEffectSwitch(GLEngine* engine) {
 
 #ifndef OMDEMO
 
-static char* queryBuilder(const Vector<CString&>* query) {
+static char* queryBuilder(const Loader* loader, const Vector<CString&>* query) {
     //document.token = "e994a237491a85ff72b9f737bbf47047cfbc6dbb0897ea1eea5e75338a4b13c3";
     //document.sessid = "8ea5f70b15263872760d7e14ce8e579a";
     //document.devid = "";
@@ -1157,10 +1163,12 @@ static char* queryBuilder(const Vector<CString&>* query) {
         }
     }
     
+    OMGame* game = (OMGame*)(loader->context->engine);
+    
     CString post = CString::format(L"{\"token\":\"%ls\",\"sessid\":\"%ls\",\"devid\":\"%ls\",\"count\":%d,\"data\":[%ls]}",
-        L"e994a237491a85ff72b9f737bbf47047cfbc6dbb0897ea1eea5e75338a4b13c3",
-        L"8ea5f70b15263872760d7e14ce8e579a",
-        L"",
+        (wchar_t*)(game->token),
+        (wchar_t*)(game->sessid),
+        (wchar_t*)(game->devid),
         count, (wchar_t*)querys);
     
     wchar_t* wstr = (wchar_t*)post;
@@ -1489,7 +1497,9 @@ void* OnQueryCallback(void* userData) {
 #endif
 
 void OMGame::onFile(const Loader::File& info, void* object) {
+#ifdef DEBUG
     CString::format(L"FILE: %ls", (wchar_t*)(info.uri)).log();
+#endif
     
 #ifndef OMDEMO
     if ((info.group.equals(L"api")) && (info.key.equals(L"query"))) {
@@ -1507,7 +1517,8 @@ void OMGame::onFile(const Loader::File& info, void* object) {
 void OMGame::onStatus(const LoaderStatus& status) {
     this->status.count = status.count;
     this->status.total = status.total;
-    CString::format(L"STATUS: %d / %d", status.count, status.total).log();
+    
+    LOG("STATUS: %d / %d", status.count, status.total);
     
     if (ready >= 1) {
         webScript(OMVIEW_LOAD, CString::format(L"setPercent(%d);", status.count * 100 / status.total));
@@ -1517,7 +1528,7 @@ void OMGame::onStatus(const LoaderStatus& status) {
 }
 
 void OMGame::onPreload() {
-    CString::format(L"PRELOADED!").log();
+    LOG("PRELOADED!");
     
     if (!context->createShaders(NULL, NULL)) {
         shutdown();
@@ -1543,7 +1554,7 @@ void OMGame::onPreload() {
 
 void OMGame::onLoad() {
     if (ready == 1) {
-        CString::format(L"READY!").log();
+        LOG("READY!");
 
 #if defined(__IOS__)
         //NSBundle* bundle = [NSBundle bundleWithIdentifier:@"com.jappsy.libGameOM"];
@@ -1817,8 +1828,8 @@ void OMGame::onLoad() {
     
         ready = 2;
         
-        webLocation(OMVIEW_GAME, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
-        webLocation(OMVIEW_HELP, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile_RU.html"))));
+        webLocation(OMVIEW_GAME, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile.html"))));
+        webLocation(OMVIEW_HELP, CString::format(L"file://%ls", (wchar_t*)(cache->getDataPath(L"mobile", L"mobile.html"))));
     }
     
 #ifndef OMDEMO
@@ -1909,21 +1920,47 @@ void onCalendarDayLoad(const Loader::File* info, void* object, void* userData) {
     OMGame* game = (OMGame*)userData;
     JSONObject* json = (JSONObject*)object;
     CString data = JSON::encode(json->root);
-    
-    game->webScript(OMVIEW_GAME, CString::format(L"document.calendarDay.onquery('%ls', null, %ls, {year:%d, month:%d, day:%d})", (wchar_t*)(info->uri), (wchar_t*)(data), year, month, day));
+
+    game->webScript(OMVIEW_GAME, CString::format(L"document.calendarDay.onquery('%ls', null, %ls, {year:%d, month:'%02d', day:'%02d'})", (wchar_t*)(info->uri), (wchar_t*)(data), year, month, day));
+
+    AtomicUnlock(&(game->lockCalendarDay));
 }
 
 bool onCalendarDayError(const Loader::File* info, void* userData) {
+    OMGame* game = (OMGame*)userData;
+    AtomicUnlock(&(game->lockCalendarDay));
+    
+    return true;
+}
+
+void onCalendarMonthLoad(const Loader::File* info, void* object, void* userData) {
+    int year = (int)(info->file.substring(3, 7));
+    int month = (int)(info->file.substring(7, 9));
+    
+    OMGame* game = (OMGame*)userData;
+    JSONObject* json = (JSONObject*)object;
+    CString data = JSON::encode(json->root);
+    
+    game->webScript(OMVIEW_GAME, CString::format(L"document.calendarSelector.onquery('%ls', null, %ls, {year:%d, month:%d})", (wchar_t*)(info->uri), (wchar_t*)(data), year, month));
+
+    AtomicUnlock(&(game->lockCalendarMonth));
+}
+
+bool onCalendarMonthError(const Loader::File* info, void* userData) {
+    OMGame* game = (OMGame*)userData;
+    AtomicUnlock(&(game->lockCalendarMonth));
+
     return true;
 }
 
 void OMGame::onWebLocation(int index, CString& location) {
     if (location.equals(L"ios:init")) {
         if (index == OMVIEW_GAME) {
-            webScript(OMVIEW_GAME, L"enableCalendarDay();");
+            webScript(OMVIEW_GAME, CString::format(L"updateLang('%ls'); enableCalendarDay();", (wchar_t*)locale));
             updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
         } else if (index == OMVIEW_HELP) {
-            webScript(OMVIEW_HELP, L"enableInfo();");
+            webScript(OMVIEW_HELP,  CString::format(L"updateLang('%ls'); enableInfo();", (wchar_t*)locale));
+            updateGrace(0);
         }
     } else if (location.equals(L"ios:close")) {
         if (index != OMVIEW_HELP) {
@@ -1932,7 +1969,13 @@ void OMGame::onWebLocation(int index, CString& location) {
             updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
         }
     } else if (location.startsWith(L"ios:calendarDay:")) {
-        context->loader->load(location.replace(L"ios:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
+        if (AtomicLockTry(&lockCalendarDay)) {
+            context->loader->load(location.replace(L"ios:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
+        }
+    } else if (location.startsWith(L"ios:calendarMonth:")) {
+        if (AtomicLockTry(&lockCalendarMonth)) {
+            context->loader->load(location.replace(L"ios:calendarMonth:", L"./calendar/"), L"web", L"calendarMonth", onCalendarMonthLoad, onCalendarMonthError, this);
+        }
     }
 }
 
@@ -1945,7 +1988,12 @@ void OMGame::onWebFail(int index, CString& error) {
     error.log();
 }
 
-OMGame::OMGame() {
+OMGame::OMGame(const CString& token, const CString& sessid, const CString& devid, const CString& locale) {
+    this->token = token;
+    this->sessid = sessid;
+    this->devid = devid;
+    this->locale = locale;
+    
     LOG("OMGame > Setup Cache");
 
     cache = new Cache(L"om");

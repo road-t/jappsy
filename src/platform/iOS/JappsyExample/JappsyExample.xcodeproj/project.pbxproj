@@ -12,7 +12,7 @@
 		C310C7C01D6E80700031E73A /* fsh_3d.fsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7BE1D6E80700031E73A /* fsh_3d.fsh */; };
 		C310C7C11D6E80700031E73A /* vsh_3d.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7BF1D6E80700031E73A /* vsh_3d.vsh */; };
 		C3401C571D661CB9009B223D /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3401C561D661CB9009B223D /* libz.framework */; };
-		C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */; };
+		C341B2B01D572C9C00D2D70F /* ExampleViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.mm */; };
 		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
 		C34FD9D01D5BC7FB0022FF71 /* libGameOM.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */; };
 		C3506D801D52575C005BC914 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C3506D7F1D52575C005BC914 /* main.m */; };
@@ -29,7 +29,7 @@
 		C310C7BF1D6E80700031E73A /* vsh_3d.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = vsh_3d.vsh; sourceTree = "<group>"; };
 		C3401C561D661CB9009B223D /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
-		C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ExampleViewController.m; sourceTree = "<group>"; };
+		C341B2AF1D572C9C00D2D70F /* ExampleViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ExampleViewController.mm; sourceTree = "<group>"; };
 		C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
 		C34FD9CF1D5BC7FB0022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libGameOM.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libGameOM.framework"; sourceTree = "<group>"; };
 		C3506D7B1D52575C005BC914 /* JappsyExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JappsyExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -86,7 +86,7 @@
 				C3506D811D52575C005BC914 /* AppDelegate.h */,
 				C3506D821D52575C005BC914 /* AppDelegate.mm */,
 				C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */,
-				C341B2AF1D572C9C00D2D70F /* ExampleViewController.m */,
+				C341B2AF1D572C9C00D2D70F /* ExampleViewController.mm */,
 				C3506D8B1D52575C005BC914 /* Main.storyboard */,
 				C3506D8E1D52575C005BC914 /* Assets.xcassets */,
 				C3506D901D52575C005BC914 /* LaunchScreen.storyboard */,
@@ -180,7 +180,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C341B2B01D572C9C00D2D70F /* ExampleViewController.m in Sources */,
+				C341B2B01D572C9C00D2D70F /* ExampleViewController.mm in Sources */,
 				C3506D831D52575C005BC914 /* AppDelegate.mm in Sources */,
 				C3506D801D52575C005BC914 /* main.m in Sources */,
 			);

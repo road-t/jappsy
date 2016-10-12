@@ -18,9 +18,10 @@
 #define JAPPSY_PLATFORM_H
 
 #ifndef DEBUG
-	// TODO: Remove Always Debug Mode
-	#warning Remove Always Debug Mode
-	#define DEBUG
+	//#warning Remove Always Debug Mode
+	//#define DEBUG
+#else
+	#undef DEBUG
 #endif
 #define JAPPSY_IO_RESTORE_FILE_POINTER
 

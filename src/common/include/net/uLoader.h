@@ -40,7 +40,7 @@ public:
 	class File : public CObject {
 	public:
 		// Вызывается при формировании пост запроса
-		typedef char* (*onQueryCallback)(const Vector<CString&>* query);
+		typedef char* (*onQueryCallback)(const Loader* loader, const Vector<CString&>* query);
 		
 		typedef void (*onLoad)(const File* info, void* object, void* userData);
 		typedef bool (*onError)(const File* info, void* userData);
@@ -162,7 +162,9 @@ private:
 	static void onjson_group(struct JsonContext* ctx, const char* key, void* target);
 	static void onjson_subgroup(struct JsonContext* ctx, const char* key, void* target);
 	static void onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target);
-	
+
+	static void* loadThread(void* userData);
+
 public:
 	GLRender* context = NULL;
 	

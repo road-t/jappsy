@@ -174,12 +174,10 @@ void GLEngine::webLocation(int index, const CString& url) {
 	}
 }
 
-CString GLEngine::webScript(int index, const CString& script) {
+void GLEngine::webScript(int index, const CString& script) {
 	if (onwebscript) {
-		return onwebscript(index, script, onwebUserData);
+		onwebscript(index, script, onwebUserData);
 	}
-	
-	return CString((const void*)NULL);
 }
 
 void GLEngine::setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptCallback onwebscript, void* userData) {

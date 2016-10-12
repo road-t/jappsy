@@ -23,7 +23,15 @@
 
 @interface OMView()
 
+@property(strong,nonatomic)NSString *token;
+@property(strong,nonatomic)NSString *sessid;
+@property(strong,nonatomic)NSString *devid;
+@property(strong,nonatomic)NSString *locale;
+
 @property(nonatomic)OMGame *engine;
+
+@property(nonatomic)OMViewCloseCallback onClose;
+@property(nonatomic)void* onCloseUserData;
 
 @property(nonatomic)BOOL defaultPortrait;
 @property(nonatomic)BOOL portrait;
@@ -69,7 +77,15 @@
 
 @implementation OMView
 
+@synthesize token;
+@synthesize sessid;
+@synthesize devid;
+@synthesize locale;
+
 @synthesize engine;
+
+@synthesize onClose;
+@synthesize onCloseUserData;
 
 @synthesize calendarView;
 @synthesize gameView;
@@ -105,14 +121,28 @@
 @synthesize llvError;
 @synthesize llhError;
 
-NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutPriority priority) {
-    constraint.priority = priority;
-    return constraint;
-}
-
-- (instancetype) init {
+- (instancetype) init:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData {
     if ((self = [super init])) {
+        self.token = [NSString stringWithString:token];
+        self.sessid = [NSString stringWithString:sessid];
+        self.devid = [NSString stringWithString:devid];
+        self.locale = [[NSString stringWithString:locale] uppercaseString];
+        
+        NSString* defaultLocale = @"EN";
+        
+        if (self.locale.length != 2) {
+            self.locale = defaultLocale;
+        } else {
+            NSString* supportedLocales = @"RU EN";
+            if (![supportedLocales containsString:self.locale]) {
+                self.locale = defaultLocale;
+            }
+        }
+        
         engine = NULL;
+        
+        onClose = callback;
+        onCloseUserData = userData;
         
         calendarView = [[OMWebView alloc] init];
         [calendarView setOpaque:NO];
@@ -139,7 +169,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
             #include "../../example/om/OMLoadHtml.res"
         ;
         CString OMLoadHtml = sOMLoadHtml;
-        OMLoadHtml = OMLoadHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language
+        OMLoadHtml = OMLoadHtml.replace(L"{LANG}", self.locale); // TODO: Real Language
         
         loadView = [[OMWebView alloc] init];
         [loadView setOpaque:NO];
@@ -153,7 +183,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
             #include "../../example/om/OMErrorHtml.res"
         ;
         CString OMErrorHtml = sOMErrorHtml;
-        OMErrorHtml = OMErrorHtml.replace(L"{LANG}", L"RU"); // TODO: Real Language
+        OMErrorHtml = OMErrorHtml.replace(L"{LANG}", self.locale); // TODO: Real Language
         
         errorView = [[OMWebView alloc] init];
         [errorView setOpaque:NO];
@@ -176,98 +206,100 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 
         [self setTranslatesAutoresizingMaskIntoConstraints:NO];
         self.backgroundColor = [UIColor blackColor];
+        
+        [self initConstraints];
     }
     return self;
 }
 
-- (void) initConstraints:(UIViewController*)controller {
+- (void) initConstraints {
     lpnCalendar = [[NSMutableArray alloc] init];
-    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],999)];
-    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0],999)];
-    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0], 997)];
+    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],899)];
+    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0],899)];
+    [lpnCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0], 897)];
 
     lpmCalendar = [[NSMutableArray alloc] init];
-    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [lpmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
     
     llnCalendar = llmCalendar = [[NSMutableArray alloc] init];
-    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [llmCalendar addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:calendarView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
     
     
     lpnGame = [[NSMutableArray alloc] init];
-    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],999)];
-    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0],999)];
-    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],998)];
+    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],899)];
+    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0],899)];
+    [lpnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],898)];
     
     lpmGame = llmGame = [[NSMutableArray alloc] init];
-    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-10.0],999)];
-    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:-10.0],999)];
-    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0],999)];
-    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],998)];
+    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-10.0],899)];
+    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:-10.0],899)];
+    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:150.0],899)];
+    [lpmGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:gameView attribute:NSLayoutAttributeWidth multiplier:(1080.0 / 1920.0) constant:0.0],898)];
 
     llnGame = [[NSMutableArray alloc] init];
-    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [llnGame addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:gameView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
     
     
     lpvHelp = [[NSMutableArray alloc] init];
-    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [lpvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
 
     lphHelp = [[NSMutableArray alloc] init];
-    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
-    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],999)];
+    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
+    [lphHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],899)];
  
     llvHelp = [[NSMutableArray alloc] init];
-    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [llvHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
 
     llhHelp = [[NSMutableArray alloc] init];
-    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
-    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],999)];
+    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
+    [llhHelp addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:helpView attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0],899)];
 
 
     lpvLoad = lphLoad = [[NSMutableArray alloc] init];
-    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [lpvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
     
     llvLoad = llhLoad = [[NSMutableArray alloc] init];
-    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [llvLoad addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:loadView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
 
     
     lpvError = lphError = [[NSMutableArray alloc] init];
-    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:controller.topLayoutGuide attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
     
     llvError = llhError = [[NSMutableArray alloc] init];
-    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];
-    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],999)];
-    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],999)];
-    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],999)];
+    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
+    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
+    [llvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];
 
     
     UIInterfaceOrientation interfaceOrientation = [[UIApplication sharedApplication] statusBarOrientation];
@@ -524,7 +556,12 @@ void onUpdateState(int state, void* userData) {
             [self layoutIfNeeded];
         } else {
             if ((_state & OMVIEW_HIDE) != 0) {
-                [self setHidden:YES];
+                if ((update & OMVIEW_HIDE) != 0) {
+                    if (onClose) {
+                        onClose(onCloseUserData);
+                    }
+                }
+                //[self setHidden:YES];
             } else {
                 [self setHidden:NO];
             }
@@ -606,6 +643,11 @@ void onUpdateState(int state, void* userData) {
         
         if ((state & OMVIEW_ANIMATE) != 0) {
             if ((_state & OMVIEW_HIDE) != 0) {
+                if ((update & OMVIEW_HIDE) != 0) {
+                    if (onClose) {
+                        onClose(onCloseUserData);
+                    }
+                }
             } else {
                 [self setHidden:NO];
             }
@@ -682,7 +724,7 @@ void onUpdateState(int state, void* userData) {
             } completion: ^(BOOL finished) {
                 if (finished) {
                     if ((_state & OMVIEW_HIDE) != 0) {
-                        [self setHidden:YES];
+                        //[self setHidden:YES];
                     } else {
                     }
 
@@ -731,26 +773,29 @@ void onLocation(int index, const CString& url, void* userData) {
     [omView onLocation:index location:(NSString*)url];
 }
 
-struct onScriptThreadData {
+class onScriptThreadData {
+public:
     OMView* omView;
     int index;
-    CString* script;
+    CString script;
 };
 
 void* onScriptThread(void* userData) {
     onScriptThreadData* thread = (onScriptThreadData*)userData;
-    return new CString([thread->omView onScript:thread->index script:(NSString*)*(thread->script)]);
+    try {
+        [thread->omView onScript:thread->index script:(NSString*)(thread->script)];
+    } catch (...) {
+    }
+    memDelete(thread);
+    return NULL;
 }
 
-CString onScript(int index, const CString& script, void* userData) {
-    onScriptThreadData thread;
-    thread.omView = (__bridge OMView*)userData;
-    thread.index = index;
-    thread.script = (CString*)&script;
-    CString* threadResult = (CString*)MainThreadSync(onScriptThread, &thread);
-    CString result = *threadResult;
-    delete threadResult;
-    return result;
+void onScript(int index, const CString& script, void* userData) {
+    onScriptThreadData* thread = memNew(thread, onScriptThreadData);
+    thread->omView = (__bridge OMView*)userData;
+    thread->index = index;
+    thread->script = script;
+    MainThreadAsync(onScriptThread, NULL, thread);
 }
 
 - (void) onLocation:(int)index location:(NSString*)url {
@@ -787,7 +832,7 @@ CString onScript(int index, const CString& script, void* userData) {
 
 - (BOOL) onStart {
     if ([gameView onStart]) {
-        engine = new class OMGame();
+        engine = new class OMGame(token, sessid, devid, locale);
         engine->setOnUpdateState(onUpdateState, (__bridge void*)self);
         engine->setWebCallbacks(onLocation, onScript, (__bridge void*)self);
         [gameView engine:engine];

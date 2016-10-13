@@ -22,8 +22,7 @@
 #include <core/uMemory.h>
 #include <jappsy.h>
 #include <platform.h>
-
-#include <openal/uMixer.h>
+#include <sound/uMixer.h>
 
 NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutPriority priority) {
 	constraint.priority = priority;

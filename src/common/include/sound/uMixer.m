@@ -15,6 +15,7 @@
  */
 
 #import "uMixer.h"
+
 #import <OpenAL/al.h>
 #import <OpenAl/alc.h>
 #import <AudioToolbox/AudioToolbox.h>
@@ -569,7 +570,7 @@ struct MusicBuffer* mmallocMusicBuffer(struct AudioData* data) {
 					if (audioHandle != NULL) {
 						ExtAudioFileDispose(data->handle);
 					}
-					return audioHandle;
+					return (struct MusicBuffer*)audioHandle;
 				} else {
 					return NULL;
 				}

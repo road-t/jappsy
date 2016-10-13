@@ -57,7 +57,7 @@ extern "C" {
 		void (*onobjectend)(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
 		void (*onarraystart)(struct JsonContext* ctx, const char* key, void* target);
 		void (*onarrayend)(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-		void (*onstring)(struct JsonContext* ctx, const char* key, char* value, void* target);
+		void (*onstring)(struct JsonContext* ctx, const char* key, const char* value, void* target);
 		void (*onnumber)(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
 		void (*onboolean)(struct JsonContext* ctx, const char* key, bool value, void* target);
 		void (*onnull)(struct JsonContext* ctx, const char* key, void* target);

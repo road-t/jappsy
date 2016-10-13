@@ -17,9 +17,7 @@
 #include "uGLSound.h"
 #include <opengl/uGLRender.h>
 
-#ifdef __IOS__
-	#include <openal/uMixer.h>
-#endif
+#include <sound/uMixer.h>
 
 void onUpdateFx(GLSoundVolumeFx* fx) {
 	uint64_t time = currentTimeMillis();
@@ -83,9 +81,7 @@ GLSound::GLSound(GLSoundMixer* mixer, const CString& key, void* audio, uint32_t 
 
 GLSound::~GLSound() {
 	mixStop();
-#ifdef __IOS__
 	destroyAudio(audio);
-#endif
 }
 
 void GLSound::update() {

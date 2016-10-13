@@ -441,7 +441,7 @@ void GLModels::onjson_rootnode_end(struct JsonContext* ctx, const char* key, voi
 	}
 }
 
-void GLModels::onjson_node_string(struct JsonContext* ctx, const char* key, char* value, void* target) {
+void GLModels::onjson_node_string(struct JsonContext* ctx, const char* key, const char* value, void* target) {
 	ModelJsonParserNodeData* data = (ModelJsonParserNodeData*)target;
 	
 	if (strcmp(key, "name") == 0) {
@@ -612,7 +612,7 @@ void GLModels::onjson_mesh_end(struct JsonContext* ctx, const int index, void* p
 	}
 }
 
-void GLModels::onjson_mesh_string(struct JsonContext* ctx, const char* key, char* value, void* target) {
+void GLModels::onjson_mesh_string(struct JsonContext* ctx, const char* key, const char* value, void* target) {
 	ModelJsonParserMeshData* data = (ModelJsonParserMeshData*)target;
 	
 	if (strcmp(key, "name") == 0) {
@@ -890,7 +890,7 @@ void GLModels::onjson_material_property_end(struct JsonContext* ctx, const int i
 	//ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
 }
 
-void GLModels::onjson_material_property_string(struct JsonContext* ctx, const char* key, char* value, void* target) {
+void GLModels::onjson_material_property_string(struct JsonContext* ctx, const char* key, const char* value, void* target) {
 	ModelJsonParserMaterialData* data = (ModelJsonParserMaterialData*)target;
 	
 	if (strcmp(key, "key") == 0) {

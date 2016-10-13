@@ -21,10 +21,7 @@
 #include <net/uHttpClient.h>
 #include <opengl/uGLRender.h>
 #include <opengl/uGLReader.h>
-
-#ifdef __IOS__
-	#include <openal/uMixer.h>
-#endif
+#include <sound/uMixer.h>
 
 Loader::File::~File() {
 	if (this->query != NULL) {
@@ -241,7 +238,7 @@ void Loader::onjson_subgroup(struct JsonContext* ctx, const char* key, void* tar
 	ctx->callbacks->onobject.onstring = onjson_subfile;
 }
 
-void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target) {
+void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, const char* value, void* target) {
 	Loader* loader = (Loader*)target;
 	
 	CString path = value;
@@ -519,7 +516,11 @@ void* onCreateSoundCallback(void* userData) {
 		GLSound* sound = thread->mixer->createSound(thread->info->key, thread->audio, thread->size);
 		return sound;
 	} catch (...) {
+#if defined(__IOS__)
 		destroyAudio(thread->audio);
+#elif defined(__JNI__)
+		#warning DestroyAudio
+#endif
 		throw;
 	}
 }
@@ -542,7 +543,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 				return false;
 			}
 #elif defined(__JNI__)
-	#error PrepareAudio
+	#warning PrepareAudio
 #endif
 		} catch (...) {
 			return false;

@@ -374,7 +374,7 @@ private:
 		// root.rootnode
 		static void onjson_rootnode_start(struct JsonContext* ctx, const char* key, void* target);
 		static void onjson_rootnode_end(struct JsonContext* ctx, const char* key, void* parenttarget, void* target, bool noerror);
-		static void onjson_node_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+		static void onjson_node_string(struct JsonContext* ctx, const char* key, const char* value, void* target);
 		static void onjson_node_array_start(struct JsonContext* ctx, const char* key, void* target);
 			// node.transformation
 			static void onjson_node_tranformation_start(struct JsonContext* ctx, const char* key, void* target);
@@ -399,7 +399,7 @@ private:
 			// root.meshes[index]
 			static void onjson_mesh_start(struct JsonContext* ctx, const int index, void* target);
 			static void onjson_mesh_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
-			static void onjson_mesh_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+			static void onjson_mesh_string(struct JsonContext* ctx, const char* key, const char* value, void* target);
 			static void onjson_mesh_number(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
 			static void onjson_mesh_array_start(struct JsonContext* ctx, const char* key, void* target); // vertices | normals | texturecoords | faces
 				// mesh.vertices
@@ -441,7 +441,7 @@ private:
 					// material.properties[index]
 					static void onjson_material_property_start(struct JsonContext* ctx, const int index, void* target);
 					static void onjson_material_property_end(struct JsonContext* ctx, const int index, void* parenttarget, void* target, bool noerror);
-					static void onjson_material_property_string(struct JsonContext* ctx, const char* key, char* value, void* target);
+					static void onjson_material_property_string(struct JsonContext* ctx, const char* key, const char* value, void* target);
 					static void onjson_material_property_number(struct JsonContext* ctx, const char* key, const struct JsonNumber& number, void* target);
 					static void onjson_material_property_array_start(struct JsonContext* ctx, const char* key, void* target);
 						// material.properties[index].value

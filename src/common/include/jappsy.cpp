@@ -17,10 +17,7 @@
 #include "jappsy.h"
 #include <core/uMemory.h>
 #include <core/uSystem.h>
-
-#ifdef __IOS__
-	#include <openal/uMixer.h>
-#endif
+#include <sound/uMixer.h>
 
 CString* jappsyCacheDir = NULL;
 

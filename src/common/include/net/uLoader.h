@@ -161,7 +161,7 @@ private:
 	static void onjson_root_start(struct JsonContext* ctx, void* target);
 	static void onjson_group(struct JsonContext* ctx, const char* key, void* target);
 	static void onjson_subgroup(struct JsonContext* ctx, const char* key, void* target);
-	static void onjson_subfile(struct JsonContext* ctx, const char* key, char* value, void* target);
+	static void onjson_subfile(struct JsonContext* ctx, const char* key, const char* value, void* target);
 
 	static void* loadThread(void* userData);
 

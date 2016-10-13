@@ -38,6 +38,8 @@
 		C3401C651D669BE0009B223D /* uObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3401C641D669BE0009B223D /* uObject.cpp */; };
 		C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */ = {isa = PBXBuildFile; fileRef = C340853A1D67F82E007D4835 /* uGLShader.mm */; };
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
+		C3486E201DAFB72100850F78 /* uMixer.h in Headers */ = {isa = PBXBuildFile; fileRef = C3486E1E1DAFB72100850F78 /* uMixer.h */; };
+		C3486E211DAFB72100850F78 /* uMixer.m in Sources */ = {isa = PBXBuildFile; fileRef = C3486E1F1DAFB72100850F78 /* uMixer.m */; };
 		C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
 		C34FD9591D5B54EB0022FF71 /* uGLFrame.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9541D5B54EB0022FF71 /* uGLFrame.h */; };
 		C34FD95A1D5B54EB0022FF71 /* uGLRender.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9551D5B54EB0022FF71 /* uGLRender.cpp */; };
@@ -69,8 +71,6 @@
 		C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */; };
 		C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA5E1D5CB7350022FF71 /* uLoader.h */; };
 		C34FDA6F1D5DDD0B0022FF71 /* uObject.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FDA6C1D5DDD0B0022FF71 /* uObject.h */; };
-		C35025841DA5411C00EFD3B0 /* uMixer.h in Headers */ = {isa = PBXBuildFile; fileRef = C35025821DA5411C00EFD3B0 /* uMixer.h */; };
-		C35025851DA5411C00EFD3B0 /* uMixer.m in Sources */ = {isa = PBXBuildFile; fileRef = C35025831DA5411C00EFD3B0 /* uMixer.m */; };
 		C35025881DA541DF00EFD3B0 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35025871DA541DF00EFD3B0 /* OpenAL.framework */; };
 		C350258A1DA541E500EFD3B0 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C35025891DA541E500EFD3B0 /* AVFoundation.framework */; };
 		C350258C1DA541EB00EFD3B0 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C350258B1DA541EB00EFD3B0 /* AudioToolbox.framework */; };
@@ -140,6 +140,8 @@
 		C3401C641D669BE0009B223D /* uObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uObject.cpp; sourceTree = "<group>"; };
 		C340853A1D67F82E007D4835 /* uGLShader.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = uGLShader.mm; sourceTree = "<group>"; };
 		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
+		C3486E1E1DAFB72100850F78 /* uMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMixer.h; sourceTree = "<group>"; };
+		C3486E1F1DAFB72100850F78 /* uMixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uMixer.m; sourceTree = "<group>"; };
 		C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLFrame.cpp; sourceTree = "<group>"; };
 		C34FD9541D5B54EB0022FF71 /* uGLFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uGLFrame.h; sourceTree = "<group>"; };
 		C34FD9551D5B54EB0022FF71 /* uGLRender.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLRender.cpp; sourceTree = "<group>"; };
@@ -171,8 +173,6 @@
 		C34FDA5D1D5CB7350022FF71 /* uLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uLoader.cpp; sourceTree = "<group>"; };
 		C34FDA5E1D5CB7350022FF71 /* uLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uLoader.h; sourceTree = "<group>"; };
 		C34FDA6C1D5DDD0B0022FF71 /* uObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uObject.h; sourceTree = "<group>"; };
-		C35025821DA5411C00EFD3B0 /* uMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMixer.h; sourceTree = "<group>"; };
-		C35025831DA5411C00EFD3B0 /* uMixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uMixer.m; sourceTree = "<group>"; };
 		C35025871DA541DF00EFD3B0 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		C35025891DA541E500EFD3B0 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		C350258B1DA541EB00EFD3B0 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -238,7 +238,7 @@
 				C34FD98F1D5B926A0022FF71 /* event */,
 				C34FD9711D5B7C490022FF71 /* data */,
 				C34FDA4F1D5CABD30022FF71 /* net */,
-				C35025811DA5411C00EFD3B0 /* openal */,
+				C3486E1D1DAFB72100850F78 /* sound */,
 				C35271FC1D551B8400F41198 /* opengl */,
 				C30577BF1D54BA9C00171EFC /* cipher */,
 				C30577C91D54BA9C00171EFC /* core */,
@@ -295,6 +295,15 @@
 			name = libs;
 			sourceTree = "<group>";
 		};
+		C3486E1D1DAFB72100850F78 /* sound */ = {
+			isa = PBXGroup;
+			children = (
+				C3486E1E1DAFB72100850F78 /* uMixer.h */,
+				C3486E1F1DAFB72100850F78 /* uMixer.m */,
+			);
+			path = sound;
+			sourceTree = "<group>";
+		};
 		C34FD9711D5B7C490022FF71 /* data */ = {
 			isa = PBXGroup;
 			children = (
@@ -334,15 +343,6 @@
 				C34FDA5E1D5CB7350022FF71 /* uLoader.h */,
 			);
 			path = net;
-			sourceTree = "<group>";
-		};
-		C35025811DA5411C00EFD3B0 /* openal */ = {
-			isa = PBXGroup;
-			children = (
-				C35025821DA5411C00EFD3B0 /* uMixer.h */,
-				C35025831DA5411C00EFD3B0 /* uMixer.m */,
-			);
-			path = openal;
 			sourceTree = "<group>";
 		};
 		C35025861DA541DF00EFD3B0 /* Frameworks */ = {
@@ -454,7 +454,6 @@
 				C34FD9B81D5BBBB70022FF71 /* JappsyView.h in Headers */,
 				C34FDA5C1D5CADCB0022FF71 /* uStream.h in Headers */,
 				C35900DA1D6542C700C1D154 /* uGLSprite.h in Headers */,
-				C35025841DA5411C00EFD3B0 /* uMixer.h in Headers */,
 				C34FDA611D5CB7350022FF71 /* uLoader.h in Headers */,
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
 				C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */,
@@ -463,6 +462,7 @@
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C35900D01D6542C700C1D154 /* uGLModel.h in Headers */,
 				C33FC40D1D68CCFC000D33D4 /* uGLObjectData.h in Headers */,
+				C3486E201DAFB72100850F78 /* uMixer.h in Headers */,
 				C30577F11D54BA9C00171EFC /* uCrc.h in Headers */,
 				C305781C1D54BA9C00171EFC /* jappsy.h in Headers */,
 				C34FD95C1D5B54EB0022FF71 /* uGLRender.h in Headers */,
@@ -591,11 +591,11 @@
 				C350258F1DA54C9E00EFD3B0 /* uGLSound.cpp in Sources */,
 				C34FDA5A1D5CADCB0022FF71 /* uStream.cpp in Sources */,
 				C34FDA411D5C01FC0022FF71 /* uGLCamera.cpp in Sources */,
-				C35025851DA5411C00EFD3B0 /* uMixer.m in Sources */,
 				C35900D31D6542C700C1D154 /* uGLParticle.cpp in Sources */,
 				C340853B1D67F82E007D4835 /* uGLShader.mm in Sources */,
 				C33F48841D674A1C00DD03A5 /* uMD5.cpp in Sources */,
 				C3A4B4EB1D5FD41C0039DD09 /* uJSON.cpp in Sources */,
+				C3486E211DAFB72100850F78 /* uMixer.m in Sources */,
 				C34FD9641D5B67900022FF71 /* uGLTouchScreen.cpp in Sources */,
 				C3401C5D1D668B4E009B223D /* uSystem.mm in Sources */,
 				C30578401D54CBAB00171EFC /* uMemory.mm in Sources */,

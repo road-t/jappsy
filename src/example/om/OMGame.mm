@@ -15,9 +15,7 @@
  */
 
 #include "OMGame.h"
-#if defined(__IOS__)
-    #include "OMView.h"
-#endif
+#include "OMView.h"
 
 #include <opengl/uGLRender.h>
 #include <core/uSystem.h>
@@ -173,7 +171,7 @@ void OMGame::updateStageVisibility() {
 static const Vec3 barsRotateVector = Vec3({0.0, -1, 0.0}).normalize();
 
 void OMGame::onFrame(GLRender* context) {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.3f, 0.5f, 1.0f);
     glClear( GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 /*
     float c = (float)color / 255.0f;

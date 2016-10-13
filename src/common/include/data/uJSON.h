@@ -116,7 +116,7 @@ extern "C" {
 		struct JsonNode*	parent;
 		JsonType	type;
 		bool		wide;
-		int32_t		level;
+		uint32_t	level;
 		union {
 			char*		data;
 			wchar_t*	wdata;
@@ -263,7 +263,7 @@ public:
 	inline static CString keyify(const void* ptr) throw(const char*) { return L"\"null\""; }
 	inline static CString keyify(const wchar_t* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
 	inline static CString keyify(const char* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
-	inline static CString keyify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
+	inline static CString keyify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode((wchar_t)character)).concat(L"\""); }
 	inline static CString keyify(const wchar_t character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
 	inline static CString keyify(const bool value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
 	inline static CString keyify(const int8_t value) throw(const char*) { return CString(L"\"").concat(value).concat(L"\""); }
@@ -282,7 +282,7 @@ public:
 	inline static CString stringify(const void* ptr) throw(const char*) { return L"null"; }
 	inline static CString stringify(const wchar_t* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
 	inline static CString stringify(const char* string) throw(const char*) { return CString(L"\"").concat(JSON::encode(string)).concat(L"\""); }
-	inline static CString stringify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
+	inline static CString stringify(const char character) throw(const char*) { return CString(L"\"").concat(JSON::encode((wchar_t)character)).concat(L"\""); }
 	inline static CString stringify(const wchar_t character) throw(const char*) { return CString(L"\"").concat(JSON::encode(character)).concat(L"\""); }
 	inline static CString stringify(const bool value) throw(const char*) { return value; }
 	inline static CString stringify(const int8_t value) throw(const char*) { return value; }

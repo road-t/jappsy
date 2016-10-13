@@ -40,7 +40,7 @@ public:
 	}
 	
 	inline GLTypeface(uint8_t family, uint8_t style) {
-		m_value = (family & 0xC) | (style & 0x3);
+		m_value = (family & (uint8_t)0xC) | (style & (uint8_t)0x3);
 	}
 	
 	inline GLTypeface& operator=(const uint8_t& typeface) {

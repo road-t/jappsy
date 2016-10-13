@@ -72,26 +72,26 @@ void GLDrawing::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 		animation->update();
 	
 	if (background >= 0)
-		sprite->render(position, background, paint, time, camera);
+		sprite->render(position, (GLuint)background, paint, time, camera);
 	if (pressed) {
 		if (click >= 0)
-			sprite->render(position, click, paint, time, camera);
+			sprite->render(position, (GLuint)click, paint, time, camera);
 		else if (normal >= 0)
-			sprite->render(position, normal, paint, time, camera);
+			sprite->render(position, (GLuint)normal, paint, time, camera);
 	} else if (hovered) {
 		if (hover >= 0)
-			sprite->render(position, hover, paint, time, camera);
+			sprite->render(position, (GLuint)hover, paint, time, camera);
 		else if (normal >= 0)
-			sprite->render(position, normal, paint, time, camera);
+			sprite->render(position, (GLuint)normal, paint, time, camera);
 	} else if (normal >= 0) {
-		sprite->render(position, normal, paint, time, camera);
+		sprite->render(position, (GLuint)normal, paint, time, camera);
 	}
 	
 	if (onrender != NULL)
-		onrender(context->engine, (GLDrawing*)this);
+		onrender(context->engine, this);
 	
 	if (foreground >= 0)
-		sprite->render(position, foreground, paint, time, camera);
+		sprite->render(position, (GLuint)foreground, paint, time, camera);
 }
 
 GLDrawings::GLDrawings(GLRender* context) throw(const char*) {

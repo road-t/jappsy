@@ -29,9 +29,9 @@ protected:
 	volatile jlock m_lock = 0;
 	volatile int32_t m_lockCount = 0;
 	
-	inline void spinLock() const { AtomicLock((volatile int32_t*)&m_lock); }
-	inline bool spinLockTry() const { return AtomicLockTry((volatile int32_t*)&m_lock); }
-	inline void spinUnlock() const { AtomicUnlock((volatile int32_t*)&m_lock); }
+	inline void spinLock() const { AtomicLock((jlock*)&m_lock); }
+	inline bool spinLockTry() const { return AtomicLockTry((jlock*)&m_lock); }
+	inline void spinUnlock() const { AtomicUnlock((jlock*)&m_lock); }
 	
 	void threadLock() const;
 	bool threadLockTry() const;

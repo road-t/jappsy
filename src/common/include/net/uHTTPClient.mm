@@ -179,7 +179,7 @@ uint64_t RFC2616toUTC(const CString& date) {
 	t.tm_min = minute;
 	t.tm_sec = second;
 	t.tm_wday = weekDay;
-	char UTC[] = "UTC";
+	static char UTC[] = "UTC";
 	t.tm_zone = UTC;
 	
 	return ((uint64_t)timegm(&t)) * 1000;
@@ -705,7 +705,7 @@ void HTTPClient::Request(const CString& url, char* post, bool threaded, int retr
 		if (IsMainThread()) {
 			HttpAsync(http);
 		} else {
-			(void)MainThreadAsync(HttpAsync, NULL, http);
+			MainThreadAsync(HttpAsync, NULL, http);
 		}
 	} else {
 		if (IsMainThread()) {

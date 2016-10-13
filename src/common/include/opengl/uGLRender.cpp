@@ -215,10 +215,10 @@ GLfloat* GLRender::makeLine(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2) {
 GLfloat* GLRender::makeColor(const uint32_t* color, uint32_t count) {
 	if (count > 5) count = 5;
 	for (uint32_t i = 0; i < count; i++) {
-		m_color[i * 4 + 0] = (GLfloat)((color[i] >> 16) & 0xFF) / 255.0;	// R
-		m_color[i * 4 + 1] = (GLfloat)((color[i] >> 8) & 0xFF) / 255.0;	// G
-		m_color[i * 4 + 2] = (GLfloat)(color[i] & 0xFF) / 255.0;			// B
-		m_color[i * 4 + 3] = (GLfloat)((color[i] >> 24) & 0xFF) / 255.0;	// A
+		m_color[i * 4 + 0] = (GLfloat)((color[i] >> 16) & 0xFF) / 255.0f;	// R
+		m_color[i * 4 + 1] = (GLfloat)((color[i] >> 8) & 0xFF) / 255.0f;	// G
+		m_color[i * 4 + 2] = (GLfloat)(color[i] & 0xFF) / 255.0f;			// B
+		m_color[i * 4 + 3] = (GLfloat)((color[i] >> 24) & 0xFF) / 255.0f;	// A
 	}
 	return m_color;
 }
@@ -231,7 +231,7 @@ void GLRender::fill(uint32_t color) {
 
 void GLRender::fillAlpha(uint8_t alpha) {
 	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
-	glClearColor(0.0, 0.0, 0.0, (GLfloat)alpha / 255.0);
+	glClearColor(0.0, 0.0, 0.0, (GLfloat)alpha / 255.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 }
@@ -276,7 +276,7 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		
 		glUniformMatrix4fv(shaderSquareStroke->uLayerProjectionMatrix, 1, GL_FALSE, projection16fv);
 		
-		GLfloat half = floorf((GLfloat)(paint.m_strokeWidth) / 2.0);
+		GLfloat half = floorf((GLfloat)(paint.m_strokeWidth) / 2.0f);
 		GLfloat corners[4] = { x1 - half, y1 - half, x2 + half, y2 + half };
 		glUniform2fv(shaderSquareStroke->uCorners, 2, corners);
 		glUniform1f(shaderSquareStroke->uBorder, paint.m_strokeWidth);
@@ -342,12 +342,12 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 		return;
 	}
 	GLuint program = shader->program;
-	int uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-	int aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-	int aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
-	int uTime = glGetUniformLocation(program, "uTime");
-	int uWorldTime = glGetUniformLocation(program, "uWorldTime");
-	int uTexture = glGetUniformLocation(program, "uTexture");
+	GLuint uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+	GLuint aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+	GLuint aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
+	GLuint uTime = (GLuint)glGetUniformLocation(program, "uTime");
+	GLuint uWorldTime = (GLuint)glGetUniformLocation(program, "uWorldTime");
+	GLuint uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
 	
 	glEnable(GL_BLEND);
 	GLuint index = shader->bind(0, uTexture);
@@ -388,12 +388,12 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 		return;
 	}
 	GLuint program = shader->program;
-	int uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-	int aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-	int aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
-	int uTime = glGetUniformLocation(program, "uTime");
-	int uTexture0 = glGetUniformLocation(program, "uTexture0");
-	int uTexture1 = glGetUniformLocation(program, "uTexture1");
+	GLuint uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+	GLuint aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+	GLuint aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
+	GLuint uTime = (GLuint)glGetUniformLocation(program, "uTime");
+	GLuint uTexture0 = (GLuint)glGetUniformLocation(program, "uTexture0");
+	GLuint uTexture1 = (GLuint)glGetUniformLocation(program, "uTexture1");
  
 	static Vector<GLint> effectTexturesVector = Vector<GLint>(2);
 	static GLint* effectTextures = effectTexturesVector.items();
@@ -470,74 +470,74 @@ bool GLRender::createShaders(JSONObject* shaders, void* library) throw(const cha
 			shaderSprite = new GLSpriteShader(shader);
 			shaderSprite->program = program;
 				
-			shaderSprite->uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-			shaderSprite->uPosition = glGetUniformLocation(program, "uPosition");
-			shaderSprite->uTexture = glGetUniformLocation(program, "uTexture");
-			shaderSprite->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-			shaderSprite->aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
+			shaderSprite->uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+			shaderSprite->uPosition = (GLuint)glGetUniformLocation(program, "uPosition");
+			shaderSprite->uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
+			shaderSprite->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+			shaderSprite->aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
 			
-			shaderSprite->uLight = glGetUniformLocation(program, "uLight");
-			shaderSprite->uTime = glGetUniformLocation(program, "uTime");
+			shaderSprite->uLight = (GLuint)glGetUniformLocation(program, "uLight");
+			shaderSprite->uTime = (GLuint)glGetUniformLocation(program, "uTime");
 		} else if (key.equals(L"q0_particle")) {
 			shaderParticle = new GLParticleShader(shader);
 			shaderParticle->program = program;
 			
-			shaderParticle->uModelViewProjectionMatrix = glGetUniformLocation(program, "uModelViewProjectionMatrix");
+			shaderParticle->uModelViewProjectionMatrix = (GLuint)glGetUniformLocation(program, "uModelViewProjectionMatrix");
 				
-			shaderParticle->uPixelX = glGetUniformLocation(program, "uPixelX");
-			shaderParticle->uPixelY = glGetUniformLocation(program, "uPixelY");
-			shaderParticle->uTime = glGetUniformLocation(program, "uTime");
-			shaderParticle->uTexture = glGetUniformLocation(program, "uTexture");
-			shaderParticle->uColor = glGetUniformLocation(program, "uColor");
+			shaderParticle->uPixelX = (GLuint)glGetUniformLocation(program, "uPixelX");
+			shaderParticle->uPixelY = (GLuint)glGetUniformLocation(program, "uPixelY");
+			shaderParticle->uTime = (GLuint)glGetUniformLocation(program, "uTime");
+			shaderParticle->uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
+			shaderParticle->uColor = (GLuint)glGetUniformLocation(program, "uColor");
 				
-			shaderParticle->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-			shaderParticle->aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
-			shaderParticle->aVelocity = glGetAttribLocation(program, "aVelocity");
-			shaderParticle->aAcceleration = glGetAttribLocation(program, "aAcceleration");
-			shaderParticle->aTime = glGetAttribLocation(program, "aTime");
+			shaderParticle->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+			shaderParticle->aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
+			shaderParticle->aVelocity = (GLuint)glGetAttribLocation(program, "aVelocity");
+			shaderParticle->aAcceleration = (GLuint)glGetAttribLocation(program, "aAcceleration");
+			shaderParticle->aTime = (GLuint)glGetAttribLocation(program, "aTime");
 		} else if (key.equals(L"q0_model") || key.equals(L"q1_model")) {
 			shaderModel = new GLModelShader(shader);
 			shaderModel->program = program;
 
-			shaderModel->uModelViewProjectionMatrix = glGetUniformLocation(program, "uModelViewProjectionMatrix");
-			shaderModel->uModelViewMatrix = glGetUniformLocation(program, "uModelViewMatrix");
-			shaderModel->uNormalMatrix = glGetUniformLocation(program, "uNormalMatrix");
+			shaderModel->uModelViewProjectionMatrix = (GLuint)glGetUniformLocation(program, "uModelViewProjectionMatrix");
+			shaderModel->uModelViewMatrix = (GLuint)glGetUniformLocation(program, "uModelViewMatrix");
+			shaderModel->uNormalMatrix = (GLuint)glGetUniformLocation(program, "uNormalMatrix");
 			
-			shaderModel->uAmbientLightColor = glGetUniformLocation(program, "uAmbientLightColor");
+			shaderModel->uAmbientLightColor = (GLuint)glGetUniformLocation(program, "uAmbientLightColor");
 				
-			shaderModel->uLightsCount = glGetUniformLocation(program, "uLightsCount");
-			shaderModel->uLights = glGetUniformLocation(program, "uLights");
+			shaderModel->uLightsCount = (GLuint)glGetUniformLocation(program, "uLightsCount");
+			shaderModel->uLights = (GLuint)glGetUniformLocation(program, "uLights");
 				
-			shaderModel->uColors = glGetUniformLocation(program, "uColors");
-			shaderModel->uTexture = glGetUniformLocation(program, "uTexture");
+			shaderModel->uColors = (GLuint)glGetUniformLocation(program, "uColors");
+			shaderModel->uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
 				
-			shaderModel->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-			shaderModel->aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
-			shaderModel->aVertexNormal = glGetAttribLocation(program, "aVertexNormal");
+			shaderModel->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+			shaderModel->aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
+			shaderModel->aVertexNormal = (GLuint)glGetAttribLocation(program, "aVertexNormal");
 		} else if (key.equals(L"q0_square_fill")) {
 			shaderSquareFill = new GLSquareFillShader(shader);
 			shaderSquareFill->program = program;
 
-			shaderSquareFill->uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-			shaderSquareFill->uColor = glGetUniformLocation(program, "uColor");
-			shaderSquareFill->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
+			shaderSquareFill->uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+			shaderSquareFill->uColor = (GLuint)glGetUniformLocation(program, "uColor");
+			shaderSquareFill->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
 		} else if (key.equals(L"q0_square_stroke")) {
 			shaderSquareStroke = new GLSquareStrokeShader(shader);
 			shaderSquareStroke->program = program;
 
-			shaderSquareStroke->uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-			shaderSquareStroke->uCorners = glGetUniformLocation(program, "uCorners");
-			shaderSquareStroke->uBorder = glGetUniformLocation(program, "uBorder");
-			shaderSquareStroke->uColor = glGetUniformLocation(program, "uColor");
-			shaderSquareStroke->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
+			shaderSquareStroke->uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+			shaderSquareStroke->uCorners = (GLuint)glGetUniformLocation(program, "uCorners");
+			shaderSquareStroke->uBorder = (GLuint)glGetUniformLocation(program, "uBorder");
+			shaderSquareStroke->uColor = (GLuint)glGetUniformLocation(program, "uColor");
+			shaderSquareStroke->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
 		} else if (key.equals(L"q0_square_texture")) {
 			shaderSquareTexture = new GLSquareTextureShader(shader);
 			shaderSquareTexture->program = program;
 
-			shaderSquareTexture->uLayerProjectionMatrix = glGetUniformLocation(program, "uLayerProjectionMatrix");
-			shaderSquareTexture->uTexture = glGetUniformLocation(program, "uTexture");
-			shaderSquareTexture->aVertexPosition = glGetAttribLocation(program, "aVertexPosition");
-			shaderSquareTexture->aTextureCoord = glGetAttribLocation(program, "aTextureCoord");
+			shaderSquareTexture->uLayerProjectionMatrix = (GLuint)glGetUniformLocation(program, "uLayerProjectionMatrix");
+			shaderSquareTexture->uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
+			shaderSquareTexture->aVertexPosition = (GLuint)glGetAttribLocation(program, "aVertexPosition");
+			shaderSquareTexture->aTextureCoord = (GLuint)glGetAttribLocation(program, "aTextureCoord");
 		}
 	}
 	
@@ -570,17 +570,17 @@ bool GLRender::createSprites(JSONObject sprites) throw(const char*) {
 					
 						CString textureKey = info->get(0)->toString();
 						Vec2 size;
-						size.x = info->get(1)->get(0)->toDouble();
-						size.y = info->get(1)->get(1)->toDouble();
-						int frames = (int)info->optInt(3, 1);
+						size.x = (GLfloat)info->get(1)->get(0)->toDouble();
+						size.y = (GLfloat)info->get(1)->get(1)->toDouble();
+						GLuint frames = (GLuint)info->optInt(3, 1);
 						
 						Vec2 textureOfs;
 						Vec2* first = NULL;
 						try {
 							if (info->get(2)->isArray()) {
 								first = &textureOfs;
-								first->x = info->get(2)->get(0)->toDouble();
-								first->y = info->get(2)->get(1)->toDouble();
+								first->x = (GLfloat)info->get(2)->get(0)->toDouble();
+								first->y = (GLfloat)info->get(2)->get(1)->toDouble();
 							}
 						} catch (...) {
 						}
@@ -590,8 +590,8 @@ bool GLRender::createSprites(JSONObject sprites) throw(const char*) {
 						try {
 							if (info->get(4)->isArray()) {
 								next = &textureStep;
-								next->x = info->get(4)->get(0)->toDouble();
-								next->y = info->get(4)->get(1)->toDouble();
+								next->x = (GLfloat)info->get(4)->get(0)->toDouble();
+								next->y = (GLfloat)info->get(4)->get(1)->toDouble();
 							}
 						} catch (...) {
 						}
@@ -622,20 +622,20 @@ bool GLRender::createDrawings(JSONObject drawings) throw(const char*) {
 						
 						CString spriteKey = info->get(0)->toString();
 						Vec2 position;
-						position.x = info->get(1)->get(0)->toDouble();
-						position.y = info->get(1)->get(1)->toDouble();
+						position.x = (GLfloat)info->get(1)->get(0)->toDouble();
+						position.y = (GLfloat)info->get(1)->get(1)->toDouble();
 						
 						Vector<GLshort> frameIndexes;
 						try {
 							const struct JsonNode* frames = info->get(2);
 							if (frames->isArray()) {
-								int32_t count = frames->count();
-								const struct JsonNode** items = frames->items();
-								for (int j = 0; j < count; j++) {
-									frameIndexes.push( items[j]->toInt() );
+								int32_t count2 = frames->count();
+								const struct JsonNode** items2 = frames->items();
+								for (int j = 0; j < count2; j++) {
+									frameIndexes.push( (GLshort)items2[j]->toInt() );
 								}
 							} else {
-								frameIndexes.push( frames->toInt() );
+								frameIndexes.push( (GLshort)frames->toInt() );
 							}
 						} catch (...) {
 						}

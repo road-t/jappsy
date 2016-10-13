@@ -82,10 +82,8 @@ void GLTouchScreen::clickEvent(const CString& name, float x, float y, float w, f
 }
 
 bool GLTouchScreen::checkBounds(float x, float y) {
-	if ((x < 0) || (x >= context->frame->width) ||
-		(y < 0) || (y >= context->frame->height))
-		return false;
-	return true;
+	return !((x < 0) || (x >= context->frame->width) ||
+			 (y < 0) || (y >= context->frame->height));
 }
 
 bool GLTouchScreen::canStartTouch() {
@@ -211,9 +209,9 @@ void GLTouchScreen::analyze(float x, float y) {
 	
 	if (context->sceneRatio > context->ratio) { // Экран уже чем треубется
 		x = roundf(x * context->width / width);
-		y = roundf((((y / height) - 0.5) * context->sceneRatio / context->ratio + 0.5) * context->height);
+		y = roundf((((y / height) - 0.5f) * context->sceneRatio / context->ratio + 0.5f) * context->height);
 	} else {
-		x = roundf((((x / width) - 0.5) * context->ratio / context->sceneRatio + 0.5) * context->width);
+		x = roundf((((x / width) - 0.5f) * context->ratio / context->sceneRatio + 0.5f) * context->width);
 		y = roundf(y * context->height / height);
 	}
 
@@ -275,8 +273,8 @@ void GLTouchScreen::analyze(float x, float y) {
 					if (yy < ymin) ymin = yy;
 					if (yy > ymax) ymax = yy;
 				}
-				cx = (xmin + xmax) / 2.0;
-				cy = (ymin + ymax) / 2.0;
+				cx = (xmin + xmax) / 2.0f;
+				cy = (ymin + ymax) / 2.0f;
 				
 				// Вычисляем средний радиус и определяем число смещений по кругу
 				GLfloat mr = 0; // Средний радиус
@@ -296,9 +294,9 @@ void GLTouchScreen::analyze(float x, float y) {
 					// Направление движения по часовой стрелке или против
 					GLfloat s = lx * yy - ly * xx;
 					GLfloat na = atan2f(yy, xx);
-					GLfloat a = (na - la) * 180.0 / M_PI;
-					while (a < -180.0) a += 360.0;
-					while (a > 180.0) a -= 360.0;
+					GLfloat a = (na - la) * 180.0f / (GLfloat)M_PI;
+					while (a < -180.0f) a += 360.0f;
+					while (a > 180.0f) a -= 360.0f;
 					if (i != 0) {
 						if (s > 0) { cw++; ca += a; }
 						else if (s < 0) { bw++; ba -= a; }
@@ -316,28 +314,28 @@ void GLTouchScreen::analyze(float x, float y) {
 				GLfloat md = 0;
 				if ((cw != 0) || (bw != 0)) {
 					if (cw > bw) {
-						md = floorf((cw - bw) * 100.0 / cw);
+						md = floorf((cw - bw) * 100.0f / cw);
 					} else {
-						md = -floorf((bw - cw) * 100.0 / bw);
+						md = -floorf((bw - cw) * 100.0f / bw);
 					}
 				}
 				// Угол смещения
 				GLfloat a = fabsf(ba - ca);
 				
 				// Проверяем ровность круга (допустимое искажение радиуса 50% на каждую точку)
-				if ((mr > minimalDistance) && (fabsf(md) > 90.0)) {
+				if ((mr > minimalDistance) && (fabsf(md) > 90.0f)) {
 					bool circle = true;
 					GLfloat drm = 0;
 					for (int i = 0; i < listlength; i++) {
 						GLfloat dr = floorf(fabsf((list[i].z / mr) - 1.0f) * 100.0f);
 						if (dr > drm) drm = dr;
-						if (dr > 50.0) {
+						if (dr > 50.0f) {
 							circle = false;
 							break;
 						}
 					}
 					if (circle) {
-						int ac = roundf(a / 90.0);
+						int ac = (int)roundf(a / 90.0f);
 						if (ac > 2) {
 							type = L"circle";
 						} else {
@@ -371,7 +369,7 @@ void GLTouchScreen::analyze(float x, float y) {
 					for (int i = listlength - 2; i > 0; i--) {
 						// Расстояние до точки от отрезка (+ знак стороны)
 						GLfloat p = (list[i].y * dx - list[i].x * dy + c) / d;
-						GLfloat dp = floorf(fabsf(p) * 100.0 / d);
+						GLfloat dp = floorf(fabsf(p) * 100.0f / d);
 						if (dp > 25) {
 							swipe = false;
 							break;
@@ -386,7 +384,7 @@ void GLTouchScreen::analyze(float x, float y) {
 						GLfloat ad = 0;
 						if (ax > ay) {
 							if (d > swipeDistance) type += L" long";
-							ad = floorf((ax - ay) * 100.0 / ax);
+							ad = floorf((ax - ay) * 100.0f / ax);
 							if (ad > 50) {
 								if (dx > 0) type += L" right";
 								else type += L" left";
@@ -399,7 +397,7 @@ void GLTouchScreen::analyze(float x, float y) {
 							}
 						} else {
 							if (d > swipeDistance) type += L" long";
-							ad = floorf((ay - ax) * 100.0 / ay);
+							ad = floorf((ay - ax) * 100.0f / ay);
 							if (ad > 50) {
 								if (dy < 0) type += L" top";
 								else type += L" bottom";
@@ -500,9 +498,9 @@ void GLTouchScreen::record(float x, float y) {
 	
 	if (context->sceneRatio > context->ratio) { // Экран уже чем треубется
 		x = roundf(x * context->width / width);
-		y = roundf((((y / height) - 0.5) * context->sceneRatio / context->ratio + 0.5) * context->height);
+		y = roundf((((y / height) - 0.5f) * context->sceneRatio / context->ratio + 0.5f) * context->height);
 	} else {
-		x = roundf((((x / width) - 0.5) * context->ratio / context->sceneRatio + 0.5) * context->width);
+		x = roundf((((x / width) - 0.5f) * context->ratio / context->sceneRatio + 0.5f) * context->width);
 		y = roundf(y * context->height / height);
 	}
 

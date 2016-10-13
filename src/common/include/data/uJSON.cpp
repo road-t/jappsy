@@ -57,7 +57,7 @@ extern "C" {
 		error.wexpected = expected;
 	}
 
-	bool json_check_number(struct JsonContext* ctx, char** ptrptr, int32_t level) {
+	bool json_check_number(struct JsonContext* ctx, char** ptrptr, uint32_t level) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		char ch = json_cur;
 		if (ch == '-') {
@@ -133,7 +133,7 @@ extern "C" {
 		return true;
 	}
 
-	bool jsonw_check_number(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_number(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level) {
 		// (-)?(0|[1-9][0-9]*)(\.[0-9]+)?([eE][-+]?[0-9]+)?
 		wchar_t ch = jsonw_cur;
 		if (ch == L'-') {
@@ -209,7 +209,7 @@ extern "C" {
 		return true;
 	}
 	
-	bool json_check_string(struct JsonContext* ctx, char** ptrptr, int32_t level) {
+	bool json_check_string(struct JsonContext* ctx, char** ptrptr, uint32_t level) {
 		char ch;
 		while (json_next != '\0') {
 			if (ch == '\"') {
@@ -278,7 +278,7 @@ extern "C" {
 		return false;
 	}
 
-	bool jsonw_check_string(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_string(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level) {
 		wchar_t ch;
 		while (jsonw_next != L'\0') {
 			if (ch == L'\"') {
@@ -393,10 +393,10 @@ extern "C" {
 		return false;
 	}
 	
-	bool json_check_object(struct JsonContext* ctx, char** ptrptr, int32_t level);
-	bool json_check_array(struct JsonContext* ctx, char** ptrptr, int32_t level);
+	bool json_check_object(struct JsonContext* ctx, char** ptrptr, uint32_t level);
+	bool json_check_array(struct JsonContext* ctx, char** ptrptr, uint32_t level);
 	
-	bool json_check_value(struct JsonContext* ctx, char** ptrptr, int32_t level) {
+	bool json_check_value(struct JsonContext* ctx, char** ptrptr, uint32_t level) {
 		char ch;
 		while (json_next != '\0') {
 			if (ch == '\"') {
@@ -481,10 +481,10 @@ extern "C" {
 		return false;
 	}
 
-	bool jsonw_check_object(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level);
-	bool jsonw_check_array(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level);
+	bool jsonw_check_object(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level);
+	bool jsonw_check_array(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level);
 	
-	bool jsonw_check_value(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_value(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level) {
 		wchar_t ch;
 		while (jsonw_next != L'\0') {
 			if (ch == L'\"') {
@@ -569,7 +569,7 @@ extern "C" {
 		return false;
 	}
 	
-	bool json_check_array(struct JsonContext* ctx, char** ptrptr, int32_t level) {
+	bool json_check_array(struct JsonContext* ctx, char** ptrptr, uint32_t level) {
 		char ch;
 		level++;
 	json_check_array_repeat:
@@ -607,7 +607,7 @@ extern "C" {
 		return false;
 	}
 
-	bool jsonw_check_array(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_array(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_check_array_repeat:
@@ -645,7 +645,7 @@ extern "C" {
 		return false;
 	}
 	
-	bool json_check_object(struct JsonContext* ctx, char** ptrptr, int32_t level) {
+	bool json_check_object(struct JsonContext* ctx, char** ptrptr, uint32_t level) {
 		char ch;
 		level++;
 	json_check_object_repeat:
@@ -701,7 +701,7 @@ extern "C" {
 		return false;
 	}
 
-	bool jsonw_check_object(struct JsonContext* ctx, wchar_t** ptrptr, int32_t level) {
+	bool jsonw_check_object(struct JsonContext* ctx, wchar_t** ptrptr, uint32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_check_object_repeat:
@@ -1053,7 +1053,7 @@ extern "C" {
 			}
 		}
 		
-		node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->data));
+		node->size = (uint32_t)((intptr_t)(*ptrptr) - (intptr_t)(node->data));
 		if (node->size > 63 * sizeof(char)) {
 			json_err(JSON_ERROR_SYNTAX);
 			return false;
@@ -1154,7 +1154,7 @@ extern "C" {
 			}
 		}
 		
-		node->size = (int)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata));
+		node->size = (uint32_t)((intptr_t)(*ptrptr) - (intptr_t)(node->wdata));
 		if (node->size > 63 * sizeof(wchar_t)) {
 			jsonw_err(JSON_ERROR_SYNTAX);
 			return false;
@@ -1164,7 +1164,7 @@ extern "C" {
 		ctx->wbuffer[node->size / sizeof(wchar_t)] = 0;
 		if (is_float) {
 			node->value.n.is_float = true;
-			node->value.n.v.f = wcstold(ctx->wbuffer, NULL);
+			node->value.n.v.f = (double)wcstold(ctx->wbuffer, NULL);
 		} else {
 			node->value.n.is_float = false;
 			node->value.n.v.i = wcstoll(ctx->wbuffer, NULL, 10);
@@ -1252,8 +1252,8 @@ extern "C" {
 							json_next;
 							if (ch == 'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (json_next != '\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (json_next != '\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= '0') && (ch <= '9')) {
 										utf16_2 |= (uint16_t)(ch - '0');
@@ -1265,9 +1265,9 @@ extern "C" {
 										json_err(JSON_ERROR_SYNTAX);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == '\0') {
 										json_err(JSON_ERROR_UNEXPECTEDEND);
 										return false;
@@ -1340,7 +1340,7 @@ extern "C" {
 				*ptr = '\0';
 				
 				try {
-					node->value.cs = memNew(node->value.cs, CString(s));
+					node->value.cs = memNew(node->value.cs, CString((const char*)s));
 				} catch(...) {
 					memFree(s);
 					return false;
@@ -1424,8 +1424,8 @@ extern "C" {
 							json_next;
 							if (ch == 'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (json_next != '\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (json_next != '\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= '0') && (ch <= '9')) {
 										utf16_2 |= (uint16_t)(ch - '0');
@@ -1438,9 +1438,9 @@ extern "C" {
 										memFree(s);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == '\0') {
 										json_err(JSON_ERROR_UNEXPECTEDEND);
 										memFree(s);
@@ -1480,32 +1480,32 @@ extern "C" {
 					}
 					
 					if (utf16 <= 0x7F) { // 1 byte UTF8
-						*ptr = utf16; ptr++;
+						*ptr = (uint8_t)utf16; ptr++;
 					} else if (utf16 <= 0x7FF) { // 2 byte UTF8
-						*ptr = 0xC0 | (utf16 >> 6); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xC0 | (uint8_t)(utf16 >> 6); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0xFFFF) { // 3 byte UTF8
-						*ptr = 0xE0 | (utf16 >> 12); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xE0 | (uint8_t)(utf16 >> 12); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
-						*ptr = 0xF0 | (utf16 >> 18); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xF0 | (uint8_t)(utf16 >> 18); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
-						*ptr = 0xF8 | (utf16 >> 24); ptr++;
-						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xF8 | (uint8_t)(utf16 >> 24); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
-						*ptr = 0xFC | (utf16 >> 30); ptr++;
-						*ptr = 0x80 | ((utf16 >> 24) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xFC | (uint8_t)(utf16 >> 30); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 24) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else {
 						memFree(s);
 						return false;
@@ -1584,8 +1584,8 @@ extern "C" {
 							jsonw_next;
 							if (ch == L'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (jsonw_next != L'\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (jsonw_next != L'\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= L'0') && (ch <= L'9')) {
 										utf16_2 |= (uint16_t)(ch - L'0');
@@ -1597,9 +1597,9 @@ extern "C" {
 										jsonw_err(JSON_ERROR_SYNTAX);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == L'\0') {
 										jsonw_err(JSON_ERROR_UNEXPECTEDEND);
 										return false;
@@ -1668,7 +1668,7 @@ extern "C" {
 				*ptr = L'\0';
 				
 				try {
-					node->value.cs = memNew(node->value.cs, CString(ws));
+					node->value.cs = memNew(node->value.cs, CString((const wchar_t*)ws));
 				} catch (...) {
 					memFree(ws);
 					return false;
@@ -1730,8 +1730,8 @@ extern "C" {
 							jsonw_next;
 							if (ch == L'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (jsonw_next != L'\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (jsonw_next != L'\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= L'0') && (ch <= L'9')) {
 										utf16_2 |= (uint16_t)(ch - L'0');
@@ -1744,9 +1744,9 @@ extern "C" {
 										memFree(ws);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == L'\0') {
 										jsonw_err(JSON_ERROR_UNEXPECTEDEND);
 										memFree(ws);
@@ -1815,10 +1815,10 @@ extern "C" {
 		return false;
 	}
 	
-	bool json_parse_object(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, int32_t level);
-	bool json_parse_array(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, int32_t level);
+	bool json_parse_object(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, uint32_t level);
+	bool json_parse_array(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, uint32_t level);
 	
-	struct JsonNode* json_parse_node(struct JsonContext* ctx, char** ptrptr, struct JsonNode* parent, int32_t level) {
+	struct JsonNode* json_parse_node(struct JsonContext* ctx, char** ptrptr, struct JsonNode* parent, uint32_t level) {
 		char ch;
 		struct JsonNode* node = NULL;
 		while (json_next != '\0') {
@@ -1983,10 +1983,10 @@ extern "C" {
 		return NULL;
 	}
 	
-	bool jsonw_parse_object(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, int32_t level);
-	bool jsonw_parse_array(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, int32_t level);
+	bool jsonw_parse_object(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, uint32_t level);
+	bool jsonw_parse_array(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, uint32_t level);
 	
-	struct JsonNode* jsonw_parse_node(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* parent, int32_t level) {
+	struct JsonNode* jsonw_parse_node(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* parent, uint32_t level) {
 		wchar_t ch;
 		struct JsonNode* node = NULL;
 		while (json_next != L'\0') {
@@ -2151,7 +2151,7 @@ extern "C" {
 		return NULL;
 	}
 	
-	bool json_parse_array(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, int32_t level) {
+	bool json_parse_array(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, uint32_t level) {
 		char ch;
 		level++;
 	json_parse_array_repeat:
@@ -2196,7 +2196,7 @@ extern "C" {
 		return false;
 	}
 	
-	bool jsonw_parse_array(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, int32_t level) {
+	bool jsonw_parse_array(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, uint32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_parse_array_repeat:
@@ -2241,7 +2241,7 @@ extern "C" {
 		return false;
 	}
 	
-	bool json_parse_object(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, int32_t level) {
+	bool json_parse_object(struct JsonContext* ctx, char** ptrptr, struct JsonNode* node, uint32_t level) {
 		char ch;
 		level++;
 	json_parse_object_repeat:
@@ -2318,7 +2318,7 @@ extern "C" {
 		return false;
 	}
 	
-	bool jsonw_parse_object(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, int32_t level) {
+	bool jsonw_parse_object(struct JsonContext* ctx, wchar_t** ptrptr, struct JsonNode* node, uint32_t level) {
 		wchar_t ch;
 		level++;
 	jsonw_parse_object_repeat:
@@ -2737,7 +2737,7 @@ extern "C" {
 		}
 		while (len-- > 0) {
 			if (e == ctx.error.wptr) *p1 = L'v'; else *p1 = L' ';
-			char ch = *e;
+			wchar_t ch = *e;
 			if (jsonw_is_special(ch)) *p2 = L' '; else *p2 = *e;
 			p1++; p2++; e++;
 		}
@@ -2859,8 +2859,8 @@ extern "C" {
 				return false;
 			}
 		}
-		
-		int nodesize = (int)((intptr_t)(*ptrptr) - (intptr_t)(nodedata));
+
+		size_t nodesize = (size_t)((intptr_t)(*ptrptr) - (intptr_t)(nodedata));
 		if (nodesize > 63 * sizeof(char)) {
 			json_err(JSON_ERROR_SYNTAX);
 			return false;
@@ -2960,8 +2960,8 @@ extern "C" {
 							json_next;
 							if (ch == 'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (json_next != '\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (json_next != '\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= '0') && (ch <= '9')) {
 										utf16_2 |= (uint16_t)(ch - '0');
@@ -2973,9 +2973,9 @@ extern "C" {
 										json_err(JSON_ERROR_SYNTAX);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == '\0') {
 										json_err(JSON_ERROR_UNEXPECTEDEND);
 										return false;
@@ -3116,8 +3116,8 @@ extern "C" {
 							json_next;
 							if (ch == 'u') {
 								uint32_t utf16_2 = 0;
-								int cnt = 4;
-								while ((cnt > 0) && (json_next != '\0')) {
+								int cnt2 = 4;
+								while ((cnt2 > 0) && (json_next != '\0')) {
 									utf16_2 <<= 4;
 									if ((ch >= '0') && (ch <= '9')) {
 										utf16_2 |= (uint16_t)(ch - '0');
@@ -3129,9 +3129,9 @@ extern "C" {
 										json_err(JSON_ERROR_SYNTAX);
 										return false;
 									}
-									cnt--;
+									cnt2--;
 								}
-								if (cnt > 0) {
+								if (cnt2 > 0) {
 									if (ch == '\0') {
 										json_err(JSON_ERROR_UNEXPECTEDEND);
 										return false;
@@ -3164,32 +3164,32 @@ extern "C" {
 					}
 					
 					if (utf16 <= 0x7F) { // 1 byte UTF8
-						*ptr = utf16; ptr++;
+						*ptr = (uint8_t)utf16; ptr++;
 					} else if (utf16 <= 0x7FF) { // 2 byte UTF8
-						*ptr = 0xC0 | (utf16 >> 6); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xC0 | (uint8_t)(utf16 >> 6); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0xFFFF) { // 3 byte UTF8
-						*ptr = 0xE0 | (utf16 >> 12); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xE0 | (uint8_t)(utf16 >> 12); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x1FFFFF) { // 4 byte UTF8
-						*ptr = 0xF0 | (utf16 >> 18); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xF0 | (uint8_t)(utf16 >> 18); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x3FFFFFF) { // 5 byte UTF8
-						*ptr = 0xF8 | (utf16 >> 24); ptr++;
-						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xF8 | (uint8_t)(utf16 >> 24); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else if (utf16 <= 0x7FFFFFFF) { // 6 byte UTF8
-						*ptr = 0xFC | (utf16 >> 30); ptr++;
-						*ptr = 0x80 | ((utf16 >> 24) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 18) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 12) & 0x3F); ptr++;
-						*ptr = 0x80 | ((utf16 >> 6) & 0x3F); ptr++;
-						*ptr = 0x80 | (utf16 & 0x3F); ptr++;
+						*ptr = (uint8_t)0xFC | (uint8_t)(utf16 >> 30); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 24) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 18) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 12) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)((utf16 >> 6) & 0x3F); ptr++;
+						*ptr = (uint8_t)0x80 | (uint8_t)(utf16 & 0x3F); ptr++;
 					} else {
 						return false;
 					}
@@ -4182,7 +4182,7 @@ int64_t JsonNode::toInt() const throw(const char*) {
 			return value.b ? 1 : 0;
 		case JSON_TYPE_NUMBER:
 			if (value.n.is_float) {
-				return value.n.v.f;
+				return (int64_t)value.n.v.f;
 			} else {
 				return value.n.v.i;
 			}
@@ -4370,7 +4370,7 @@ void JsonNode::set(int index, struct JsonNode* object) throw(const char*) {
 		throw eInvalidParams;
 	}
 	
-	int32_t level = this->level + 1;
+	uint32_t level = this->level + 1;
 	uint32_t count = value.a.c - 1;
 	
 	object->level = level;
@@ -4402,7 +4402,7 @@ void JsonNode::set(const CString& key, struct JsonNode* object) throw(const char
 		throw eInvalidParams;
 	}
 	
-	int32_t level = this->level + 1;
+	uint32_t level = this->level + 1;
 	
 	object->level = level;
 	object->parent = this;

@@ -15,6 +15,7 @@
  */
 
 #include "uCrc.h"
+#include <core/uAtomic.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,7 +63,11 @@ uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len) {
 	uint32_t aligned = len >> 3; len &= 7;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint64_t val = AtomicGet((uint64_t*)buf);
+#endif
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
@@ -77,7 +82,11 @@ uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len) {
 	uint32_t aligned = len >> 2; len &= 3;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint32_t val = AtomicGet((uint32_t*)buf);
+#endif
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
 		crc = crc7_lookup[crc ^ (val & 0xFF)]; val >>= 8;
@@ -87,7 +96,11 @@ uint8_t atomic_mmcrc7(register uint8_t crc, void *data, register uint32_t len) {
 #endif
 	
 	while (len-- > 0) {
+#if defined(__atomic_load_n)
 		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+#else
+		uint8_t val = AtomicGet(buf);
+#endif
 		crc = crc7_lookup[crc ^ val];
 		buf++;
 	}
@@ -149,7 +162,11 @@ uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len
 	uint32_t aligned = len >> 3; len &= 7;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint64_t val = AtomicGet((uint64_t*)buf);
+#endif
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
@@ -164,7 +181,11 @@ uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len
 	uint32_t aligned = len >> 2; len &= 3;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint32_t val = AtomicGet((uint32_t*)buf);
+#endif
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ (val & 0xFF)]; val >>= 8;
@@ -174,7 +195,11 @@ uint16_t atomic_mmcrc16(register uint16_t crc, void *data, register uint32_t len
 #endif
 	
 	while (len-- > 0) {
+#if defined(__atomic_load_n)
 		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+#else
+		uint8_t val = AtomicGet(buf);
+#endif
 		crc = (crc << 8) ^ crc16_lookup[(crc >> 8) ^ val];
 		buf++;
 	}
@@ -247,7 +272,11 @@ uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len
 	uint32_t aligned = len >> 3; len &= 7;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint64_t val = __atomic_load_n((uint64_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint64_t val = AtomicGet((uint64_t*)buf);
+#endif
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
@@ -262,7 +291,11 @@ uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len
 	uint32_t aligned = len >> 2; len &= 3;
 	
 	while (aligned-- > 0) {
+#if defined(__atomic_load_n)
 		uint32_t val = __atomic_load_n((uint32_t*)buf, __ATOMIC_ACQUIRE);
+#else
+		uint32_t val = AtomicGet((uint32_t*)buf);
+#endif
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ (val & 0xFF)]; val >>= 8;
@@ -272,7 +305,11 @@ uint32_t atomic_mmcrc32(register uint32_t crc, void *data, register uint32_t len
 #endif
 	
 	while (len-- > 0) {
+#if defined(__atomic_load_n)
 		uint8_t val = __atomic_load_n(buf, __ATOMIC_ACQUIRE);
+#else
+		uint8_t val = AtomicGet(buf);
+#endif
 		crc = (crc << 8) ^ crc32_lookup[(crc >> 24) ^ val];
 		buf++;
 	}

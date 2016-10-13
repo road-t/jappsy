@@ -16,7 +16,6 @@
 
 #include "uGLParticle.h"
 #include <opengl/uGLRender.h>
-#include <core/uMemory.h>
 
 GLParticle::GLParticle() {
 }
@@ -67,11 +66,11 @@ GLParticleSystem::~GLParticleSystem() {
 GLParticle* GLParticleSystem::createRocket(uint64_t startFrame, const Vec3& position) throw(const char*) {
 	GLParticle* p = new GLParticle();
 	p->position.set(position);
-	p->velocity.random( {0.5, 0, 0.5} ).add( {0, 0.5, 0} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) * 2.0 + 4.0);
-	p->acceleration.set( {0, -0.01, 0} );
+	p->velocity.random( {0.5f, 0, 0.5f} ).add( {0, 0.5, 0} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) * 2.0f + 4.0f);
+	p->acceleration.set( {0, -0.01f, 0} );
 	p->size = 2;
 	p->startFrame = startFrame;
-	p->lifeFrame = rand() % 50 + 50;
+	p->lifeFrame = (uint64_t)(rand() % 50 + 50);
 	p->style = L"rocket";
 	list.push(p);
 	
@@ -79,7 +78,7 @@ GLParticle* GLParticleSystem::createRocket(uint64_t startFrame, const Vec3& posi
 	for (uint64_t i = 0; i < p->lifeFrame; i++) {
 		if ((rand() % 4) >= 1) {
 			Vec3 vV; vV.multiply(p->velocity, i);
-			Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(i * (i + 1)) / 2.0);
+			Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(i * (i + 1)) / 2.0f);
 			Vec3 vP; vP.add(p->position, vV).add(vA);
 			vV.multiply(p->acceleration, i).add(p->velocity);
 			
@@ -90,9 +89,9 @@ GLParticle* GLParticleSystem::createRocket(uint64_t startFrame, const Vec3& posi
 	}
 	
 	Vec3 vV; vV.multiply(p->velocity, p->lifeFrame);
-	Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(p->lifeFrame * (p->lifeFrame + 1)) / 2.0);
+	Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(p->lifeFrame * (p->lifeFrame + 1)) / 2.0f);
 	Vec3 vP; vP.add(p->position, vV).add(vA);
-	uint64_t c = rand() % 50 + 50;
+	uint64_t c = (uint64_t)(rand() % 50 + 50);
 	for (uint64_t i = 0; i < c; i++) {
 		GLParticle* sub = createFlare(p->startFrame + p->lifeFrame, vP);
 		uint64_t subtime = sub->startFrame + sub->lifeFrame;
@@ -107,11 +106,11 @@ GLParticle* GLParticleSystem::createRocket(uint64_t startFrame, const Vec3& posi
 GLParticle* GLParticleSystem::createFlare(uint64_t startFrame, const Vec3& position) throw(const char*) {
 	GLParticle* p = new GLParticle();
 	p->position.set(position);
-	p->velocity.random( {0.5, 0.5, 0.5} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) * 2.0 + 1.0);
-	p->acceleration.set( {0, -0.01, 0} );
+	p->velocity.random( {0.5f, 0.5f, 0.5f} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) * 2.0f + 1.0f);
+	p->acceleration.set( {0, -0.01f, 0} );
 	p->size = 5;
 	p->startFrame = startFrame;
-	p->lifeFrame = rand() % 100 + 10;
+	p->lifeFrame = (uint64_t)(rand() % 100 + 10);
 	p->style = L"flare";
 	list.push(p);
 	
@@ -119,7 +118,7 @@ GLParticle* GLParticleSystem::createFlare(uint64_t startFrame, const Vec3& posit
 	for (uint64_t i = 0; i < p->lifeFrame; i++) {
 		if ((rand() % 4) >= 3) {
 			Vec3 vV; vV.multiply(p->velocity, i);
-			Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(i * (i + 1)) / 2.0);
+			Vec3 vA; vA.multiply(p->acceleration, (GLfloat)(i * (i + 1)) / 2.0f);
 			Vec3 vP; vP.add(p->position, vV).add(vA);
 			vV.multiply(p->acceleration, i).add(p->velocity);
 			
@@ -137,11 +136,11 @@ GLParticle* GLParticleSystem::createFlare(uint64_t startFrame, const Vec3& posit
 GLParticle* GLParticleSystem::createSubFlare(uint64_t startFrame, const Vec3& position, const Vec3& velocity) throw(const char*) {
 	GLParticle* p = new GLParticle();
 	p->position.set(position);
-	p->velocity.random( {0.5, 0.5, 0.5} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) + 1.0).add(velocity).multiply(0.25);
-	p->acceleration.set( {0, -0.01, 0} );
+	p->velocity.random( {0.5f, 0.5f, 0.5f} ).multiply((GLfloat)rand() / (GLfloat)(RAND_MAX) + 1.0f).add(velocity).multiply(0.25f);
+	p->acceleration.set( {0, -0.01f, 0} );
 	p->size = 2;
 	p->startFrame = startFrame;
-	p->lifeFrame = rand() % 50 + 10;
+	p->lifeFrame = (uint64_t)(rand() % 50 + 10);
 	p->style = L"subflare";
 	list.push(p);
 	
@@ -176,7 +175,7 @@ void GLParticleSystem::generate() throw(const char*) {
 		texture.push( {0,1} );
 		texture.push( {1,1} );
 		texture.push( {1,0} );
-		GLshort k = i*4;
+		GLshort k = (GLshort)(i*4);
 		index.push( {k, (GLshort)(k+1), (GLshort)(k+2)} );
 		index.push( {k, (GLshort)(k+2), (GLshort)(k+3)} );
 	}
@@ -217,7 +216,7 @@ void GLParticleSystem::generate() throw(const char*) {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index.count() * sizeof(Vec3i), index.items(), GL_STATIC_DRAW);
 		CheckGLError();
-		indexCount = index.count() * 3;
+		indexCount = (GLuint)(index.count() * 3);
 	} catch (...) {
 		if (vertexBuffer != 0) {
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -318,8 +317,8 @@ void GLParticleSystem::render(GLObject* object, const GLfloat time, GLCamera* ca
 	glUniform3fv(shader->uPixelY, 1, vY.v);
 	
 	{
-		Vec3 time = { (GLfloat)(currentFrame - startFrame), (GLfloat)maxFrame, 0 };
-		glUniform3fv(shader->uTime, 1, time.v);
+		Vec3 time2 = { (GLfloat)(currentFrame - startFrame), (GLfloat)maxFrame, 0 };
+		glUniform3fv(shader->uTime, 1, time2.v);
 		glUniform3fv(shader->uColor, 1, color.v);
 		
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);

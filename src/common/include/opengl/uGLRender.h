@@ -45,15 +45,15 @@ public:
 	inline GLSpriteShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
-	
-	int uLayerProjectionMatrix;
-	int uPosition;
-	int uTexture;
-	int aVertexPosition;
-	int aTextureCoord;
-	
-	int uLight;
-	int uTime;
+
+	GLuint uLayerProjectionMatrix;
+	GLuint uPosition;
+	GLuint uTexture;
+	GLuint aVertexPosition;
+	GLuint aTextureCoord;
+
+	GLuint uLight;
+	GLuint uTime;
 };
 
 class GLParticleShader : public CObject {
@@ -63,20 +63,20 @@ public:
 	inline GLParticleShader(GLShader* shader) { this->shader = shader; }
 	
 	GLuint program = 0;
-	
-	int uModelViewProjectionMatrix;
-	
-	int uPixelX;
-	int uPixelY;
-	int uTime;
-	int uTexture;
-	int uColor;
-	
-	int aVertexPosition;
-	int aTextureCoord;
-	int aVelocity;
-	int aAcceleration;
-	int aTime;
+
+	GLuint uModelViewProjectionMatrix;
+
+	GLuint uPixelX;
+	GLuint uPixelY;
+	GLuint uTime;
+	GLuint uTexture;
+	GLuint uColor;
+
+	GLuint aVertexPosition;
+	GLuint aTextureCoord;
+	GLuint aVelocity;
+	GLuint aAcceleration;
+	GLuint aTime;
 };
 
 class GLModelShader : public CObject {
@@ -86,22 +86,22 @@ public:
 	inline GLModelShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
-	
-	int uModelViewProjectionMatrix;
-	int uModelViewMatrix;
-	int uNormalMatrix;
-	
-	int uAmbientLightColor;
-	
-	int uLightsCount;
-	int uLights;
-	
-	int uColors;
-	int uTexture;
-	
-	int aVertexPosition;
-	int aTextureCoord;
-	int aVertexNormal;
+
+	GLuint uModelViewProjectionMatrix;
+	GLuint uModelViewMatrix;
+	GLuint uNormalMatrix;
+
+	GLuint uAmbientLightColor;
+
+	GLuint uLightsCount;
+	GLuint uLights;
+
+	GLuint uColors;
+	GLuint uTexture;
+
+	GLuint aVertexPosition;
+	GLuint aTextureCoord;
+	GLuint aVertexNormal;
 };
 
 class GLSquareFillShader : public CObject {
@@ -111,10 +111,10 @@ public:
 	inline GLSquareFillShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
-	
-	int uLayerProjectionMatrix;
-	int uColor;
-	int aVertexPosition;
+
+	GLuint uLayerProjectionMatrix;
+	GLuint uColor;
+	GLuint aVertexPosition;
 };
 
 class GLSquareStrokeShader : public CObject {
@@ -124,12 +124,12 @@ public:
 	inline GLSquareStrokeShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
-	
-	int uLayerProjectionMatrix;
-	int uCorners;
-	int uBorder;
-	int uColor;
-	int aVertexPosition;
+
+	GLuint uLayerProjectionMatrix;
+	GLuint uCorners;
+	GLuint uBorder;
+	GLuint uColor;
+	GLuint aVertexPosition;
 };
 
 class GLSquareTextureShader : public CObject {
@@ -139,11 +139,11 @@ public:
 	inline GLSquareTextureShader(GLShader* shader) { this->shader = shader; }
 
 	GLuint program = 0;
-	
-	int uLayerProjectionMatrix;
-	int uTexture;
-	int aVertexPosition;
-	int aTextureCoord;
+
+	GLuint uLayerProjectionMatrix;
+	GLuint uTexture;
+	GLuint aVertexPosition;
+	GLuint aTextureCoord;
 };
 
 class GLRender : public CObject {

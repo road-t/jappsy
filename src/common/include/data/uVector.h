@@ -850,7 +850,7 @@ public:
 		int32_t index = m_keys->search(key);
 		if (index >= 0) {
 			m_keys->remove(index);
-			return m_values->remove(index);
+			m_values->remove(index);
 		}
 	}
 	
@@ -932,7 +932,7 @@ public:
 		int32_t index = m_keys->search(key);
 		if (index >= 0) {
 			m_keys->remove(index);
-			return m_values->remove(index);
+			m_values->remove(index);
 		}
 	}
 	
@@ -1180,6 +1180,7 @@ public:
 			m_keys->remove(index);
 			return m_values->remove(index);
 		}
+		return NULL;
 	}
 	
 	virtual inline void removefree(K key) {

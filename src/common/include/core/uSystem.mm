@@ -209,6 +209,8 @@ void* NewThreadRun(void* data) {
 		}
 	
 		ALooper_addFd(mainLooper, mainThreadMessagePipe[0], LOOPER_ID_MESSAGEPIPE, ALOOPER_EVENT_INPUT, mainThreadMessagePipeCallback, NULL);
+
+		return 0;
 	}
 #endif
 

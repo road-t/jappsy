@@ -31,7 +31,7 @@ void onUpdateFx(GLSoundVolumeFx* fx) {
 		fx->target->update();
 	} else {
 		int64_t elapsed = (int64_t)(time - fx->timeStartOut);
-		GLfloat v = 1.0 - (GLfloat)elapsed / (GLfloat)(fx->speed);
+		GLfloat v = 1.0f - (GLfloat)elapsed / (GLfloat)(fx->speed);
 		if (v < 0.0) v = 0.0;
 		fx->target->volumeFxScale = v;
 		fx->target->invalid = true;
@@ -54,7 +54,7 @@ GLSoundVolumeFx::GLSoundVolumeFx(GLSound* target, uint64_t timeout, uint64_t spe
 	GLfloat v = target->volumeFxScale + ((GLfloat)timeout / (GLfloat)speed);
 	if (v > 1.0) v = 1.0;
 	
-	this->timeStartOut = this->timeout - (uint64_t)(int64_t)floorf((1.0 - v) * (GLfloat)speed);
+	this->timeStartOut = this->timeout - (uint64_t)(int64_t)floorf((1.0f - v) * (GLfloat)speed);
 	
 	target->mixer->addFx(target);
 	
@@ -97,8 +97,8 @@ void GLSound::update() {
 		} else {
 			if (mixer->mixerVolume == 0.0) {
 				if (volume < -1.0) {
-					GLfloat v = volumeFxScale;
-					volumeAudio(audio, v);
+					GLfloat v2 = volumeFxScale;
+					volumeAudio(audio, v2);
 				} else {
 					volumeAudio(audio, 0.0);
 				}
@@ -238,8 +238,8 @@ void GLSoundMixer::removeFx(GLSound* sound) {
 }
 
 void GLSoundMixer::mixMaxVolume(GLfloat volume, GLfloat maxvolume) {
-	mixerVolume = (volume < 0) ? 1.0 : volume;
-	mixerMaxVolume = (maxvolume < 0) ? 1.0 : maxvolume;
+	mixerVolume = (volume < 0) ? 1.0f : volume;
+	mixerMaxVolume = (maxvolume < 0) ? 1.0f : maxvolume;
 	
 	int32_t count = list.count();
 	GLSound** items = list.items();

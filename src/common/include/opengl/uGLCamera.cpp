@@ -119,8 +119,8 @@ bool GLCamera::update() {
 			view16fv.identity();
 		} else {
 			if (style == ORTHOGRAPHIC) {
-				GLfloat w2 = width / 2.0;
-				GLfloat h2 = height / 2.0;
+				GLfloat w2 = width / 2.0f;
+				GLfloat h2 = height / 2.0f;
 				projection16fv.ortho(-w2, w2, -h2, h2, min, max);
 			} else if (style == PERSPECTIVE) {
 				Vec3 v; v.set(scale);

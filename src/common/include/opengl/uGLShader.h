@@ -41,8 +41,8 @@ public:
 	~GLShader();
 	
 	bool checkReady();
-	GLuint bind(GLint index, GLint uniform = -1);
-	GLuint bind(GLint index, Vector<GLint>& uniforms);
+	GLuint bind(GLuint index, GLint uniform = -1);
+	GLuint bind(GLuint index, Vector<GLint>& uniforms);
 };
 
 class GLShaders : public CObject {

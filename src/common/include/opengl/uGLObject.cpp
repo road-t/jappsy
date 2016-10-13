@@ -60,10 +60,8 @@ GLObject* GLObject::setDrawing(const CString& key, const GLfloat time) throw(con
 
 bool GLObject::eventHandler(const CString& event, const GLTouchPoint* cur, const GLTouchPoint* delta, const GLTouchPoint* speed, void* userData) {
 	GLObject* object= (GLObject*)userData;
-	if (object->visible) {
-		return object->onevent(object->scene->context->engine, event, (GLDrawing*)(object->object));
-	}
-	return false;
+	return object->visible &&
+		   object->onevent(object->scene->context->engine, event, (GLDrawing*)(object->object));
 }
 
 void GLObject::trackEvent(onEventCallback callback) {

@@ -112,10 +112,10 @@ GLPaint& GLPaint::setAlignY(GLAlignY align) {
 GLPaint& GLPaint::setColor(uint32_t color) {
 	m_color = color;
 	m_invisible = (color & 0xFF000000) == 0;
-	m_color4iv[0] = ((color >> 16) & 0xFF) / 255.0;		// R
-	m_color4iv[1] = ((color >> 8) & 0xFF) / 255.0;		// G
-	m_color4iv[2] = (color & 0xFF) / 255.0;				// B
-	m_color4iv[3] = ((color >> 24) & 0xFF) / 255.0;		// A
+	m_color4iv[0] = ((color >> 16) & 0xFF) / 255.0f;		// R
+	m_color4iv[1] = ((color >> 8) & 0xFF) / 255.0f;		// G
+	m_color4iv[2] = (color & 0xFF) / 255.0f;				// B
+	m_color4iv[3] = ((color >> 24) & 0xFF) / 255.0f;		// A
 	return *this;
 }
 
@@ -123,10 +123,10 @@ GLPaint& GLPaint::setLight(GLfloat light, GLfloat alpha) {
 	m_color4iv[0] = m_color4iv[1] = m_color4iv[2] = light;
 	m_color4iv[3] = alpha;
 	m_color =
-		(uint32_t)floorf(clamp(m_color4iv[2] * 255.0, 0, 255)) |
-		((uint32_t)floorf(clamp(m_color4iv[1] * 255.0, 0, 255)) << 8) |
-		((uint32_t)floorf(clamp(m_color4iv[0] * 255.0, 0, 255)) << 16) |
-		((uint32_t)floorf(clamp(m_color4iv[3] * 255.0, 0, 255)) << 24);
+		(uint32_t)floorf(clamp(m_color4iv[2] * 255.0f, 0, 255)) |
+		((uint32_t)floorf(clamp(m_color4iv[1] * 255.0f, 0, 255)) << 8) |
+		((uint32_t)floorf(clamp(m_color4iv[0] * 255.0f, 0, 255)) << 16) |
+		((uint32_t)floorf(clamp(m_color4iv[3] * 255.0f, 0, 255)) << 24);
 	m_invisible = (m_color & 0xFF000000) == 0;
 	return *this;
 }
@@ -142,7 +142,7 @@ GLPaint& GLPaint::setStroke(GLfloat width, uint32_t color) {
 GLPaint& GLPaint::setAlpha(uint8_t alpha) {
 	m_color = (m_color & 0x00FFFFFF) | ((uint32_t)(alpha & 0xFF) << 24);
 	m_invisible = (m_color & 0xFF000000) == 0;
-	m_color4iv[3] = (alpha & 0xFF) / 255.0;				// A
+	m_color4iv[3] = (alpha & 0xFF) / 255.0f;				// A
 	return *this;
 }
 

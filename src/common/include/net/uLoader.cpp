@@ -266,19 +266,21 @@ void Loader::load(const char* json) throw(const char*) {
 		throw eNullPointer;
 	
 	struct JsonContext ctx;
-	struct JsonCallbacks callbacks;
-	ctx.callbacks = &callbacks;
-	JsonClearCallbacks(&callbacks, this);
-	callbacks.onrootstart = onjson_root_start;
+	struct JsonCallbacks* callbacks = memNew(callbacks, JsonCallbacks);
+	ctx.callbacks = callbacks;
+	JsonClearCallbacks(callbacks, this);
+	callbacks->onrootstart = onjson_root_start;
 	if (!JsonCall(&ctx, json)) {
 		unlock();
 #ifdef DEBUG
 		JsonDebugError(ctx, json);
 #endif
+		memDelete(callbacks);
 		throw eConvert;
 	}
 	unlock();
-	
+	memDelete(callbacks);
+
 	run();
 }
 
@@ -614,8 +616,5 @@ void Loader::onFatal(const File* info, const CString& error) {
 }
 
 bool Loader::onRetry(const File* info) {
-	if (AtomicGet(&shutdown) != 0)
-		return false;
-	
-	return true;
+	return AtomicGet(&shutdown) == 0;
 }

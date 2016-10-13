@@ -31,10 +31,7 @@ extern "C" {
 #endif
 
 bool is_gzip(const void* in, uint32_t insize) {
-    if ((in == NULL) || (insize < 2))
-        return false;
-
-    return (*(uint16_t*)in == GZIP_MAGIC);
+    return !((in == NULL) || (insize < 2)) && *(uint16_t*)in == GZIP_MAGIC;
 }
 
 voidpf mmzalloc(voidpf opaque, unsigned items, unsigned size) {

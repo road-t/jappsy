@@ -33,11 +33,11 @@ static void pushSquare(Vector<GLfloat>& v, GLfloat x, GLfloat y, GLfloat w, GLfl
 
 static void pushSquareIndex(Vector<GLshort>& v, GLshort i) {
 	v.push(i);
-	v.push(i+1);
-	v.push(i+2);
+	v.push((GLshort)(i+1));
+	v.push((GLshort)(i+2));
 	v.push(i);
-	v.push(i+2);
-	v.push(i+3);
+	v.push((GLshort)(i+2));
+	v.push((GLshort)(i+3));
 }
 
 GLSprite::GLSprite(GLRender* context, const CString& key, const CString& textureKey, const Vec2& size, const GLuint frames, const Vec2* first, const Vec2* next) throw(const char*) {
@@ -45,8 +45,8 @@ GLSprite::GLSprite(GLRender* context, const CString& key, const CString& texture
 	this->key = key;
 	
 	texture = context->textures->get(textureKey);
-	width = size.x;
-	height = size.y;
+	width = (GLint)size.x;
+	height = (GLint)size.y;
 	this->frames = frames;
 	
 	GLfloat sw = width;
@@ -73,7 +73,7 @@ GLSprite::GLSprite(GLRender* context, const CString& key, const CString& texture
 	for (int i = 0; i < frames; i++) {
 		pushSquare(vertices, 0.0, 0.0, sw, sh);
 		pushSquare(textures, tx, ty, tw, th);
-		pushSquareIndex(indexes, i * 4);
+		pushSquareIndex(indexes, (GLshort)(i * 4));
 		
 		if (next != NULL) {
 			tx += tw * next->x;
@@ -169,8 +169,8 @@ void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* p
 	if (!isnan(time)) {
 		glUniform1f(shader->uTime, time);
 	} else {
-		GLfloat time = (GLfloat)(currentTimeMillis()) / 2000.0;
-		glUniform1f(shader->uTime, time - floorf(time));
+		GLfloat time2 = (GLfloat)(currentTimeMillis()) / 2000.0f;
+		glUniform1f(shader->uTime, time2 - floorf(time2));
 	}
 	
 	Vec2 pos = getPosition(position, paint);
@@ -204,11 +204,11 @@ void GLSprite::renderNumber(const Vec2& position, GLfloat step, const CString& v
 	if (step > 0) {
 		pos[0] += step * p;
 	} else {
-		pos[0] += step * 2.0;
+		pos[0] += step * 2.0f;
 		step = -step;
 	}
 	for (; p >= 0; p--) {
-		int v = (int)(s[p]) - 48;
+		GLuint v = (GLuint)(uint8_t)((s[p]) - 48);
 		render(pos, v);
 		pos.x -= step;
 	}

@@ -20,7 +20,7 @@
 GLObjectData::~GLObjectData() {
 	if (!m_reference) {
 		if (m_type == GLObjectDataType::TEXTURES) {
-			uint32_t count = m_handles.count();
+			int32_t count = m_handles.count();
 			if (count > 0) {
 				GLuint* items = m_handles.items();
 				for (int i = 0; i < count; i++) {
@@ -44,7 +44,7 @@ GLObjectData* GLObjectData::setTarget(const CString& target) {
 GLObjectData* GLObjectData::setTextures(const Vector<GLuint>& handles, bool reference) {
 	m_target = null;
 	m_handles.clear();
-	uint32_t count = handles.count();
+	int32_t count = handles.count();
 	if (count > 0) {
 		GLuint* items = handles.items();
 		for (int i = 0; i < count; i++) {

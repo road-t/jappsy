@@ -39,20 +39,22 @@ GLFrame::GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback, 
 }
 
 GLFrame::~GLFrame() {
-	do {
+	{
 		// Unassign all attributes
 		GLuint tempBuffer;
 		glGenBuffers(1, &tempBuffer);
 		if (glGetError() == GL_OUT_OF_MEMORY)
-			break;
+			goto GLFrame_destructor;
 		glBindBuffer(GL_ARRAY_BUFFER, tempBuffer);
 		GLuint numAttributes = 0;
 		glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, (GLint*)&numAttributes);
 		for (GLuint attrib = 0; attrib < numAttributes; ++attrib)
 			glVertexAttribPointer(attrib, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 		glDeleteBuffers(1, &tempBuffer);
-	} while (false);
-	
+	}
+
+	GLFrame_destructor:
+
 	this->engine = NULL;
 	this->context = NULL;
 	
@@ -68,7 +70,7 @@ void GLFrame::loop() {
 	this->currentTime = currentTimeMillis();
 	uint64_t elapsed = this->currentTime - this->lastFrame;
 	if (elapsed > 0)
-		this->frames->put(1000.0 / elapsed);
+		this->frames->put(1000.0f / elapsed);
 	this->fps = (uint32_t)floorf(this->frames->value());
 	
 	this->onFrame(this->context, this->userData);

@@ -38,7 +38,7 @@ public:
 	GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	~GLTexture();
 	
-	GLuint bind(GLint index, GLint uniform = -1);
+	GLuint bind(GLuint index, GLint uniform = -1);
 };
 
 class GLTextures : public CObject {
@@ -46,8 +46,8 @@ private:
 	GLRender* context = NULL;
 	VectorMap<CString&, GLTexture*> list;
 	GLTexture* defaultTexture;
-	
-	void remove(const CString& key);
+
+	//void remove(const CString& key);
 public:
 	GLuint defaultTextureHandle = 0;
 

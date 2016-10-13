@@ -280,7 +280,7 @@ extern "C" {
 #define __TORADIANS (M_PI / 180.0f)
 	
 	void Mat4RotateX(GLfloat* d, GLfloat a) {
-		a = a * __TORADIANS;
+		a = a * (GLfloat)__TORADIANS;
 		d[0]=d[15]=1.0;
 		d[1]=d[2]=d[3]=d[4]=d[7]=d[8]=d[11]=d[12]=d[13]=d[14]=0.0;
 		d[5]=d[10]=cosf(a);
@@ -289,7 +289,7 @@ extern "C" {
 	}
 	
 	void Mat4RotateY(GLfloat* d, GLfloat a) {
-		a = a * __TORADIANS;
+		a = a * (GLfloat)__TORADIANS;
 		d[5]=d[15]=1.0;
 		d[1]=d[3]=d[4]=d[6]=d[7]=d[9]=d[11]=d[12]=d[13]=d[14]=0.0;
 		d[0]=d[10]=cosf(a);
@@ -298,7 +298,7 @@ extern "C" {
 	}
 	
 	void Mat4RotateZ(GLfloat* d, GLfloat a) {
-		a = a * __TORADIANS;
+		a = a * (GLfloat)__TORADIANS;
 		d[10]=d[15]=1.0;
 		d[2]=d[3]=d[6]=d[7]=d[8]=d[9]=d[11]=d[12]=d[13]=d[14]=0.0;
 		d[0]=d[5]=cosf(a);
@@ -309,14 +309,14 @@ extern "C" {
 	void Mat4Frustum(GLfloat* d, GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) {
 		GLfloat rl = (r-l);
 		if (rl != 0) {
-			d[0]=2.0*n/rl;
+			d[0]=2.0f*n/rl;
 			d[8]=(r+l)/rl;
 		} else {
 			d[0]=d[8]=0;
 		}
 		GLfloat tb = (t-b);
 		if (tb != 0) {
-			d[5]=2.0*n/tb;
+			d[5]=2.0f*n/tb;
 			d[9]=(t+b)/tb;
 		} else {
 			d[5]=d[9]=0;
@@ -324,11 +324,11 @@ extern "C" {
 		GLfloat fn = (f-n);
 		if (fn != 0) {
 			d[10]=-(f+n)/fn;
-			d[14]=-2.0*f*n/fn;
+			d[14]=-2.0f*f*n/fn;
 		} else {
 			d[10]=d[14]=0;
 		}
-		d[11]=-1.0;
+		d[11]=-1.0f;
 		d[1]=d[2]=d[3]=d[4]=d[6]=d[7]=d[12]=d[13]=d[15]=0.0;
 	}
 	
@@ -341,43 +341,43 @@ extern "C" {
 		 */
 		bool leftHanded = true;
 		GLfloat frustumDepth = far - near;
-		GLfloat oneOverDepth = 1.0 / frustumDepth;
+		GLfloat oneOverDepth = 1.0f / frustumDepth;
 		
 		/* fovY
 		 d[5] = 1.0 / tanf(fov * M_PI / 360.0);
 		 d[0] = (leftHanded ? 1.0 : -1.0) * d[5] / aspect;
 		 */
-		GLfloat t = tanf(fov * M_PI / 360.0);
+		GLfloat t = tanf(fov * (GLfloat)M_PI / 360.0f);
 		if (t != 0) {
-			d[0] = (leftHanded ? 1.0 : -1.0) / t;
+			d[0] = (leftHanded ? 1.0f : -1.0f) / t;
 		} else {
 			d[0]=0;
 		}
-		d[5] = (leftHanded ? 1.0 : -1.0) * d[0] * aspect;
+		d[5] = (leftHanded ? 1.0f : -1.0f) * d[0] * aspect;
 		d[10] = -far * oneOverDepth;
-		d[11] = -1.0;
-		d[14] = -2.0 * far * near * oneOverDepth;
+		d[11] = -1.0f;
+		d[14] = -2.0f * far * near * oneOverDepth;
 		d[1]=d[2]=d[3]=d[4]=d[6]=d[7]=d[8]=d[9]=d[12]=d[13]=d[15]=0.0;
 	}
 	
 	void Mat4Ortho(GLfloat* d, GLfloat l, GLfloat r, GLfloat b, GLfloat t, GLfloat n, GLfloat f) {
 		GLfloat rl = (r-l);
 		if (rl != 0) {
-			d[0]=2.0/rl;
+			d[0]=2.0f/rl;
 			d[12]=-(r+l)/rl;
 		} else {
 			d[0]=d[12]=0;
 		}
 		GLfloat tb = (t-b);
 		if (tb != 0) {
-			d[5]=2.0/tb;
+			d[5]=2.0f/tb;
 			d[13]=-(t+b)/tb;
 		} else {
 			d[5]=d[13]=0;
 		}
 		GLfloat fn = (f-n);
 		if (fn != 0) {
-			d[10]=-2.0/fn;
+			d[10]=-2.0f/fn;
 			d[14]=-(f+n)/fn;
 		} else {
 			d[10]=d[14]=0;
@@ -388,7 +388,7 @@ extern "C" {
 
 	void Mat4Rotate(GLfloat* d, GLfloat x, GLfloat y, GLfloat z, GLfloat a) {
 		a *= __TORADIANS;
-		GLfloat c = cosf(a), s = sinf(a), t = 1.0-c;
+		GLfloat c = cosf(a), s = sinf(a), t = 1.0f-c;
 		GLfloat xt=x*t, yt=y*t, zt=z*t, xs=x*s, ys=y*s, zs=z*s;
 		d[0]=x*xt+c;
 		d[1]=y*xt+zs;
@@ -449,7 +449,7 @@ extern "C" {
 		GLfloat b5 = s[10]*s[15]-s[14]*s[11];
 		
 		GLfloat det = a0*b5-a1*b4+a2*b3+a3*b2-a4*b1+a5*b0;
-		GLfloat invdet = (det == 0) ? 0 : (1.0 / det);
+		GLfloat invdet = (det == 0) ? 0 : (1.0f / det);
 		
 		d[0] = (s[5]*b5-s[6]*b4+s[7]*b3) * invdet;
 		d[1] = (-s[1]*b5+s[2]*b4-s[3]*b3) * invdet;
@@ -565,7 +565,7 @@ extern "C" {
 			d[0]=d[1]=d[2]=0;
 		}
 		
-		d[3] = acosf(c) / __TORADIANS;
+		d[3] = acosf(c) / (GLfloat)__TORADIANS;
 		
 		GLfloat trans[16];
 		Mat4Rotate(trans, d[0], d[1], d[2], d[3]);

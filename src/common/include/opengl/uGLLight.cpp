@@ -91,8 +91,8 @@ bool GLLight::update() {
 			light16fv[6] = target3fv[2];
 			
 			if (style == GLLightStyle::SPOT) {
-				light16fv[3] = hotspot * M_PI / 360.0;
-				light16fv[7] = falloff * M_PI / 360.0;
+				light16fv[3] = hotspot * (GLfloat)M_PI / 360.0f;
+				light16fv[7] = falloff * (GLfloat)M_PI / 360.0f;
 				light16fv[11] = 1;
 			} else {
 				light16fv[3] = hotspot;

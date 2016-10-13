@@ -566,8 +566,7 @@ extern "C" {
 		uint32_t* ptr = (uint32_t*)src;
 		uint32_t len = 0;
 		uint32_t size = 0;
-		uint32_t ch;
-		while ((ch = *ptr) != 0) {
+		while (*ptr != 0) {
 			ptr++; size += 4;
 			len++;
 		}
@@ -727,13 +726,13 @@ extern "C" {
 #ifdef STRING_WCSLWR
 	wchar_t* wcslwr(wchar_t* s) {
 		wchar_t* p = s;
-		while ((*p = towlower(*p)) != 0) p++;
+		while ((*p = (wchar_t)towlower((wint_t)*p)) != 0) p++;
 		return s;
 	}
 	
 	wchar_t* wcsupr(wchar_t* s) {
 		wchar_t* p = s;
-		while ((*p = towupper(*p)) != 0) p++;
+		while ((*p = (wchar_t)towupper((wint_t)*p)) != 0) p++;
 		return s;
 	}
 #endif
@@ -756,10 +755,10 @@ extern "C" {
 			char ch1 = *ptr1; ptr1++;
 			char ch2 = *ptr2; ptr2++;
 			uint32_t v1 = 0;
-			uint32_t v2;
+			uint32_t v2 = 0;
 			if (ch1 & 0x80) {
 				if (ch2 & 0x80) {
-					do {
+					{
 						int cnt;
 						if ((ch1 & 0xE0) == 0xC0) cnt = 1;
 						else if ((ch1 & 0xF0) == 0xE0) cnt = 2;
@@ -767,21 +766,21 @@ extern "C" {
 						else if ((ch1 & 0xFC) == 0xF8) cnt = 4;
 						else if ((ch1 & 0xFE) == 0xFC) cnt = 6;
 						else {
-							v1 = ch1;
-							break;
+							v1 = (uint32_t)((uint8_t)ch1);
+							goto utf8_cmpi_v1;
 						}
-						
+
 						int skip = 0;
-						uint32_t utf8 = (uint32_t)ch1;
+						uint32_t utf8 = (uint32_t)((uint8_t)ch1);
 						while (((ch1 = *ptr1) != '\0') && (cnt > 0)) {
 							ptr1++; skip++;
 							if ((ch1 & 0xC0) != 0x80)
-								break;
+								goto utf8_cmpi_v1;
 							cnt--;
 						}
 						if (cnt > 0) {
 							ptr1 -= skip;
-							break;
+							goto utf8_cmpi_v1;
 						} else {
 							int shift = (6 * skip);
 							utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
@@ -792,7 +791,7 @@ extern "C" {
 								ptr1++;
 								skip--;
 							}
-							
+
 							#if __WCHAR_MAX__ > 0x10000
 								v1 = towlower((wchar_t)utf8);
 							#else
@@ -803,9 +802,10 @@ extern "C" {
 								}
 							#endif
 						}
-					} while (false);
-							
-					do {
+					}
+				utf8_cmpi_v1:;
+
+					{
 						int cnt;
 						if ((ch2 & 0xE0) == 0xC0) cnt = 1;
 						else if ((ch2 & 0xF0) == 0xE0) cnt = 2;
@@ -813,8 +813,8 @@ extern "C" {
 						else if ((ch2 & 0xFC) == 0xF8) cnt = 4;
 						else if ((ch2 & 0xFE) == 0xFC) cnt = 6;
 						else {
-							v2 = ch2;
-							break;
+							v2 = (uint32_t)((uint8_t)ch2);
+							goto utf8_cmpi_v2;
 						}
 						
 						int skip = 0;
@@ -822,12 +822,12 @@ extern "C" {
 						while (((ch2 = *ptr2) != '\0') && (cnt > 0)) {
 							ptr2++; skip++;
 							if ((ch2 & 0xC0) != 0x80)
-								break;
+								goto utf8_cmpi_v2;
 							cnt--;
 						}
 						if (cnt > 0) {
 							ptr2 -= skip;
-							break;
+							goto utf8_cmpi_v2;
 						} else {
 							int shift = (6 * skip);
 							utf8 = (utf8 & (0x1F >> (skip - 1))) << shift;
@@ -849,15 +849,17 @@ extern "C" {
 								}
 							#endif
 						}
-					} while (false);
+					}
+				utf8_cmpi_v2:;
+
 				} else {
 					return 1;
 				}
 			} else if (ch2 & 0x80) {
 				return -1;
 			} else {
-				v1 = towlower((wchar_t)ch1);
-				v2 = towlower((wchar_t)ch2);
+				v1 = towlower((wint_t)((uint8_t)ch1));
+				v2 = towlower((wint_t)((uint8_t)ch2));
 			}
 			
 			if (v1 != v2) return (v1 < v2) ? -1 : 1;
@@ -883,8 +885,8 @@ extern "C" {
 			return 1;
 		
 		while (len-- > 0) {
-			wchar_t v1 = towlower(*ptr1); ptr1++;
-			wchar_t v2 = towlower(*ptr2); ptr2++;
+			wchar_t v1 = (wchar_t)towlower((wint_t)*ptr1); ptr1++;
+			wchar_t v2 = (wchar_t)towlower((wint_t)*ptr2); ptr2++;
 			if (v1 != v2) return (v1 < v2) ? -1 : 1;
 		}
 		if (len1 == len2)
@@ -908,8 +910,8 @@ extern "C" {
 #define StringNegInfinite L"-Infinity"
 #define StringEmpty L""
 #define StringNil NULL
-#define StringNull L"null"
-#define StringUndefined L"undefined"
+//#define StringNull L"null"
+//#define StringUndefined L"undefined"
 
 #define STRING_BLOCK_SIZE	32
 
@@ -1575,10 +1577,10 @@ static inline int swprintf(wchar_t* target, double value) {
 }
 
 CString::CString(double value) throw(const char*) {
-	if (isnan(value)) {
+	if (__builtin_isnan(value)) {
 		this->operator=(StringNan);
-	} else if (isinf(value)) {
-		if (signbit(value)) {
+	} else if (__builtin_isinf(value)) {
+		if (__builtin_signbit(value)) {
 			this->operator=(StringNegInfinite);
 		} else {
 			this->operator=(StringInfinite);
@@ -1595,10 +1597,10 @@ CString::CString(double value) throw(const char*) {
 }
 
 CString& CString::operator =(double value) throw(const char*) {
-	if (isnan(value))
+	if (__builtin_isnan(value))
 		return this->operator=(StringNan);
-	else if (isinf(value)) {
-		if (signbit(value))
+	else if (__builtin_isinf(value)) {
+		if (__builtin_signbit(value))
 			return this->operator=(StringNegInfinite);
 		else
 			return this->operator=(StringInfinite);
@@ -1615,10 +1617,10 @@ CString& CString::operator =(double value) throw(const char*) {
 }
 
 CString& CString::concat(const double value) throw(const char*) {
-	if (isnan(value))
+	if (__builtin_isnan(value))
 		return this->concat(StringNan);
-	else if (isinf(value)) {
-		if (signbit(value))
+	else if (__builtin_isinf(value)) {
+		if (__builtin_signbit(value))
 			return this->concat(StringNegInfinite);
 		else
 			return this->concat(StringInfinite);
@@ -1656,7 +1658,7 @@ CString::operator NSString*() const {
 
 enum StringNumberFormat { snfNone, snfUndefined, snfNil, snfNull, snfBoolTrue, snfBoolFalse, snfHex, snfOct, snfBit, snfFloat, snfFloatEx, snfFloatNan, snfFloatInfPos, snfFloatInfNeg, snfInt, snfUInt };
 
-static int getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
+static uint32_t getStringNumberFormat(wchar_t* src, uint32_t srcLen, uint32_t* pos, uint32_t* len) {
 	if (srcLen > 0) {
 		wchar_t* lpStr = src;
 		wchar_t ch = lpStr[0];
@@ -1829,7 +1831,7 @@ static uint64_t wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
 			return 0;
 			
 		case snfBoolTrue:
-			return -1;
+			return (uint64_t)-1;
 			
 		case snfFloatInfPos:
 		case snfFloatInfNeg:
@@ -1855,6 +1857,8 @@ static uint64_t wtoull(const wchar_t* data, uint32_t len, uint32_t type) {
 			
 		case snfUInt:
 			return wcstoull(data, NULL, 10);
+
+		default:;
 	}
 	
 	return 0;
@@ -1897,6 +1901,8 @@ int64_t wtoll(const wchar_t* data, uint32_t len, uint32_t type) {
 			
 		case snfUInt:
 			return (int64_t)(wcstoull(data, NULL, 10));
+
+		default:;
 	}
 	
 	return 0;
@@ -1941,6 +1947,8 @@ long double wtod(const wchar_t* data, uint32_t len, uint32_t type) {
 			
 		case snfUInt:
 			return (long double)(wcstoull(data, NULL, 10));
+
+		default:;
 	}
 	
 	return 0;
@@ -1954,7 +1962,7 @@ CString::operator bool() const {
 	
 	uint32_t pos;
 	uint32_t len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	switch (type) {
 		case snfNone:
 			return this->m_length != 0; // Не пустое?
@@ -1970,6 +1978,8 @@ CString::operator bool() const {
 		case snfFloatInfPos:
 		case snfFloatInfNeg:
 			return true;
+
+		default:;
 	}
 	
 	return wtoll(this->m_data + pos, len, type) != 0;
@@ -1980,7 +1990,7 @@ CString::operator int8_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<uint8_t>(wtoll(this->m_data + pos, len, type));
 }
 
@@ -1989,7 +1999,7 @@ CString::operator uint8_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<uint8_t>(wtoull(this->m_data + pos, len, type));
 }
 
@@ -1998,7 +2008,7 @@ CString::operator int16_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<int16_t>(wtoll(this->m_data + pos, len, type));
 }
 
@@ -2007,7 +2017,7 @@ CString::operator uint16_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<uint16_t>(wtoull(this->m_data + pos, len, type));
 }
 
@@ -2016,7 +2026,7 @@ CString::operator int32_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<int32_t>(wtoll(this->m_data + pos, len, type));
 }
 
@@ -2025,7 +2035,7 @@ CString::operator uint32_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return static_cast<uint32_t>(wtoull(this->m_data + pos, len, type));
 }
 
@@ -2034,7 +2044,7 @@ CString::operator int64_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return wtoll(this->m_data + pos, len, type);
 }
 
@@ -2043,7 +2053,7 @@ CString::operator uint64_t() const {
 		return 0;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return wtoull(this->m_data + pos, len, type);
 }
 
@@ -2052,7 +2062,7 @@ CString::operator float() const {
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return (float)(wtod(this->m_data + pos, len, type));
 }
 
@@ -2061,7 +2071,7 @@ CString::operator double() const {
 		return NAN;
 	
 	uint32_t pos, len;
-	int type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
+	uint32_t type = getStringNumberFormat(this->m_data, this->m_length, &pos, &len);
 	return (double)(wtod(this->m_data + pos, len, type));
 }
 
@@ -2069,10 +2079,7 @@ CString::operator double() const {
 
 bool CString::equals(const CString& string) const {
 	if (m_length == string.m_length) {
-		if (m_length == 0)
-			return true;
-		else
-			return memcmp(m_data, string.m_data, m_size) == 0;
+		return m_length == 0 || memcmp(m_data, string.m_data, m_size) == 0;
 	}
 	return false;
 }
@@ -2141,8 +2148,8 @@ bool CString::equalsIgnoreCase(const CString& string) const {
 		wchar_t* ptr2 = string.m_data;
 		uint32_t len = m_length;
 		while (len-- > 0) {
-			wchar_t v1 = towlower(*ptr1); ptr1++;
-			wchar_t v2 = towlower(*ptr2); ptr2++;
+			wchar_t v1 = (wchar_t)towlower((wint_t)*ptr1); ptr1++;
+			wchar_t v2 = (wchar_t)towlower((wint_t)*ptr2); ptr2++;
 			if (v1 != v2) return false;
 		}
 		return true;
@@ -2162,8 +2169,8 @@ bool CString::equalsIgnoreCase(const wchar_t* string) const {
 			wchar_t* ptr2 = (wchar_t*)string;
 			uint32_t len = m_length;
 			while (len > 0) {
-				wchar_t v1 = towlower(*ptr1);
-				wchar_t v2 = towlower(*ptr2);
+				wchar_t v1 = (wchar_t)towlower((wint_t)*ptr1);
+				wchar_t v2 = (wchar_t)towlower((wint_t)*ptr2);
 				if (v1 != v2) return false;
 				ptr1++; ptr2++; len--;
 			}
@@ -2185,8 +2192,8 @@ int CString::compareToIgnoreCase(const CString& string) const {
 	wchar_t* ptr1 = m_data;
 	wchar_t* ptr2 = string.m_data;
 	while (len-- > 0) {
-		wchar_t v1 = towlower(*ptr1); ptr1++;
-		wchar_t v2 = towlower(*ptr2); ptr2++;
+		wchar_t v1 = (wchar_t)towlower((wint_t)*ptr1); ptr1++;
+		wchar_t v2 = (wchar_t)towlower((wint_t)*ptr2); ptr2++;
 		if (v1 != v2) return (v1 < v2) ? -1 : 1;
 	}
 	if (len1 == len2)
@@ -2210,8 +2217,8 @@ int CString::compareToIgnoreCase(const wchar_t* string) const {
 	wchar_t* ptr1 = m_data;
 	wchar_t* ptr2 = (wchar_t*)string;
 	while (len-- > 0) {
-		wchar_t v1 = towlower(*ptr1); ptr1++;
-		wchar_t v2 = towlower(*ptr2); ptr2++;
+		wchar_t v1 = (wchar_t)towlower((wint_t)*ptr1); ptr1++;
+		wchar_t v2 = (wchar_t)towlower((wint_t)*ptr2); ptr2++;
 		if (v1 != v2) return (v1 < v2) ? -1 : 1;
 	}
 	if (len1 == len2)
@@ -2232,10 +2239,8 @@ bool CString::startsWith(const CString& string, uint32_t start) const {
 		return false;
 	
 	uint32_t end = start + len2;
-	if (len1 < end)
-		return false;
-	
-	return memcmp(m_data + start, string.m_data, len2 * sizeof(wchar_t)) == 0;
+	return len1 >= end && memcmp(m_data + start, string.m_data, len2 * sizeof(wchar_t)) == 0;
+
 }
 
 bool CString::startsWith(const wchar_t* string, uint32_t start) const {
@@ -2251,10 +2256,8 @@ bool CString::startsWith(const wchar_t* string, uint32_t start) const {
 		return false;
 	
 	uint32_t end = start + len2;
-	if (len1 < end)
-		return false;
-	
-	return memcmp(m_data + start, string, len2 * sizeof(wchar_t)) == 0;
+	return len1 >= end && memcmp(m_data + start, string, len2 * sizeof(wchar_t)) == 0;
+
 }
 
 bool CString::endsWith(const CString& string) const {
@@ -2265,11 +2268,9 @@ bool CString::endsWith(const CString& string) const {
 	uint32_t len1 = m_length;
 	if (len1 == 0)
 		return false;
-	
-	if (len1 < len2)
-		return false;
 
-	return memcmp(m_data + len1 - len2, string.m_data, len2 * sizeof(wchar_t)) == 0;
+	return len1 >= len2 && memcmp(m_data + len1 - len2, string.m_data, len2 * sizeof(wchar_t)) == 0;
+
 }
 
 bool CString::endsWith(const wchar_t* string) const {
@@ -2284,10 +2285,8 @@ bool CString::endsWith(const wchar_t* string) const {
 	if (len1 == 0)
 		return false;
 
-	if (len1 < len2)
-		return false;
-	
-	return memcmp(m_data + len1 - len2, string, len2 * sizeof(wchar_t)) == 0;
+	return len1 >= len2 && memcmp(m_data + len1 - len2, string, len2 * sizeof(wchar_t)) == 0;
+
 }
 
 //==============================================================
@@ -2438,7 +2437,7 @@ CString CString::substring(int start, int end) const {
 	if (len == 0)
 		return StringEmpty;
 	
-	return CString(m_data + pos, len);
+	return CString(m_data + pos, (uint32_t)len);
 }
 
 wchar_t& CString::operator [](int index) const throw(const char*) {
@@ -2802,7 +2801,7 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 							int resLen = ::swprintf(buffer, 64, format, val);
 							if (resLen != EOF) {
 								int ofs = m_length;
-								setLength(ofs + resLen);
+								setLength((uint32_t)(ofs + resLen));
 								memcpy(m_data + ofs, buffer, (resLen + 1) * sizeof(wchar_t));
 							}
 						} else if (ch == L'n') {
@@ -2829,7 +2828,7 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 							int resLen = ::swprintf(buffer, 64, format, val);
 							if (resLen != EOF) {
 								int ofs = m_length;
-								setLength(ofs + resLen);
+								setLength((uint32_t)(ofs + resLen));
 								memcpy(m_data + ofs, buffer, (resLen + 1) * sizeof(wchar_t));
 							}
 						} else if (ch == L'n') {
@@ -2894,8 +2893,10 @@ int CString::vswprintf(const wchar_t* string, va_list arglist) {
 						va_format(void*, void*);
 					} else if (ch == L'n') {
 						va_store(int32_t);
+#if defined(__IOS__)
 					} else if (ch == L'@') {
 						va_concat(NSString*, NSString*);
+#endif
 					} else {
 						error = true;
 						break;

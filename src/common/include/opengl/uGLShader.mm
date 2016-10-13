@@ -26,15 +26,15 @@ GLShader::GLShader(GLRender* context, const CString& key, GLObjectData* vsh, GLO
 	this->fsh = fsh;
 	this->program = program;
 
-	uint32_t count = textures.count();
+	int32_t count = textures.count();
 	if (count > 0) {
-		this->textures.resize(count);
+		this->textures.resize((uint32_t)count);
 		memcpy(this->textures.items(), textures.items(), count * sizeof(GLObjectData*));
 	}
 }
 
 GLShader::~GLShader() {
-	uint32_t count = this->textures.count();
+	int32_t count = this->textures.count();
 	if (count > 0) {
 		GLObjectData** textures = this->textures.items();
 		for (int i = 0; i < count; i++) {
@@ -107,10 +107,10 @@ bool GLShader::checkReady() {
 	}
 	
 	uint32_t handlesCount = 0;
-	uint32_t count = this->textures.count();
+	int32_t count = this->textures.count();
 	if (count > 0) {
 		GLObjectData** items = this->textures.items();
-		for (int i = (int)(count-1); i >= 0; i--) {
+		for (int i = count-1; i >= 0; i--) {
 			if (items[i]->isReference()) {
 				GLTexture* texture;
 				try {
@@ -134,7 +134,7 @@ bool GLShader::checkReady() {
 		uint32_t ofs = 0;
 		for (int i = 0; i < count; i++) {
 			Vector<GLuint>* textures = &(items[i]->getTextures());
-			uint32_t textureCount = textures->count();
+			int32_t textureCount = textures->count();
 			GLuint* textureItems = textures->items();
 			for (int j = 0; j < textureCount; j++) {
 				handles[ofs++] = textureItems[j];
@@ -145,12 +145,12 @@ bool GLShader::checkReady() {
 	return true;
 }
 
-GLuint GLShader::bind(GLint index, GLint uniform) {
+GLuint GLShader::bind(GLuint index, GLint uniform) {
 	if (program != 0) {
 		glUseProgram(program);
 	}
 	
-	uint32_t count = handles.count();
+	int32_t count = handles.count();
 	GLuint* items = handles.items();
 	for (int i = 0; i < count; i++) {
 		context->activeTexture(index);
@@ -170,12 +170,12 @@ GLuint GLShader::bind(GLint index, GLint uniform) {
 	return index;
 }
 
-GLuint GLShader::bind(GLint index, Vector<GLint>& uniforms) {
+GLuint GLShader::bind(GLuint index, Vector<GLint>& uniforms) {
 	if (program != 0) {
 		glUseProgram(program);
 	}
 	
-	uint32_t count = handles.count();
+	int32_t count = handles.count();
 	GLuint* items = handles.items();
 	for (int i = 0; i < count; i++) {
 		context->activeTexture(index);
@@ -184,7 +184,7 @@ GLuint GLShader::bind(GLint index, Vector<GLint>& uniforms) {
 		index++;
 	}
 	
-	uint32_t unicount = uniforms.count();
+	int32_t unicount = uniforms.count();
 	if (unicount > 0) {
 		if (count == 1) {
 			glUniform1i(uniforms[0], handles1iv[0]);
@@ -247,7 +247,7 @@ GLuint GLShaders::createVertexShader(const char* vertexShaderSource) throw(const
 		GLint logLen = 0;
 		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLen);
 		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, logLen + 1);
+			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
 			glGetShaderInfoLog(vertexShader, logLen, &logLen, log);
 			CString::format(L"OpenGL Vertex Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
@@ -274,7 +274,7 @@ GLuint GLShaders::createFragmentShader(const char* fragmentShaderSource) throw(c
 		GLint logLen = 0;
 		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLen);
 		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, logLen + 1);
+			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
 			glGetShaderInfoLog(fragmentShader, logLen, &logLen, log);
 			CString::format(L"OpenGL Fragment Shader Log:\r\n%s", (char*)log).log();
 			memFree(log);
@@ -306,7 +306,7 @@ GLuint GLShaders::createProgram(GLuint vertexShader, GLuint fragmentShader) thro
 		GLint logLen = 0;
 		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLen);
 		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, logLen + 1);
+			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
 			glGetProgramInfoLog(program, logLen, &logLen, log);
 			CString::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
 			memFree(log);
@@ -345,8 +345,6 @@ void* GLShaders::CreateVertexShaderCallback(void* threadData) {
 	GLObjectData* shd = NULL;
 	try {
 		shd = memNew(shd, GLObjectData(thread->context));
-		if (shd == NULL)
-			throw eOutOfMemory;
 		shd->setShader(sh, false);
 	} catch (...) {
 		thread->context->shaders->releaseShader(sh);
@@ -377,8 +375,6 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 	GLObjectData* shd = NULL;
 	try {
 		shd = memNew(shd, GLObjectData(thread->context));
-		if (shd == NULL)
-			throw eOutOfMemory;
 		shd->setShader(sh, false);
 	} catch (...) {
 		thread->context->shaders->releaseShader(sh);
@@ -450,13 +446,9 @@ GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReferenc
 	
 	try {
 		vsh = memNew(vsh, GLObjectData(context));
-		if (vsh == NULL)
-			throw eOutOfMemory;
 		vsh->setTarget(vshReference);
 		
 		fsh = memNew(fsh, GLObjectData(context));
-		if (fsh == NULL)
-			throw eOutOfMemory;
 		fsh->setTarget(fshReference);
 	} catch (...) {
 		if (vsh != NULL) {

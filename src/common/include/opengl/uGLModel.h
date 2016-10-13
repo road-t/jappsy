@@ -369,7 +369,7 @@ private:
 	// json parser callbacks
 	// root
 	static void onjson_root_start(struct JsonContext* ctx, void* target);
-	static void onjson_root_end(struct JsonContext* ctx, void* target, bool noerror);
+	//static void onjson_root_end(struct JsonContext* ctx, void* target, bool noerror);
 	static void onjson_root_object_start(struct JsonContext* ctx, const char* key, void* target);
 		// root.rootnode
 		static void onjson_rootnode_start(struct JsonContext* ctx, const char* key, void* target);

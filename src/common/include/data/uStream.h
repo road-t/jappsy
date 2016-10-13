@@ -32,9 +32,7 @@ private:
 	CString m_sourcePath;
 	
 	inline static bool equalBytes(const Stream& a, const Stream& b) {
-		if (a.m_size != b.m_size)
-			return false;
-		return (memcmp(a.m_buffer, b.m_buffer, a.m_size) == 0);
+		return a.m_size == b.m_size && memcmp(a.m_buffer, b.m_buffer, a.m_size) == 0;
 	}
 	
 	inline static uint32_t readUInt32(const uint8_t* buffer, uint32_t offset) {

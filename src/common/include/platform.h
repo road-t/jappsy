@@ -18,8 +18,8 @@
 #define JAPPSY_PLATFORM_H
 
 #ifndef DEBUG
-	//#warning Remove Always Debug Mode
-	//#define DEBUG
+	#warning Remove Always Debug Mode
+	#define DEBUG
 #else
 	#undef DEBUG
 #endif

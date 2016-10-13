@@ -15,8 +15,6 @@
  */
 
 #include "uURI.h"
-#include <wchar.h>
-#include <data/uString.h>
 
 const wchar_t* URI::basePath = L"http://localhost";
 
@@ -93,12 +91,12 @@ URI::URI(const wchar_t* uri) {
 						}
 						
 						if (u != p) {
-							int len = ((intptr_t)p - (intptr_t)u) / sizeof(wchar_t) - 1;
+							int len2 = ((intptr_t)p - (intptr_t)u) / sizeof(wchar_t) - 1;
 							
-							if (len > 0) {
-								m_password = memAlloc(wchar_t, m_password, (len + 1) * sizeof(wchar_t));
-								memcpy(m_password, u + 1, len * sizeof(wchar_t));
-								m_password[len] = 0;
+							if (len2 > 0) {
+								m_password = memAlloc(wchar_t, m_password, (len2 + 1) * sizeof(wchar_t));
+								memcpy(m_password, u + 1, len2 * sizeof(wchar_t));
+								m_password[len2] = 0;
 							}
 						}
 						
@@ -145,8 +143,7 @@ URI::URI(const wchar_t* uri) {
 							m_port[len] = 0;
 						}
 					}
-					
-					s = p;
+
 					break;
 				}
 				p++;
@@ -199,12 +196,12 @@ URI::URI(const wchar_t* uri) {
 					m_file[len] = 0;
 					
 					if (e != NULL) {
-						int len = ((intptr_t)p - (intptr_t)e) / sizeof(wchar_t);
+						int len2 = ((intptr_t)p - (intptr_t)e) / sizeof(wchar_t);
 						
-						if (len > 0) {
-							m_ext = memAlloc(wchar_t, m_ext, (len + 1) * sizeof(wchar_t));
-							memcpy(m_ext, e, len * sizeof(wchar_t));
-							m_ext[len] = 0;
+						if (len2 > 0) {
+							m_ext = memAlloc(wchar_t, m_ext, (len2 + 1) * sizeof(wchar_t));
+							memcpy(m_ext, e, len2 * sizeof(wchar_t));
+							m_ext[len2] = 0;
 						}
 					}
 				}
@@ -256,7 +253,6 @@ URI::URI(const wchar_t* uri) {
 						m_anchor[len] = 0;
 					}
 					
-					s = p;
 					break;
 				}
 				p++;

@@ -20,13 +20,13 @@
 
 GLTexture::GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	this->context = context;
-	uint32_t count = handles.count();
+	int32_t count = handles.count();
 	if (count > 0) {
-		this->handles.resize(count);
+		this->handles.resize((uint32_t)count);
 		memcpy(this->handles.items(), handles.items(), count * sizeof(GLuint));
 
 		try {
-			handles1iv.resize(count);
+			handles1iv.resize((uint32_t)count);
 		} catch (...) {
 			this->handles.clear();
 			throw;
@@ -37,7 +37,7 @@ GLTexture::GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GL
 }
 
 GLTexture::~GLTexture() {
-	uint32_t count = handles.count();
+	int32_t count = handles.count();
 	if (handles.count() > 0) {
 		for (int i = 0; i < count; i++) {
 			context->textures->releaseTextureHandle(handles[i]);
@@ -45,7 +45,7 @@ GLTexture::~GLTexture() {
 	}
 }
 
-GLuint GLTexture::bind(GLint index, GLint uniform) {
+GLuint GLTexture::bind(GLuint index, GLint uniform) {
 	for (int i = 0; i < handles.count(); i++) {
 		GLuint handle = handles.get(i);
 		context->activeTexture(index);
@@ -55,7 +55,7 @@ GLuint GLTexture::bind(GLint index, GLint uniform) {
 	}
 	
 	if (uniform != -1) {
-		uint32_t count = handles.count();
+		int32_t count = handles.count();
 		if (count == 1) {
 			glUniform1i(uniform, handles1iv[0]);
 		} else {

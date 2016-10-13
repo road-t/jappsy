@@ -69,7 +69,7 @@ void* GLReader::CreateTextureCallback(void* threadData) {
 void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	struct CreateTextureThreadData* thread = (struct CreateTextureThreadData*)threadData;
 	
-	uint32_t count = thread->handles.count();
+	int32_t count = thread->handles.count();
 	GLuint* items = thread->handles.items();
 	for (int i = 0; i < count; i++) {
 		thread->context->textures->releaseTextureHandle(items[i]);
@@ -104,7 +104,7 @@ GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* st
 				if ((chunk == GLReader::IGZCHUNK) || (chunk == GLReader::IRWCHUNK)) {
 					uint32_t dataSize;
 					if (chunk == GLReader::IGZCHUNK) {
-						dataSize = thread.width * thread.height * 4;
+						dataSize = (uint32_t)(thread.width * thread.height * 4);
 						thread.data = stream->readGZip(len, &dataSize);
 					} else {
 						thread.data = stream->readBytes(len);
@@ -165,8 +165,6 @@ void* GLReader::CreateShaderSourceCallback(void* threadData) {
 	GLObjectData* shd = NULL;
 	try {
 		shd = memNew(shd, GLObjectData(thread->context));
-		if (shd == NULL)
-			throw eOutOfMemory;
 		shd->setShader(sh, false);
 	} catch (...) {
 		thread->context->shaders->releaseShader(sh);
@@ -200,8 +198,6 @@ void* GLReader::CreateShaderTextureCallback(void* threadData) {
 	GLObjectData* shd = NULL;
 	try {
 		shd = memNew(shd, GLObjectData(thread->context));
-		if (shd == NULL)
-			throw eOutOfMemory;
 		Vector<GLuint> handles;
 		handles.push(handle);
 		shd->setTextures(handles, false);
@@ -257,7 +253,7 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 		thread->program = 0;
 	}
 	
-	uint32_t count = thread->textures.count();
+	int32_t count = thread->textures.count();
 	if (count > 0) {
 		GLObjectData** items = thread->textures.items();
 		for (int i = 0; i < count; i++) {
@@ -311,8 +307,6 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 					GLObjectData* shd = NULL;
 					try {
 						shd = memNew(shd, GLObjectData(ctx));
-						if (shd == NULL)
-							throw eOutOfMemory;
 						shd->setTarget(target);
 					} catch (...) {
 						memFree(target);
@@ -346,7 +340,7 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 					if ((chunk == GLReader::IGZCHUNK) || (chunk == GLReader::IRWCHUNK)) {
 						uint32_t dataSize;
 						if (chunk == GLReader::IGZCHUNK) {
-							dataSize = thread.width * thread.height * 4;
+							dataSize = (uint32_t)(thread.width * thread.height * 4);
 							thread.data = stream->readGZip(len, &dataSize);
 						} else {
 							thread.data = stream->readBytes(len);

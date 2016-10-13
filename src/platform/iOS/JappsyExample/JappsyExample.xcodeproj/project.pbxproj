@@ -7,10 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		C310C7AB1D6D1C790031E73A /* mobile_vsh_effect_sun1.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7AA1D6D1C790031E73A /* mobile_vsh_effect_sun1.vsh */; };
-		C310C7AD1D6D1C7D0031E73A /* mobile_fsh_effect_sun1.fsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7AC1D6D1C7D0031E73A /* mobile_fsh_effect_sun1.fsh */; };
-		C310C7C01D6E80700031E73A /* fsh_3d.fsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7BE1D6E80700031E73A /* fsh_3d.fsh */; };
-		C310C7C11D6E80700031E73A /* vsh_3d.vsh in Resources */ = {isa = PBXBuildFile; fileRef = C310C7BF1D6E80700031E73A /* vsh_3d.vsh */; };
 		C3401C571D661CB9009B223D /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C3401C561D661CB9009B223D /* libz.framework */; };
 		C341B2B01D572C9C00D2D70F /* ExampleViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = C341B2AF1D572C9C00D2D70F /* ExampleViewController.mm */; };
 		C34FD9C81D5BC2AD0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9C71D5BC2AD0022FF71 /* libJappsyEngine.framework */; };
@@ -23,10 +19,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		C310C7AA1D6D1C790031E73A /* mobile_vsh_effect_sun1.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = mobile_vsh_effect_sun1.vsh; sourceTree = "<group>"; };
-		C310C7AC1D6D1C7D0031E73A /* mobile_fsh_effect_sun1.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = mobile_fsh_effect_sun1.fsh; sourceTree = "<group>"; };
-		C310C7BE1D6E80700031E73A /* fsh_3d.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = fsh_3d.fsh; sourceTree = "<group>"; };
-		C310C7BF1D6E80700031E73A /* vsh_3d.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = vsh_3d.vsh; sourceTree = "<group>"; };
 		C3401C561D661CB9009B223D /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ExampleViewController.h; sourceTree = "<group>"; };
 		C341B2AF1D572C9C00D2D70F /* ExampleViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ExampleViewController.mm; sourceTree = "<group>"; };
@@ -79,10 +71,6 @@
 		C3506D7D1D52575C005BC914 /* JappsyExample */ = {
 			isa = PBXGroup;
 			children = (
-				C310C7BE1D6E80700031E73A /* fsh_3d.fsh */,
-				C310C7BF1D6E80700031E73A /* vsh_3d.vsh */,
-				C310C7AC1D6D1C7D0031E73A /* mobile_fsh_effect_sun1.fsh */,
-				C310C7AA1D6D1C790031E73A /* mobile_vsh_effect_sun1.vsh */,
 				C3506D811D52575C005BC914 /* AppDelegate.h */,
 				C3506D821D52575C005BC914 /* AppDelegate.mm */,
 				C341B2AE1D572C9C00D2D70F /* ExampleViewController.h */,
@@ -163,13 +151,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C310C7AD1D6D1C7D0031E73A /* mobile_fsh_effect_sun1.fsh in Resources */,
 				C3506D8D1D52575C005BC914 /* Main.storyboard in Resources */,
-				C310C7C01D6E80700031E73A /* fsh_3d.fsh in Resources */,
 				C3506D8F1D52575C005BC914 /* Assets.xcassets in Resources */,
 				C3506D921D52575C005BC914 /* LaunchScreen.storyboard in Resources */,
-				C310C7AB1D6D1C790031E73A /* mobile_vsh_effect_sun1.vsh in Resources */,
-				C310C7C11D6E80700031E73A /* vsh_3d.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,6 +286,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = LGXN3MWZ8Y;
+				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -316,6 +301,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = LGXN3MWZ8Y;
+				HEADER_SEARCH_PATHS = $SRCROOT/../../../common/include/;
 				INFOPLIST_FILE = JappsyExample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

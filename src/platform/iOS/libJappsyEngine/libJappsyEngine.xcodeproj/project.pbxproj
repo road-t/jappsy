@@ -447,6 +447,7 @@
 			files = (
 				C35900D61D6542C700C1D154 /* uGLScene.h in Headers */,
 				C34FD9871D5B8E0A0022FF71 /* uString.h in Headers */,
+				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C35025901DA54C9E00EFD3B0 /* uGLSound.h in Headers */,
 				C34FDA481D5C96DD0022FF71 /* uGLAlignY.h in Headers */,
 				C310C7BD1D6E080E0031E73A /* uGLAnimation.h in Headers */,
@@ -458,7 +459,6 @@
 				C34FD9611D5B55540022FF71 /* uGLEngine.h in Headers */,
 				C35900CA1D6542C700C1D154 /* uGLDrawing.h in Headers */,
 				C35900DC1D6542C700C1D154 /* uGLTexture.h in Headers */,
-				C30578251D54BA9C00171EFC /* platform.h in Headers */,
 				C35272081D551BBE00F41198 /* uOpenGL.h in Headers */,
 				C35900D01D6542C700C1D154 /* uGLModel.h in Headers */,
 				C33FC40D1D68CCFC000D33D4 /* uGLObjectData.h in Headers */,

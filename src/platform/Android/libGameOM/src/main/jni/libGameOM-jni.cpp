@@ -33,7 +33,12 @@ Java_com_jappsy_OMEngine_onCreate(JNIEnv *env, jclass type) {
 	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onCreate");
 
 	try {
-		OMGame *engine = new OMGame();
+		OMGame *engine = new OMGame(
+				L"e994a237491a85ff72b9f737bbf47047cfbc6dbb0897ea1eea5e75338a4b13c3",
+				L"8ea5f70b15263872760d7e14ce8e579a",
+				L"",
+				L"EN"
+		);
 		return (jlong) (intptr_t) (engine);
 	} catch (...) {
 		return (jlong) NULL;

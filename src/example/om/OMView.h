@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#import <UIKit/UIKit.h>
-
 #ifndef OMViewH
 #define OMViewH
 
@@ -51,6 +49,10 @@
 
 #endif
 
+#ifdef __OBJC__
+
+#import <UIKit/UIKit.h>
+
 typedef void (*OMViewCloseCallback)(void* userData);
 
 @interface OMView : UIView
@@ -65,3 +67,5 @@ typedef void (*OMViewCloseCallback)(void* userData);
 - (void) updateState:(int)state;
 
 @end
+
+#endif

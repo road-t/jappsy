@@ -9,9 +9,9 @@
 /* Begin PBXBuildFile section */
 		C315917A1DAB7EBE00F8EB6E /* OMWebView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C35025921DA65A8100EFD3B0 /* OMWebView.mm */; };
 		C340852D1D67D3EA007D4835 /* GLKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C340852C1D67D3EA007D4835 /* GLKit.framework */; };
+		C3486E231DAFBE2000850F78 /* OMView.h in Headers */ = {isa = PBXBuildFile; fileRef = C3486E221DAFBE2000850F78 /* OMView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9A81D5BBB220022FF71 /* libGameOM.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9A71D5BBB220022FF71 /* libGameOM.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9B01D5BBB7F0022FF71 /* libJappsyEngine.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */; };
-		C34FD9D31D5BC9830022FF71 /* OMView.h in Headers */ = {isa = PBXBuildFile; fileRef = C34FD9D11D5BC9830022FF71 /* OMView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		C34FD9D41D5BC9830022FF71 /* OMView.mm in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9D21D5BC9830022FF71 /* OMView.mm */; };
 		C35025941DA65B2000EFD3B0 /* OMWebView.h in Headers */ = {isa = PBXBuildFile; fileRef = C35025911DA65A6200EFD3B0 /* OMWebView.h */; };
 		C3513FC81D762E7100DC6362 /* OMBars.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3513FBD1D762E7100DC6362 /* OMBars.cpp */; };
@@ -25,11 +25,11 @@
 /* Begin PBXFileReference section */
 		C340852C1D67D3EA007D4835 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		C3416E611DAD08A500298835 /* OMErrorHtml.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMErrorHtml.res; sourceTree = "<group>"; };
+		C3486E221DAFBE2000850F78 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OMView.h; path = ../../../../example/om/OMView.h; sourceTree = "<group>"; };
 		C34FD9A41D5BBB220022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libGameOM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C34FD9A71D5BBB220022FF71 /* libGameOM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libGameOM.h; sourceTree = "<group>"; };
 		C34FD9A91D5BBB220022FF71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		C34FD9AF1D5BBB7F0022FF71 /* libJappsyEngine.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libJappsyEngine.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libJappsyEngine.framework"; sourceTree = "<group>"; };
-		C34FD9D11D5BC9830022FF71 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OMView.h; sourceTree = "<group>"; };
 		C34FD9D21D5BC9830022FF71 /* OMView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMView.mm; sourceTree = "<group>"; };
 		C35025911DA65A6200EFD3B0 /* OMWebView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OMWebView.h; sourceTree = "<group>"; };
 		C35025921DA65A8100EFD3B0 /* OMWebView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = OMWebView.mm; sourceTree = "<group>"; };
@@ -84,7 +84,7 @@
 				C3513FBC1D762E7100DC6362 /* om */,
 				C34FD9A71D5BBB220022FF71 /* libGameOM.h */,
 				C34FD9A91D5BBB220022FF71 /* Info.plist */,
-				C34FD9D11D5BC9830022FF71 /* OMView.h */,
+				C3486E221DAFBE2000850F78 /* OMView.h */,
 				C34FD9D21D5BC9830022FF71 /* OMView.mm */,
 				C35025911DA65A6200EFD3B0 /* OMWebView.h */,
 				C35025921DA65A8100EFD3B0 /* OMWebView.mm */,
@@ -120,8 +120,8 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C34FD9D31D5BC9830022FF71 /* OMView.h in Headers */,
 				C3513FCC1D762E7100DC6362 /* OMGame.h in Headers */,
+				C3486E231DAFBE2000850F78 /* OMView.h in Headers */,
 				C35025941DA65B2000EFD3B0 /* OMWebView.h in Headers */,
 				C3513FC91D762E7100DC6362 /* OMBars.h in Headers */,
 				C34FD9A81D5BBB220022FF71 /* libGameOM.h in Headers */,

@@ -77,11 +77,6 @@
 
 @implementation OMView
 
-@synthesize token;
-@synthesize sessid;
-@synthesize devid;
-@synthesize locale;
-
 @synthesize engine;
 
 @synthesize onClose;
@@ -123,19 +118,19 @@
 
 - (instancetype) init:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData {
     if ((self = [super init])) {
-        self.token = [NSString stringWithString:token];
-        self.sessid = [NSString stringWithString:sessid];
-        self.devid = [NSString stringWithString:devid];
-        self.locale = [[NSString stringWithString:locale] uppercaseString];
+        _token = [NSString stringWithString:token];
+        _sessid = [NSString stringWithString:sessid];
+        _devid = [NSString stringWithString:devid];
+        _locale = [[NSString stringWithString:locale] uppercaseString];
         
         NSString* defaultLocale = @"EN";
         
-        if (self.locale.length != 2) {
-            self.locale = defaultLocale;
+        if (_locale.length != 2) {
+            _locale = defaultLocale;
         } else {
             NSString* supportedLocales = @"RU EN";
-            if (![supportedLocales containsString:self.locale]) {
-                self.locale = defaultLocale;
+            if (![supportedLocales containsString:_locale]) {
+                _locale = defaultLocale;
             }
         }
         
@@ -832,7 +827,7 @@ void onScript(int index, const CString& script, void* userData) {
 
 - (BOOL) onStart {
     if ([gameView onStart]) {
-        engine = new class OMGame(token, sessid, devid, locale);
+        engine = new class OMGame(_token, _sessid, _devid, _locale);
         engine->setOnUpdateState(onUpdateState, (__bridge void*)self);
         engine->setWebCallbacks(onLocation, onScript, (__bridge void*)self);
         [gameView engine:engine];

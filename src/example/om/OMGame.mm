@@ -17,8 +17,6 @@
 #include "OMGame.h"
 #include "OMView.h"
 
-#include <opengl/uGLRender.h>
-#include <core/uSystem.h>
 #include <opengl/uGLLight.h>
 
 void OMGame::playMantra() {
@@ -91,9 +89,13 @@ void OMGame::updateSounds(OMGameStage stage) {
 void OMGame::updateStage(OMGameStage stage, onNextCallback callback, uint64_t timeout, bool fade) {
     uint64_t nextTimeout = currentTimeMillis() + timeout;
     nextTime = fade ? nextTimeout : 0;
-    
+
+    this->nextTimeout = nextTimeout;
+    nextStage = stage;
+    nextCallback = callback;
+
+    /* FIXED multithread update from loader
     if (timeout == 0) {
-        /*
         updateSounds(this->nextStage);
         
         this->stage = stage;
@@ -105,15 +107,12 @@ void OMGame::updateStage(OMGameStage stage, onNextCallback callback, uint64_t ti
         
         if (callback)
             callback(this);
-         */
-        this->nextTimeout = nextTimeout;
-        nextStage = stage;
-        nextCallback = callback;
     } else {
         this->nextTimeout = nextTimeout;
         nextStage = stage;
         nextCallback = callback;
     }
+     */
 }
 
 void OMGame::updateStageVisibility() {
@@ -269,6 +268,7 @@ void OMGame::onFrame(GLRender* context) {
                         case 88: context->mixer->get(L"sun_88")->mixPlay(false, 1.0, true, false); break;
                         case 444: context->mixer->get(L"moon_444")->mixPlay(false, 1.0, true, false); break;
                         case 888: context->mixer->get(L"sun_888")->mixPlay(false, 1.0, true, false); break;
+                        default:;
                     }
                     
                     if (sum == 0) {
@@ -292,7 +292,7 @@ void OMGame::onFrame(GLRender* context) {
                         LOG("Запуск феерверков");
                         scene->startParticlesGroup(groups.rocketslist, 1);
                     } else if (sum > 0) {
-                        CString::format(L"Приз +%d", sum).log();
+                        LOG("Приз +%d", sum);
                         prizeTimeout = currentTime + 4000; // Время отображения приза
                         updateStage(STAGE_BARS_PRIZE);
                         
@@ -365,7 +365,7 @@ void OMGame::onFrame(GLRender* context) {
                     doubleShowTimeout = 0;
                     
                     (void)conf.sequence.shift();
-                    conf.sequence.push(conf.dblindex);
+                    conf.sequence.push((int8_t)conf.dblindex);
                     
                     if (conf.dblselect != conf.dblindex) {
                         LOG("Удвоение - Проиграно");
@@ -452,7 +452,7 @@ void OMGame::onFrame(GLRender* context) {
                         conf.total = 0;
                     }
                     
-                    GLfloat speed = (GLfloat)(conf.total) / 5000.0 + 1.0;
+                    GLfloat speed = (GLfloat)(conf.total) / 5000.0f + 1.0f;
                     takeTimeout = currentTime + (int)(50.0 / speed);
                 }
             }
@@ -502,7 +502,7 @@ void OMGame::onFrame(GLRender* context) {
                         conf.doublein = 0;
                     }
                     
-                    GLfloat speed = (GLfloat)(conf.total) / 5000.0 + 1.0;
+                    GLfloat speed = (GLfloat)(conf.total) / 5000.0f + 1.0f;
                     takeTimeout = currentTime + (int)(50.0 / speed);
                 }
             }
@@ -552,9 +552,11 @@ void OMGame::onTouch(const CString& event) {
             return;
         }
         
+#ifdef DEBUG
         if (event.indexOf("click ") < 0) {
             event.log();
         }
+#endif
         
         if (event == L"swipe long left") {
             if (stage == STAGE_BARS) {
@@ -585,10 +587,10 @@ bool OMGame::onTrackBar(const CString& event, const GLTouchPoint* cur, const GLT
             
             game->bars.clear();
             if (event.startsWith(L"move")) {
-                game->bars.rotation[index].userMove(-delta->x / 4.0);
+                game->bars.rotation[index].userMove(-delta->x / 4.0f);
                 game->context->mixer->get(L"stone_move_long")->mixPlayTimeout(true, 1.0, false, false, 100, 100);
             } else if (event.startsWith(L"leave")) {
-                game->bars.rotation[index].userRotate(-delta->x / 4.0, speed->x * 250.0);
+                game->bars.rotation[index].userRotate(-delta->x / 4.0f, speed->x * 250.0f);
                 if (speed->x >= 1.0) {
                     game->context->mixer->get(L"stone_move_long")->mixPlayTimeout(true, 1.0, false, false, 500, 250);
                 }
@@ -605,12 +607,16 @@ bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* dr
     if (game->nextTimeout == 0) {
         if (event.startsWith("enter ")) {
             GLAnimation::createBlink(drawing, 1.0, 1.5, 500);
+#ifdef DEBUG
             CString::format(L"Нажата кнопка %ls", (wchar_t*)event).log();
+#endif
             game->context->mixer->get(L"button")->mixPlay(false, 1.0, true, false);
         } else if (event.startsWith("move ")) {
         } else if (event.startsWith("leave ")) {
         } else {
+#ifdef DEBUG
             CString::format(L"Действие по кнопке %ls", (wchar_t*)event).log();
+#endif
             if (event == L"click btn_auto") {
                 if (game->stage == STAGE_BARS) {
                     if (game->conf.points >= game->conf.bet) {
@@ -697,8 +703,10 @@ bool OMGame::onButtonEvent(GLEngine* engine, const CString& event, GLDrawing* dr
                 game->conf.bet = v;
                 game->donlistSwitch = false;
                 game->scene->visibleGroup(game->groups.donlist, game->donlistSwitch);
+#ifdef DEBUG
             } else {
                 event.log();
+#endif
             }
         }
         return true;
@@ -748,7 +756,9 @@ bool OMGame::onDoubleEvent(GLEngine* engine, const CString& event, GLDrawing* dr
     if (event.indexOf("enter ") == 0) {
         if (game->stage == STAGE_DOUBLE) {
             GLAnimation::createPingPong(drawing, 0.3, 1.0, 500);
+#ifdef DEBUG
             CString::format(L"Нажата кнопка %ls", (wchar_t*)event).log();
+#endif
             game->context->mixer->get(L"button")->mixPlay(false, 1.0, true, false);
         }
     } else if (event.indexOf("move ") == 0) {
@@ -757,7 +767,9 @@ bool OMGame::onDoubleEvent(GLEngine* engine, const CString& event, GLDrawing* dr
             GLAnimation::createLightOut(drawing, 0.3, 1.0, 500);
         }
     } else {
+#ifdef DEBUG
         CString::format(L"Действие по кнопке %ls", (wchar_t*)event).log();
+#endif
         if (event == "click dbl_sun") {
             if (game->stage == STAGE_DOUBLE) {
                 game->doubleSelect(0);
@@ -766,8 +778,10 @@ bool OMGame::onDoubleEvent(GLEngine* engine, const CString& event, GLDrawing* dr
             if (game->stage == STAGE_DOUBLE) {
                 game->doubleSelect(1);
             }
+#ifdef DEBUG
         } else {
             event.log();
+#endif
         }
     }
     return true;
@@ -876,8 +890,8 @@ void OMGame::renderButtonDonate(GLEngine* engine, GLDrawing* drawing) {
 void OMGame::renderButtonSelectDonate(GLEngine* engine, GLDrawing* drawing) {
     OMGame* game = (OMGame*)engine;
     Vec2 pos;
-    pos.x = drawing->position.x + (GLfloat)(drawing->sprite->width) / 2.0;
-    pos.y = drawing->position.y + (GLfloat)(drawing->sprite->height) / 2.0;
+    pos.x = drawing->position.x + (GLfloat)(drawing->sprite->width) / 2.0f;
+    pos.y = drawing->position.y + (GLfloat)(drawing->sprite->height) / 2.0f;
 
     GLfloat v = 0.0;
     
@@ -1032,19 +1046,19 @@ void OMGame::drawSplash(GLEngine* engine) {
         game->text_sequence->render();
         GLfloat x = 900;
         if (game->stage == STAGE_DOUBLE_SHOW) {
-            GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->doubleShowTimeout) + 3000) / 2000.0;
+            GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->doubleShowTimeout) + 3000) / 2000.0f;
             if (ofs > 1) ofs = 1;
             game->paintSpriteLeftCenter.setLight(ofs, ofs);
-            game->sequence->render( {x - 176 + ofs * 176, 178+152/2}, game->conf.dblindex, &game->paintSpriteLeftCenter );
-            game->paintSpriteLeftCenter.setLight(1.0 - ofs, 1.0 - ofs);
-            game->sequence->render( {x + 176 * 4 + ofs * 176, 178+152/2}, game->conf.sequence[0], &game->paintSpriteLeftCenter );
+            game->sequence->render( {x - 176 + ofs * 176, 178+152/2}, (GLuint)game->conf.dblindex, &game->paintSpriteLeftCenter );
+            game->paintSpriteLeftCenter.setLight(1.0f - ofs, 1.0f - ofs);
+            game->sequence->render( {x + 176 * 4 + ofs * 176, 178+152/2}, (GLuint)game->conf.sequence[0], &game->paintSpriteLeftCenter );
             game->paintSpriteLeftCenter.setLight(1.0, 1.0);
             for (int i = 0; i < 4; i++) {
-                game->sequence->render( {x + 176 * i + ofs * 176, 178+152/2}, game->conf.sequence[4-i], &game->paintSpriteLeftCenter );
+                game->sequence->render( {x + 176 * i + ofs * 176, 178+152/2}, (GLuint)game->conf.sequence[4-i], &game->paintSpriteLeftCenter );
             }
         } else {
             for (int i = 0; i < 5; i++) {
-                game->sequence->render( {x + 176 * i, 178+152/2}, game->conf.sequence[4-i], &game->paintSpriteLeftCenter );
+                game->sequence->render( {x + 176 * i, 178+152/2}, (GLuint)game->conf.sequence[4-i], &game->paintSpriteLeftCenter );
             }
         }
     }
@@ -1062,7 +1076,7 @@ void OMGame::drawEffectsTorsion(GLEngine* engine) {
     GLRender* context = game->scene->context;
     
     bool mobile = true;
-    GLfloat worldTime = (GLfloat)(currentTimeMillis() % 86400000) / 86400000.0;
+    GLfloat worldTime = (GLfloat)(currentTimeMillis() % 86400000) / 86400000.0f;
     
     if (mobile) {
         context->drawEffectMobile(960-700, 606-700, 960+700, 606+700, "q1_effect_torsion", worldTime, worldTime);
@@ -1079,13 +1093,13 @@ void OMGame::drawEffectsDouble(GLEngine* engine) {
     int index = game->conf.dblindex;
     
     uint64_t currentTime = currentTimeMillis();
-    GLfloat worldTime = (GLfloat)(currentTime % 86400000) / 86400000.0;
+    GLfloat worldTime = (GLfloat)(currentTime % 86400000) / 86400000.0f;
     
     GLfloat localTime;
     if (game->stage != STAGE_DOUBLE_HIDE) {
-        localTime = (GLfloat)(((int64_t)currentTime - (int64_t)(game->localTime)) % 86400000) / 86400000.0;
+        localTime = (GLfloat)(((int64_t)currentTime - (int64_t)(game->localTime)) % 86400000) / 86400000.0f;
     } else {
-        localTime = (GLfloat)(((int64_t)(game->localTime) - (int64_t)currentTime) % 86400000) / 86400000.0;
+        localTime = (GLfloat)(((int64_t)(game->localTime) - (int64_t)currentTime) % 86400000) / 86400000.0f;
     }
     
     if ((game->stage == STAGE_DOUBLE) || (game->stage == STAGE_DOUBLE_WAIT) || ((game->stage == STAGE_DOUBLE_TAKE) && (game->conf.doubleout != 0))) {
@@ -1105,8 +1119,8 @@ void OMGame::drawEffectsDouble(GLEngine* engine) {
             } else {
                 context->drawEffectMobile(960-320, 606-320, 960+320, 606+320, L"q1_effect_moon2", localTime, worldTime);
                 context->drawEffectMobile(220-200, 450-200, 220+200, 450+200, L"q1_effect_star1", localTime, worldTime);
-                context->drawEffectMobile(450-150, 820-150, 450+150, 820+150, L"q1_effect_star2", localTime, worldTime + 0.3/86400.0);
-                context->drawEffectMobile(1700-200, 750-200, 1700+200, 750+200, L"q1_effect_star1", localTime, worldTime + 0.6/86400.0);
+                context->drawEffectMobile(450-150, 820-150, 450+150, 820+150, L"q1_effect_star2", localTime, worldTime + 0.3f/86400.0f);
+                context->drawEffectMobile(1700-200, 750-200, 1700+200, 750+200, L"q1_effect_star1", localTime, worldTime + 0.6f/86400.0f);
             }
             
             context->drawEffectMobile(1050-120, 490-120, 1050+120, 490+120, L"q1_effect_unknown_star", localTime, worldTime);
@@ -1116,8 +1130,8 @@ void OMGame::drawEffectsDouble(GLEngine* engine) {
             } else {
                 context->drawEffect(960-320, 606-320, 960+320, 606+320, L"q0_effect_moon2", localTime, worldTime);
                 context->drawEffect(220-200, 450-200, 220+200, 450+200, L"q0_effect_star1", localTime, worldTime);
-                context->drawEffect(450-150, 820-150, 450+150, 820+150, L"q0_effect_star2", localTime, worldTime + 0.3/86400.0);
-                context->drawEffect(1700-200, 750-200, 1700+200, 750+200, L"q0_effect_star1", localTime, worldTime + 0.6/86400.0);
+                context->drawEffect(450-150, 820-150, 450+150, 820+150, L"q0_effect_star2", localTime, worldTime + 0.3f/86400.0f);
+                context->drawEffect(1700-200, 750-200, 1700+200, 750+200, L"q0_effect_star1", localTime, worldTime + 0.6f/86400.0f);
             }
             
             context->drawEffect(1050-120, 490-120, 1050+120, 490+120, L"q0_effect_unknown_star", localTime, worldTime);
@@ -1131,11 +1145,11 @@ void OMGame::drawEffectSwitch(GLEngine* engine) {
     
     if (game->nextTime != 0) {
         uint64_t currentTime = currentTimeMillis();
-        GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->nextTime)) / 500.0;
+        GLfloat ofs = (GLfloat)((int64_t)currentTime - (int64_t)(game->nextTime)) / 500.0f;
         if (ofs >= 1.0) {
             game->nextTime = 0;
         } else {
-            game->paintSwitch.setLight(0, 1.0 - clamp(fabsf(ofs), 0.0, 1.0));
+            game->paintSwitch.setLight(0, 1.0f - clamp(fabsf(ofs), 0.0f, 1.0f));
             context->drawRect(0, 0, 1920, 1080, game->paintSwitch, context->cameras->background);
         }
     }
@@ -1366,13 +1380,13 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
             serverConfig->setInt(L"ask", sync);
         
             // Сброс локального конфига
-            conf.points = grace->optDouble(L"current_deposit", 0.0);
-            conf.pointsin = grace->optDouble(L"current_in", 0.0);
-            conf.bet = state->optDouble(L"last_donate", 0.1);
+            conf.points = (GLfloat)grace->optDouble(L"current_deposit", 0.0);
+            conf.pointsin = (GLfloat)grace->optDouble(L"current_in", 0.0);
+            conf.bet = (GLfloat)state->optDouble(L"last_donate", 0.1);
             conf.prize = 0;
             conf.prizefree = 0;
             conf.total = 0;
-            conf.doublein = state->optDouble(L"last_double_in", 0.0);
+            conf.doublein = (GLfloat)state->optDouble(L"last_double_in", 0.0);
             conf.doubleout = conf.doublein * 2;
             conf.spin = 0;
             conf.free = 0;
@@ -1418,7 +1432,7 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
             CString last_double = state->optString(L"last_double", L"");
             if (last_double.m_length == 5) {
                 for (int i = 0; i < 5; i++) {
-                    conf.sequence[i] = (int)(last_double.charAt(i)) - 48;
+                    conf.sequence[i] = (int8_t)((int32_t)(last_double.charAt(i)) - 48);
                 }
             }
         
@@ -1434,14 +1448,14 @@ bool OMGame::onUpdateConfig(OMGameStage action) {
                 doubleSelect((int)state->optInt(L"last_double_index", 0), false);
             }
         } else if (action == STAGE_BARS_STOP) {
-            conf.points = grace->optDouble(L"current_deposit", 0.0);
-            conf.pointsin = grace->optDouble(L"current_in", 0.0);
-            conf.bet = state->optDouble(L"last_donate", 0.1);
+            conf.points = (GLfloat)grace->optDouble(L"current_deposit", 0.0);
+            conf.pointsin = (GLfloat)grace->optDouble(L"current_in", 0.0);
+            conf.bet = (GLfloat)state->optDouble(L"last_donate", 0.1);
         } else if (action == STAGE_DOUBLE_SHOW) {
-            conf.points = grace->optDouble(L"current_deposit", 0.0);
-            conf.pointsin = grace->optDouble(L"current_in", 0.0);
-            conf.bet = state->optDouble(L"last_donate", 0.1);
-            conf.doublein = state->optDouble(L"last_double_in", 0.0);
+            conf.points = (GLfloat)grace->optDouble(L"current_deposit", 0.0);
+            conf.pointsin = (GLfloat)grace->optDouble(L"current_in", 0.0);
+            conf.bet = (GLfloat)state->optDouble(L"last_donate", 0.1);
+            conf.doublein = (GLfloat)state->optDouble(L"last_double_in", 0.0);
             conf.doubleout = conf.doublein * 2;
         }
     
@@ -1621,7 +1635,7 @@ void OMGame::onLoad() {
         scene->ambient.set( { 0.0, 0.0, 0.0 } );
     
         GLCamera* cam = context->cameras->createCamera(L"cam");
-        cam->size(1920, 1080)->perspective(45, 0.1, 100)->lookAt( {317.207, 347.124, 1351.136}, {317.207, 347.124, -249.692}, {0,1,0} );
+        cam->size(1920, 1080)->perspective(45, 0.1f, 100)->lookAt( {317.207f, 347.124f, 1351.136f}, {317.207f, 347.124f, -249.692f}, {0,1,0} );
         scene->setCamera(cam);
     
         { // Освещение сцены
@@ -1629,8 +1643,8 @@ void OMGame::onLoad() {
              scene->lights->createLight(L"Omni001")->omni( {-554.5, 701.5, -246}, {1, 1, 1}, 0.54, 0.0, 0.0, false );
              scene->lights->createLight(L"Omni002")->omni( {1183.5, 378.5, 109.5}, {1, 1, 1}, 0.3, 0.0, 0.0, false );
              */
-            scene->lights->createLight(L"Spot001")->spot( {783.9, 359.2, 619.6}, {47.2, 256.3, -536.5}, {1, 1, 1}, 1.0, 111.7, 2.0, false );
-            scene->lights->createLight(L"Spot002")->spot( {-182, 578.2, 488}, {256.4, 352.5, -830.5}, {1, 1, 1}, 0.63, 77.2, 2.0, false );
+            scene->lights->createLight(L"Spot001")->spot( {783.9f, 359.2f, 619.6f}, {47.2f, 256.3f, -536.5f}, {1, 1, 1}, 1.0f, 111.7f, 2.0f, false );
+            scene->lights->createLight(L"Spot002")->spot( {-182.0f, 578.2f, 488.0f}, {256.4, 352.5f, -830.5f}, {1, 1, 1}, 0.63f, 77.2f, 2.0f, false );
         }
     
         Vector<GLObject*>* backLayer = scene->createLayer();
@@ -1658,32 +1672,32 @@ void OMGame::onLoad() {
         }
     
         { // Модели
-            scene->createLayerObject(modelLayer, L"ball_0")->setModel(L"ball")->objectMatrix.translate( {1.947, 620.468, -252.468} );
-            scene->createLayerObject(modelLayer, L"cap_0")->setModel(L"cap")->objectMatrix.translate( {4.12, 572.537, -249.301} );
-            scene->createLayerObject(modelLayer, L"bar_00")->setModel(L"bar")->objectMatrix.translate( {3.397, 477.718, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 180));
-            scene->createLayerObject(modelLayer, L"separator_00")->setModel(L"separator")->objectMatrix.translate( {3.049, 401.208, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_01")->setModel(L"bar")->objectMatrix.translate( {3.397, 327.124, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 90));
-            scene->createLayerObject(modelLayer, L"separator_01")->setModel(L"separator")->objectMatrix.translate( {3.049, 252.739, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_02")->setModel(L"bar")->objectMatrix.translate( {3.397, 179.488, -249.692} );
-            scene->createLayerObject(modelLayer, L"separator_02")->setModel(L"separator")->objectMatrix.translate( {3.049, 106.063, -248.473} );
+            scene->createLayerObject(modelLayer, L"ball_0")->setModel(L"ball")->objectMatrix.translate( {1.947f, 620.468f, -252.468f} );
+            scene->createLayerObject(modelLayer, L"cap_0")->setModel(L"cap")->objectMatrix.translate( {4.12f, 572.537f, -249.301f} );
+            scene->createLayerObject(modelLayer, L"bar_00")->setModel(L"bar")->objectMatrix.translate( {3.397f, 477.718f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 180));
+            scene->createLayerObject(modelLayer, L"separator_00")->setModel(L"separator")->objectMatrix.translate( {3.049f, 401.208f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_01")->setModel(L"bar")->objectMatrix.translate( {3.397f, 327.124f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 90));
+            scene->createLayerObject(modelLayer, L"separator_01")->setModel(L"separator")->objectMatrix.translate( {3.049f, 252.739f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_02")->setModel(L"bar")->objectMatrix.translate( {3.397f, 179.488f, -249.692f} );
+            scene->createLayerObject(modelLayer, L"separator_02")->setModel(L"separator")->objectMatrix.translate( {3.049f, 106.063f, -248.473f} );
         
-            scene->createLayerObject(modelLayer, L"ball_1")->setModel(L"ball")->objectMatrix.translate( {315.811, 620.468, -252.468} );
-            scene->createLayerObject(modelLayer, L"cap_1")->setModel(L"cap")->objectMatrix.translate( {317.984, 572.537, -249.301} );
-            scene->createLayerObject(modelLayer, L"bar_10")->setModel(L"bar")->objectMatrix.translate( {317.207, 477.718, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 180));
-            scene->createLayerObject(modelLayer, L"separator_10")->setModel(L"separator")->objectMatrix.translate( {316.914, 401.208, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_11")->setModel(L"bar")->objectMatrix.translate( {317.207, 327.124, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 90));
-            scene->createLayerObject(modelLayer, L"separator_11")->setModel(L"separator")->objectMatrix.translate( {316.914, 252.739, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_12")->setModel(L"bar")->objectMatrix.translate( {317.207, 179.488, -249.692} );
-            scene->createLayerObject(modelLayer, L"separator_12")->setModel(L"separator")->objectMatrix.translate( {316.914, 106.063, -248.473} );
+            scene->createLayerObject(modelLayer, L"ball_1")->setModel(L"ball")->objectMatrix.translate( {315.811f, 620.468f, -252.468f} );
+            scene->createLayerObject(modelLayer, L"cap_1")->setModel(L"cap")->objectMatrix.translate( {317.984f, 572.537f, -249.301f} );
+            scene->createLayerObject(modelLayer, L"bar_10")->setModel(L"bar")->objectMatrix.translate( {317.207f, 477.718f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 180));
+            scene->createLayerObject(modelLayer, L"separator_10")->setModel(L"separator")->objectMatrix.translate( {316.914f, 401.208f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_11")->setModel(L"bar")->objectMatrix.translate( {317.207f, 327.124f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 90));
+            scene->createLayerObject(modelLayer, L"separator_11")->setModel(L"separator")->objectMatrix.translate( {316.914f, 252.739f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_12")->setModel(L"bar")->objectMatrix.translate( {317.207f, 179.488f, -249.692f} );
+            scene->createLayerObject(modelLayer, L"separator_12")->setModel(L"separator")->objectMatrix.translate( {316.914f, 106.063f, -248.473f} );
 
-            scene->createLayerObject(modelLayer, L"ball_2")->setModel(L"ball")->objectMatrix.translate( {626.263, 620.468, -252.468} );
-            scene->createLayerObject(modelLayer, L"cap_2")->setModel(L"cap")->objectMatrix.translate( {628.436, 572.537, -249.301} );
-            scene->createLayerObject(modelLayer, L"bar_20")->setModel(L"bar")->objectMatrix.translate( {632.114, 477.718, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 180));
-            scene->createLayerObject(modelLayer, L"separator_20")->setModel(L"separator")->objectMatrix.translate( {631.676, 401.208, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_21")->setModel(L"bar")->objectMatrix.translate( {632.114, 327.124, -249.692} ).multiply(Mat4().rotate({0,-1,0}, 90));
-            scene->createLayerObject(modelLayer, L"separator_21")->setModel(L"separator")->objectMatrix.translate( {631.676, 252.739, -248.473} );
-            scene->createLayerObject(modelLayer, L"bar_22")->setModel(L"bar")->objectMatrix.translate( {632.114, 179.488, -249.692} );
-            scene->createLayerObject(modelLayer, L"separator_22")->setModel(L"separator")->objectMatrix.translate( {631.676, 106.063, -248.473} );
+            scene->createLayerObject(modelLayer, L"ball_2")->setModel(L"ball")->objectMatrix.translate( {626.263f, 620.468f, -252.468f} );
+            scene->createLayerObject(modelLayer, L"cap_2")->setModel(L"cap")->objectMatrix.translate( {628.436f, 572.537f, -249.301f} );
+            scene->createLayerObject(modelLayer, L"bar_20")->setModel(L"bar")->objectMatrix.translate( {632.114f, 477.718f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 180));
+            scene->createLayerObject(modelLayer, L"separator_20")->setModel(L"separator")->objectMatrix.translate( {631.676f, 401.208f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_21")->setModel(L"bar")->objectMatrix.translate( {632.114f, 327.124f, -249.692f} ).multiply(Mat4().rotate({0,-1,0}, 90));
+            scene->createLayerObject(modelLayer, L"separator_21")->setModel(L"separator")->objectMatrix.translate( {631.676f, 252.739f, -248.473f} );
+            scene->createLayerObject(modelLayer, L"bar_22")->setModel(L"bar")->objectMatrix.translate( {632.114f, 179.488f, -249.692f} );
+            scene->createLayerObject(modelLayer, L"separator_22")->setModel(L"separator")->objectMatrix.translate( {631.676f, 106.063f, -248.473f} );
         
             // Список 3д объектов на первом барабане
             groups.barlist1.push( scene->objects->get(L"ball_0") );
@@ -1866,8 +1880,8 @@ void OMGame::onLoad() {
                                         const JsonNode* grace = nextServerConfig->opt(L"grace");
                                         if (grace != NULL) {
                                             // При простое и ожидании обновить текущее состояние баланса
-                                            conf.points = grace->optDouble(L"current_deposit", 0.0);
-                                            conf.pointsin = grace->optDouble(L"current_in", 0.0);
+                                            conf.points = (GLfloat)grace->optDouble(L"current_deposit", 0.0);
+                                            conf.pointsin = (GLfloat)grace->optDouble(L"current_in", 0.0);
                                         }
                                     }
                                     
@@ -1887,7 +1901,9 @@ void OMGame::onLoad() {
 }
 
 void OMGame::onError(const CString& error) {
+#ifdef DEBUG
     CString::format(L"ERROR: %ls", (wchar_t*)error).log();
+#endif
     
     if (ready < 2) {
         updateState(OMVIEW_LOAD_ERROR | OMVIEW_ANIMATE);
@@ -1905,8 +1921,10 @@ void OMGame::onRetry() {
 }
 
 void OMGame::onFatal(const CString& error) {
+#ifdef DEBUG
     CString::format(L"ERROR: %ls", (wchar_t*)error).log();
-
+#endif
+    
     shutdown();
 }
 
@@ -1983,7 +2001,9 @@ void OMGame::onWebReady(int index) {
 
 void OMGame::onWebFail(int index, CString& error) {
     LOG("webFail: %d", index);
+#ifdef DEBUG
     error.log();
+#endif
 }
 
 OMGame::OMGame(const CString& token, const CString& sessid, const CString& devid, const CString& locale) {

@@ -228,7 +228,7 @@ void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const cha
 			throw eOutOfMemory;
 		}
 
-		AtomicSetPtr(&(msg->runCallback), (void*)callback);
+		AtomicSetPtr(&(msg->runCallback), callback);
 		AtomicSetPtr(&(msg->resultCallback), NULL);
 		AtomicSetPtr(&(msg->userData), userData);
 		AtomicSet(&(msg->syncCall), true);
@@ -274,8 +274,8 @@ void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultC
 		if (msg == NULL)
 			throw eOutOfMemory;
 		
-		AtomicSetPtr(&(msg->runCallback), (void*)runCallback);
-		AtomicSetPtr(&(msg->resultCallback), (void*)resultCallback);
+		AtomicSetPtr(&(msg->runCallback), runCallback);
+		AtomicSetPtr(&(msg->resultCallback), resultCallback);
 		AtomicSetPtr(&(msg->userData), userData);
 		AtomicSet(&(msg->syncCall), false);
 		AtomicSetPtr(&(msg->syncData), NULL);
@@ -296,8 +296,8 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
 	if (msg == NULL)
 		throw eOutOfMemory;
 
-	AtomicSetPtr(&(msg->runCallback), (void*)runCallback);
-	AtomicSetPtr(&(msg->resultCallback), (void*)resultCallback);
+	AtomicSetPtr(&(msg->runCallback), runCallback);
+	AtomicSetPtr(&(msg->resultCallback), resultCallback);
 	AtomicSetPtr(&(msg->userData), userData);
 	AtomicSet(&(msg->syncCall), false);
 	AtomicSetPtr(&(msg->syncData), NULL);

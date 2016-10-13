@@ -110,7 +110,7 @@ public:
         Vector<GLObject*> rocketslist;
     } groups;
     
-    jbool donlistSwitch = false;
+    bool donlistSwitch = false;
     
     GLPaint paint;
     GLPaint paintLoading;

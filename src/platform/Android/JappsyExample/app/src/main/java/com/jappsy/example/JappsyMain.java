@@ -21,7 +21,6 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.WindowManager;
 
 import com.jappsy.JappsyEngine;
 import com.jappsy.OMView;
@@ -58,11 +57,8 @@ public class JappsyMain extends Activity {
         moveTaskToBack(true);
     }
 
-    @Override public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_MENU) {
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
+        return keyCode == KeyEvent.KEYCODE_MENU || super.onKeyDown(keyCode, event);
     }
 
     @Override protected void onResume() {

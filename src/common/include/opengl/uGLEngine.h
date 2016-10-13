@@ -45,7 +45,7 @@ public:
 	Cache* cache = NULL;
 
 	GLEngine();
-	~GLEngine();
+	virtual ~GLEngine();
 	
 	void shutdown();
 	

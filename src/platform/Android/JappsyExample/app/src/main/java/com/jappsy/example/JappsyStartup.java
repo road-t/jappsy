@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.util.Log;
 
 public class JappsyStartup extends BroadcastReceiver {
@@ -54,6 +53,7 @@ public class JappsyStartup extends BroadcastReceiver {
         }
     }
 
+    @SuppressWarnings({"EmptyMethod", "UnusedParameters"})
     public static void onStartup(Context context) {
         /* EXAMPLE AUTOSTART ENABLED ON ANDROID STARTUP
             if (Config.TVBOX != false) {
@@ -67,6 +67,7 @@ public class JappsyStartup extends BroadcastReceiver {
         */
     }
 
+    @SuppressWarnings("SameReturnValue")
     public static boolean onJappsyMain(Activity activity) {
         JappsyService.startForegroundService(activity);
 

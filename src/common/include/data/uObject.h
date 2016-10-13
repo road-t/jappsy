@@ -51,7 +51,9 @@ public:
 	virtual CString toString() const;
 	virtual CString toJSON() const;
 
-	void log() const;
+#ifdef DEBUG
+	virtual void log() const;
+#endif
 };
 
 #endif //JAPPSY_UOBJECT_H

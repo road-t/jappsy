@@ -12,10 +12,10 @@
     <!-- uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" /-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
-    <!-- needed for Autostart on boot -->
+    <!-- needed for Auto-start on boot -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
-    <!-- needed for Android 4.0.x and eariler -->
+    <!-- needed for Android 4.0.x and earlier -->
     <uses-permission android:name="android.permission.READ_LOGS" />
 
     <application

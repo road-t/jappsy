@@ -20,7 +20,7 @@
 #include <net/uLoader.h>
 #include <opengl/uGLRender.h>
 
-class HTTPRequest {
+class HTTPRequest : public CObject {
 public:
 	CString url;
 	void* userData = NULL;
@@ -36,8 +36,6 @@ public:
 	HTTPClient::onRetryCallback onretry = NULL;
 	HTTPClient::onFatalCallback onfatal = NULL;
 	HTTPClient::onReleaseCallback onrelease = NULL;
-	
-	static void run(HTTPRequest* request) throw(const char*);
 };
 
 wchar_t sWeekDay[7][4] = { L"Sun", L"Mon", L"Tue", L"Wed", L"Thu", L"Fri", L"Sat" };
@@ -687,9 +685,7 @@ void* HttpSync(void* threadData) {
 
 void HTTPClient::Request(const CString& url, char* post, bool threaded, int retry, int timeout, bool cache, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onFatalCallback onfatal, onReleaseCallback onrelease) throw(const char*) {
 	HTTPRequest* http = memNew(http, HTTPRequest());
-	if (http == NULL)
-		throw eOutOfMemory;
-	
+
 	http->url = url;
 	http->threaded = threaded;
 	http->retry = retry;
@@ -698,7 +694,7 @@ void HTTPClient::Request(const CString& url, char* post, bool threaded, int retr
 	http->cache = cache;
 	http->cacheStream = NULL;
 	http->userData = userData;
-	
+
 	http->onstream = onstream;
 	http->onerror = onerror;
 	http->onretry = onretry;

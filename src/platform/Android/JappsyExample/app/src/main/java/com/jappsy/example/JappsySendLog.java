@@ -91,13 +91,13 @@ public class JappsySendLog extends Activity implements View.OnClickListener {
         startActivity(intent);
     }
 
-    public static final String extractLogToFile(Context context) {
+    public static String extractLogToFile(Context context) {
         PackageManager manager = context.getPackageManager();
         PackageInfo info = null;
         String packageName = context.getPackageName();
         try {
             info = manager.getPackageInfo(packageName, 0);
-        } catch (PackageManager.NameNotFoundException e2) {
+        } catch (PackageManager.NameNotFoundException ignored) {
         }
         String model = Build.MODEL;
         if (!model.startsWith(Build.MANUFACTURER))
@@ -107,6 +107,7 @@ public class JappsySendLog extends Activity implements View.OnClickListener {
         // the email app.
         String path = getLogPath(context);
         File filePath = new File(path);
+        //noinspection ResultOfMethodCallIgnored
         filePath.mkdirs();
 
         String fullName = path + m_sendLogFile;
@@ -146,9 +147,9 @@ public class JappsySendLog extends Activity implements View.OnClickListener {
         }
         catch (IOException e) {
             if (writer != null)
-                try { writer.close(); } catch (IOException e1) {}
+                try { writer.close(); } catch (IOException ignored) {}
             if (reader != null)
-                try { reader.close(); } catch (IOException e1) {}
+                try { reader.close(); } catch (IOException ignored) {}
 
             // You might want to write a failure message to the log here.
             return null;

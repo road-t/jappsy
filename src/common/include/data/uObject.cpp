@@ -67,6 +67,8 @@ CString CObject::toJSON() const {
 	return L"{}";
 }
 
+#ifdef DEBUG
+
 void CObject::log() const {
 	/*
 	CString json = JSON::stringify(*this);
@@ -90,3 +92,4 @@ void CObject::log() const {
 	 */
 }
 
+#endif

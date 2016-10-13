@@ -34,7 +34,7 @@ GLFrame::GLFrame(GLEngine* engine, GLRender* context, onFrameCallback callback, 
 	this->frames = memNew(this->frames, SmoothValue(10));
 	this->fps = 0;
 	
-	this->onFrame = (callback != NULL) ? callback : defaultOnFrame;
+	this->onFrame = (callback != NULL) ? callback : (onFrameCallback)defaultOnFrame;
 	this->userData = userData;
 }
 

@@ -1170,7 +1170,7 @@ public:
 			m_keys->push(key);
 			m_values->push(value);
 		} else {
-			m_values->operator[](index) = value;
+			m_values->operator[](index) = (V*)value;
 		}
 	}
 	

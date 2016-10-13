@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.util.Log;
@@ -48,9 +49,9 @@ public class JappsyService extends Service {
     private Method m_SetForeground;
     private Method m_StartForeground;
     private Method m_StopForeground;
-    private Object[] m_SetForegroundArgs = new Object[1];
-    private Object[] m_StartForegroundArgs = new Object[2];
-    private Object[] m_StopForegroundArgs = new Object[1];
+    private final Object[] m_SetForegroundArgs = new Object[1];
+    private final Object[] m_StartForegroundArgs = new Object[2];
+    private final Object[] m_StopForegroundArgs = new Object[1];
 
     @SuppressWarnings("deprecation")
     @Override public void onStart(Intent intent, int startId) {
@@ -64,7 +65,7 @@ public class JappsyService extends Service {
 
     private boolean m_started = false;
 
-    void handleCommand(Intent intent) {
+    private void handleCommand(Intent intent) {
         if (intent != null) {
             if (ACTION_FOREGROUND.equals(intent.getAction())) {
                 if (!m_started) {
@@ -72,17 +73,23 @@ public class JappsyService extends Service {
 
                     Notification.Builder builder = new Notification.Builder(this)
                             .setAutoCancel(false)
-                                    //.setTicker("this is ticker text")
+                            //.setTicker("this is ticker text")
                             .setContentTitle(getString(R.string.app_name))
-                                    //.setContentText("")
+                            //.setContentText("")
                             .setSmallIcon(R.mipmap.ic_launcher)
                             .setContentIntent(contentIntent)
                             .setOngoing(true);
-                                    //.setSubText("This is subtext...")   //API level 16
-                                    //.setNumber(100)
-                                    //.build();
+                    //.setSubText("This is subtext...")   //API level 16
+                    //.setNumber(100)
+                    //.build();
 
-                    Notification notification = builder.getNotification();
+                    Notification notification;
+                    if (Build.VERSION.SDK_INT < 16) {
+                        //noinspection deprecation
+                        notification = builder.getNotification();
+                    } else {
+                        notification = builder.build();
+                    }
 
                     startForegroundCompat(SERVICE_NOTIFICATION_ID, notification);
                     JappsyStartup.onStartup(this);
@@ -95,7 +102,7 @@ public class JappsyService extends Service {
         }
     }
 
-    void startForegroundCompat(int id, Notification notification) {
+    private void startForegroundCompat(int id, Notification notification) {
         if (m_StartForeground != null) {
             m_StartForegroundArgs[0] = id;//Integer.valueOf(id);
             m_StartForegroundArgs[1] = notification;
@@ -108,7 +115,7 @@ public class JappsyService extends Service {
         m_NM.notify(id, notification);
     }
 
-    void stopForegroundCompat(int id) {
+    private void stopForegroundCompat(int id) {
         if (m_StopForeground != null) {
             m_StopForegroundArgs[0] = Boolean.TRUE;
             invokeMethod(m_StopForeground, m_StopForegroundArgs);
@@ -120,7 +127,8 @@ public class JappsyService extends Service {
         invokeMethod(m_SetForeground, m_SetForegroundArgs);
     }
 
-    void invokeMethod(Method method, Object[] args) {
+    private void invokeMethod(Method method, Object[] args) {
+        //noinspection TryWithIdenticalCatches
         try {
             method.invoke(this, args);
         } catch (InvocationTargetException e) {
@@ -132,7 +140,6 @@ public class JappsyService extends Service {
 
     private ConditionVariable m_ConditionStop;
     private ConditionVariable m_ConditionStoped;
-    private Thread m_serviceThread;
 
     private BroadcastReceiver m_receiver;
 
@@ -161,7 +168,7 @@ public class JappsyService extends Service {
 
         m_ConditionStop = new ConditionVariable(false);
         m_ConditionStoped = new ConditionVariable(false);
-        m_serviceThread = new Thread(m_Task);
+        Thread m_serviceThread = new Thread(m_Task);
         m_serviceThread.start();
     }
 
@@ -242,19 +249,21 @@ public class JappsyService extends Service {
         context.startService(intent);
     }
 
+    @SuppressWarnings("unused")
     public static void startBackgroundService(Context context) {
         Intent intent = new Intent(JappsyService.ACTION_BACKGROUND);
         intent.setClass(context, JappsyService.class);
         context.startService(intent);
     }
 
+    @SuppressWarnings("unused")
     public static void stopService(Context context) {
         context.stopService(new Intent(context, JappsyService.class));
     }
 
     /**********************************/
 
-    private Runnable m_Task = new Runnable() {
+    private final Runnable m_Task = new Runnable() {
         public void run() {
             Log.d(TAG, "Thread Begin");
             while (true) {

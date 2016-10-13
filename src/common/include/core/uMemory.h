@@ -30,17 +30,17 @@
 extern "C" {
 #endif
 
-void* mmalloc(uint32_t dwSize);
+void* mmalloc(size_t dwSize);
 #define mmcalloc(dwSize, dwCount)	mmalloc((dwSize) * (dwCount))
-void* mmrealloc(void* mem, uint32_t dwSize);
+void* mmrealloc(void* mem, size_t dwSize);
 void mmfree(void* mem);
 
-void atomic_bzero(void* dst, uint32_t size);
-void atomic_memset(void* dst, uint8_t val, uint32_t size);
-void atomic_memread(void* dst, const void* src, uint32_t size);
-void atomic_memwrite(void* dst, const void* src, uint32_t size);
-void atomic_memcpy(void* dst, const void* src, uint32_t size);
-void atomic_memmove(void* dst, const void* src, uint32_t size);
+void atomic_bzero(void* dst, size_t size);
+void atomic_memset(void* dst, uint8_t val, size_t size);
+void atomic_memread(void* dst, const void* src, size_t size);
+void atomic_memwrite(void* dst, const void* src, size_t size);
+void atomic_memcpy(void* dst, const void* src, size_t size);
+void atomic_memmove(void* dst, const void* src, size_t size);
 
 uint64_t mmStats(uint32_t* stats, int count);
 void mmCleanup();
@@ -48,14 +48,13 @@ void mmCleanup();
 void mmInit();
 void mmQuit();
 
-
 #ifdef DEBUG
-    void memLogAlloc(const char* location, const char* type, const char* var, const void* ptr, uint32_t size);
-    void memLogRealloc(const char* location, const char* type, const char* varNew, const void* ptrNew, const char* varOld, const void* ptrOld, uint32_t sizeNew);
+    void memLogAlloc(const char* location, const char* type, const char* var, const void* ptr, size_t size);
+    void memLogRealloc(const char* location, const char* type, const char* varNew, const void* ptrNew, const char* varOld, const void* ptrOld, size_t sizeNew);
     void memLogFree(const char* var, const void* ptr);
-    void memLogNew(const char* location, const char* var, const char* type, const void* ptr, uint32_t size);
+    void memLogNew(const char* location, const char* var, const char* type, const void* ptr, size_t size);
     void memLogDelete(const char* var, const void* ptr);
-    void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uint32_t* size);
+    void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, size_t* size);
     void memLogCallFunction(const char* location);
     void memLogRetFunction();
 #endif

@@ -16,138 +16,201 @@
 
 #include "uMemory.h"
 #include <core/uAtomic.h>
-#include <cipher/uCrc.h>
+
+#if MM_VIRTUAL != 0
+	#include <cipher/uCrc.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 	
-	void atomic_bzero(void* dst, uint32_t size) {
+	void atomic_bzero(void* dst, size_t size) {
 		if ((dst == NULL) || (size == 0))
 			return;
 		
 		uint8_t* buf = (uint8_t*)dst;
 #if defined(__X64__)
-		uint32_t aligned = size >> 3; size &= 7;
+		size_t aligned = size >> 3; size &= 7;
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint64_t*)buf, 0, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint64_t*)buf, 0);
+#endif
 			buf += 8;
 		}
 #else
-		uint32_t aligned = size >> 2; size &= 3;
+		size_t aligned = size >> 2; size &= 3;
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint32_t*)buf, 0, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint32_t*)buf, 0);
+#endif
 			buf += 4;
 		}
 #endif
 		while (size-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n(buf, 0, __ATOMIC_RELEASE);
+#else
+			AtomicSet(buf, 0);
+#endif
 			buf++;
 		}
 	}
 	
-	void atomic_memset(void* dst, uint8_t val, uint32_t size) {
+	void atomic_memset(void* dst, uint8_t val, size_t size) {
 		if ((dst == NULL) || (size == 0))
 			return;
 		
 		uint8_t* buf = (uint8_t*)dst;
 #if defined(__X64__)
-		uint32_t aligned = size >> 3; size &= 7;
+		size_t aligned = size >> 3; size &= 7;
 		uint64_t value = ((uint32_t)val << 24) | ((uint32_t)val << 16) | ((uint32_t)val << 8) | (uint32_t)val; value |= (value << 32);
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint64_t*)buf, value, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint64_t*)buf, value);
+#endif
 			buf += 8;
 		}
 #else
-		uint32_t aligned = size >> 2; size &= 3;
+		size_t aligned = size >> 2; size &= 3;
 		uint32_t value = ((uint32_t)val << 24) | ((uint32_t)val << 16) | ((uint32_t)val << 8) | (uint32_t)val;
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint32_t*)buf, value, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint32_t*)buf, value);
+#endif
 			buf += 4;
 		}
 #endif
 		while (size-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n(buf, val, __ATOMIC_RELEASE);
+#else
+			AtomicSet(buf, val);
+#endif
 			buf++;
 		}
 	}
 	
-	void atomic_memread(void* dst, const void* src, uint32_t size) {
+	void atomic_memread(void* dst, const void* src, size_t size) {
 		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
 			return;
 		
 		uint8_t* target = (uint8_t*)dst;
 		uint8_t* source = (uint8_t*)src;
 #if defined(__X64__)
-		uint32_t aligned = size >> 3; size &= 7;
+		size_t aligned = size >> 3; size &= 7;
 		while (aligned-- > 0) {
+#if defined(__atomic_load)
 			__atomic_load((uint64_t*)source, (uint64_t*)target, __ATOMIC_ACQUIRE);
+#else
+			*(uint64_t*)target = AtomicGet((uint64_t*)source);
+#endif
 			target += 8; source += 8;
 		}
 #else
-		uint32_t aligned = size >> 2; size &= 3;
+		size_t aligned = size >> 2; size &= 3;
 		while (aligned-- > 0) {
+#if defined(__atomic_load)
 			__atomic_load((uint32_t*)source, (uint32_t*)target, __ATOMIC_ACQUIRE);
+#else
+			*(uint32_t*)target = AtomicGet((uint32_t*)source);
+#endif
 			target += 4; source += 4;
 		}
 #endif
 		while (size-- > 0) {
+#if defined(__atomic_load)
 			__atomic_load(source, target, __ATOMIC_ACQUIRE);
+#else
+			*target = AtomicGet(source);
+#endif
 			target++; source++;
 		}
 	}
 	
-	void atomic_memwrite(void* dst, const void* src, uint32_t size) {
+	void atomic_memwrite(void* dst, const void* src, size_t size) {
 		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
 			return;
 		
 		uint8_t* target = (uint8_t*)dst;
 		uint8_t* source = (uint8_t*)src;
 #if defined(__X64__)
-		uint32_t aligned = size >> 3; size &= 7;
+		size_t aligned = size >> 3; size &= 7;
 		while (aligned-- > 0) {
+#if defined(__atomic_store)
 			__atomic_store((uint64_t*)target, (uint64_t*)source, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint64_t*)target, *(uint64_t*)source);
+#endif
 			target += 8; source += 8;
 		}
 #else
-		uint32_t aligned = size >> 2; size &= 3;
+		size_t aligned = size >> 2; size &= 3;
 		while (aligned-- > 0) {
+#if defined(__atomic_store)
 			__atomic_store((uint32_t*)target, (uint32_t*)source, __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint32_t*)target, *(uint32_t*)source);
+#endif
 			target += 4; source += 4;
 		}
 #endif
 		while (size-- > 0) {
+#if defined(__atomic_store)
 			__atomic_store(target, source, __ATOMIC_RELEASE);
+#else
+			AtomicSet(target, *source);
+#endif
 			target++; source++;
 		}
 	}
 	
-	void atomic_memcpy(void* dst, const void* src, uint32_t size) {
+	void atomic_memcpy(void* dst, const void* src, size_t size) {
 		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
 			return;
 		
 		uint8_t* target = (uint8_t*)dst;
 		uint8_t* source = (uint8_t*)src;
 #if defined(__X64__)
-		uint32_t aligned = size >> 3; size &= 7;
+		size_t aligned = size >> 3; size &= 7;
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint64_t*)target, AtomicGet((uint64_t*)source));
+#endif
 			target += 8; source += 8;
 		}
 #else
-		uint32_t aligned = size >> 2; size &= 3;
+		size_t aligned = size >> 2; size &= 3;
 		while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+			AtomicSet((uint32_t*)target, AtomicGet((uint32_t*)source));
+#endif
 			target += 4; source += 4;
 		}
 #endif
 		while (size-- > 0) {
+#if defined(__atomic_store_n)
 			__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+			AtomicSet(target, AtomicGet(source));
+#endif
 			target++; source++;
 		}
 	}
 	
-	void atomic_memmove(void* dst, const void* src, uint32_t size) {
+	void atomic_memmove(void* dst, const void* src, size_t size) {
 		if ((dst == NULL) || (src == NULL) || (dst == src) || (size == 0))
 			return;
 		
@@ -156,40 +219,64 @@ extern "C" {
 		
 		if (((intptr_t)target < (intptr_t)source) || ((intptr_t)(source + size) <= (intptr_t)target)) {
 #if defined(__X64__)
-			uint32_t aligned = size >> 3; size &= 7;
+			size_t aligned = size >> 3; size &= 7;
 			while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 				__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet((uint64_t*)target, AtomicGet((uint64_t*)source));
+#endif
 				target += 8; source += 8;
 			}
 #else
-			uint32_t aligned = size >> 2; size &= 3;
+			size_t aligned = size >> 2; size &= 3;
 			while (aligned-- > 0) {
+#if defined(__atomic_store_n)
 				__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet((uint32_t*)target, AtomicGet((uint32_t*)source));
+#endif
 				target += 4; source += 4;
 			}
 #endif
 			while (size-- > 0) {
+#if defined(__atomic_store_n)
 				__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet(target, AtomicGet(source));
+#endif
 				target++; source++;
 			}
 		} else {
 			target += size; source += size;
 #if defined(__X64__)
-			uint32_t aligned = size >> 3; size &= 7;
+			size_t aligned = size >> 3; size &= 7;
 			while (aligned-- > 0) {
 				target -= 8; source -= 8;
+#if defined(__atomic_store_n)
 				__atomic_store_n((uint64_t*)target, __atomic_load_n((uint64_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet((uint64_t*)target, AtomicGet((uint64_t*)source));
+#endif
 			}
 #else
-			uint32_t aligned = size >> 2; size &= 3;
+			size_t aligned = size >> 2; size &= 3;
 			while (aligned-- > 0) {
 				target -= 4; source -= 4;
+#if defined(__atomic_store_n)
 				__atomic_store_n((uint32_t*)target, __atomic_load_n((uint32_t*)source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet((uint32_t*)target, AtomicGet((uint32_t*)source));
+#endif
 			}
 #endif
 			while (size-- > 0) {
 				target--; source--;
+#if defined(__atomic_store_n)
 				__atomic_store_n(target, __atomic_load_n(source, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+#else
+				AtomicSet(target, AtomicGet(source));
+#endif
 			}
 		}
 	}
@@ -198,7 +285,7 @@ extern "C" {
 	static volatile int32_t memAllocCount = 0;
 	static volatile int32_t memNewCount = 0;
 #if MEMORY_LOG == 1
-	static volatile int32_t memSize = 0;
+	static volatile size_t memSize = 0;
 #endif
 	
 	struct MemLogElement {
@@ -258,7 +345,7 @@ volatile bool mmLock = false;
 struct MM_STACK_ITEM* mmVirtual[MM_STACK_MAX];
 struct MM_STACK_ITEM* mmUnused;
 
-static inline uint32_t mmGetIndex(uint32_t mmsize) {
+static inline uint32_t mmGetIndex(size_t mmsize) {
     uint32_t idx = 0;
 
     while (mmsize > 0) {
@@ -293,7 +380,7 @@ uint64_t mmStats(uint32_t* stats, int count) {
     return res;
 }
 
-void* mmVirtualAlloc(uint32_t mmsize) {
+void* mmVirtualAlloc(size_t mmsize) {
     if (mmsize == 0)
         return 0;
 
@@ -424,7 +511,7 @@ void* mmvalloc(uint32_t dwSize) {
     return 0;
 }
 #elif MM_VIRTUAL != 0
-void* mmvalloc(uint32_t dwSize) {
+void* mmvalloc(size_t dwSize) {
     if (dwSize == 0)
         return 0;
 
@@ -443,7 +530,7 @@ void* mmvalloc(uint32_t dwSize) {
     }
 
     if (ptr != 0) {
-        *ptr = dwSize;
+        *ptr = (uint32_t)dwSize;
         *(ptr+1) = mmcrc32(0xFFFFFFFF, ptr, 4);
         return ptr+2;
     } else {
@@ -462,7 +549,7 @@ void* mmvalloc(uint32_t dwSize) {
 
 static volatile int32_t mmInitCounter = 0;
 
-void* mmalloc(uint32_t dwSize) {
+void* mmalloc(size_t dwSize) {
 #if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
 	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0)
 		return malloc(dwSize);
@@ -481,7 +568,7 @@ void* mmalloc(uint32_t dwSize) {
 #endif
 }
 
-void* mmrealloc(void* mem, uint32_t dwSize) {
+void* mmrealloc(void* mem, size_t dwSize) {
 #if defined(__WINNT__) && (defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT))
 	if (AtomicCompareExchange(&mmInitCounter, 0, 0) == 0) {
 		if (mem == 0) {
@@ -590,13 +677,13 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
         }
         return 0;
     }
-    uint32_t len = prevSize;
+	size_t len = prevSize;
     if (len > dwSize) len = dwSize;
     if (prevSize < 2048) {
         if (dwSize < 2048) {
             uint32_t* nmem = (uint32_t*)realloc(ptr, dwSize + 8);
             if (nmem != 0) {
-                *nmem = dwSize;
+                *nmem = (uint32_t)dwSize;
                 *(nmem+1) = mmcrc32(0xFFFFFFFF, nmem, 4);
                 return nmem+2;
             }
@@ -604,7 +691,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
             uint32_t* nmem = (uint32_t*)mmVirtualAlloc(dwSize + 8);
             if (nmem != 0) {
                 memcpy(nmem+2, mem, len);
-                *nmem = dwSize;
+                *nmem = (uint32_t)dwSize;
                 *(nmem+1) = mmcrc32(0xFFFFFFFF, nmem, 4);
                 free(ptr);
                 return nmem+2;
@@ -619,7 +706,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
             uint32_t* nmem = (uint32_t*)malloc(dwSize + 8);
             if (nmem != 0) {
                 memcpy(nmem+2, mem, len);
-                *nmem = dwSize;
+                *nmem = (uint32_t)dwSize;
                 *(nmem+1) = mmcrc32(0xFFFFFFFF, nmem, 4);
                 mmVirtualFree(ptr);
                 return nmem+2;
@@ -635,7 +722,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
             }
 #else
             if (mmGetIndex(prevSize + 8) == mmGetIndex(dwSize + 8)) {
-                *ptr = dwSize;
+                *ptr = (uint32_t)dwSize;
                 *(ptr+1) = mmcrc32(0xFFFFFFFF, ptr, 4);
                 return mem;
             }
@@ -643,7 +730,7 @@ void* mmrealloc(void* mem, uint32_t dwSize) {
             uint32_t* nmem = (uint32_t*)mmVirtualAlloc(dwSize + 8);
             if (nmem != 0) {
                 memcpy(nmem+2, mem, len);
-                *nmem = dwSize;
+                *nmem = (uint32_t)dwSize;
                 *(nmem+1) = mmcrc32(0xFFFFFFFF, nmem, 4);
                 mmVirtualFree(ptr);
                 return nmem+2;
@@ -794,7 +881,7 @@ void memLogCallFunction(const char* location) {
     memLock();
 	int32_t index;
 	if ((index = AtomicIncrement(&memLogCallStackCount)) < memLogMaxCallStackSize) {
-		int32_t len = strlen(location);
+		size_t len = strlen(location);
 		atomic_memwrite((char*)memLogCallStack[index], location, len + 1);
 	}
     memUnlock();
@@ -809,7 +896,7 @@ void memLogRetFunction() {
 #endif
 }
 
-void memAdd(const char* location, const char* type, const char* var, const void* ptr, uint32_t size, jbool isnew) {
+void memAdd(const char* location, const char* type, const char* var, const void* ptr, size_t size, jbool isnew) {
 #if MEMORY_LOG == 1
     memLock();
     struct MemLogElement* el = 0;
@@ -947,7 +1034,7 @@ void memLogSort() {
 #endif
 }
 
-void memLogAlloc(const char* location, const char* type, const char* var, const void* ptr, uint32_t size) {
+void memLogAlloc(const char* location, const char* type, const char* var, const void* ptr, size_t size) {
     if (size == 0)
         return;
 
@@ -956,7 +1043,7 @@ void memLogAlloc(const char* location, const char* type, const char* var, const 
     (void)AtomicIncrement(&memAllocCount);
 }
 
-void memLogRealloc(const char* location, const char* type, const char* varNew, const void* ptrNew, const char* varOld, const void* ptrOld, uint32_t sizeNew) {
+void memLogRealloc(const char* location, const char* type, const char* varNew, const void* ptrNew, const char* varOld, const void* ptrOld, size_t sizeNew) {
     if (sizeNew == 0) {
         memDel(varOld,ptrOld,false);
         (void)AtomicDecrement(&memCount);
@@ -979,7 +1066,7 @@ void memLogFree(const char* var, const void* ptr) {
     (void)AtomicDecrement(&memAllocCount);
 }
 
-void memLogNew(const char* location, const char* var, const char* type, const void* ptr, uint32_t size) {
+void memLogNew(const char* location, const char* var, const char* type, const void* ptr, size_t size) {
     memAdd(location,type,var,ptr,size,true);
     (void)AtomicIncrement(&memCount);
     (void)AtomicIncrement(&memNewCount);
@@ -991,7 +1078,7 @@ void memLogDelete(const char* var, const void* ptr) {
     (void)AtomicDecrement(&memNewCount);
 }
 
-void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uint32_t* size) {
+void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, size_t* size) {
 #if MEMORY_LOG == 1
 	memLock();
 	
@@ -1043,9 +1130,10 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
     printf("%s", buf);
 #endif
 
+	int i = 0;
+#if defined(MM_CHECK_LEFT) || defined(MM_CHECK_RIGHT) || (MM_VIRTUAL != 0)
     uint32_t stats[20];
     uint64_t locked = mmStats(stats, 20);
-    int i = 0;
     for (; i < 20; i++) {
         uint32_t blockSize = (uint32_t)1 << i;
         if (stats[i] > 0) {
@@ -1079,7 +1167,7 @@ void memLogStats(uint32_t* count, uint32_t* mallocCount, uint32_t* newCount, uin
 #else
     printf("%s", buf);
 #endif
-
+#endif
 	__sync_synchronize();
     for (i = 0; i < memCount; i++) {
         struct MemLogElement* item = (struct MemLogElement*)&(memLogElements[i]);

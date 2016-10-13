@@ -137,24 +137,8 @@
 	#define AtomicLockTry(ptr) (__sync_lock_test_and_set(ptr, 1) == 0)
     #define AtomicUnlock(ptr) __sync_lock_release(ptr)
     #define AtomicGet(ptr) __sync_val_compare_and_swap(ptr, 0, 0)
-
-	#if !defined(AtomicExchange)
-		#define AtomicExchange AtomicExchange_Inline
-
-		static inline int32_t AtomicExchange_Inline(volatile int32_t* ptr, int32_t val) {
-			int32_t old_val;
-			do {
-				old_val = *ptr;
-			}
-			while (__sync_val_compare_and_swap(ptr, old_val, val) != old_val);
-			return old_val;
-		}
-	#endif
-
-	#if !defined(AtomicSet)
-		#define AtomicSet AtomicExchange
-	#endif
-
+	#define AtomicExchange(ptr, val) __sync_lock_test_and_set(ptr, val)
+	#define AtomicSet(ptr, val) __sync_lock_test_and_set(ptr, val)
 	#define AtomicCompareExchange(ptr, val, compare) __sync_val_compare_and_swap(ptr, compare, val)
 
     #define AtomicAdd(ptr, val) __sync_fetch_and_add(ptr, val)
@@ -185,24 +169,8 @@
 	#endif
 
 	#define AtomicGetPtr(ptr) __sync_val_compare_and_swap(ptr, NULL, NULL)
-
-	#if !defined(AtomicExchangePtr)
-		#define AtomicExchangePtr(ptr, val) AtomicExchangePtr_Inline((void* volatile *)(ptr), val)
-
-		static inline void* AtomicExchangePtr_Inline(void* volatile *ptr, void* val) {
-			void* old_val;
-			do {
-				old_val = *ptr;
-			}
-			while (__sync_val_compare_and_swap(ptr, old_val, val) != old_val);
-			return old_val;
-		}
-	#endif
-
-	#if !defined(AtomicSetPtr)
-		#define AtomicSetPtr AtomicExchangePtr
-	#endif
-
+	#define AtomicExchangePtr(ptr, val) __sync_lock_test_and_set(ptr, val)
+	#define AtomicSetPtr(ptr, val) __sync_lock_test_and_set(ptr, val)
 	#define AtomicCompareExchangePtr(ptr, val, compare) __sync_val_compare_and_swap(ptr, compare, val)
 
 #endif

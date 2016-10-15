@@ -25,11 +25,11 @@ CString* jappsyCacheDir = NULL;
 extern "C" {
 #endif
 
-void jappsyInit(const char* cacheDir) {
+void jappsyInit(const char* cacheDir, void* system) {
     LOG("Jappsy Init > Cache %s", cacheDir);
 
     mmInit();
-    uSystemInit();
+    uSystemInit(system);
     jappsyCacheDir = new CString(cacheDir);
 #ifdef __IOS__
 	initAudioPlayer();

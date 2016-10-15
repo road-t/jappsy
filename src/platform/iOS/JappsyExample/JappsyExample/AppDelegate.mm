@@ -37,7 +37,7 @@ OMView *omView = NULL;
 	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
 	NSString *cacheDirectory = [paths objectAtIndex:0];
 
-	jappsyInit(cacheDirectory.UTF8String);
+	jappsyInit(cacheDirectory.UTF8String, NULL);
 	
     return YES;
 }

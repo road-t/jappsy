@@ -3003,6 +3003,32 @@ void CString::log() const {
 
 #endif
 
+#if defined(__JNI__)
+
+jstring CString::toJString(JNIEnv* env) {
+	wchar_t* wstr = (wchar_t*)m_data;
+	if (wstr == NULL)
+		return NULL;
+
+	uint32_t size = wcs_toutf8_size(wstr);
+	if (size == 0)
+		return NULL;
+
+	char* str = memAlloc(char, str, size);
+	if (str == NULL)
+		return NULL;
+
+	wcs_toutf8(wstr, str, size);
+
+	jstring result = env->NewStringUTF(str);
+
+	memFree(str);
+
+	return result;
+}
+
+#endif
+
 //==============================================================
 
 void uStringInit() {

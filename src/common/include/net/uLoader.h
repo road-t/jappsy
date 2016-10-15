@@ -135,6 +135,7 @@ private:
 	CString cacheid;
 	
 	void checkUpdate(int time);
+	static void* onUpdateWait(void* data);
 	static void* onUpdate(void* data);
 	void update();
 	void run();

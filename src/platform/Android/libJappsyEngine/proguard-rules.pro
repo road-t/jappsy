@@ -21,3 +21,6 @@
     public static int v(...);
     public static int d(...);
 }
+
+-keep public class com.jappsy.net.HTTPClient
+-keep public class com.jappsy.net.HTTPResponse

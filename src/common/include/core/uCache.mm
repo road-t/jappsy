@@ -18,6 +18,7 @@
 #include <jappsy.h>
 
 #if defined(__IOS__)
+
 #import <mach/mach.h>
 
 #ifdef __cplusplus
@@ -25,20 +26,48 @@ extern "C" {
 #endif
 
 	Stream* NSDataToStream(NSData* data) throw(const char*) {
-	NSUInteger size = [data length];
-	uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
-	if (streamptr != NULL) {
-		memcpy(streamptr, [data bytes], size);
-		*((wchar_t*)(streamptr + size)) = L'\0';
-		try {
-			return new Stream(streamptr, size, true);
-		} catch (...) {
-			memFree(streamptr);
-			throw;
-		}
-	} else
-		throw eOutOfMemory;
+		NSUInteger size = [data length];
+		uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
+		if (streamptr != NULL) {
+			memcpy(streamptr, [data bytes], size);
+			*((wchar_t*)(streamptr + size)) = L'\0';
+			try {
+				return new Stream(streamptr, size, true);
+			} catch (...) {
+				memFree(streamptr);
+				throw;
+			}
+		} else
+			throw eOutOfMemory;
+	}
+
+#ifdef __cplusplus
 }
+#endif
+
+#elif defined(__JNI__)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	Stream* jbyteArrayToStream(JNIEnv* env, jbyteArray data) throw(const char*) {
+		jsize size = data == NULL ? 0 : env->GetArrayLength(data);
+		uint8_t* streamptr = memAlloc(uint8_t, streamptr, size + sizeof(wchar_t));
+		if (streamptr != NULL) {
+			if (data != NULL) {
+				env->GetByteArrayRegion(data, 0, size, (jbyte *)streamptr);
+			}
+			*((wchar_t*)(streamptr + size)) = L'\0';
+			try {
+				return new Stream(streamptr, (uint32_t)size, true);
+			} catch (...) {
+				memFree(streamptr);
+				throw;
+			}
+		} else
+			throw eOutOfMemory;
+	}
 
 #ifdef __cplusplus
 }
@@ -91,6 +120,7 @@ uint64_t Cache::getFreeMemory() {
 
 #if defined(__JNI__)
 	#include <sys/stat.h>
+	#include <fts.h>
 #endif
 
 bool Cache::mkdirs(const CString& createPath) {
@@ -190,7 +220,87 @@ void Cache::deleteRecursive(const CString& directory) {
 		}
 	}
 #elif defined(__JNI__)
-	#warning TODO
+	wchar_t* wstr = (wchar_t*)directory;
+
+	uint32_t size = wcs_toutf8_size(wstr);
+	if (size == 0)
+		return;
+
+	char* str = (char*)mmalloc(size);
+	if (str == NULL)
+		throw eOutOfMemory;
+
+	wcs_toutf8(wstr, str, size);
+
+	size_t len = size - 1;
+	if (len == 0) {
+		mmfree(str);
+		return;
+	}
+
+	if (str[len - 1] == '/')
+		str[len - 1] = '\0';
+
+	LOG("rmdir %s", str);
+
+	FTS *ftsp = NULL;
+	FTSENT *curr;
+
+	char *files[] = { (char *) str, NULL };
+
+	// FTS_NOCHDIR  - Avoid changing cwd, which could cause unexpected behavior
+	//                in multithreaded programs
+	// FTS_PHYSICAL - Don't follow symlinks. Prevents deletion of files outside
+	//                of the specified directory
+	// FTS_XDEV     - Don't cross filesystem boundaries
+	ftsp = fts_open(files, FTS_NOCHDIR | FTS_PHYSICAL | FTS_XDEV, NULL);
+	if (!ftsp) {
+		LOG("%s: fts_open failed: %s", str, strerror(errno));
+		goto deleteRecursive_finish;
+	}
+
+	while ((curr = fts_read(ftsp))) {
+		switch (curr->fts_info) {
+			case FTS_NS:
+			case FTS_DNR:
+			case FTS_ERR:
+				LOG("%s: fts_read error: %s", curr->fts_accpath, strerror(curr->fts_errno));
+				break;
+
+			case FTS_DC:
+			case FTS_DOT:
+			case FTS_NSOK:
+				// Not reached unless FTS_LOGICAL, FTS_SEEDOT, or FTS_NOSTAT were
+				// passed to fts_open()
+				break;
+
+			case FTS_D:
+				// Do nothing. Need depth-first search, so directories are deleted
+				// in FTS_DP
+				break;
+
+			case FTS_DP:
+			case FTS_F:
+			case FTS_SL:
+			case FTS_SLNONE:
+			case FTS_DEFAULT:
+				if (remove(curr->fts_accpath) < 0) {
+					LOG("%s: failed to remove: %s",	curr->fts_path, strerror(errno));
+				} else {
+					LOG("%s: remove", curr->fts_accpath);
+				}
+				break;
+
+			default:;
+		}
+	}
+
+deleteRecursive_finish:
+	if (ftsp) {
+		fts_close(ftsp);
+	}
+
+	mmfree(str);
 #else
 	#error Unsupported platform!
 #endif
@@ -235,7 +345,14 @@ void Cache::addData(const CString& path, const CString& file, Stream* data) {
 	
 	AtomicUnlock(&m_DiskCacheLock);
 #elif defined(__JNI__)
+	AtomicLock(&m_DiskCacheLock);
+
 	#warning TODO
+
+	CString fileDir = m_dataCacheDir; fileDir.concat(path);
+	CString::format(L"Cache::addData(%ls) fileDir: %ls", (wchar_t*)path, (wchar_t*)fileDir).log();
+
+	AtomicUnlock(&m_DiskCacheLock);
 #else
 	#error Unsupported platform!
 #endif

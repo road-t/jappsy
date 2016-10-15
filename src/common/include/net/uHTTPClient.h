@@ -33,4 +33,7 @@ public:
 	static void Request(const CString& url, char* post, bool threaded, int retry, int timeout, bool cache, void* userData, onStreamCallback onstream, onErrorCallback onerror, onRetryCallback onretry, onFatalCallback onfatal, onReleaseCallback onrelease) throw(const char*);
 };
 
+void uHTTPClientInit();
+void uHTTPClientQuit();
+
 #endif //JAPPSY_UHTTPCLIENT_H

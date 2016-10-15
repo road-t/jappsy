@@ -30,7 +30,7 @@ extern "C" {
 
 JNIEXPORT jlong JNICALL
 Java_com_jappsy_OMEngine_onCreate(JNIEnv *env, jclass type) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onCreate");
+	LOG("onCreate");
 
 	try {
 		OMGame *engine = new OMGame(

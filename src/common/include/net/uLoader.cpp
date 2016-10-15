@@ -106,16 +106,23 @@ void Loader::checkUpdate(int time) {
 			
 			threadData->loader = this;
 			threadData->time = time;
-			NewThreadAsync(onUpdate, NULL, threadData);
+			NewThreadAsync(onUpdateWait, NULL, threadData);
 		}
 	}
 	unlock();
 }
 
+void* Loader::onUpdateWait(void* data) {
+	struct LoaderUpdateWaitData* threadData = (struct LoaderUpdateWaitData*)data;
+	systemSleep(AtomicGet(&(threadData->time)));
+	OpenGLThreadAsync(onUpdate, NULL, threadData);
+
+	return NULL;
+}
+
 void* Loader::onUpdate(void* data) {
 	struct LoaderUpdateWaitData* threadData = (struct LoaderUpdateWaitData*)data;
 	Loader* loader = (Loader*)AtomicGetPtr(&(threadData->loader));
-	systemSleep(AtomicGet(&(threadData->time)));
 	memFree(threadData);
 	
 	loader->update();
@@ -199,6 +206,7 @@ void Loader::update() {
 		} else {
 			unlock();
 			if (onready != NULL) {
+				LOG("Loader::onReady");
 				try {
 					(void)MainThreadSync(onready, userData);
 				} catch (const char* e) {
@@ -250,6 +258,9 @@ void Loader::onjson_subfile(struct JsonContext* ctx, const char* key, const char
 		if (!loader->subgroup.startsWith(L"disable/") && (strstr(key, "disable/") == NULL)) {
 			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), key, loader->subgroup, true);
 			loader->list.push(info);
+#ifdef DEBUG
+			CString::format(L"Load: %ls", (wchar_t*)(info->uri)).log();
+#endif
 			AtomicIncrement(&(loader->status.total));
 		}
 	} catch (...) {
@@ -306,6 +317,9 @@ void* Loader::loadThread(void* userData) {
 			uri->absolutePath((wchar_t*)(thread->loader->basePath));
 		
 			Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), thread->key, thread->group, true);
+#ifdef DEBUG
+			CString::format(L"Load: %ls", (wchar_t*)(info->uri)).log();
+#endif
 			info->onload = thread->onload;
 			info->onerror = thread->onerror;
 			info->userData = thread->userData;
@@ -362,6 +376,9 @@ void Loader::query(const CString& path, const CString& message, File::onQueryCal
 		}
 	
 		Loader::File* info = new Loader::File(uri->path(), uri->file(), uri->uri(), uri->ext(), "query", "api", false);
+#ifdef DEBUG
+		CString::format(L"Load: %ls", (wchar_t*)(info->uri)).log();
+#endif
 		if (info->query == NULL) {
 			info->query = new Vector<CString&>();
 		}
@@ -394,7 +411,9 @@ bool Loader::onhttp_text(const CString& url, Stream* stream, void* userData) {
 		result = info->loader->onText(info->info, stream);
 	} catch (...) {
 	}
-	
+
+	//LOG("Loader::onText = %s", (result ? "TRUE" : "FALSE"));
+
 	return result;
 }
 
@@ -406,6 +425,8 @@ bool Loader::onhttp_data(const CString& url, Stream* stream, void* userData) {
 		result = info->loader->onData(info->info, stream);
 	} catch (...) {
 	}
+
+	//LOG("Loader::onData = %s", (result ? "TRUE" : "FALSE"));
 	
 	return result;
 }

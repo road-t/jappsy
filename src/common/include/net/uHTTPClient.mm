@@ -193,10 +193,6 @@ CString UTCtoRFC2616(uint64_t time) {
 	return CString::format(L"%ls, %02d %ls %04d %02d:%02d:%02d GMT", sWeekDay[t.tm_wday], t.tm_mday, sMonth[t.tm_mon], t.tm_year + 1900, t.tm_hour, t.tm_min, t.tm_sec);
 }
 
-#if defined(__IOS__)
-
-#import <UIKit/UIKit.h>
-
 Stream* HttpLoadCache(void* userData) {
 	try {
 		Loader::Info* info = (Loader::Info*)userData;
@@ -217,6 +213,10 @@ void HttpSaveCache(Stream* stream, void* userData) {
 	} catch (...) {
 	}
 }
+
+#if defined(__IOS__)
+
+#import <UIKit/UIKit.h>
 
 void* HttpSync(void* threadData) {
 	HTTPRequest *http = (HTTPRequest*)threadData;
@@ -380,6 +380,11 @@ void* HttpSync(void* threadData) {
 				}
 			}
 				
+			if (resultStream != NULL) {
+				delete resultStream;
+				resultStream = NULL;
+			}
+
 			int timeout = 1000;
 			if (http->onerror != NULL) {
 				if (resultError == NULL) {
@@ -390,6 +395,10 @@ void* HttpSync(void* threadData) {
 			if (http->retry > 0) {
 				if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
 					http->onfatal(http->url, L"Shutdown", http->userData);
+					if (resultError != NULL) {
+						delete resultError;
+						resultError = NULL;
+					}
 					break;
 				}
 				http->retry--;
@@ -400,6 +409,10 @@ void* HttpSync(void* threadData) {
 						delete http->cacheStream;
 						http->cacheStream = NULL;
 						if (result) {
+							if (resultError != NULL) {
+								delete resultError;
+								resultError = NULL;
+							}
 							break;
 						}
 					} catch (...) {
@@ -411,16 +424,13 @@ void* HttpSync(void* threadData) {
 					resultError = new CString();
 				}
 				http->onfatal(http->url, *((CString*)resultError), http->userData);
+				if (resultError != NULL) {
+					delete resultError;
+					resultError = NULL;
+				}
 				break;
 			}
 
-			if (resultStream != NULL) {
-				delete resultStream;
-			}
-			if (resultError != NULL) {
-				delete resultError;
-			}
-			
 			systemSleep(timeout);
 		} while (true);
 		
@@ -673,11 +683,293 @@ void* HttpAsync(void* threadData) {
 
 #elif defined(__JNI__)
 
-void* HttpAsync(void* threadData) {
+static const char _clsHttpClient[] = "com/jappsy/net/HTTPClient";
+const char* clsHttpClient = _clsHttpClient;
+
+static const char _clsHttpResponse[] = "com/jappsy/net/HTTPResponse";
+const char* clsHttpResponse = _clsHttpResponse;
+
+jclass clazzHttpClient;
+jclass clazzHttpResponse;
+
+struct HTTPRequestResponse {
+	HTTPRequest* http;
+	Stream* resultStream;
+	CString* resultError;
+};
+
+void* HttpRequest(void* threadData) {
+	HTTPRequest *http = (HTTPRequest*)threadData;
+
+	CString::format(L"HttpRequest: %ls", (wchar_t*)(http->url)).log();
+
+	JNIEnv* env = GetThreadEnv();
+	jstring juri = http->url.toJString(env);
+	jstring jpost = http->post == NULL ? NULL : env->NewStringUTF(http->post);
+	jmethodID method = env->GetStaticMethodID(clazzHttpClient, "Request", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)Lcom/jappsy/net/HTTPResponse;");
+	jfieldID jfCode = env->GetFieldID(clazzHttpResponse, "code", "I");
+	jfieldID jfError = env->GetFieldID(clazzHttpResponse, "error", "Ljava/lang/String;");
+	jfieldID jfData = env->GetFieldID(clazzHttpResponse, "data", "[B");
+	jfieldID jfModified = env->GetFieldID(clazzHttpResponse, "modified", "Ljava/lang/String;");
+
+	int status = 0;
+	Stream* stream = NULL;
+
+	HTTPRequestResponse* requestResponse = NULL;
+	try {
+		requestResponse = (HTTPRequestResponse *) mmalloc(sizeof(HTTPRequestResponse));
+		requestResponse->http = http;
+		requestResponse->resultError = NULL;
+		requestResponse->resultStream = NULL;
+	} catch (...) {
+		http->onfatal(http->url, eOutOfMemory, http->userData);
+		http->onrelease(http->userData);
+		memDelete(http);
+		goto HttpRequest_response;
+	}
+
+	if ((jfCode == NULL) || (jfError == NULL) || (jfData == NULL) || (jfModified == NULL)) {
+		requestResponse->resultError = new CString(eInvalidPointer);
+		goto HttpRequest_response;
+	}
+
+	{
+		__sync_synchronize();
+
+		if (http->cache) {
+			http->cacheStream = HttpLoadCache(http->userData);
+		}
+
+		jstring jmodifiedSince = NULL;
+		if (http->cacheStream != NULL) {
+			jmodifiedSince = UTCtoRFC2616(http->cacheStream->getModificationDate()).toJString(env);
+		}
+
+		jobject response = env->CallStaticObjectMethod(clazzHttpClient, method, juri, jpost,
+													   jmodifiedSince, http->timeout);
+		if (!(env->ExceptionCheck()) && (response != NULL)) {
+			status = env->GetIntField(response, jfCode);
+
+			jstring JresponseError = (jstring) env->GetObjectField(response, jfError);
+			if (JresponseError != NULL) {
+				const char *NresponseError = env->GetStringUTFChars(JresponseError, 0);
+				if (NresponseError != NULL) {
+					requestResponse->resultError = new CString(NresponseError);
+					env->ReleaseStringUTFChars(JresponseError, NresponseError);
+				}
+			} else {
+				jbyteArray JresponseData = (jbyteArray) env->GetObjectField(response, jfData);
+				try {
+					stream = jbyteArrayToStream(env, JresponseData);
+
+					if (stream != NULL) {
+						jstring JresponseModified = (jstring) env->GetObjectField(response,
+																				  jfModified);
+						if (JresponseModified != NULL) {
+							const char *NresponseModified = env->GetStringUTFChars(
+									JresponseModified, 0);
+							if (NresponseModified != NULL) {
+								stream->setModificationDate(RFC2616toUTC(NresponseModified));
+								env->ReleaseStringUTFChars(JresponseModified, NresponseModified);
+							}
+						}
+					}
+				} catch (const char *e) {
+					requestResponse->resultError = new CString(e);
+				} catch (...) {
+					requestResponse->resultError = new CString(eUnknown);
+				}
+			}
+		}
+	}
+
+	if (status == 304) { // Not Modified
+		if (http->cacheStream != NULL) {
+			requestResponse->resultStream = http->cacheStream;
+		}
+	} else if (status == 200) { // OK
+		if (stream != NULL) {
+			try {
+				HttpSaveCache(stream, http->userData);
+
+				requestResponse->resultStream = stream;
+			} catch (...) {
+			}
+		}
+	}
+
+HttpRequest_response:
+
+	ReleaseThreadEnv();
+
+	return requestResponse;
+}
+
+void* HttpRequestResultSync(void* threadData) {
+	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)threadData;
+
+	if (requestResponse == NULL) {
+		LOG("HttpRequestResultSync: NULL");
+
+		return NULL;
+	}
+
+	__sync_synchronize();
+
+	CString::format(L"HttpRequestResultSync: %ls", (wchar_t*)(requestResponse->http->url)).log();
+
+	int timeout = 1000;
+
+	if (requestResponse->resultStream != NULL) {
+		if (requestResponse->resultStream == requestResponse->http->cacheStream) {
+			requestResponse->resultStream = NULL;
+			try {
+				bool result = requestResponse->http->onstream(requestResponse->http->url, requestResponse->http->cacheStream, requestResponse->http->userData);
+				delete requestResponse->http->cacheStream;
+				requestResponse->http->cacheStream = NULL;
+				if (result) {
+					timeout = 0;
+					goto HttpRequestResultSync_break;
+				}
+			} catch (...) {
+				delete requestResponse->http->cacheStream;
+				requestResponse->http->cacheStream = NULL;
+			}
+		} else {
+			try {
+				bool result = requestResponse->http->onstream(requestResponse->http->url, (Stream*)requestResponse->resultStream, requestResponse->http->userData);
+				delete requestResponse->resultStream;
+				requestResponse->resultStream = NULL;
+				if (result) {
+					timeout = 0;
+					goto HttpRequestResultSync_break;
+				}
+			} catch (...) {
+			}
+		}
+	}
+
+	if (requestResponse->resultStream != NULL) {
+		delete requestResponse->resultStream;
+		requestResponse->resultStream = NULL;
+	}
+
+	if (requestResponse->http->onerror != NULL) {
+		if (requestResponse->resultError == NULL) {
+			requestResponse->resultError = new CString();
+		}
+		timeout = requestResponse->http->onerror(requestResponse->http->url, *((CString*)requestResponse->resultError), requestResponse->http->userData);
+	}
+	if (requestResponse->http->retry > 0) {
+		if ((requestResponse->http->onretry != NULL) && (!requestResponse->http->onretry(requestResponse->http->url, requestResponse->http->userData))) {
+			requestResponse->http->onfatal(requestResponse->http->url, L"Shutdown", requestResponse->http->userData);
+			timeout = 0;
+			goto HttpRequestResultSync_break;
+		}
+		requestResponse->http->retry--;
+	} else if (requestResponse->http->retry == 0) {
+		if (requestResponse->http->cacheStream != NULL) {
+			try {
+				bool result = requestResponse->http->onstream(requestResponse->http->url, requestResponse->http->cacheStream, requestResponse->http->userData);
+				delete requestResponse->http->cacheStream;
+				requestResponse->http->cacheStream = NULL;
+				if (result) {
+					timeout = 0;
+					goto HttpRequestResultSync_break;
+				}
+			} catch (...) {
+				delete requestResponse->http->cacheStream;
+				requestResponse->http->cacheStream = NULL;
+			}
+		}
+		if (requestResponse->resultError == NULL) {
+			requestResponse->resultError = new CString();
+		}
+		requestResponse->http->onfatal(requestResponse->http->url, *((CString*)requestResponse->resultError), requestResponse->http->userData);
+		timeout = 0;
+		goto HttpRequestResultSync_break;
+	}
+
+HttpRequestResultSync_break:
+
+	if (requestResponse->resultError != NULL) {
+		delete requestResponse->resultError;
+		requestResponse->resultError = NULL;
+	}
+
+	if (requestResponse->http->cacheStream != NULL) {
+		delete requestResponse->http->cacheStream;
+		requestResponse->http->cacheStream = NULL;
+	}
+
+	if (timeout == 0) {
+		requestResponse->http->onrelease(requestResponse->http->userData);
+		memDelete(requestResponse->http);
+	}
+
+	mmfree(requestResponse);
+
+	return (void*)(intptr_t)(timeout);
+}
+
+void* HttpRequestResultAsync(void* resultData);
+void* HttpRequestResult(void* threadData, void* resultData) {
+	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)resultData;
+
+	if (requestResponse != NULL) {
+		CString::format(L"HttpRequestResult: %ls", (wchar_t*)(requestResponse->http->url)).log();
+
+		MainThreadAsync(HttpRequestResultAsync, NULL, requestResponse);
+	}
+
 	return NULL;
 }
 
-void* HttpSync(void* threadData) {
+struct HTTPRequestRepeat {
+	HTTPRequest* http;
+	int timeout;
+};
+
+void* HttpRequestRepeat(void* threadData) {
+	HTTPRequestRepeat* repeat = (HTTPRequestRepeat*)threadData;
+
+	CString::format(L"HttpRequestRepeat: %ls", (wchar_t*)(repeat->http->url)).log();
+
+	systemSleep(repeat->timeout);
+
+	MainThreadAsync(HttpRequestResultAsync, NULL, HttpRequest(repeat->http));
+
+	mmfree(repeat);
+	return NULL;
+}
+
+void* HttpRequestResultAsync(void* resultData) {
+	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)resultData;
+	HTTPRequest* http = NULL;
+	if (requestResponse != NULL) {
+		http = requestResponse->http;
+
+		CString::format(L"HttpRequestResultAsync: %ls", (wchar_t*)(http->url)).log();
+	} else {
+		LOG("HttpRequestResultAsync: NULL");
+	}
+
+	int repeatTimeout = (int)(intptr_t)(HttpRequestResultSync(requestResponse));
+	if ((repeatTimeout != 0) && (http != NULL)) {
+		HTTPRequestRepeat* repeat = (HTTPRequestRepeat*)mmalloc(sizeof(HTTPRequestRepeat));
+		if (repeat == NULL) {
+			http->onfatal(http->url, eOutOfMemory, http->userData);
+			http->onrelease(http->userData);
+			memDelete(http);
+			return NULL;
+		}
+
+		repeat->http = http;
+		repeat->timeout = repeatTimeout;
+
+		NewThreadAsync(HttpRequestRepeat, NULL, repeat);
+	}
+
 	return NULL;
 }
 
@@ -701,6 +993,7 @@ void HTTPClient::Request(const CString& url, char* post, bool threaded, int retr
 	http->onfatal = onfatal;
 	http->onrelease = onrelease;
 
+#if defined(__IOS__)
 	if (http->threaded) {
 		if (IsMainThread()) {
 			HttpAsync(http);
@@ -714,4 +1007,64 @@ void HTTPClient::Request(const CString& url, char* post, bool threaded, int retr
 			(void)MainThreadSync(HttpSync, http);
 		}
 	}
+#elif defined(__JNI__)
+	if (http->threaded) {
+		NewThreadAsync(HttpRequest, HttpRequestResult, http);
+	} else {
+		if (IsMainThread()) {
+			LOG("Error: Main thread sync request not supported by platform!");
+		} else {
+			int repeatTimeout = 0;
+			do {
+				repeatTimeout = (int) (intptr_t) (HttpRequestResultSync(HttpRequest(http)));
+			} while (repeatTimeout != 0);
+		}
+	}
+#else
+	#error Platform not supported!
+#endif
+}
+
+void uHTTPClientInit() {
+#if defined(__JNI__)
+	JNIEnv* env = GetThreadEnv();
+
+	jclass clazz;
+
+	clazz = env->FindClass(clsHttpClient);
+	if (env->ExceptionCheck()) {
+		LOG("JNIEnv: FindClass %s (Fail)", clsHttpClient);
+		clazzHttpClient = NULL;
+	} else {
+		LOG("JNIEnv: FindClass %s (OK)", clsHttpClient);
+		clazzHttpClient = (jclass)(env->NewGlobalRef(clazz));
+	}
+
+	clazz = env->FindClass(clsHttpResponse);
+	if (env->ExceptionCheck()) {
+		LOG("JNIEnv: FindClass %s (Fail)", clsHttpResponse);
+		clazzHttpResponse = NULL;
+	} else {
+		LOG("JNIEnv: FindClass %s (OK)", clsHttpResponse);
+		clazzHttpResponse = (jclass)(env->NewGlobalRef(clazz));
+	}
+
+	ReleaseThreadEnv();
+#endif
+}
+
+void uHTTPClientQuit() {
+#if defined(__JNI__)
+	JNIEnv* env = GetThreadEnv();
+
+	if (clazzHttpClient != NULL) {
+		env->DeleteGlobalRef(clazzHttpClient);
+	}
+
+	if (clazzHttpResponse != NULL) {
+		env->DeleteGlobalRef(clazzHttpResponse);
+	}
+
+	ReleaseThreadEnv();
+#endif
 }

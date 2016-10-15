@@ -39,7 +39,7 @@ public class JappsyEngine {
 	 */
 	public static native void mallinfo();
 
-	public static native long onCreate();
+	public static native void onCreate();
 	public static native void onDestroy(long handle);
 	public static native void onUpdate(long handle, int width, int height);
 	public static native void onPause(long handle);

@@ -18,8 +18,8 @@
 #define JAPPSY_PLATFORM_H
 
 #ifndef DEBUG
-	//#warning Remove Always Debug Mode
-	//#define DEBUG
+	#warning Remove Always Debug Mode
+	#define DEBUG
 #else
 	#undef DEBUG
 #endif
@@ -171,7 +171,8 @@ extern "C" {
             #define LOG(f, ...) printf(f, ##__VA_ARGS__);
         #elif defined(__JNI__)
             #include <android/log.h>
-            #define LOG(f, ...) __android_log_print(ANDROID_LOG_INFO, "JNI", f, ##__VA_ARGS__);
+			#include <sys/syscall.h>
+            #define LOG(f, ...) __android_log_print(ANDROID_LOG_INFO, "JNI", "(%d) " f, syscall(__NR_gettid)/*(uint32_t)((intptr_t)(pthread_self()))*/, ##__VA_ARGS__);
         #endif
 	#else
 		#define LOG(f, ...)

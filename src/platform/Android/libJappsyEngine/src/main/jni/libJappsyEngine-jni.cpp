@@ -55,15 +55,15 @@ Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type, jstring cacheD
 	jint result = (jint) *((uint8_t *) &x);
 
 	const char *nativeString = env->GetStringUTFChars(cacheDir, 0);
-	jappsyInit(nativeString);
+	jappsyInit(nativeString, (void*)env);
 	env->ReleaseStringUTFChars(cacheDir, nativeString);
 
 	if (result == 0) {
-		__android_log_print(ANDROID_LOG_ERROR, "JNI", "Unsupported Platform!");
+		LOG("Unsupported Platform!");
 		return JNI_FALSE;
 	}
 
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "Start");
+	LOG("Start");
 
 	return JNI_TRUE;
 }
@@ -72,12 +72,17 @@ JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_free(JNIEnv *env, jclass type) {
 	jappsyQuit();
 
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "Stop");
+	LOG("Stop");
 }
 
-JNIEXPORT jlong JNICALL
+void initOpenGLThreadId();
+void releaseOpenGLThreadId();
+
+JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onCreate(JNIEnv *env, jclass type) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onCreate");
+	LOG("onCreateSurface");
+
+	initOpenGLThreadId();
 /*
 	try {
 		GLEngine* engine = new GLEngine();
@@ -86,12 +91,14 @@ Java_com_jappsy_JappsyEngine_onCreate(JNIEnv *env, jclass type) {
 		return (jlong)NULL;
 	}
  */
-	return (jlong)NULL;
+//	return (jlong)NULL;
 }
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onDestroy(JNIEnv *env, jclass type, jlong handle) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onDestroy");
+	LOG("onDestroy");
+
+	releaseOpenGLThreadId();
 
 	if (handle != 0) {
 		try {
@@ -105,7 +112,7 @@ Java_com_jappsy_JappsyEngine_onDestroy(JNIEnv *env, jclass type, jlong handle) {
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onUpdate(JNIEnv *env, jclass type, jlong handle, jint width,
 									  jint height) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onUpdate");
+	LOG("onUpdate(%d,%d)", width, height);
 
 	glViewport(0, 0, width, height);
 
@@ -120,19 +127,25 @@ Java_com_jappsy_JappsyEngine_onUpdate(JNIEnv *env, jclass type, jlong handle, ji
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onPause(JNIEnv *env, jclass type, jlong handle) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onPause");
+	LOG("onPause");
 }
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onResume(JNIEnv *env, jclass type, jlong handle) {
-	__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onResume");
+	LOG("onResume");
 }
 
 static int color = 0;
 
+void OpenGLThreadMessageLooper();
+
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
-	//__android_log_print(ANDROID_LOG_DEBUG, "JNI", "onFrame");
+	//LOG("onFrame");
+
+	//LOG("OpenGL Thread Message Loop (Start)");
+	OpenGLThreadMessageLooper();
+	//LOG("OpenGL Thread Message Loop (End)");
 
 	if (handle != 0) {
 		try {

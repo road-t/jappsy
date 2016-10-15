@@ -399,7 +399,7 @@ GLShader* GLShaders::createVertexShader(const CString& key, const char* vertexSh
 	thread.key = &key;
 	thread.shaderSource = vertexShaderSource;
 	
-	return (GLShader*)MainThreadSync(CreateVertexShaderCallback, &thread);
+	return (GLShader*)OpenGLThreadSync(CreateVertexShaderCallback, &thread);
 }
 
 GLShader* GLShaders::createFragmentShader(const CString& key, const char* fragmentShaderSource) throw(const char*) {
@@ -408,7 +408,7 @@ GLShader* GLShaders::createFragmentShader(const CString& key, const char* fragme
 	thread.key = &key;
 	thread.shaderSource = fragmentShaderSource;
 	
-	return (GLShader*)MainThreadSync(CreateFragmentShaderCallback, &thread);
+	return (GLShader*)OpenGLThreadSync(CreateFragmentShaderCallback, &thread);
 }
 
 GLShader* GLShaders::createShader(const CString& key, const wchar_t* vshReference, const wchar_t* fshReference, void* library) throw(const char*) {

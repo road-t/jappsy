@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-void uSystemInit();
+void uSystemInit(void* system);
 void uSystemQuit();
 
 typedef void* (*ThreadRunCallback)(void* userData);
@@ -31,11 +31,20 @@ typedef void* (*ThreadResultCallback)(void* userData, void* resultData);
 
 void* CurrentThreadId();
 bool IsMainThread();
+bool IsOpenGLThread();
 
 void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const char*);
 void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);
 void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);
-	
+
+void* OpenGLThreadSync(ThreadRunCallback callback, void* userData) throw(const char*);
+void OpenGLThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*);
+
+#if defined(__JNI__)
+	JNIEnv* GetThreadEnv();
+	void ReleaseThreadEnv();
+#endif
+
 #if defined(__WINNT__)
     extern LARGE_INTEGER uSystem_Frequency;
     extern uint64_t uSystem_SystemTimeShiftNS;

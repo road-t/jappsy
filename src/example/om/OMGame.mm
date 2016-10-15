@@ -1544,6 +1544,7 @@ void OMGame::onPreload() {
     
     if (!context->createShaders(NULL, NULL)) {
         shutdown();
+        return;
     }
 
     LOG("OMGame > Json Load Config");
@@ -1592,6 +1593,7 @@ void OMGame::onLoad() {
 
         if (!context->createModels("{}", library)) {
             shutdown();
+            return;
         }
     
         // Подготавливаем спрайты из текстур
@@ -1602,6 +1604,7 @@ void OMGame::onLoad() {
     
         if (!context->createSprites(sOMSpritesRes)) {
             shutdown();
+            return;
         }
     
         // Подготавливаем картинки из спрайтов
@@ -1612,6 +1615,7 @@ void OMGame::onLoad() {
     
         if (!context->createDrawings(sOMDrawingsRes)) {
             shutdown();
+            return;
         }
     
         context->drawings->get(L"text_sequence")->setPaint(paintSpriteLeftCenter);

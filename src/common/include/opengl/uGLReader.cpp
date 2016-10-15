@@ -111,7 +111,7 @@ GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* st
 						dataSize = len;
 					}
 
-					(void)MainThreadSync(CreateTextureHandleCallback, &thread);
+					(void)OpenGLThreadSync(CreateTextureHandleCallback, &thread);
 				} else {
 					if (stream->skip(len) < 0)
 						break;
@@ -121,9 +121,9 @@ GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* st
 				chunk = (uint32_t)stream->readInt();
 			}
 			
-			return (GLTexture*)(MainThreadSync(CreateTextureCallback, &thread));
+			return (GLTexture*)(OpenGLThreadSync(CreateTextureCallback, &thread));
 		} catch (...) {
-			(void)MainThreadSync(CreateTextureErrorCallback, &thread);
+			(void)OpenGLThreadSync(CreateTextureErrorCallback, &thread);
 			throw;
 		}
 	}
@@ -294,7 +294,7 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 					
 					thread.chunk = chunk;
 					try {
-						(void)MainThreadSync(CreateShaderSourceCallback, &thread);
+						(void)OpenGLThreadSync(CreateShaderSourceCallback, &thread);
 					} catch (...) {
 						memFree(thread.shaderSource);
 						thread.shaderSource = NULL;
@@ -347,7 +347,7 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 							dataSize = len;
 						}
 						
-						(void)MainThreadSync(CreateShaderTextureCallback, &thread);
+						(void)OpenGLThreadSync(CreateShaderTextureCallback, &thread);
 					} else {
 						throw eIOInvalidFile;
 					}
@@ -363,11 +363,11 @@ GLShader* GLReader::createShader(GLRender* ctx, const CString& key, Stream* stre
 			if ((thread.vsh == NULL) && (thread.fsh == NULL)) {
 				throw eIOInvalidFile;
 			} else if ((thread.vsh != NULL) && (thread.fsh != NULL) && (!thread.vsh->isReference()) && (!thread.fsh->isReference())) {
-				(void)MainThreadSync(CreateShaderProgramCallback, &thread);
+				(void)OpenGLThreadSync(CreateShaderProgramCallback, &thread);
 			}
-			return (GLShader*)(MainThreadSync(CreateShaderCallback, &thread));
+			return (GLShader*)(OpenGLThreadSync(CreateShaderCallback, &thread));
 		} catch (...) {
-			(void)MainThreadSync(CreateShaderErrorCallback, &thread);
+			(void)OpenGLThreadSync(CreateShaderErrorCallback, &thread);
 			throw;
 		}
 	}

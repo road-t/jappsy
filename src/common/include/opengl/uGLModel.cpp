@@ -1088,7 +1088,7 @@ GLModel* GLModels::createModel(const CString& key, const char* json) throw(const
 	// Все проверки пройдены - создаем GLModel
 	GLModel* model = NULL;
 	try {
-		model = (GLModel*)MainThreadSync(CreateJsonModelCallback, &target);
+		model = (GLModel*)OpenGLThreadSync(CreateJsonModelCallback, &target);
 	} catch (...) {
 		target.release();
 		throw;

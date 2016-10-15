@@ -24,7 +24,7 @@ FOUNDATION_EXPORT const unsigned char libJappsyEngineVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <libJappsyEngine/PublicHeader.h>
 
-FOUNDATION_EXPORT void jappsyInit(const char* cacheDir);
+FOUNDATION_EXPORT void jappsyInit(const char* cacheDir, void* system);
 FOUNDATION_EXPORT void jappsyQuit();
 
 #import <libJappsyEngine/JappsyView.h>

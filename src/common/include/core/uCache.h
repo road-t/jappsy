@@ -23,6 +23,8 @@
 #include <core/uAtomic.h>
 #include <data/uStream.h>
 
+#if defined(__IOS__)
+
 #ifndef __OBJC__
 class NSData;
 #endif
@@ -35,6 +37,20 @@ extern "C" {
 	
 #ifdef __cplusplus
 }
+#endif
+
+#elif defined(__JNI__)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+	Stream* jbyteArrayToStream(JNIEnv* env, jbyteArray data) throw(const char*);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
 
 class Cache {

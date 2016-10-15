@@ -25,6 +25,7 @@ import android.content.pm.ConfigurationInfo;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -254,7 +255,7 @@ public class JappsyView extends GLSurfaceView {
 	}
 
 	public void onStart() {
-		//m_engine = JappsyEngine.onCreate();
+		JappsyEngine.onCreate();
 	}
 
 	public void onStop() {
@@ -283,7 +284,9 @@ public class JappsyView extends GLSurfaceView {
 		// Запоминаем содержимое и заменяем
 		m_restoreActivity = target;
 		m_restoreView = ((ViewGroup) target.findViewById(android.R.id.content)).getChildAt(0);
-		target.setContentView(this);
+		if (m_restoreView != this) {
+			target.setContentView(this);
+		}
 
 		m_methods.onEnterFullScreen();
 		m_activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -297,7 +300,9 @@ public class JappsyView extends GLSurfaceView {
 		m_activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// Восстанавливаем содержимое
-		m_restoreActivity.setContentView(m_restoreView);
+		if ((m_restoreView != this) && (m_restoreView != null)) {
+			m_restoreActivity.setContentView(m_restoreView);
+		}
 		m_restoreView = null;
 		m_restoreActivity = null;
 	}

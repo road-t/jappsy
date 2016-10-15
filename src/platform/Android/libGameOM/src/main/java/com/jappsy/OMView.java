@@ -27,9 +27,6 @@ import com.jappsy.OMEngine;
 public class OMView extends JappsyView {
 	public OMView(Context context) {
 		super(context);
-		if (!isInEditMode()) {
-			m_engine = OMEngine.onCreate();
-		}
 	}
 
 	public OMView(Context context, AttributeSet attrs) {
@@ -51,5 +48,13 @@ public class OMView extends JappsyView {
 		}
 
 		return null;
+	}
+
+	@Override
+	public void onStart() {
+		super.onStart();
+		if (!isInEditMode()) {
+			m_engine = OMEngine.onCreate();
+		}
 	}
 }

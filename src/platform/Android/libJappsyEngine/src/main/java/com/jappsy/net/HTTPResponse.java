@@ -14,28 +14,13 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_H
-#define JAPPSY_H
+package com.jappsy.net;
 
-#include <platform.h>
-#include <data/uString.h>
+import java.nio.ByteBuffer;
 
-#ifdef __cplusplus
-extern CString* jappsyCacheDir;
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-// Initialize all core static variables
-void jappsyInit(const char* cacheDir, void* system);
-
-// Deinitialize all core static variables
-void jappsyQuit();
-
-#ifdef __cplusplus
+public class HTTPResponse {
+	public int code;
+	public String error;
+	public byte[] data;
+	public String modified;
 }
-#endif
-
-#endif //JAPPSY_H

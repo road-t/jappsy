@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,25 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_H
-#define JAPPSY_H
+package com.jappsy.exceptions;
 
-#include <platform.h>
-#include <data/uString.h>
+public class EGlobal extends Exception {
 
-#ifdef __cplusplus
-extern CString* jappsyCacheDir;
-#endif
+	private static final long serialVersionUID = -5831055767798743666L;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+	public EGlobal() {
+	}
 
-// Initialize all core static variables
-void jappsyInit(const char* cacheDir, void* system);
+	public EGlobal(String detailMessage) {
+		super(detailMessage);
+	}
 
-// Deinitialize all core static variables
-void jappsyQuit();
+	public EGlobal(Throwable throwable) {
+		super(throwable);
+	}
 
-#ifdef __cplusplus
+	public EGlobal(String detailMessage, Throwable throwable) {
+		super(detailMessage, throwable);
+	}
+
 }
-#endif
-
-#endif //JAPPSY_H

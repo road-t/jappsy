@@ -140,7 +140,9 @@ GLEngine::~GLEngine() {
 
 void GLEngine::shutdown() {
 	context->loader->release();
-	
+
+	LOG("GLEngine::Shutdown");
+
 	// TODO: Функция вызывается в ОМ для завершения игры, но при этом завершение не происходит... (разобраться)
 }
 

@@ -17,56 +17,65 @@
 #include "uSystem.h"
 #include <core/uAtomic.h>
 #include <core/uMemory.h>
+#include <opengl/uOpenGL.h>
+#include <net/uHTTPClient.h>
 
-void* CurrentThreadId() {
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void *CurrentThreadId() {
 #if defined(__IOS__)
 	return (__bridge void *)([NSThread currentThread]);
 #elif defined(__JNI__)
-	return (void*)((intptr_t)(pthread_self()));
+	return (void *) ((intptr_t) (pthread_self()));
 #elif defined(__WINNT__)
 	return (void*)((intptr_r)(GetCurrentThreadId()));
-#else
-	#error Unsupported platform!
 #endif
 }
 
-static void* MainThreadId = NULL;
+static void *MainThreadId = NULL;
+static void *OpenGLThreadId = NULL;
 
 bool IsMainThread() {
 	return MainThreadId == CurrentThreadId();
 }
 
+bool IsOpenGLThread() {
+	return AtomicGet(&OpenGLThreadId) == CurrentThreadId();
+}
+
 struct ThreadSyncData {
 	volatile jlock syncLock;
-	volatile void* resultData;
-	volatile const char* errorData;
+	volatile void *resultData;
+	volatile const char *errorData;
 };
 
 struct ThreadMessage {
 	volatile ThreadRunCallback runCallback;
 	volatile ThreadResultCallback resultCallback;
-	volatile void* userData;
+	volatile void *userData;
 
 	volatile jbool syncCall;
 
-	volatile struct ThreadSyncData* syncData;
+	volatile struct ThreadSyncData *syncData;
 };
 
-void* NewThreadRun(void* data) {
-	struct ThreadMessage* msg = (struct ThreadMessage*)data;
-	volatile struct ThreadSyncData* syncData = AtomicGetPtr(&(msg->syncData));
-	
+void *NewThreadRun(void *data) {
+	struct ThreadMessage *msg = (struct ThreadMessage *) data;
+	volatile struct ThreadSyncData *syncData = AtomicGetPtr(&(msg->syncData));
+
 	ThreadRunCallback runCallback = AtomicGetPtr(&(msg->runCallback));
 	volatile void *userData = AtomicGetPtr(&(msg->userData));
 	void *result = NULL;
-	
+
 	try {
 		__sync_synchronize();
 
-		result = runCallback((void*)userData);
-	} catch (const char* error) {
+		result = runCallback((void *) userData);
+	} catch (const char *error) {
 		if (AtomicGet(&(msg->syncCall))) {
-			AtomicSetPtr(&(syncData->errorData), (char*)error);
+			AtomicSetPtr(&(syncData->errorData), (char *) error);
 			AtomicUnlock(&(syncData->syncLock));
 			return NULL;
 		} else {
@@ -75,7 +84,7 @@ void* NewThreadRun(void* data) {
 		}
 	} catch (...) {
 		if (AtomicGet(&(msg->syncCall))) {
-			AtomicSetPtr(&(syncData->errorData), (char*)eUnknown);
+			AtomicSetPtr(&(syncData->errorData), (char *) eUnknown);
 			AtomicUnlock(&(syncData->syncLock));
 			return NULL;
 		} else {
@@ -83,7 +92,7 @@ void* NewThreadRun(void* data) {
 			throw;
 		}
 	}
-	
+
 	if (AtomicGet(&(msg->syncCall))) {
 		AtomicSetPtr(&(syncData->resultData), result);
 		AtomicUnlock(&(syncData->syncLock));
@@ -92,134 +101,199 @@ void* NewThreadRun(void* data) {
 		memFree(msg);
 		if (resultCallback != NULL) {
 			try {
-				resultCallback((void*)userData, result);
+				resultCallback((void *) userData, result);
 			} catch (...) {
 				throw;
 			}
 		}
 	}
-	
+
+#if defined(__JNI__)
+	pthread_exit(NULL);
+#endif
 	return NULL;
 }
 
 #if defined(__IOS__)
 
-	@interface JappsyThreadHandler : NSObject
+@interface JappsyThreadHandler : NSObject
 
-	+(void)ThreadRunner:(NSValue *)threadData;
++(void)ThreadRunner:(NSValue *)threadData;
 
-	@end
+@end
 
-	@implementation JappsyThreadHandler
+@implementation JappsyThreadHandler
 
-	+(void)ThreadRunner:(NSValue *)threadData {
-		@autoreleasepool {
-			struct ThreadMessage* msg = (struct ThreadMessage*)([threadData pointerValue]);
-			(void)NewThreadRun(msg);
-		}
++(void)ThreadRunner:(NSValue *)threadData {
+	@autoreleasepool {
+		struct ThreadMessage* msg = (struct ThreadMessage*)([threadData pointerValue]);
+		(void)NewThreadRun(msg);
 	}
+}
 
-	@end
+@end
 
 #elif defined(__JNI__)
-	#include <asm/fcntl.h>
-	#include <unistd.h>
-	#include <android/looper.h>
-	#include <pthread.h>
+#include <asm/fcntl.h>
+#include <unistd.h>
+#include <android/looper.h>
+#include <pthread.h>
 
-	static int mainThreadMessagePipe[2];
+static JavaVM *javaVM = NULL;
+static JNIEnv *mainEnv = NULL;
 
-	static const int LOOPER_ID_MESSAGEPIPE = 'JPSY';
+__thread JNIEnv *threadEnv = NULL;
+__thread int32_t threadEnvCounter = 0;
 
-	void postMainThreadMessage(struct ThreadMessage* msg) {
-		if (write(mainThreadMessagePipe[1], msg, sizeof(msg)) != sizeof(msg)) {
-			LOG("Thread message buffer overrun!")
+JNIEnv *GetThreadEnv() {
+	if (CurrentThreadId() == MainThreadId) {
+		return mainEnv;
+	} else {
+		if (threadEnvCounter == 0) {
+			javaVM->AttachCurrentThread(&threadEnv, NULL);
+		}
+		threadEnvCounter++;
+		return threadEnv;
+	}
+}
+
+void ReleaseThreadEnv() {
+	if (CurrentThreadId() != MainThreadId) {
+		if (threadEnvCounter > 0) {
+			threadEnvCounter--;
+			if (threadEnvCounter == 0) {
+				javaVM->DetachCurrentThread();
+				threadEnv = NULL;
+			}
 		}
 	}
+}
 
-	static int mainThreadMessagePipeCallback(int fd, int events, void *data) {
-		struct ThreadMessage msg;
-		
-		while (read(fd, &msg, sizeof(msg)) == sizeof(msg)) {
-			LOG("Got message!");
+static int mainThreadMessagePipe[2];
+static int openglThreadMessagePipe[2];
 
-			volatile struct ThreadSyncData* syncData = AtomicGetPtr(&(msg.syncData));
+static const int LOOPER_ID_MESSAGEPIPE = 'JPSY';
 
-			ThreadRunCallback runCallback = AtomicGetPtr(&(msg.runCallback));
-			volatile void *userData = AtomicGetPtr(&(msg.userData));
-			void *result = NULL;
+void postMainThreadMessage(struct ThreadMessage *msg) {
+	if (write(mainThreadMessagePipe[1], msg, sizeof(struct ThreadMessage)) !=
+		sizeof(struct ThreadMessage)) {
+		LOG("Main thread message buffer overrun!")
+	}
+}
 
-			try {
-				result = runCallback((void*)userData);
-			} catch (const char* error) {
-				if (AtomicGet(&(msg.syncCall))) {
-					AtomicSetPtr(&(syncData->errorData), (char*)error);
-					AtomicUnlock(&(syncData->syncLock));
-					return 1;
-				} else {
-					throw;
-				}
-			} catch (...) {
-				if (AtomicGet(&(msg.syncCall))) {
-					AtomicSetPtr(&(syncData->errorData), (char*)eUnknown);
-					AtomicUnlock(&(syncData->syncLock));
-					return 1;
-				} else {
-					throw;
-				}
-			}
+void postOpenGLThreadMessage(struct ThreadMessage *msg) {
+	if (write(openglThreadMessagePipe[1], msg, sizeof(struct ThreadMessage)) !=
+		sizeof(struct ThreadMessage)) {
+		LOG("OpenGL thread message buffer overrun!")
+	}
+}
 
+static int threadMessagePipeCallback(int fd, int events, void *data) {
+	struct ThreadMessage msg;
+
+	while (read(fd, &msg, sizeof(struct ThreadMessage)) == sizeof(struct ThreadMessage)) {
+		//LOG("(%d) Got message!", fd);
+
+		volatile struct ThreadSyncData *syncData = AtomicGetPtr(&(msg.syncData));
+
+		ThreadRunCallback runCallback = AtomicGetPtr(&(msg.runCallback));
+		volatile void *userData = AtomicGetPtr(&(msg.userData));
+		void *result = NULL;
+
+		try {
+			result = runCallback((void *) userData);
+		} catch (const char *error) {
 			if (AtomicGet(&(msg.syncCall))) {
-				AtomicSetPtr(&(syncData->resultData), result);
+				AtomicSetPtr(&(syncData->errorData), (char *) error);
 				AtomicUnlock(&(syncData->syncLock));
+				return 1;
 			} else {
-				ThreadResultCallback resultCallback = AtomicGetPtr(&(msg.resultCallback));
-				if (resultCallback != NULL) {
-					try {
-						resultCallback((void*)userData, result);
-					} catch (...) {
-						throw;
-					}
+				throw;
+			}
+		} catch (...) {
+			if (AtomicGet(&(msg.syncCall))) {
+				AtomicSetPtr(&(syncData->errorData), (char *) eUnknown);
+				AtomicUnlock(&(syncData->syncLock));
+				return 1;
+			} else {
+				throw;
+			}
+		}
+
+		if (AtomicGet(&(msg.syncCall))) {
+			AtomicSetPtr(&(syncData->resultData), result);
+			AtomicUnlock(&(syncData->syncLock));
+		} else {
+			ThreadResultCallback resultCallback = AtomicGetPtr(&(msg.resultCallback));
+			if (resultCallback != NULL) {
+				try {
+					resultCallback((void *) userData, result);
+				} catch (...) {
+					throw;
 				}
 			}
 		}
-	
-		return 1;
 	}
 
-	static int setupMainThreadMessageLooper() {
-		int err, opt, i;
-		err = pipe(mainThreadMessagePipe);
-		if (err == -1) {
-			LOG("Create message pipe failed!");
-			return -1;
-		}
-		for (i = 0; i < 2; i++) {
-			opt = fcntl(mainThreadMessagePipe[i], F_GETFL);
-			if ((opt & (O_CLOEXEC | O_NONBLOCK)) != (O_CLOEXEC | O_NONBLOCK)) {
-				opt |= O_CLOEXEC | O_NONBLOCK;
-				fcntl(mainThreadMessagePipe[i], F_SETFL, opt);
-			}
-		}
-		
-		ALooper* mainLooper = ALooper_forThread();
-		if (mainLooper == NULL) {
-			LOG("Main thread looper not found!")
-			return -1;
-		}
-	
-		ALooper_addFd(mainLooper, mainThreadMessagePipe[0], LOOPER_ID_MESSAGEPIPE, ALOOPER_EVENT_INPUT, mainThreadMessagePipeCallback, NULL);
+	return 1;
+}
 
-		return 0;
+static int setupThreadMessageLooper() {
+	int err, opt, i;
+	err = pipe(mainThreadMessagePipe);
+	if (err == -1) {
+		LOG("Main thread create message pipe failed!");
+		return -1;
+	} else {
+		LOG("Main thread message pipe (%d, %d)", mainThreadMessagePipe[0], mainThreadMessagePipe[1]);
 	}
+	err = pipe(openglThreadMessagePipe);
+	if (err == -1) {
+		LOG("OpenGL thread create message pipe failed!");
+		return -1;
+	} else {
+		LOG("OpenGL thread message pipe (%d, %d)", openglThreadMessagePipe[0], openglThreadMessagePipe[1]);
+	}
+	for (i = 0; i < 2; i++) {
+		opt = fcntl(mainThreadMessagePipe[i], F_GETFL);
+		if ((opt & (O_CLOEXEC | O_NONBLOCK)) != (O_CLOEXEC | O_NONBLOCK)) {
+			opt |= O_CLOEXEC | O_NONBLOCK;
+			fcntl(mainThreadMessagePipe[i], F_SETFL, opt);
+		}
+
+		opt = fcntl(openglThreadMessagePipe[i], F_GETFL);
+		if ((opt & (O_CLOEXEC | O_NONBLOCK)) != (O_CLOEXEC | O_NONBLOCK)) {
+			opt |= O_CLOEXEC | O_NONBLOCK;
+			fcntl(openglThreadMessagePipe[i], F_SETFL, opt);
+		}
+	}
+
+	ALooper *mainLooper = ALooper_forThread();
+	if (mainLooper == NULL) {
+		LOG("Main thread looper not found!")
+		return -1;
+	}
+
+	ALooper_addFd(mainLooper, mainThreadMessagePipe[0], LOOPER_ID_MESSAGEPIPE, ALOOPER_EVENT_INPUT,
+				  threadMessagePipeCallback, NULL);
+
+	return 0;
+}
+
+void OpenGLThreadMessageLooper() {
+	threadMessagePipeCallback(openglThreadMessagePipe[0], 0, NULL);
+}
+
 #endif
 
-void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const char*) {
+void *MainThreadSync(ThreadRunCallback callback, void *userData) throw(const char*) {
 	if (CurrentThreadId() == MainThreadId) {
 		return callback(userData);
 	} else {
-		struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
-		struct ThreadSyncData* syncData = memAlloc(struct ThreadSyncData, syncData, sizeof(struct ThreadSyncData));
+		struct ThreadMessage *msg = memAlloc(struct ThreadMessage, msg,
+											 sizeof(struct ThreadMessage));
+		struct ThreadSyncData *syncData = memAlloc(struct ThreadSyncData, syncData,
+												   sizeof(struct ThreadSyncData));
 		if ((msg == NULL) || (syncData == NULL)) {
 			if (msg != NULL) {
 				memFree(msg);
@@ -246,36 +320,38 @@ void* MainThreadSync(ThreadRunCallback callback, void* userData) throw(const cha
 #elif defined(__JNI__)
 		postMainThreadMessage(msg);
 #else
-		#error Unsupported platform!
+#error Unsupported platform!
 #endif
 		AtomicLock(&(syncData->syncLock));
 		memFree(msg);
 
-		volatile const char* throwError = AtomicGetPtr(&(syncData->errorData));
+		volatile const char *throwError = AtomicGetPtr(&(syncData->errorData));
 		if (throwError != NULL) {
 			memFree(syncData);
-			throw (const char*)throwError;
+			throw (const char *) throwError;
 		}
 
-		volatile void* result = AtomicGetPtr(&(syncData->resultData));
+		volatile void *result = AtomicGetPtr(&(syncData->resultData));
 		memFree(syncData);
 
 		__sync_synchronize();
 
-		return (void*)result;
+		return (void *) result;
 	}
 }
 
-void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*) {
+void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback,
+					 void *userData) throw(const char*) {
 	if (CurrentThreadId() == MainThreadId) {
-		void* result = runCallback(userData);
+		void *result = runCallback(userData);
 		if (resultCallback != NULL)
 			resultCallback(userData, result);
 	} else {
-		struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
+		struct ThreadMessage *msg = memAlloc(struct ThreadMessage, msg,
+											 sizeof(struct ThreadMessage));
 		if (msg == NULL)
 			throw eOutOfMemory;
-		
+
 		AtomicSetPtr(&(msg->runCallback), runCallback);
 		AtomicSetPtr(&(msg->resultCallback), resultCallback);
 		AtomicSetPtr(&(msg->userData), userData);
@@ -288,13 +364,110 @@ void MainThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultC
 		postMainThreadMessage(msg);
 		memFree(msg);
 #else
-		#error Unsupported platform!
+	#error Unsupported platform!
 #endif
 	}
 }
 
-void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback, void* userData) throw(const char*) {
-	struct ThreadMessage* msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
+void *OpenGLThreadSync(ThreadRunCallback callback, void *userData) throw(const char*) {
+#if defined(__IOS__)
+	if (CurrentThreadId() == MainThreadId) {
+		return callback(userData);
+	} else {
+		return MainThreadSync(callback, userData);
+	}
+#elif defined(__JNI__)
+	if (IsOpenGLThread()) {
+		return callback(userData);
+	} else {
+		struct ThreadMessage *msg = memAlloc(struct ThreadMessage, msg,
+											 sizeof(struct ThreadMessage));
+		struct ThreadSyncData *syncData = memAlloc(struct ThreadSyncData, syncData,
+												   sizeof(struct ThreadSyncData));
+		if ((msg == NULL) || (syncData == NULL)) {
+			if (msg != NULL) {
+				memFree(msg);
+			}
+			if (syncData != NULL) {
+				memFree(syncData);
+			}
+			throw eOutOfMemory;
+		}
+
+		AtomicSetPtr(&(msg->runCallback), callback);
+		AtomicSetPtr(&(msg->resultCallback), NULL);
+		AtomicSetPtr(&(msg->userData), userData);
+		AtomicSet(&(msg->syncCall), true);
+		AtomicSetPtr(&(msg->syncData), syncData);
+
+		AtomicSet(&(syncData->syncLock), false);
+		AtomicSetPtr(&(syncData->resultData), NULL);
+		AtomicSetPtr(&(syncData->errorData), NULL);
+
+		//LOG("OpenGL Thread Message (Start)");
+		AtomicLock(&(syncData->syncLock));
+		postOpenGLThreadMessage(msg);
+		//LOG("OpenGL Thread Message (Sent)");
+		AtomicLock(&(syncData->syncLock));
+		//LOG("OpenGL Thread Message (Done)");
+		memFree(msg);
+
+		volatile const char *throwError = AtomicGetPtr(&(syncData->errorData));
+		if (throwError != NULL) {
+			memFree(syncData);
+			throw (const char *) throwError;
+		}
+
+		volatile void *result = AtomicGetPtr(&(syncData->resultData));
+		memFree(syncData);
+
+		__sync_synchronize();
+
+		return (void *) result;
+	}
+#else
+	#error Unsupported platform!
+#endif
+}
+
+void OpenGLThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback,
+					   void *userData) throw(const char*) {
+#if defined(__IOS__)
+	if (CurrentThreadId() == MainThreadId) {
+		void *result = runCallback(userData);
+		if (resultCallback != NULL)
+			resultCallback(userData, result);
+	} else {
+		MainThreadAsync(runCallback, resultCallback, userData);
+	}
+#elif defined(__JNI__)
+	if (IsOpenGLThread()) {
+		void *result = runCallback(userData);
+		if (resultCallback != NULL)
+			resultCallback(userData, result);
+	} else {
+		struct ThreadMessage *msg = memAlloc(struct ThreadMessage, msg,
+											 sizeof(struct ThreadMessage));
+		if (msg == NULL)
+			throw eOutOfMemory;
+
+		AtomicSetPtr(&(msg->runCallback), runCallback);
+		AtomicSetPtr(&(msg->resultCallback), resultCallback);
+		AtomicSetPtr(&(msg->userData), userData);
+		AtomicSet(&(msg->syncCall), false);
+		AtomicSetPtr(&(msg->syncData), NULL);
+
+		postOpenGLThreadMessage(msg);
+		memFree(msg);
+	}
+#else
+	#error Unsupported platform!
+#endif
+}
+
+void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCallback,
+					void *userData) throw(const char*) {
+	struct ThreadMessage *msg = memAlloc(struct ThreadMessage, msg, sizeof(struct ThreadMessage));
 	if (msg == NULL)
 		throw eOutOfMemory;
 
@@ -309,42 +482,51 @@ void NewThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resultCa
 #elif defined(__JNI__)
 	pthread_t thread;
 	pthread_create(&thread, NULL, NewThreadRun, msg);
+	pthread_detach(thread);
 #else
-	#error Unsupported platform!
+#error Unsupported platform!
 #endif
 }
 
 #if defined(__IOS__)
-extern "C" {
-	uint64_t CNSDateNano() {
-		return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000000000);
-	}
 
-	uint64_t CNSDateMillis() {
-		return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000);
-	}
-
-	void CNSThreadSleep(int ms) {
-		[NSThread sleepForTimeInterval:(double)ms / 1000.0];
-	}
+uint64_t CNSDateNano() {
+	return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000000000);
 }
+
+uint64_t CNSDateMillis() {
+	return (uint64_t)floor([[NSDate date] timeIntervalSince1970] * 1000);
+}
+
+void CNSThreadSleep(int ms) {
+	[NSThread sleepForTimeInterval:(double)ms / 1000.0];
+}
+
 #endif
 
 #if defined(__WINNT__)
-    LARGE_INTEGER uSystem_Frequency;
-    uint64_t uSystem_SystemTimeShiftNS;
-    uint64_t uSystem_SystemTimeShiftMS;
-    LARGE_INTEGER uSystem_CounterShift;
+	LARGE_INTEGER uSystem_Frequency;
+	uint64_t uSystem_SystemTimeShiftNS;
+	uint64_t uSystem_SystemTimeShiftMS;
+	LARGE_INTEGER uSystem_CounterShift;
 #endif
 
-void uSystemInit() {
+void initOpenGLThreadId() {
+	AtomicSet(&OpenGLThreadId, CurrentThreadId());
+}
+
+void releaseOpenGLThreadId() {
+	AtomicSet(&OpenGLThreadId, NULL);
+}
+
+void uSystemInit(void *system) {
 #if defined(__WINNT__)
-    QueryPerformanceFrequency(&uSystem_Frequency);
-    GetSystemTimeAsFileTime((FILETIME*)(&uSystem_SystemTimeShiftNS));
-    QueryPerformanceCounter(&uSystem_CounterShift);
-    uSystem_SystemTimeShiftNS -= 116444736000000000LL;
-    uSystem_SystemTimeShiftMS = uSystem_SystemTimeShiftNS / 10000LL;
-    uSystem_SystemTimeShiftNS *= 100LL;
+	QueryPerformanceFrequency(&uSystem_Frequency);
+	GetSystemTimeAsFileTime((FILETIME*)(&uSystem_SystemTimeShiftNS));
+	QueryPerformanceCounter(&uSystem_CounterShift);
+	uSystem_SystemTimeShiftNS -= 116444736000000000LL;
+	uSystem_SystemTimeShiftMS = uSystem_SystemTimeShiftNS / 10000LL;
+	uSystem_SystemTimeShiftNS *= 100LL;
 #endif
 
 	MainThreadId = CurrentThreadId();
@@ -352,10 +534,19 @@ void uSystemInit() {
 	__sync_synchronize();
 
 #if defined(__JNI__)
-	setupMainThreadMessageLooper();
+	mainEnv = (JNIEnv *) system;
+	mainEnv->GetJavaVM(&javaVM);
+
+	setupThreadMessageLooper();
 #endif
+
+	uHTTPClientInit();
 }
 
 void uSystemQuit() {
-
+	uHTTPClientQuit();
 }
+
+#ifdef __cplusplus
+}
+#endif

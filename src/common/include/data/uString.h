@@ -501,6 +501,11 @@ extern "C" {
 #ifdef DEBUG
 		void log() const;
 #endif
+
+#if defined(__JNI__)
+		jstring toJString(JNIEnv* env);
+#endif
+
 	};
 
 #endif

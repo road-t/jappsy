@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2016 The Jappsy Open Source Project (http://jappsy.com)
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,27 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_H
-#define JAPPSY_H
+package com.jappsy.exceptions;
 
-#include <platform.h>
-#include <data/uString.h>
+public class EOutOfMemory extends EGlobal {
 
-#ifdef __cplusplus
-extern CString* jappsyCacheDir;
-#endif
+	private static final long serialVersionUID = 4363935052299232040L;
+	private static final String eOutOfMemory = "Out of Memory";
+	
+	public EOutOfMemory() {
+		super(eOutOfMemory);
+	}
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+	public EOutOfMemory(String detailMessage) {
+		super(detailMessage);
+	}
 
-// Initialize all core static variables
-void jappsyInit(const char* cacheDir, void* system);
+	public EOutOfMemory(Throwable throwable) {
+		super(eOutOfMemory, throwable);
+	}
 
-// Deinitialize all core static variables
-void jappsyQuit();
+	public EOutOfMemory(String detailMessage, Throwable throwable) {
+		super(detailMessage, throwable);
+	}
 
-#ifdef __cplusplus
 }
-#endif
-
-#endif //JAPPSY_H

@@ -115,7 +115,9 @@ void Loader::checkUpdate(int time) {
 void* Loader::onUpdateWait(void* data) {
 	struct LoaderUpdateWaitData* threadData = (struct LoaderUpdateWaitData*)data;
 	systemSleep(AtomicGet(&(threadData->time)));
-	OpenGLThreadAsync(onUpdate, NULL, threadData);
+	//OpenGLThreadAsync(onUpdate, NULL, threadData);
+
+	(void)onUpdate(threadData);
 
 	return NULL;
 }
@@ -208,7 +210,7 @@ void Loader::update() {
 			if (onready != NULL) {
 				LOG("Loader::onReady");
 				try {
-					(void)MainThreadSync(onready, userData);
+					(void)OpenGLThreadSync(onready, userData);
 				} catch (const char* e) {
 					lock();
 					lastError = e;

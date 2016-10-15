@@ -809,14 +809,14 @@ void* HttpRequestResultSync(void* threadData) {
 	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)threadData;
 
 	if (requestResponse == NULL) {
-		LOG("HttpRequestResultSync: NULL");
+		//LOG("HttpRequestResultSync: NULL");
 
 		return NULL;
 	}
 
 	__sync_synchronize();
 
-	CString::format(L"HttpRequestResultSync: %ls", (wchar_t*)(requestResponse->http->url)).log();
+	//CString::format(L"HttpRequestResultSync: %ls", (wchar_t*)(requestResponse->http->url)).log();
 
 	int timeout = 1000;
 
@@ -917,7 +917,7 @@ void* HttpRequestResult(void* threadData, void* resultData) {
 	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)resultData;
 
 	if (requestResponse != NULL) {
-		CString::format(L"HttpRequestResult: %ls", (wchar_t*)(requestResponse->http->url)).log();
+		//CString::format(L"HttpRequestResult: %ls", (wchar_t*)(requestResponse->http->url)).log();
 
 		MainThreadAsync(HttpRequestResultAsync, NULL, requestResponse);
 	}
@@ -933,7 +933,7 @@ struct HTTPRequestRepeat {
 void* HttpRequestRepeat(void* threadData) {
 	HTTPRequestRepeat* repeat = (HTTPRequestRepeat*)threadData;
 
-	CString::format(L"HttpRequestRepeat: %ls", (wchar_t*)(repeat->http->url)).log();
+	//CString::format(L"HttpRequestRepeat: %ls", (wchar_t*)(repeat->http->url)).log();
 
 	systemSleep(repeat->timeout);
 
@@ -949,9 +949,9 @@ void* HttpRequestResultAsync(void* resultData) {
 	if (requestResponse != NULL) {
 		http = requestResponse->http;
 
-		CString::format(L"HttpRequestResultAsync: %ls", (wchar_t*)(http->url)).log();
+		//CString::format(L"HttpRequestResultAsync: %ls", (wchar_t*)(http->url)).log();
 	} else {
-		LOG("HttpRequestResultAsync: NULL");
+		//LOG("HttpRequestResultAsync: NULL");
 	}
 
 	int repeatTimeout = (int)(intptr_t)(HttpRequestResultSync(requestResponse));

@@ -51,11 +51,6 @@ public class HTTPClient {
 				if (post != null) {
 					httpConnection.setRequestMethod("POST");
 					httpConnection.setRequestProperty("Content-Type", "application/json");
-
-					OutputStream os = httpConnection.getOutputStream();
-					byte[] outputInBytes = post.getBytes("UTF-8");
-					os.write(outputInBytes);
-					os.close();
 				} else {
 					httpConnection.setRequestMethod("GET");
 				}
@@ -63,6 +58,13 @@ public class HTTPClient {
 				httpConnection.setRequestProperty("User-Agent", "Jappsy/1.0");
 				if (modifiedSince != null) {
 					httpConnection.setRequestProperty("If-Modified-Since", modifiedSince);
+				}
+
+				if (post != null) {
+					OutputStream os = httpConnection.getOutputStream();
+					byte[] outputInBytes = post.getBytes("UTF-8");
+					os.write(outputInBytes);
+					os.close();
 				}
 
 				httpConnection.connect();
@@ -91,11 +93,6 @@ public class HTTPClient {
 				if (post != null) {
 					httpConnection.setRequestMethod("POST");
 					httpConnection.setRequestProperty("Content-Type", "application/json");
-
-					OutputStream os = httpConnection.getOutputStream();
-					byte[] outputInBytes = post.getBytes("UTF-8");
-					os.write(outputInBytes);
-					os.close();
 				} else {
 					httpConnection.setRequestMethod("GET");
 				}
@@ -103,6 +100,13 @@ public class HTTPClient {
 				httpConnection.setRequestProperty("User-Agent", "Jappsy/1.0");
 				if (modifiedSince != null) {
 					httpConnection.setRequestProperty("If-Modified-Since", modifiedSince);
+				}
+
+				if (post != null) {
+					OutputStream os = httpConnection.getOutputStream();
+					byte[] outputInBytes = post.getBytes("UTF-8");
+					os.write(outputInBytes);
+					os.close();
 				}
 
 				httpConnection.connect();

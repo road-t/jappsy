@@ -400,7 +400,7 @@ Cache_addData_skip:
 
 	CString::freeChar(str);
 
-	CString::format(L"Cache::addData(%ls) %s", (wchar_t*)filePath, error).log();
+	//CString::format(L"Cache::addData(%ls) %s", (wchar_t*)filePath, error).log();
 #else
 	#error Unsupported platform!
 #endif
@@ -534,7 +534,7 @@ Cache_getData_skip:
 
 	CString::freeChar(str);
 
-	CString::format(L"Cache::getData(%ls) %s", (wchar_t*)filePath, error).log();
+	//CString::format(L"Cache::getData(%ls) %s", (wchar_t*)filePath, error).log();
 
 	return stream;
 #else

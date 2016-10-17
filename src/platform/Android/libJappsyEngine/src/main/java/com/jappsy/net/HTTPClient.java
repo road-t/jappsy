@@ -32,7 +32,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class HTTPClient {
 
 	public static HTTPResponse Request(final String uri, final String post, final String modifiedSince, final int timeout) {
-		Log.d("Request", uri);
+		//Log.d("Request", uri);
 
 		HTTPResponse response = new HTTPResponse();
 

@@ -545,6 +545,7 @@ void* onCreateSoundCallback(void* userData) {
 		destroyAudio(thread->audio);
 #elif defined(__JNI__)
 		#warning DestroyAudio
+		LOG("TODO: Loader::DestroyAudio");
 #endif
 		throw;
 	}
@@ -569,6 +570,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 			}
 #elif defined(__JNI__)
 	#warning PrepareAudio
+			LOG("TODO: Loader::PrepareAudio");
 #endif
 		} catch (...) {
 			return false;

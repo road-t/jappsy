@@ -16,6 +16,7 @@
 
 #include "uCache.h"
 #include <jappsy.h>
+#include <core/uSystem.h>
 
 #if defined(__IOS__)
 
@@ -46,6 +47,8 @@ extern "C" {
 #endif
 
 #elif defined(__JNI__)
+
+#include <io/uFileIO.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -136,21 +139,19 @@ bool Cache::mkdirs(const CString& createPath) {
 	
 	return true;
 #elif defined(__JNI__)
-	wchar_t* wstr = (wchar_t*)createPath;
-
-	uint32_t size = wcs_toutf8_size(wstr);
-	if (size == 0)
-		return true;
-
-	char* str = (char*)mmalloc(size);
-	if (str == NULL)
-		throw eOutOfMemory;
-
-	wcs_toutf8(wstr, str, size);
+	char* str;
+	uint32_t size;
+	try {
+		str = createPath.toChar(&size);
+		if (str == NULL)
+			return true;
+	} catch (...) {
+		throw;
+	}
 
 	size_t len = size - 1;
 	if (len == 0) {
-		mmfree(str);
+		CString::freeChar(str);
 		return true;
 	}
 
@@ -161,16 +162,16 @@ bool Cache::mkdirs(const CString& createPath) {
 	for (p = str + 1; *p; p++) {
 		if (*p == '/') {
 			*p = 0;
-			LOG("mkdir %s", str);
+			//LOG("mkdir %s", str);
 			mkdir(str, S_IRWXU | S_IRWXG | S_IXOTH);
 			*p = '/';
 		}
 	}
 
-	LOG("mkdir %s", str);
+	//LOG("mkdir %s", str);
 	mkdir(str, S_IRWXU | S_IRWXG | S_IXOTH);
 
-	mmfree(str);
+	CString::freeChar(str);
 	return true;
 #else
 	#error Unsupported platform!
@@ -220,17 +221,15 @@ void Cache::deleteRecursive(const CString& directory) {
 		}
 	}
 #elif defined(__JNI__)
-	wchar_t* wstr = (wchar_t*)directory;
-
-	uint32_t size = wcs_toutf8_size(wstr);
-	if (size == 0)
-		return;
-
-	char* str = (char*)mmalloc(size);
-	if (str == NULL)
-		throw eOutOfMemory;
-
-	wcs_toutf8(wstr, str, size);
+	char* str;
+	uint32_t size;
+	try {
+		str = directory.toChar(&size);
+		if (str == NULL)
+			return;
+	} catch (...) {
+		throw;
+	}
 
 	size_t len = size - 1;
 	if (len == 0) {
@@ -300,7 +299,7 @@ deleteRecursive_finish:
 		fts_close(ftsp);
 	}
 
-	mmfree(str);
+	CString::freeChar(str);
 #else
 	#error Unsupported platform!
 #endif
@@ -347,12 +346,61 @@ void Cache::addData(const CString& path, const CString& file, Stream* data) {
 #elif defined(__JNI__)
 	AtomicLock(&m_DiskCacheLock);
 
-	#warning TODO
+	//#warning TODO
+	//LOG("TODO: Cahe::addData");
 
-	CString fileDir = m_dataCacheDir; fileDir.concat(path);
-	CString::format(L"Cache::addData(%ls) fileDir: %ls", (wchar_t*)path, (wchar_t*)fileDir).log();
+	CString fileDir = m_dataCacheDir; fileDir.concatPath(path);
+	mkdirs(fileDir);
+	CString filePath = fileDir; filePath.concatPath(file);
+
+	char* str;
+	try {
+		str = filePath.toChar();
+		if (str == NULL)
+			return;
+	} catch (...) {
+		return;
+	}
+
+	const char* error = eOK;
+
+	// Create File
+	int fd = fio_createNew(str, &error);
+	if (fd < 0) {
+		goto Cache_addData_skip;
+	}
+
+	// Write File
+	if (!fio_writeFully(fd, (uint8_t *) (data->getBuffer()), data->getSize(), &error)) {
+		fio_close(fd, NULL);
+
+		// Delete File
+		unlink(str);
+
+		goto Cache_addData_skip;
+	}
+
+	// Set Modification Time
+	{
+		uint64_t modificationDate = data->getModificationDate();
+		if (modificationDate != 0) {
+			fio_setModification(fd, modificationDate, &error);
+		}
+	}
+
+	// Close File
+	fio_flush(fd, &error);
+	fio_close(fd, &error);
+
+	data->setSourcePath(filePath);
+
+Cache_addData_skip:
 
 	AtomicUnlock(&m_DiskCacheLock);
+
+	CString::freeChar(str);
+
+	CString::format(L"Cache::addData(%ls) %s", (wchar_t*)filePath, error).log();
 #else
 	#error Unsupported platform!
 #endif
@@ -386,9 +434,109 @@ Stream* Cache::getData(const CString& path, const CString& file) {
 	
 	return NULL;
 #elif defined(__JNI__)
-	#warning TODO
+	AtomicLock(&m_DiskCacheLock);
 
-	return NULL;
+	//#warning TODO
+	//LOG("TODO: Cahe::getData");
+
+	CString filePath = m_dataCacheDir; filePath.concatPath(path); filePath.concatPath(file);
+
+	char* str;
+	try {
+		str = filePath.toChar();
+		if (str == NULL)
+			return NULL;
+	} catch (...) {
+		return NULL;
+	}
+
+	const char* error = eOK;
+	Stream* stream = NULL;
+
+	// Open File
+	int fd = fio_open(str, &error);
+	if (fd == -1) {
+		goto Cache_getData_skip;
+	}
+
+	// Read File & Close
+	{
+		off_t fileSize;
+		if (!fio_begin(fd, NULL, &fileSize, &error)) {
+			fio_close(fd, NULL);
+			goto Cache_getData_skip;
+		}
+
+		if (fileSize > 0x7FFFFFFF) {
+			fio_end(fd, NULL, NULL);
+			fio_close(fd, NULL);
+
+			error = eIOReadLimit;
+			goto Cache_getData_skip;
+		}
+
+		uint8_t* streamptr = memAlloc(uint8_t, streamptr, (uint32_t)fileSize + 1);
+		if (streamptr == NULL) {
+			fio_end(fd, NULL, NULL);
+			fio_close(fd, NULL);
+
+			error = eOutOfMemory;
+			goto Cache_getData_skip;
+		}
+
+		if (!fio_readFully(fd, streamptr, (uint32_t)fileSize, &error)) {
+			memFree(streamptr);
+
+			fio_end(fd, NULL, NULL);
+			fio_close(fd, NULL);
+
+			goto Cache_getData_skip;
+		}
+
+		if (!fio_end(fd, NULL, &error)) {
+			memFree(streamptr);
+
+			fio_close(fd, NULL);
+
+			goto Cache_getData_skip;
+		}
+
+		// Get Modification
+		uint64_t modificationDate = 0;
+		if (!fio_getModification(fd, &modificationDate, &error)) {
+			memFree(streamptr);
+
+			goto Cache_getData_skip;
+		}
+
+		// Close File
+		if (!fio_close(fd, &error)) {
+			memFree(streamptr);
+
+			goto Cache_getData_skip;
+		}
+
+		streamptr[fileSize] = '\0';
+
+		try {
+			stream = new Stream(streamptr, (uint32_t)fileSize, true);
+			stream->setModificationDate(modificationDate);
+		} catch (...) {
+			memFree(streamptr);
+
+			goto Cache_getData_skip;
+		}
+	}
+
+Cache_getData_skip:
+
+	AtomicUnlock(&m_DiskCacheLock);
+
+	CString::freeChar(str);
+
+	CString::format(L"Cache::getData(%ls) %s", (wchar_t*)filePath, error).log();
+
+	return stream;
 #else
 	#error Unsupported platform!
 #endif
@@ -404,9 +552,16 @@ CString Cache::getDataPath(const CString& path, const CString& file) {
 	
 	return filePath;
 #elif defined(__JNI__)
-	#warning TODO
-	
-	return NULL;
+	AtomicLock(&m_DiskCacheLock);
+
+	//#warning TODO
+	//LOG("TODO: Cahe::getDataPath");
+
+	CString filePath = m_dataCacheDir; filePath.concatPath(path); filePath.concatPath(file);
+
+	AtomicUnlock(&m_DiskCacheLock);
+
+	return filePath;
 #else
 	#error Unsupported platform!
 #endif

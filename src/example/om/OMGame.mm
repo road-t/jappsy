@@ -1182,22 +1182,8 @@ static char* queryBuilder(const Loader* loader, const Vector<CString&>* query) {
         (wchar_t*)(game->sessid),
         (wchar_t*)(game->devid),
         count, (wchar_t*)querys);
-    
-    wchar_t* wstr = (wchar_t*)post;
-    if (wstr == NULL)
-        return NULL;
-    
-    uint32_t size = wcs_toutf8_size(wstr);
-    if (size == 0)
-        return NULL;
-    
-    char* str = memAlloc(char, str, size);
-    if (str == NULL)
-        return NULL;
-    
-    wcs_toutf8(wstr, str, size);
-    
-    return str;
+
+    return post.toChar();
 }
 
 void OMGame::updateConfig() {

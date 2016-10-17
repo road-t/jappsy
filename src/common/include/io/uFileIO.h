@@ -29,15 +29,23 @@ extern const char* clsFileDescriptor;
 
 #endif
 
-bool fio_begin(const int fd, off_t* restore, off_t* size, char** error);
-bool fio_end(const int fd, off_t* restore, char** error);
-bool fio_readFully(const int fd, uint8_t* buffer, int len, char** error);
-bool fio_writeFully(const int fd, uint8_t* buffer, int len, char** error);
-bool fio_seek(const int fd, uint32_t ofs, char** error);
-bool fio_flush(const int fd, char** error);
-bool fio_truncate(const int fd, uint32_t size, char** error);
+int fio_create(const char* path, const char** error);
+int fio_createNew(const char* path, const char** error);
+int fio_open(const char* path, const char** error);
+bool fio_close(const int fd, const char** error);
 
-void* fio_readFile(const int fd, uint32_t* size, char** error);
+bool fio_begin(const int fd, off_t* restore, off_t* size, const char** error);
+bool fio_end(const int fd, off_t* restore, const char** error);
+bool fio_readFully(const int fd, uint8_t* buffer, size_t len, const char** error);
+bool fio_writeFully(const int fd, uint8_t* buffer, size_t len, const char** error);
+bool fio_seek(const int fd, uint32_t ofs, const char** error);
+bool fio_flush(const int fd, const char** error);
+bool fio_truncate(const int fd, uint32_t size, const char** error);
+
+void* fio_readFile(const int fd, uint32_t* size, const char** error);
+
+bool fio_setModification(const int fd, uint64_t time, const char** error);
+bool fio_getModification(const int fd, uint64_t* time, const char** error);
 
 #ifdef __cplusplus
 }

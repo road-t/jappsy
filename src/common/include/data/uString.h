@@ -350,7 +350,9 @@ extern "C" {
 		CString& concat(const uint64_t value) throw(const char*);
 		CString& concat(const float value) throw(const char*);
 		CString& concat(const double value) throw(const char*);
-		
+
+		CString& concatPath(const CString& string) throw(const char*);
+
 		inline CString& operator +=(const CString& string) throw(const char*) { return this->concat(string); };
 #if defined(__IOS__)
 		inline CString& operator +=(const NSString* string) throw(const char*) { return this->concat(string); };
@@ -476,6 +478,9 @@ extern "C" {
 		inline uint32_t hashCode() const { return (m_data == NULL) ? 0 : mmcrc32(0xFFFFFFFF, m_data, m_size); }
 		virtual CString toString() const;
 		virtual CString toJSON() const;
+
+		char* toChar(uint32_t* strsize = NULL) const throw(const char*);
+		static void freeChar(char* str);
 
 #if defined(__IOS__)
 		bool matches(const CString& regularExpression) const;

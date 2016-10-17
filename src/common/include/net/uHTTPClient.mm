@@ -701,7 +701,7 @@ struct HTTPRequestResponse {
 void* HttpRequest(void* threadData) {
 	HTTPRequest *http = (HTTPRequest*)threadData;
 
-	CString::format(L"HttpRequest: %ls", (wchar_t*)(http->url)).log();
+	//CString::format(L"HttpRequest: %ls", (wchar_t*)(http->url)).log();
 
 	JNIEnv* env = GetThreadEnv();
 	jstring juri = http->url.toJString(env);

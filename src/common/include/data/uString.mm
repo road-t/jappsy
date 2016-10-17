@@ -1638,6 +1638,80 @@ CString& CString::concat(const double value) throw(const char*) {
 	return *this;
 }
 
+CString& CString::concatPath(const CString& string) throw(const char*) {
+	if (m_length > 0) {
+		if (m_data[m_length - 1] != L'/') {
+			concat(L'/');
+		}
+	}
+
+	wchar_t* ptr = (wchar_t*)string;
+	wchar_t ch;
+	if (ptr[0] == L'/') {
+		ptr++;
+	}
+	if ((ch = ptr[0]) == L'.') {
+		ch = ptr[1];
+		if (ch == L'/') {
+			ptr += 2;
+		} else if (ch == L'\0') {
+			return *this;
+		}
+	}
+
+	concat(ptr);
+
+	ptr = m_data;
+
+	wchar_t* last = ptr;
+	ch = *ptr;
+
+	do {
+		if (ch == L'/') {
+			ch = ptr[1];
+			if (ch == L'.') {
+				ch = ptr[2];
+				if (ch == L'.') {
+					ch = ptr[3];
+					if ((ch == L'\0') || (ch == L'/')) {
+						// /../
+						memmove(last, ptr + 3, (wcslen(ptr + 3) + 1) * sizeof(wchar_t));
+						ptr = m_data;
+						last = ptr;
+						continue;
+					}
+
+					// /..path
+					last = ptr;
+					ptr += 3;
+				} else if (ch == L'/') {
+					// /./
+					memmove(ptr, ptr + 2, (wcslen(ptr+2) + 1) * sizeof(wchar_t));
+					continue;
+				} else {
+					// /.path
+					last = ptr;
+					ptr += 2;
+				}
+			} else {
+				// /path
+				last = ptr;
+				ptr++;
+			}
+
+			while ((ch != L'\0') && (ch != L'/')) {
+				ptr++; ch = *ptr;
+			}
+		} else {
+			ptr++; ch = *ptr;
+		}
+	} while (ch != L'\0');
+
+	setLength((uint32_t)wcslen(m_data));
+
+	return *this;
+}
+
 #ifdef __IOS__
 
 CString::operator NSString*() const {
@@ -2979,26 +3053,46 @@ CString CString::toJSON() const {
 	return CString(L"\"").concat(*this).concat(L"\"");
 }
 
+char* CString::toChar(uint32_t* strsize) const throw(const char*) {
+	wchar_t* wstr = (wchar_t*)m_data;
+	if (wstr == NULL)
+		return NULL;
+
+	uint32_t size = wcs_toutf8_size(wstr);
+	if (strsize != NULL) {
+		*strsize = size;
+	}
+	if (size == 0)
+		return NULL;
+
+	char* str = memAlloc(char, str, size);
+	if (str == NULL)
+		throw eOutOfMemory;
+
+	wcs_toutf8(wstr, str, size);
+
+	return str;
+}
+
+void CString::freeChar(char* str) {
+	if (str != NULL) {
+		memFree(str);
+	}
+}
+
 #ifdef DEBUG
 
 void CString::log() const {
-	wchar_t* wstr = (wchar_t*)m_data;
-	if (wstr == NULL)
-		return;
-	
-	uint32_t size = wcs_toutf8_size(wstr);
-	if (size == 0)
-		return;
-	
-	char* str = memAlloc(char, str, size);
-	if (str == NULL)
-		return;
-	
-	wcs_toutf8(wstr, str, size);
-	
+	char* str;
+	try {
+		str = toChar();
+	} catch(...) {
+		str = NULL;
+	}
+
 	LOG("%s", str);
 	
-	memFree(str);
+	freeChar(str);
 }
 
 #endif
@@ -3006,23 +3100,18 @@ void CString::log() const {
 #if defined(__JNI__)
 
 jstring CString::toJString(JNIEnv* env) {
-	wchar_t* wstr = (wchar_t*)m_data;
-	if (wstr == NULL)
+	char* str;
+	try {
+		str = toChar();
+		if (str == NULL)
+			return NULL;
+	} catch (...) {
 		return NULL;
-
-	uint32_t size = wcs_toutf8_size(wstr);
-	if (size == 0)
-		return NULL;
-
-	char* str = memAlloc(char, str, size);
-	if (str == NULL)
-		return NULL;
-
-	wcs_toutf8(wstr, str, size);
+	}
 
 	jstring result = env->NewStringUTF(str);
 
-	memFree(str);
+	freeChar(str);
 
 	return result;
 }

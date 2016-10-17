@@ -23,6 +23,7 @@ extern "C" {
 void initAudioPlayer() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: initAudioPlayer");
 #else
 	#error Unsupported platform!
 #endif
@@ -31,6 +32,7 @@ void initAudioPlayer() {
 bool shutdownAudioPlayer() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: shutdownAudioPlayer");
 #else
 	#error Unsupported platform!
 #endif
@@ -40,6 +42,7 @@ bool shutdownAudioPlayer() {
 void pauseAudioPlayer() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: pauseAudioPlayer");
 #else
 	#error Unsupported platform!
 #endif
@@ -48,6 +51,7 @@ void pauseAudioPlayer() {
 void resumeAudioPlayer() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: resumeAudioPlayer");
 #else
 	#error Unsupported platform!
 #endif
@@ -56,6 +60,7 @@ void resumeAudioPlayer() {
 bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: prepareAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -65,6 +70,7 @@ bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyC
 void destroyAudio(void* audioHandle) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: destroyAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -73,6 +79,7 @@ void destroyAudio(void* audioHandle) {
 void playAudio(void* audioHandle, bool loop) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: playAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -81,6 +88,7 @@ void playAudio(void* audioHandle, bool loop) {
 bool playingAudio(void* audioHandle) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: playingAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -90,6 +98,7 @@ bool playingAudio(void* audioHandle) {
 void volumeAudio(void* audioHandle, float volume) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: volumeAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -98,6 +107,7 @@ void volumeAudio(void* audioHandle, float volume) {
 bool pauseAudio(void* audioHandle) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: pauseAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -107,6 +117,7 @@ bool pauseAudio(void* audioHandle) {
 void stopAudio(void* audioHandle) {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: stopAudio");
 #else
 	#error Unsupported platform!
 #endif
@@ -115,6 +126,7 @@ void stopAudio(void* audioHandle) {
 int32_t freeChannels() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: freeChannels");
 #else
 	#error Unsupported platform!
 #endif
@@ -124,6 +136,7 @@ int32_t freeChannels() {
 int32_t activeChannels() {
 #if defined(__JNI__)
 	#warning TODO!
+	LOG("TODO: activeChannels");
 #else
 	#error Unsupported platform!
 #endif

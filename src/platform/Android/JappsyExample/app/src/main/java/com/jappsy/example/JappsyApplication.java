@@ -59,5 +59,8 @@ public class JappsyApplication extends Application {
                 System.exit(0);
             }
         });
+
+        if (JappsyEngine.initialize(getCacheDir().getAbsolutePath()))
+            JappsyEngine.m_initialized = true;
     }
 }

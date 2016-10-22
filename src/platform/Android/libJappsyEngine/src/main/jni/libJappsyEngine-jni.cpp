@@ -23,6 +23,14 @@
 #include <malloc.h>
 #include <jappsy.h>
 #include <opengl/uGLEngine.h>
+#include <sound/uMixer.h>
+
+class JappsyEngine : public CObject {
+public:
+	jbool running = false;
+	jbool stopping = false;
+	GLEngine* engine = NULL;
+};
 
 static uint64_t getNativeHeapSize() {
 	struct mallinfo info = mallinfo();
@@ -63,7 +71,7 @@ Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type, jstring cacheD
 		return JNI_FALSE;
 	}
 
-	LOG("Start");
+	//LOG("Start");
 
 	return JNI_TRUE;
 }
@@ -72,72 +80,166 @@ JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_free(JNIEnv *env, jclass type) {
 	jappsyQuit();
 
-	LOG("Stop");
+	//LOG("Stop");
 }
 
 void initOpenGLThreadId();
 void releaseOpenGLThreadId();
 
-JNIEXPORT void JNICALL
+JNIEXPORT jlong JNICALL
 Java_com_jappsy_JappsyEngine_onCreate(JNIEnv *env, jclass type) {
-	LOG("onCreateSurface");
+	LOG("onCreate");
 
-	initOpenGLThreadId();
-/*
 	try {
-		GLEngine* engine = new GLEngine();
-		return (jlong)(intptr_t)(engine);
+		JappsyEngine *context = new JappsyEngine();
+		AtomicSet(&(context->running), false);
+		AtomicSet(&(context->stopping), false);
+		return (jlong) (intptr_t) (context);
 	} catch (...) {
 		return (jlong)NULL;
 	}
- */
-//	return (jlong)NULL;
 }
 
 JNIEXPORT void JNICALL
-Java_com_jappsy_JappsyEngine_onDestroy(JNIEnv *env, jclass type, jlong handle) {
-	LOG("onDestroy");
-
-	releaseOpenGLThreadId();
+Java_com_jappsy_JappsyEngine_setEngine(JNIEnv *env, jclass type, jlong handle, jlong engineHandle) {
+	LOG("setEngine");
 
 	if (handle != 0) {
-		try {
-			GLEngine *engine = (GLEngine *)(intptr_t)(handle);
-			delete engine;
-		} catch (...) {
-		}
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+		AtomicSet(&(context->engine), (GLEngine*)(intptr_t)(engineHandle));
 	}
 }
 
 JNIEXPORT void JNICALL
-Java_com_jappsy_JappsyEngine_onUpdate(JNIEnv *env, jclass type, jlong handle, jint width,
-									  jint height) {
-	LOG("onUpdate(%d,%d)", width, height);
-
-	glViewport(0, 0, width, height);
-
+Java_com_jappsy_JappsyEngine_onStart(JNIEnv *env, jclass type, jlong handle) {
 	if (handle != 0) {
-		try {
-			GLEngine *engine = (GLEngine *)(intptr_t)(handle);
-			engine->onUpdate(width, height);
-		} catch (...) {
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+		if (!AtomicGet(&(context->stopping))) {
+			LOG("onStart");
+
+			initOpenGLThreadId();
+
+			//Java_com_jappsy_JappsyEngine_onResume(env, type, handle)
 		}
 	}
 }
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onPause(JNIEnv *env, jclass type, jlong handle) {
-	LOG("onPause");
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+		if (!AtomicGet(&(context->stopping))) {
+			if (AtomicCompareExchange(&(context->running), false, true)) {
+				LOG("onPause");
+
+				pauseAudioPlayer();
+			}
+		}
+	}
 }
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onResume(JNIEnv *env, jclass type, jlong handle) {
-	LOG("onResume");
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+		if (!AtomicGet(&(context->stopping))) {
+			if (!AtomicCompareExchange(&(context->running), true, false)) {
+				LOG("onResume");
+
+				resumeAudioPlayer();
+			}
+		}
+	}
+}
+
+void* onShutdown(void* userData) {
+	LOG("onShutdown");
+
+	JappsyEngine *context = (JappsyEngine*)userData;
+	GLEngine* engine = AtomicGet(&(context->engine));
+
+	if (engine != NULL) {
+		delete engine;
+	}
+
+	delete context;
+
+	return NULL;
+}
+
+void* onShutdownRequest(void* userData) {
+	LOG("onShutdownRequest");
+
+	JappsyEngine *context = (JappsyEngine*)userData;
+	GLEngine* engine = AtomicGet(&(context->engine));
+
+	if (engine != NULL) {
+		try {
+			engine->shutdown();
+		} catch (...) {
+		}
+	}
+
+	MainThreadAsync(onShutdown, NULL, context);
+
+	return NULL;
+}
+
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_onStop(JNIEnv *env, jclass type, jlong handle) {
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+
+		if (!AtomicGet(&(context->stopping))) {
+			Java_com_jappsy_JappsyEngine_onPause(env, type, handle);
+		}
+
+		if (!AtomicCompareExchange(&(context->stopping), true, false)) {
+			LOG("onStop");
+
+			NewThreadAsync(onShutdownRequest, NULL, context);
+
+			releaseOpenGLThreadId();
+		}
+	}
+}
+
+/*
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_onDestroy(JNIEnv *env, jclass type, jlong handle) {
+	LOG("onDestroy");
+
+	if (handle != 0) {
+		Java_com_jappsy_JappsyEngine_onStop(env, type, handle);
+	}
+}
+ */
+
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_onUpdate(JNIEnv *env, jclass type, jlong handle, jint width,
+									  jint height) {
+	glViewport(0, 0, width, height);
+
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine*)(intptr_t)(handle);
+
+		if (!AtomicGet(&(context->stopping))) {
+			if (AtomicGet(&(context->running))) {
+				LOG("onUpdate(%d,%d)", width, height);
+
+				GLEngine *engine = AtomicGet(&(context->engine));
+				if (engine != NULL) {
+					try {
+						engine->onUpdate(width, height);
+					} catch (...) {
+					}
+				}
+			}
+		}
+	}
 }
 
 static int color = 0;
-
-void OpenGLThreadMessageLooper();
 
 JNIEXPORT void JNICALL
 Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
@@ -148,10 +250,18 @@ Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
 	//LOG("OpenGL Thread Message Loop (End)");
 
 	if (handle != 0) {
-		try {
-			GLEngine *engine = (GLEngine *)(intptr_t)(handle);
-			engine->onRender();
-		} catch (...) {
+		JappsyEngine *context = (JappsyEngine *) (intptr_t) (handle);
+
+		if (!AtomicGet(&(context->stopping))) {
+			if (AtomicGet(&(context->running))) {
+				GLEngine *engine = AtomicGet(&(context->engine));
+				if (engine != NULL) {
+					try {
+						engine->onRender();
+					} catch (...) {
+					}
+				}
+			}
 		}
 	} else {
 		float c = (float) color / 255.0f;

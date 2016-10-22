@@ -35,9 +35,6 @@ public class JappsyMain extends Activity {
 
         super.onCreate(savedInstanceState);
 
-        if (JappsyEngine.initialize(getCacheDir().getAbsolutePath()))
-            JappsyEngine.m_initialized = true;
-
         if (!JappsyEngine.m_initialized) {
             finish();
             return;
@@ -88,6 +85,7 @@ public class JappsyMain extends Activity {
 
     @Override protected void onDestroy() {
         Log.d(TAG, "onDestroy");
+
         super.onDestroy();
     }
 

@@ -43,6 +43,8 @@ void OpenGLThreadAsync(ThreadRunCallback runCallback, ThreadResultCallback resul
 #if defined(__JNI__)
 	JNIEnv* GetThreadEnv();
 	void ReleaseThreadEnv();
+
+	void OpenGLThreadMessageLooper();
 #endif
 
 #if defined(__WINNT__)

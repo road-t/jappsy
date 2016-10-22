@@ -126,7 +126,6 @@ void* onFatalCallback(const CString& error, void* userData) {
 
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
-	onUpdateState = NULL;
 }
 
 GLEngine::~GLEngine() {

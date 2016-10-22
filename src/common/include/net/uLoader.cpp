@@ -58,7 +58,9 @@ void Loader::setCallbacks(onStatusCallback onstatus, onFileCallback onfile, onEr
 void Loader::release() {
 	lock();
 	AtomicSet(&shutdown, 1);
-	
+
+	//LOG("Loader::release(updating)");
+
 	do {
 		if (AtomicLockTry(&updating))
 			break;
@@ -67,9 +69,15 @@ void Loader::release() {
 		usleep(1);
 		lock();
 	} while (true);
-	
+
+	//LOG("Loader::release(left)");
+
 	while (AtomicGet(&status.left) > 0) {
 		usleep(1);
+
+#if defined(__JNI__)
+		OpenGLThreadMessageLooper();
+#endif
 	}
 	
 	AtomicUnlock(&updating);
@@ -161,12 +169,14 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jpeg") == 0)) {
 					Info* user = new Info(this, info);
 					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+#if defined(__IOS__)
 				} else if (
 					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
 					(info->ext.compareToIgnoreCase(L"ogg") == 0)
 				) {
 					Info* user = new Info(this, info);
 					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
+#endif
 				} else if (
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {

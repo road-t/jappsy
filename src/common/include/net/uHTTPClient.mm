@@ -392,7 +392,7 @@ void* HttpSync(void* threadData) {
 				}
 				timeout = http->onerror(http->url, *((CString*)resultError), http->userData);
 			}
-			if (http->retry > 0) {
+			if (http->retry != 0) {
 				if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
 					http->onfatal(http->url, L"Shutdown", http->userData);
 					if (resultError != NULL) {
@@ -401,8 +401,10 @@ void* HttpSync(void* threadData) {
 					}
 					break;
 				}
-				http->retry--;
-			} else if (http->retry == 0) {
+				if (http->retry > 0) {
+					http->retry--;
+				}
+			} else {
 				if (http->cacheStream != NULL) {
 					try {
 						bool result = http->onstream(http->url, http->cacheStream, http->userData);
@@ -533,14 +535,16 @@ void* HttpAsync(void* threadData) {
 						if (http->onerror != NULL) {
 							timeout = http->onerror(http->url, [error localizedDescription], http->userData);
 						}
-						if (http->retry > 0) {
+						if (http->retry != 0) {
 							if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
 								http->onfatal(http->url, L"Shutdown", http->userData);
 								break;
 							}
-							http->retry--;
+							if (http->retry > 0) {
+								http->retry--;
+							}
 							repeat = true;
-						} else if (http->retry == 0) {
+						} else {
 							if (http->cacheStream != NULL) {
 								try {
 									bool result = http->onstream(http->url, http->cacheStream, http->userData);
@@ -556,8 +560,6 @@ void* HttpAsync(void* threadData) {
 							}
 							http->onfatal(http->url, [error localizedDescription], http->userData);
 							break;
-						} else {
-							repeat = true;
 						}
 					} while (false);
 					if (!repeat) {
@@ -633,14 +635,16 @@ void* HttpAsync(void* threadData) {
 						if (http->onerror != NULL) {
 							timeout = http->onerror(http->url, [error localizedDescription], http->userData);
 						}
-						if (http->retry > 0) {
+						if (http->retry != 0) {
 							if ((http->onretry != NULL) && (!http->onretry(http->url, http->userData))) {
 								http->onfatal(http->url, L"Shutdown", http->userData);
 								break;
 							}
-							http->retry--;
+							if (http->retry > 0) {
+								http->retry--;
+							}
 							repeat = true;
-						} else if (http->retry == 0) {
+						} else {
 							if (http->cacheStream != NULL) {
 								try {
 									bool result = http->onstream(http->url, http->cacheStream, http->userData);
@@ -656,8 +660,6 @@ void* HttpAsync(void* threadData) {
 							}
 							http->onfatal(http->url, [error localizedDescription], http->userData);
 							break;
-						} else {
-							repeat = true;
 						}
 					} while (false);
 					if (!repeat) {
@@ -701,7 +703,9 @@ struct HTTPRequestResponse {
 void* HttpRequest(void* threadData) {
 	HTTPRequest *http = (HTTPRequest*)threadData;
 
-	//CString::format(L"HttpRequest: %ls", (wchar_t*)(http->url)).log();
+#ifdef DEBUG
+	CString::format(L"HttpRequest: %ls", (wchar_t*)(http->url)).log();
+#endif
 
 	JNIEnv* env = GetThreadEnv();
 	jstring juri = http->url.toJString(env);
@@ -809,14 +813,17 @@ void* HttpRequestResultSync(void* threadData) {
 	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)threadData;
 
 	if (requestResponse == NULL) {
-		//LOG("HttpRequestResultSync: NULL");
-
+#ifdef DEBUG
+		LOG("HttpRequestResultSync: NULL");
+#endif
 		return NULL;
 	}
 
 	__sync_synchronize();
 
-	//CString::format(L"HttpRequestResultSync: %ls", (wchar_t*)(requestResponse->http->url)).log();
+#ifdef DEBUG
+	CString::format(L"HttpRequestResultSync: %ls", (wchar_t*)(requestResponse->http->url)).log();
+#endif
 
 	int timeout = 1000;
 
@@ -860,13 +867,15 @@ void* HttpRequestResultSync(void* threadData) {
 		}
 		timeout = requestResponse->http->onerror(requestResponse->http->url, *((CString*)requestResponse->resultError), requestResponse->http->userData);
 	}
-	if (requestResponse->http->retry > 0) {
+	if (requestResponse->http->retry != 0) {
 		if ((requestResponse->http->onretry != NULL) && (!requestResponse->http->onretry(requestResponse->http->url, requestResponse->http->userData))) {
 			requestResponse->http->onfatal(requestResponse->http->url, L"Shutdown", requestResponse->http->userData);
 			timeout = 0;
 			goto HttpRequestResultSync_break;
 		}
-		requestResponse->http->retry--;
+		if (requestResponse->http->retry > 0) {
+			requestResponse->http->retry--;
+		}
 	} else if (requestResponse->http->retry == 0) {
 		if (requestResponse->http->cacheStream != NULL) {
 			try {
@@ -917,9 +926,11 @@ void* HttpRequestResult(void* threadData, void* resultData) {
 	HTTPRequestResponse* requestResponse = (HTTPRequestResponse*)resultData;
 
 	if (requestResponse != NULL) {
-		//CString::format(L"HttpRequestResult: %ls", (wchar_t*)(requestResponse->http->url)).log();
+#ifdef DEBUG
+		CString::format(L"HttpRequestResult: %ls", (wchar_t*)(requestResponse->http->url)).log();
+#endif
 
-		MainThreadAsync(HttpRequestResultAsync, NULL, requestResponse);
+		OpenGLThreadAsync(HttpRequestResultAsync, NULL, requestResponse);
 	}
 
 	return NULL;
@@ -933,11 +944,13 @@ struct HTTPRequestRepeat {
 void* HttpRequestRepeat(void* threadData) {
 	HTTPRequestRepeat* repeat = (HTTPRequestRepeat*)threadData;
 
-	//CString::format(L"HttpRequestRepeat: %ls", (wchar_t*)(repeat->http->url)).log();
+#ifdef DEBUG
+	CString::format(L"HttpRequestRepeat: %ls", (wchar_t*)(repeat->http->url)).log();
+#endif
 
 	systemSleep(repeat->timeout);
 
-	MainThreadAsync(HttpRequestResultAsync, NULL, HttpRequest(repeat->http));
+	OpenGLThreadAsync(HttpRequestResultAsync, NULL, HttpRequest(repeat->http));
 
 	mmfree(repeat);
 	return NULL;
@@ -949,9 +962,11 @@ void* HttpRequestResultAsync(void* resultData) {
 	if (requestResponse != NULL) {
 		http = requestResponse->http;
 
-		//CString::format(L"HttpRequestResultAsync: %ls", (wchar_t*)(http->url)).log();
+#ifdef DEBUG
+		CString::format(L"HttpRequestResultAsync: %ls", (wchar_t*)(http->url)).log();
 	} else {
-		//LOG("HttpRequestResultAsync: NULL");
+		LOG("HttpRequestResultAsync: NULL");
+#endif
 	}
 
 	int repeatTimeout = (int)(intptr_t)(HttpRequestResultSync(requestResponse));

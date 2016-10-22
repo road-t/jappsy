@@ -171,6 +171,7 @@ void ReleaseThreadEnv() {
 
 static int mainThreadMessagePipe[2];
 static int openglThreadMessagePipe[2];
+volatile uint32_t openglThreadMessagePipeEvents = 0;
 
 static const int LOOPER_ID_MESSAGEPIPE = 'JPSY';
 
@@ -185,13 +186,20 @@ void postOpenGLThreadMessage(struct ThreadMessage *msg) {
 	if (write(openglThreadMessagePipe[1], msg, sizeof(struct ThreadMessage)) !=
 		sizeof(struct ThreadMessage)) {
 		LOG("OpenGL thread message buffer overrun!")
+	} else {
+		AtomicIncrement(&openglThreadMessagePipeEvents);
 	}
 }
 
 static int threadMessagePipeCallback(int fd, int events, void *data) {
 	struct ThreadMessage msg;
 
+	LOG("MessageLoop(%d): Read Messages (Start)", fd);
+
 	while (read(fd, &msg, sizeof(struct ThreadMessage)) == sizeof(struct ThreadMessage)) {
+		if (fd == openglThreadMessagePipe[0]) {
+			AtomicDecrement(&openglThreadMessagePipeEvents);
+		}
 		//LOG("(%d) Got message!", fd);
 
 		volatile struct ThreadSyncData *syncData = AtomicGetPtr(&(msg.syncData));
@@ -206,16 +214,25 @@ static int threadMessagePipeCallback(int fd, int events, void *data) {
 			if (AtomicGet(&(msg.syncCall))) {
 				AtomicSetPtr(&(syncData->errorData), (char *) error);
 				AtomicUnlock(&(syncData->syncLock));
+
+				LOG("MessageLoop(%d): Read Messages (Error)", fd);
+
 				return 1;
 			} else {
+				LOG("MessageLoop(%d): Read Messages (Error)", fd);
+
 				throw;
 			}
 		} catch (...) {
 			if (AtomicGet(&(msg.syncCall))) {
 				AtomicSetPtr(&(syncData->errorData), (char *) eUnknown);
 				AtomicUnlock(&(syncData->syncLock));
+				LOG("MessageLoop(%d): Read Messages (Error)", fd);
+
 				return 1;
 			} else {
+				LOG("MessageLoop(%d): Read Messages (Error)", fd);
+
 				throw;
 			}
 		}
@@ -229,11 +246,15 @@ static int threadMessagePipeCallback(int fd, int events, void *data) {
 				try {
 					resultCallback((void *) userData, result);
 				} catch (...) {
+					LOG("MessageLoop(%d): Read Messages (Error)", fd);
+
 					throw;
 				}
 			}
 		}
 	}
+
+	LOG("MessageLoop(%d): Read Messages (Done)", fd);
 
 	return 1;
 }
@@ -281,7 +302,9 @@ static int setupThreadMessageLooper() {
 }
 
 void OpenGLThreadMessageLooper() {
-	threadMessagePipeCallback(openglThreadMessagePipe[0], 0, NULL);
+	if (AtomicGet(&openglThreadMessagePipeEvents) != 0) {
+		threadMessagePipeCallback(openglThreadMessagePipe[0], 0, NULL);
+	}
 }
 
 #endif

@@ -285,9 +285,6 @@ public class JappsyService extends Service {
     @Override public void onTaskRemoved(Intent rootIntent) {
         Log.d(TAG, "onTaskRemoved");
 
-        JappsyEngine.free();
-        JappsyEngine.m_initialized = false;
-
         /* EXAMPLE SERVICE RESTART ON APP CRASH
             Intent restartServiceIntent = new Intent(getApplicationContext(), this.getClass());
             restartServiceIntent.setPackage(getPackageName());

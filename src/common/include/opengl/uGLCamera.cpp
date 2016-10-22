@@ -35,7 +35,16 @@ GLCamera::GLCamera(GLRender* context, const CString& key) {
 	max = 1000;
 	style = PERSPECTIVE;
 	invalid = true;
+
+	// В каждой системе разный буфер глубины, на его точность влияет размер значений
+	// Поэтому производится уменьшение масштаба всех обьектов, чтобы глубина не превышала порог
+#if defined(__IOS__)
 	scale = 0.001;
+#elif defined(__JNI__)
+	scale = 0.0001;
+#else
+	#error Unsupported platform!
+#endif
 }
 
 GLCamera* GLCamera::invalidate() {

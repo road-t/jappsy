@@ -21,34 +21,40 @@
 
 CString* jappsyCacheDir = NULL;
 
+jbool jappsyInitialized = false;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void jappsyInit(const char* cacheDir, void* system) {
-    LOG("Jappsy Init > Cache %s", cacheDir);
+    if (!AtomicCompareExchange(&jappsyInitialized, true, false)) {
+        LOG("Jappsy Init > Cache %s", cacheDir);
 
-    mmInit();
-    uSystemInit(system);
-    jappsyCacheDir = new CString(cacheDir);
+        mmInit();
+        uSystemInit(system);
+        jappsyCacheDir = new CString(cacheDir);
 #ifdef __IOS__
-	initAudioPlayer();
+        initAudioPlayer();
 #endif
+    }
 }
 
 void jappsyQuit() {
+    if (AtomicCompareExchange(&jappsyInitialized, false, true)) {
 #ifdef DEBUG
-    memLogStats(NULL, NULL, NULL, NULL);
+        memLogStats(NULL, NULL, NULL, NULL);
 #endif
 
 #ifdef __IOS__
-	shutdownAudioPlayer();
+        shutdownAudioPlayer();
 #endif
-    delete jappsyCacheDir;
-    uSystemQuit();
-    mmQuit();
+        delete jappsyCacheDir;
+        uSystemQuit();
+        mmQuit();
 
-    LOG("Jappsy Quit");
+        LOG("Jappsy Quit");
+    }
 }
 
 #ifdef __cplusplus

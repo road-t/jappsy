@@ -54,7 +54,7 @@ public class OMView extends JappsyView {
 	public void onStart() {
 		super.onStart();
 		if (!isInEditMode()) {
-			m_engine = OMEngine.onCreate();
+			JappsyEngine.setEngine(m_context, OMEngine.onCreate());
 		}
 	}
 }

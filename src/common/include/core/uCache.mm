@@ -168,7 +168,7 @@ bool Cache::mkdirs(const CString& createPath) {
 		}
 	}
 
-	//LOG("mkdir %s", str);
+	LOG("mkdir %s", str);
 	mkdir(str, S_IRWXU | S_IRWXG | S_IXOTH);
 
 	CString::freeChar(str);
@@ -400,7 +400,9 @@ Cache_addData_skip:
 
 	CString::freeChar(str);
 
-	//CString::format(L"Cache::addData(%ls) %s", (wchar_t*)filePath, error).log();
+#ifdef DEBUG
+	CString::format(L"Cache::addData(%ls) %s", (wchar_t*)filePath, error).log();
+#endif
 #else
 	#error Unsupported platform!
 #endif
@@ -534,7 +536,9 @@ Cache_getData_skip:
 
 	CString::freeChar(str);
 
-	//CString::format(L"Cache::getData(%ls) %s", (wchar_t*)filePath, error).log();
+#ifdef DEBUG
+	CString::format(L"Cache::getData(%ls) %s", (wchar_t*)filePath, error).log();
+#endif
 
 	return stream;
 #else

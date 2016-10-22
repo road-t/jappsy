@@ -21,7 +21,7 @@
 	#warning Remove Always Debug Mode
 	#define DEBUG
 #else
-	#undef DEBUG
+	//#undef DEBUG
 #endif
 #define JAPPSY_IO_RESTORE_FILE_POINTER
 

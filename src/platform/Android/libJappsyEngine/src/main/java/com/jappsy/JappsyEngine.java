@@ -39,8 +39,14 @@ public class JappsyEngine {
 	 */
 	public static native void mallinfo();
 
-	public static native void onCreate();
-	public static native void onDestroy(long handle);
+	public static native long onCreate();
+	//public static native void onDestroy(long handle);
+
+	public static native void setEngine(long handle, long engineHandle);
+
+	public static native void onStart(long handle);
+	public static native void onStop(long handle);
+
 	public static native void onUpdate(long handle, int width, int height);
 	public static native void onPause(long handle);
 	public static native void onResume(long handle);

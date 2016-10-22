@@ -69,7 +69,7 @@ public class JappsyView extends GLSurfaceView {
 	 */
 	private int m_line;
 
-	protected long m_engine = 0;
+	protected long m_context = 0;
 
 	private boolean m_stopping = false;
 
@@ -239,37 +239,41 @@ public class JappsyView extends GLSurfaceView {
 			if (m_created) {
 				onStop();
 			}
+
+			m_context = JappsyEngine.onCreate();
 			onStart();
 			m_created = true;
+
+			onResume();
 		}
 
 		@Override
 		public void onSurfaceChanged(GL10 gl, int width, int height) {
-			JappsyEngine.onUpdate(m_engine, width, height);
+			JappsyEngine.onUpdate(m_context, width, height);
 		}
 
 		@Override
 		public void onDrawFrame(GL10 gl) {
-			JappsyEngine.onFrame(m_engine);
+			JappsyEngine.onFrame(m_context);
 		}
 	}
 
 	public void onStart() {
-		JappsyEngine.onCreate();
+		JappsyEngine.onStart(m_context);
 	}
 
 	public void onStop() {
-		JappsyEngine.onDestroy(m_engine);
-		m_engine = 0;
+		JappsyEngine.onStop(m_context);
+		m_context = 0;
 	}
 
 	@Override public void onResume() {
 		super.onResume();
-		JappsyEngine.onResume(m_engine);
+		JappsyEngine.onResume(m_context);
 	}
 
 	@Override public void onPause() {
-		JappsyEngine.onPause(m_engine);
+		JappsyEngine.onPause(m_context);
 		super.onPause();
 	}
 

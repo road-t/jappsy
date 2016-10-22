@@ -34,11 +34,11 @@ public:
 protected:
 	GLRender* context = NULL;
 	
-	onUpdateStateCallback onUpdateState;
+	onUpdateStateCallback onUpdateState = NULL;
 	void* onUpdateStateUserData = NULL;
 
-	onWebLocationCallback onweblocation;
-	onWebScriptCallback onwebscript;
+	onWebLocationCallback onweblocation = NULL;
+	onWebScriptCallback onwebscript = NULL;
 	void* onwebUserData = NULL;
 	
 public:

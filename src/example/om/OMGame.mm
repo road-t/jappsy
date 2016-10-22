@@ -529,7 +529,7 @@ void OMGame::onFrame(GLRender* context) {
         
         static int fpscounter = 0;
         fpscounter++;
-        if (fpscounter >= 10) {
+        if (fpscounter >= 60) {
             fpscounter = 0;
 
             LOG("FPS: %d", context->frame->fps);

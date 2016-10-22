@@ -1074,10 +1074,12 @@ void uHTTPClientQuit() {
 
 	if (clazzHttpClient != NULL) {
 		env->DeleteGlobalRef(clazzHttpClient);
+		clazzHttpClient = NULL;
 	}
 
 	if (clazzHttpResponse != NULL) {
 		env->DeleteGlobalRef(clazzHttpResponse);
+		clazzHttpResponse = NULL;
 	}
 
 	ReleaseThreadEnv();

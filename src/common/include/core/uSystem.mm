@@ -19,6 +19,7 @@
 #include <core/uMemory.h>
 #include <opengl/uOpenGL.h>
 #include <net/uHTTPClient.h>
+#include <event/uMotionEvent.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -564,9 +565,11 @@ void uSystemInit(void *system) {
 #endif
 
 	uHTTPClientInit();
+	uMotionEventInit();
 }
 
 void uSystemQuit() {
+	uMotionEventQuit();
 	uHTTPClientQuit();
 }
 

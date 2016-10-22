@@ -169,14 +169,12 @@ void Loader::update() {
 					(info->ext.compareToIgnoreCase(L"jpeg") == 0)) {
 					Info* user = new Info(this, info);
 					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
-#if defined(__IOS__)
 				} else if (
 					(info->ext.compareToIgnoreCase(L"mp3") == 0) ||
 					(info->ext.compareToIgnoreCase(L"ogg") == 0)
 				) {
 					Info* user = new Info(this, info);
 					HTTPClient::Request(info->uri, info->post, true, -1, 5, info->cache, user, onhttp_data, onhttp_error, onhttp_retry, onhttp_fatal, onhttp_release);
-#endif
 				} else if (
 					(info->ext.compareToIgnoreCase(L"jimg") == 0) ||
 					(info->ext.compareToIgnoreCase(L"jsh") == 0)) {
@@ -581,6 +579,14 @@ bool Loader::onData(const File* info, Stream* stream) {
 #elif defined(__JNI__)
 	#warning PrepareAudio
 			LOG("TODO: Loader::PrepareAudio");
+			PrepareAudioThread thread;
+			thread.audio = NULL;
+			thread.size = 0;
+			thread.ready = true;
+			thread.mixer = context->mixer;
+			thread.info = info;
+			GLSound* sound = (GLSound*)MainThreadSync(onCreateSoundCallback, &thread);
+			onLoad(info, sound);
 #endif
 		} catch (...) {
 			return false;

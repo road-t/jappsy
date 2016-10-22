@@ -62,6 +62,19 @@ public:
 	
 	MotionPointer* insert(int32_t id) throw(const char*);
 	void remove(int32_t pointerIndex);
+
+	int32_t findPointerIndex(int32_t id) const;
 };
+
+void uMotionEventInit();
+void uMotionEventQuit();
+
+#if defined(__JNI__)
+
+class GLEngine;
+
+void onMotionEvent(JNIEnv* env, jobject event, GLEngine* engine);
+
+#endif
 
 #endif //JAPPSY_UGLMOTIONEVENT_H

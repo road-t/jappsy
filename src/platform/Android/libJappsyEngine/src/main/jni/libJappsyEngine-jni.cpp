@@ -273,6 +273,21 @@ Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
 	}
 }
 
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_onTouch(JNIEnv *env, jclass type, jlong handle, jobject event) {
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine *) (intptr_t) (handle);
+		if (!AtomicGet(&(context->stopping))) {
+			if (AtomicGet(&(context->running))) {
+				GLEngine *engine = AtomicGet(&(context->engine));
+				if (engine != NULL) {
+					onMotionEvent(env, event, engine);
+				}
+			}
+		}
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif

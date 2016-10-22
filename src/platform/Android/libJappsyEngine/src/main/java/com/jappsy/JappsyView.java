@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -309,6 +310,13 @@ public class JappsyView extends GLSurfaceView {
 		}
 		m_restoreView = null;
 		m_restoreActivity = null;
+	}
+
+	private int m_pointId1 = 0;
+
+	@Override public boolean onTouchEvent(MotionEvent event) {
+		JappsyEngine.onTouch(m_context, event);
+		return true;
 	}
 
 }

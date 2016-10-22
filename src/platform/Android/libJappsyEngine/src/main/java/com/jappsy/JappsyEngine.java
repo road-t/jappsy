@@ -16,6 +16,8 @@
 
 package com.jappsy;
 
+import android.view.MotionEvent;
+
 public class JappsyEngine {
 	public static boolean m_initialized = false;
 
@@ -51,4 +53,6 @@ public class JappsyEngine {
 	public static native void onPause(long handle);
 	public static native void onResume(long handle);
 	public static native void onFrame(long handle);
+
+	public static native void onTouch(long handle, MotionEvent event);
 }

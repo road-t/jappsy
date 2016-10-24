@@ -28,7 +28,7 @@ model {
 		}
 		ndk {
 			moduleName "JappsyEngine-jni"
-			ldLibs.addAll(["android", "log", "GLESv2"])
+			ldLibs.addAll(["android", "log", "GLESv2", "OpenSLES"])
 			cppFlags.addAll(["-fexceptions"])
 			cppFlags.addAll(["-std=c++11"])
 			stl = "stlport_static"

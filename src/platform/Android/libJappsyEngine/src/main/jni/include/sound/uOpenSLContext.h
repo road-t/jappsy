@@ -14,4 +14,43 @@
  * limitations under the License.
  */
 
-#include "uAudio.h"
+#ifndef JAPPSY_UOPENSLCONTEXT_H
+#define JAPPSY_UOPENSLCONTEXT_H
+
+#include <platform.h>
+
+#include <SLES/OpenSLES.h>
+#include <SLES/OpenSLES_Android.h>
+
+#include <core/uAtomic.h>
+
+class OpenSLPlayer;
+class OpenSLSound;
+
+#define OPENSL_CHANNELS		16
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+struct OpenSLContext {
+	SLObjectItf engineObj = NULL;
+	SLEngineItf engine = NULL;
+	SLObjectItf outputMixObj = NULL;
+
+	OpenSLPlayer* players[OPENSL_CHANNELS];
+
+	bool init();
+	void shutdown();
+
+	void pause();
+	void resume();
+
+	OpenSLPlayer* getFreePlayer(OpenSLSound* sound);
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif //JAPPSY_UOPENSLCONTEXT_H

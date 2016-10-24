@@ -16,6 +16,22 @@
 
 #include "uAudioCVT.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+void calculateAudioSpec(struct tAudioSpec *spec) {
+	switch (spec->format) {
+		case AUDIO_U8:
+			spec->silence = 0x80;
+			break;
+		default:
+			spec->silence = 0x00;
+			break;
+	}
+	spec->size = (uint32_t)((spec->format & 0xFF) >> 3) * spec->channels * spec->samples;
+}
+
 /*
 // Вычисление максимальной громкости и последующая его нормализация
 void normVol(struct tAudioConvert *cvt, uint16_t format) {
@@ -1420,3 +1436,7 @@ int buildAudioCVT(struct tAudioConvert *cvt,
 
 	return(cvt->needed);
 }
+
+#ifdef __cplusplus
+}
+#endif

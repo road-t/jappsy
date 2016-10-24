@@ -33,7 +33,7 @@ extern "C" {
 	typedef void (*AudioReadyCallback)(void* audioHandle, uint32_t bufferSize, uint64_t audioSize, void* userData);
 	typedef void (*AudioErrorCallback)(void* userData);
 	
-	bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
+	bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
 	void destroyAudio(void* audioHandle);
 	void playAudio(void* audioHandle, bool loop);
 	bool playingAudio(void* audioHandle);

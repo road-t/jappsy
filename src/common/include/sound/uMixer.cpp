@@ -16,14 +16,27 @@
 
 #include "uMixer.h"
 
+#if defined(__JNI__)
+
+#include <sound/uOpenSLContext.h>
+
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#if defined(__JNI__)
+
+static OpenSLContext context;
+
+#endif
+
 void initAudioPlayer() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: initAudioPlayer");
+	LOG("OpenSL: initAudioPlayer");
+
+	context.init();
 #else
 	#error Unsupported platform!
 #endif
@@ -31,8 +44,9 @@ void initAudioPlayer() {
 
 bool shutdownAudioPlayer() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: shutdownAudioPlayer");
+	LOG("OpenSL: shutdownAudioPlayer");
+
+	context.shutdown();
 #else
 	#error Unsupported platform!
 #endif
@@ -57,7 +71,7 @@ void resumeAudioPlayer() {
 #endif
 }
 
-bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
+bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
 #if defined(__JNI__)
 	#warning TODO!
 	LOG("TODO: prepareAudio");

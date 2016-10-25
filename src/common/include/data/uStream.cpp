@@ -71,6 +71,21 @@ Stream::~Stream() {
 	m_position = 0;
 }
 
+uint32_t Stream::readBytes(void* buffer, uint32_t length) throw(const char*) {
+	if (length == 0)
+		return 0;
+
+	uint32_t end = m_position + length;
+	if (end > m_size)
+		throw eIOReadLimit;
+
+	uint32_t size = end - m_position;
+	memcpy(buffer, m_buffer + m_position, size);
+	m_position = end;
+
+	return size;
+}
+
 uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
 	if (length == 0)
 		return NULL;

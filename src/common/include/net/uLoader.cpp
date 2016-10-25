@@ -559,6 +559,8 @@ void* onCreateSoundCallback(void* userData) {
 	}
 }
 
+#include <sound/mp3/uMP3Sound.h>
+
 bool Loader::onData(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
@@ -579,6 +581,21 @@ bool Loader::onData(const File* info, Stream* stream) {
 #elif defined(__JNI__)
 	#warning PrepareAudio
 			LOG("TODO: Loader::PrepareAudio");
+
+			MP3Sound* test = new MP3Sound();
+			if (test->createBuffer(test)) {
+				LOG("MP3: OpenBuffer");
+				test->openBuffer(test, stream);
+
+				uint8_t buffer[16384];
+				size_t filled = test->fillBuffer(test, buffer, 16384);
+				LOG("MP3: Filled %d", (int)filled);
+
+				test->closeBuffer(test);
+				test->deleteBuffer(test);
+			}
+			delete test;
+
 			PrepareAudioThread thread;
 			thread.audio = NULL;
 			thread.size = 0;

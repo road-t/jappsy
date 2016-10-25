@@ -69,7 +69,8 @@ public:
 	
 	inline void setPosition(uint32_t position) throw(const char*) { if (position > m_size) throw eOutOfRange; m_position = position; }
 	inline uint32_t getPosition() { return m_position; }
-	
+
+	uint32_t readBytes(void* buffer, uint32_t length) throw(const char*); // eIOReadLimit
 	uint8_t* readBytes(uint32_t length) throw(const char*); // eIOReadLimit, eOutOfMemory
 	uint32_t readInt() throw(const char*); // eIOReadLimit
 	uint8_t readUnsignedByte() throw(const char*); // eIOReadLimit

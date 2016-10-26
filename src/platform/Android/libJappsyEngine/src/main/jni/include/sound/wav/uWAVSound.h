@@ -14,38 +14,37 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UMP3SOUND_H
-#define JAPPSY_UMP3SOUND_H
+#ifndef JAPPSY_UWAVSOUND_H
+#define JAPPSY_UWAVSOUND_H
 
 #include <platform.h>
 #include <sound/uSound.h>
-#include <sound/mp3/uMP3Decoder.h>
+#include <sound/wav/uWAVDecoder.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-bool is_mp3(uint32_t sig);
+bool is_wav(uint32_t sig);
 
 #ifdef __cplusplus
 }
 #endif
 
-class MP3Sound : public Sound {
+class WAVSound : public Sound {
 protected:
-	struct tMP3Decoder* mp3 = NULL;
-	struct tMPADecoderConfig config;
-	struct tMPADecoderInfo mpainfo;
+	struct tWAVDecoder* wav;
 
 private:
-	static bool mp3_openBuffer(MP3Sound* sound, Stream* stream);
-	static size_t mp3_fillBuffer(MP3Sound* sound, void* stream, size_t len);
-	static void mp3_resetBuffer(MP3Sound* sound);
-	static void mp3_closeBuffer(MP3Sound* sound);
+	static bool wav_openBuffer(WAVSound* sound, Stream* stream);
+	static size_t wav_fillBuffer(WAVSound* sound, void* stream, size_t len);
+	static void wav_resetBuffer(WAVSound* sound);
+	static void wav_closeBuffer(WAVSound* sound);
 
 public:
-	MP3Sound();
-	~MP3Sound();
+	WAVSound();
+	~WAVSound();
 };
 
-#endif //JAPPSY_UMP3SOUND_H
+
+#endif //JAPPSY_UWAVSOUND_H

@@ -614,16 +614,13 @@ int tMP3Decoder::init(Stream* stream, int nogap) {
 	mp3->init_done = 0;
 	mp3->stream = stream;
 	mp3->stream_size = stream->getSize();
+	mp3->stream_start = stream->getPosition();
 	mp3->in_buffer_offset = mp3->in_buffer_used = 0;
 	mp3->out_buffer_offset = mp3->out_buffer_used = 0;
 
 	int32_t n = sizeof(mp3->in_buffer);
 	if (static_cast<uint32_t>(n) > mp3->stream_size) n = (int32_t)mp3->stream_size;
-	try {
-		n = stream->readBytes(mp3->in_buffer, (uint32_t)n);
-	} catch (...) {
-		n = 0;
-	}
+	n = stream->readBytes(mp3->in_buffer, (uint32_t)n);
 	mp3->in_buffer_used = (uint32_t)n;
 	if (n < 4) {
 		reset();
@@ -663,6 +660,7 @@ int tMP3Decoder::init(Stream* stream, int nogap) {
 	}
 	mp3->mpainfo.duration = (mp3->mpainfo.frames*mp3->mpainfo.frame_samples + (mp3->mpainfo.frequency >> 1))/mp3->mpainfo.frequency;
 	mp3->init_done = 1;
+	mp3->stream_start += mp3->in_buffer_offset;
 	return 0;
 }
 
@@ -799,7 +797,16 @@ int tMP3Decoder::seek(int64_t pos, int units) {
 	struct tMP3Decoder* mp3 = this;
 	int64_t newpos;
 	if (!(mp3->init_done)) return -1;
-	if (units == MP3DEC_SEEK_BYTES) {
+	if (units == MP3DEC_SEEK_START) {
+		try {
+			mp3->stream->setPosition(mp3->stream_start);
+		} catch (...) {
+			return -1;
+		}
+		mp3->mpadec->state = MPADEC_STATE_START;
+		mp3->in_buffer_offset = mp3->in_buffer_used = 0;
+		mp3->out_buffer_offset = mp3->out_buffer_used = 0;
+	} else if (units == MP3DEC_SEEK_BYTES) {
 		newpos = mp3->stream->getPosition() + pos;
 		if (newpos > mp3->stream_size) newpos = mp3->stream_size;
 		try {

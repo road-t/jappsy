@@ -21,6 +21,7 @@
 #include <data/uObject.h>
 #include <data/uString.h>
 #include <sound/uOpenSLContext.h>
+#include <data/uStream.h>
 
 class OpenSLSound : public CObject {
 public:
@@ -29,6 +30,7 @@ public:
 
 	CString path;
 	virtual void load(const CString& path) = 0;
+	virtual void load(Stream* stream) = 0;
 
 	virtual void setVolume(float volume);
 	virtual float getVolume();

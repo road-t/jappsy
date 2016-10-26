@@ -588,8 +588,27 @@ bool Loader::onData(const File* info, Stream* stream) {
 				test->openBuffer(test, stream);
 
 				uint8_t buffer[16384];
-				size_t filled = test->fillBuffer(test, buffer, 16384);
-				LOG("MP3: Filled %d", (int)filled);
+				size_t filled = 0;
+				size_t total = 0;
+				uint32_t crc = 0;
+
+				do {
+					total = total + (filled = test->fillBuffer(test, buffer, 16384));
+					crc = mmcrc32(0, buffer, 16384);
+					LOG("MP3: Filled %d (CRC: %08X)", (int) filled, crc);
+				} while (filled != 0);
+				LOG("MP3: Total %d", (int)total);
+
+				total = 0;
+				test->resetBuffer(test);
+				LOG("MP3: Reset");
+
+				do {
+					total = total + (filled = test->fillBuffer(test, buffer, 16384));
+					crc = mmcrc32(0, buffer, 16384);
+					LOG("MP3: Filled %d (CRC: %08X)", (int) filled, crc);
+				} while (filled != 0);
+				LOG("MP3: Total %d", (int)total);
 
 				test->closeBuffer(test);
 				test->deleteBuffer(test);

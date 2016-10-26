@@ -29,7 +29,7 @@ Stream::Stream(const wchar_t* data) throw(const char*) {
 				throw eOutOfMemory;
 			wcs_toutf8(data, (char*)m_buffer, size);
 			m_allocated = true;
-			m_size = size - 1;
+			m_limit = m_size = size - 1;
 			m_modificationDate = currentTimeMillis();
 			m_sourcePath = (const void*)NULL;
 		}
@@ -42,7 +42,7 @@ Stream::Stream(const char* data, bool autorelease) {
 		uint32_t length = utf8_strlen(data, &size);
 		if (length > 0) {
 			m_buffer = (uint8_t*)data;
-			m_size = size - 1;
+			m_limit = m_size = size - 1;
 			m_allocated = autorelease;
 			m_modificationDate = currentTimeMillis();
 			m_sourcePath = (const void*)NULL;
@@ -53,7 +53,7 @@ Stream::Stream(const char* data, bool autorelease) {
 Stream::Stream(const void* data, uint32_t length, bool autorelease) {
 	if ((data != NULL) && (length != 0)) {
 		m_buffer = (uint8_t*)data;
-		m_size = length;
+		m_limit = m_size = length;
 		m_allocated = autorelease;
 		m_modificationDate = currentTimeMillis();
 		m_sourcePath = (const void*)NULL;
@@ -67,17 +67,17 @@ Stream::~Stream() {
 	
 	m_allocated = false;
 	m_buffer = NULL;
-	m_size = 0;
+	m_limit = m_size = 0;
 	m_position = 0;
 }
 
-uint32_t Stream::readBytes(void* buffer, uint32_t length) throw(const char*) {
+uint32_t Stream::readBytes(void* buffer, uint32_t length) {
 	if (length == 0)
 		return 0;
 
 	uint32_t end = m_position + length;
-	if (end > m_size)
-		throw eIOReadLimit;
+	if (end > m_limit)
+		end = m_limit;
 
 	uint32_t size = end - m_position;
 	memcpy(buffer, m_buffer + m_position, size);
@@ -91,7 +91,7 @@ uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
 		return NULL;
 	
 	uint32_t end = m_position + length;
-	if (end > m_size)
+	if (end > m_limit)
 		throw eIOReadLimit;
 	
 	uint32_t size = end - m_position;
@@ -104,9 +104,9 @@ uint8_t* Stream::readBytes(uint32_t length) throw(const char*) {
 	return data;
 }
 
-uint32_t Stream::readInt() throw(const char*) {
+uint32_t Stream::readU32() throw(const char*) {
 	uint32_t end = m_position + 4;
-	if (end > m_size)
+	if (end > m_limit)
 		throw eIOReadLimit;
 
 	uint32_t value = readUInt32(m_buffer, m_position);
@@ -114,9 +114,19 @@ uint32_t Stream::readInt() throw(const char*) {
 	return value;
 }
 
-uint8_t Stream::readUnsignedByte() throw(const char*) {
+uint16_t Stream::readU16() throw(const char*) {
+	uint32_t end = m_position + 2;
+	if (end > m_limit)
+		throw eIOReadLimit;
+
+	uint16_t value = readUInt16(m_buffer, m_position);
+	m_position = end;
+	return value;
+}
+
+uint8_t Stream::readU8() throw(const char*) {
 	uint32_t end = m_position + 1;
-	if (end > m_size)
+	if (end > m_limit)
 		throw eIOReadLimit;
 	
 	uint8_t value = readUInt8(m_buffer, m_position);
@@ -124,9 +134,39 @@ uint8_t Stream::readUnsignedByte() throw(const char*) {
 	return value;
 }
 
+int32_t Stream::readS32() throw(const char*) {
+	uint32_t end = m_position + 4;
+	if (end > m_limit)
+		throw eIOReadLimit;
+
+	int32_t value = (int32_t)readUInt32(m_buffer, m_position);
+	m_position = end;
+	return value;
+}
+
+int16_t Stream::readS16() throw(const char*) {
+	uint32_t end = m_position + 2;
+	if (end > m_limit)
+		throw eIOReadLimit;
+
+	int16_t value = (int16_t)readUInt16(m_buffer, m_position);
+	m_position = end;
+	return value;
+}
+
+int8_t Stream::readS8() throw(const char*) {
+	uint32_t end = m_position + 1;
+	if (end > m_limit)
+		throw eIOReadLimit;
+
+	int8_t value = (int8_t)readUInt8(m_buffer, m_position);
+	m_position = end;
+	return value;
+}
+
 int32_t Stream::skip(uint32_t length) {
 	uint32_t end = m_position + length;
-	if (end > m_size)
+	if (end > m_limit)
 		return -1;
 
 	m_position = end;
@@ -138,7 +178,7 @@ char* Stream::readString(uint32_t length) throw(const char*) {
 		return NULL;
 	
 	uint32_t end = m_position + length;
-	if (end > m_size)
+	if (end > m_limit)
 		throw eIOReadLimit;
 	
 	uint32_t size = end - m_position;
@@ -180,3 +220,21 @@ char* Stream::readGZipString(uint32_t length) throw(const char*) {
 	return (char*)data;
 }
 
+Stream* Stream::duplicate() throw(const char*) {
+	Stream* result = NULL;
+
+	if (m_size > 0) {
+		uint8_t* buffer = memAlloc(uint8_t, buffer, m_size + 1);
+		if (buffer == NULL) {
+			throw eOutOfMemory;
+		}
+
+		result = new Stream(buffer, m_size, true);
+		result->setLimit(getLimit());
+		result->setSourcePath(getSourcePath());
+		result->setModificationDate(getModificationDate());
+		result->setPosition(getPosition());
+	}
+
+	return result;
+}

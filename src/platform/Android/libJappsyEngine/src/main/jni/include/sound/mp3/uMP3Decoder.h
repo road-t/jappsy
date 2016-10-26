@@ -27,6 +27,7 @@ extern "C" {
 #define MP3DEC_SEEK_BYTES   0
 #define MP3DEC_SEEK_SAMPLES 1
 #define MP3DEC_SEEK_SECONDS 2
+#define MP3DEC_SEEK_START	3
 
 #define MPADEC_SBLIMIT     32
 #define MPADEC_SSLIMIT     18
@@ -270,6 +271,7 @@ struct tMP3Decoder {
 	struct tMPADecoder* mpadec;
 	Stream* stream;
 	uint32_t stream_size;
+	uint32_t stream_start;
 	struct tMPADecoderInfo mpainfo;
 	struct tMPATagInfo taginfo;
 	uint32_t in_buffer_offset;

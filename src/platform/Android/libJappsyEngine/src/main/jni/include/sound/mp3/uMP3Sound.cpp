@@ -63,13 +63,20 @@ bool MP3Sound::mp3_openBuffer(MP3Sound* sound, Stream* stream) {
 		mp3dec_uninit(sound->mp3); sound->mp3 = 0;
 		return false;
 	}
-	if (sound->mp3->init(stream,0) != 0) {
+	try {
+		sound->stream = stream->duplicate();
+	} catch (...) {
 		mp3dec_uninit(sound->mp3); sound->mp3 = 0;
 		return false;
 	}
-	sound->stream = stream;
+	if (sound->mp3->init(sound->stream,0) != 0) {
+		mp3dec_uninit(sound->mp3); sound->mp3 = 0;
+		delete sound->stream; sound->stream = NULL;
+		return false;
+	}
 	if (sound->mp3->get_info(&(sound->mpainfo), MPADEC_INFO_STREAM) != 0) {
 		mp3dec_uninit(sound->mp3); sound->mp3 = 0;
+		delete sound->stream; sound->stream = NULL;
 		return false;
 	}
 
@@ -112,13 +119,18 @@ size_t MP3Sound::mp3_fillBuffer(MP3Sound* sound, void* stream, size_t len) {
 	return (size_t)bufused;
 }
 
+void MP3Sound::mp3_resetBuffer(MP3Sound* sound) {
+	sound->mp3->seek(0, MP3DEC_SEEK_START);
+}
+
 void MP3Sound::mp3_closeBuffer(MP3Sound* sound) {
 	if (sound->mp3 != NULL) {
 		mp3dec_uninit(sound->mp3);
 		sound->mp3 = NULL;
 
 		if (sound->stream != NULL) {
-			memDelete(sound->stream);
+			delete sound->stream;
+			sound->stream = NULL;
 		}
 	}
 }
@@ -129,6 +141,7 @@ MP3Sound::MP3Sound() {
 	deleteBuffer = (void (*)(void*))mp3_deleteBuffer;
 	openBuffer = (bool (*)(void*, Stream*))mp3_openBuffer;
 	fillBuffer = (size_t (*)(void*, void*, size_t))mp3_fillBuffer;
+	resetBuffer = (void (*)(void*))mp3_resetBuffer;
 	closeBuffer = (void (*)(void*))mp3_closeBuffer;
 }
 

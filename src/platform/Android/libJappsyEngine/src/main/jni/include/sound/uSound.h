@@ -39,10 +39,11 @@ public:
 	void (*deleteBuffer)(void* sound) = NULL; // удалить буффер
 	bool (*openBuffer)(void* sound, Stream* stream) = NULL; // открыть буффер из файла или памяти
 	size_t (*fillBuffer)(void* sound, void* stream, size_t len) = NULL; // заполнить буффер данными
+	void (*resetBuffer)(void* sound); // сбросить буффер в начало
 	void (*closeBuffer)(void* sound) = NULL; // закрыть буффер
 
-	uint8_t *buffer = NULL;			// буффер содержащий уже считанные данные из (файла/памяти)
-	size_t bufferSize = 0;			// размер буффера
+	//uint8_t *buffer = NULL;			// буффер содержащий уже считанные данные из (файла/памяти)
+	//size_t bufferSize = 0;			// размер буффера
 
 	// Длительность в милисекундах
 	uint32_t duration = 0;

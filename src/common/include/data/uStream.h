@@ -26,6 +26,7 @@ private:
 	bool m_allocated = false;
 	uint8_t* m_buffer = NULL;
 	uint32_t m_size = 0;
+	uint32_t m_limit = 0;
 	uint32_t m_position = 0;
 	uint64_t m_modificationDate = 0;
 	
@@ -58,7 +59,10 @@ public:
 	Stream(const char* data, bool autorelease = false);
 	Stream(const void* data, uint32_t length, bool autorelease = false);
 	~Stream();
-	
+
+	inline void setLimit(uint32_t position) { m_limit = (position > m_size) ? m_size : position; }
+	inline uint32_t getLimit() { return m_limit; }
+
 	inline void* getBuffer() { return m_buffer; }
 	inline uint32_t getSize() { return m_size; }
 	inline uint64_t getModificationDate() { return m_modificationDate; }
@@ -67,19 +71,25 @@ public:
 	inline void setModificationDate(uint64_t date) { m_modificationDate = date; }
 	inline void setSourcePath(const CString& path) { m_sourcePath = path; }
 	
-	inline void setPosition(uint32_t position) throw(const char*) { if (position > m_size) throw eOutOfRange; m_position = position; }
+	inline void setPosition(uint32_t position) throw(const char*) { if (position > m_limit) throw eOutOfRange; m_position = position; }
 	inline uint32_t getPosition() { return m_position; }
 
-	uint32_t readBytes(void* buffer, uint32_t length) throw(const char*); // eIOReadLimit
+	uint32_t readBytes(void* buffer, uint32_t length);
 	uint8_t* readBytes(uint32_t length) throw(const char*); // eIOReadLimit, eOutOfMemory
-	uint32_t readInt() throw(const char*); // eIOReadLimit
-	uint8_t readUnsignedByte() throw(const char*); // eIOReadLimit
-	
+	uint32_t readU32() throw(const char*); // eIOReadLimit
+	uint16_t readU16() throw(const char*); // eIOReadLimit
+	uint8_t readU8() throw(const char*); // eIOReadLimit
+	int32_t readS32() throw(const char*); // eIOReadLimit
+	int16_t readS16() throw(const char*); // eIOReadLimit
+	int8_t readS8() throw(const char*); // eIOReadLimit
+
 	char* readString(uint32_t length) throw(const char*);
 	uint8_t* readGZip(uint32_t length, uint32_t* resultSize) throw(const char*);
 	char* readGZipString(uint32_t length) throw(const char*);
 	
 	int32_t skip(uint32_t length);
+
+	Stream* duplicate() throw(const char*);
 };
 
 #endif //JAPPSY_USTREAM_H

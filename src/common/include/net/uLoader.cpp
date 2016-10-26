@@ -559,7 +559,9 @@ void* onCreateSoundCallback(void* userData) {
 	}
 }
 
-#include <sound/mp3/uMP3Sound.h>
+#if defined(__JNI__)
+	#include <sound/mp3/uMP3Sound.h>
+#endif
 
 bool Loader::onData(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)

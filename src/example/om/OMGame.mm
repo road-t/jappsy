@@ -1540,7 +1540,7 @@ void OMGame::onPreload() {
     
     status.count = 0;
     status.total = 0;
-    
+
     LOG("OMGame > Start Loading");
     load(sOMLoadRes);
     

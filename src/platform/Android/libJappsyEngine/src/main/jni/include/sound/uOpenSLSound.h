@@ -22,38 +22,48 @@
 #include <data/uString.h>
 #include <sound/uOpenSLContext.h>
 #include <data/uStream.h>
+#include <sound/uSound.h>
 
 class OpenSLSound : public CObject {
+private:
+	Sound* sound = NULL;
+
 public:
-	OpenSLSound(struct OpenSLContext* context);
-	virtual ~OpenSLSound();
+	OpenSLSound();
+	~OpenSLSound();
 
 	CString path;
-	virtual void load(const CString& path) = 0;
-	virtual void load(Stream* stream) = 0;
+	//bool load(const CString& path);
+	bool load(Stream* stream);
 
-	virtual void setVolume(float volume);
-	virtual float getVolume();
+	void setVolume(float volume);
+	float getVolume();
 
-	virtual void play();
-	virtual void pause();
-	virtual void stop();
-	SLuint32 state();
+	void play(OpenSLContext* context);
+	void pause();
+	void stop();
 
-	bool isActive();
-	virtual bool isPlaying();
-	virtual bool isPaused();
-	virtual bool isStopped();
+	bool isPlaying();
+	bool isPaused();
 	void setLoop(bool loop);
 	bool isLooping();
-	virtual long getSize() { return 0; }
-	virtual char* getBuffer() { return 0; }
+
+	size_t memoryUsed();
+	size_t audioSize();
+	size_t fillBuffer(uint8_t* buffer, size_t bufferSize);
+	void reset();
 
 protected:
-	bool loop = false;
+	jbool loop = false;
+	jbool paused = false;
+	jbool playing = false;
+	jbool rewind = false;
 	float volume = 1.0f;
 	OpenSLPlayer* player = NULL;
 	OpenSLContext* context = NULL;
+
+	off_t lastConvertOfs = 0;
+	size_t lastConvertSize = 0;
 };
 
 #endif //JAPPSY_UOPENSLSOUND_H

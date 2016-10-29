@@ -40,11 +40,14 @@ public:
 	void setSound(OpenSLSound* sound);
 
 	OpenSLSound* sound = NULL;
+	uint64_t accessTime = 0;
+	jbool resume = false;
 
 protected:
 	virtual void clear();
 
 	OpenSLContext* context;
+
 	SLmillibel gain_to_attenuation(float gain);
 	static float gain_from_attenuation(float attenuation);
 
@@ -61,6 +64,18 @@ protected:
 	SLMuteSoloItf playerMuteSolo = NULL;
 
 	SLBufferQueueItf bufferQueue = NULL;
+
+	static void EventCallback(SLPlayItf caller, void* userData, SLuint32 event);
+	static void BufferCallback(SLBufferQueueItf caller, void* userData);
+
+	uint32_t buffersUsed = 0;
+	uint8_t* buffers[4] = {0};
+	size_t bufferSize = 0;
+	int nextBuffer = 0;
+
+	char* getBuffer(size_t* size);
+	void queue();
+	void fillBuffers();
 };
 
 #endif //JAPPSY_UOPENSLPLAYER_H

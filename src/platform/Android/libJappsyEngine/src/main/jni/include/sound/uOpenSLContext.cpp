@@ -18,13 +18,9 @@
 #include <sound/uOpenSLPlayer.h>
 
 bool OpenSLContext::init() {
-	engineObj = NULL;
-	engine = NULL;
-	outputMixObj = NULL;
+	lock();
 
-	for (int i = 0; i < OPENSL_CHANNELS; i++) {
-		players[i] = NULL;
-	}
+	shutdown();
 
 	SLresult result;
 
@@ -43,6 +39,8 @@ bool OpenSLContext::init() {
 							lEngineMixReqs);
 
 	if (result != SL_RESULT_SUCCESS ) {
+		unlock();
+
 		LOG("OpenSL: Error create engine");
 		return false;
 	}
@@ -50,6 +48,8 @@ bool OpenSLContext::init() {
 	result = (*engineObj)->Realize(engineObj, SL_BOOLEAN_FALSE );
 
 	if (result != SL_RESULT_SUCCESS ) {
+		unlock();
+
 		LOG("OpenSL: Error realize engine");
 		return false;
 	}
@@ -57,6 +57,8 @@ bool OpenSLContext::init() {
 	result = (*engineObj)->GetInterface(engineObj, SL_IID_ENGINE, &engine);
 
 	if (result != SL_RESULT_SUCCESS ) {
+		unlock();
+
 		LOG("OpenSL: Error get engine interface");
 		return false;
 	}
@@ -64,6 +66,8 @@ bool OpenSLContext::init() {
 	result = (*engine)->CreateOutputMix(engine, &(outputMixObj), lOutputMixIIDCount, lOutputMixIIDs, lOutputMixReqs);
 
 	if (result != SL_RESULT_SUCCESS ) {
+		unlock();
+
 		LOG("OpenSL: Error create output mixer");
 		return false;
 	}
@@ -71,20 +75,20 @@ bool OpenSLContext::init() {
 	result = (*outputMixObj)->Realize(outputMixObj, SL_BOOLEAN_FALSE );
 
 	if (result != SL_RESULT_SUCCESS ) {
+		unlock();
+
 		LOG("OpenSL: Error realize output mixer");
 		return false;
 	}
 
-	for (int i = 0; i < OPENSL_CHANNELS; i++) {
-		AtomicSet(&(players[i]), new OpenSLPlayer(this));
-	}
-
-	__sync_synchronize();
+	unlock();
 
 	return true;
 }
 
 void OpenSLContext::shutdown() {
+	lock();
+
 	for (int i = 0; i < OPENSL_CHANNELS; i++) {
 		OpenSLPlayer* player = AtomicExchange(&(players[i]), NULL);
 		if (player != NULL) {
@@ -102,33 +106,115 @@ void OpenSLContext::shutdown() {
 		engineObj = NULL;
 		engine = NULL;
 	}
+
+	unlock();
+}
+
+bool OpenSLContext::isPaused() {
+	return AtomicGet(&paused);
 }
 
 void OpenSLContext::pause() {
-	for (int i = 0; i < OPENSL_CHANNELS; i++) {
-		OpenSLPlayer* player = AtomicGet(&(players[i]));
-		if (player != NULL && player->isPlaying()) {
-			player->pause();
+	lock();
+
+	if (!AtomicExchange(&paused, true)) {
+		for (int i = 0; i < OPENSL_CHANNELS; i++) {
+			OpenSLPlayer *player = AtomicGet(&(players[i]));
+			if (player != NULL) {
+				player->lock();
+
+				if (player->isPlaying()) {
+					player->pause();
+					AtomicSet(&player->resume, true);
+				}
+
+				player->unlock();
+			}
 		}
 	}
+
+	unlock();
 }
 
 void OpenSLContext::resume() {
-	for (int i = 0; i < OPENSL_CHANNELS; i++) {
-		OpenSLPlayer* player = AtomicGet(&(players[i]));
-		if (player != NULL && player->isPaused()) {
-			player->play();
+	lock();
+
+	if (AtomicExchange(&paused, false)) {
+		for (int i = 0; i < OPENSL_CHANNELS; i++) {
+			OpenSLPlayer *player = AtomicGet(&(players[i]));
+			if (player != NULL) {
+				player->lock();
+
+				if (player->isPaused() && (AtomicExchange(&player->resume, false))) {
+					player->play();
+				}
+
+				player->unlock();
+			}
 		}
 	}
+
+	unlock();
 }
 
 OpenSLPlayer* OpenSLContext::getFreePlayer(OpenSLSound* sound) {
+	lock();
+
+	int empty = -1;
+	int old_index = -1;
+	uint64_t old_access = 0;
+
+OpenSLContext_getFreePlayer_repeat:
+
 	for (int i = 0; i < OPENSL_CHANNELS; i++) {
 		OpenSLPlayer *player = AtomicGet(&(players[i]));
-		if (player != NULL && !player->isPlaying()) {
+		if (player == NULL) {
+			empty = i;
+		} else {
+			player->lock();
+
+			if ((old_access == 0) || (player->accessTime <= old_access)) {
+				old_index = i;
+				old_access = player->accessTime;
+			}
+
+			if (!player->isPlaying()) {
+				unlock();
+
+				AtomicSet(&player->resume, false);
+				return player;
+			}
+
+			player->unlock();
+		}
+	}
+
+	if (empty >= 0) {
+		OpenSLPlayer *player;
+		AtomicSet(&(players[empty]), player = new OpenSLPlayer(this));
+
+		player->lock();
+		unlock();
+
+		return player;
+	}
+
+	if (old_index >= 0) {
+		OpenSLPlayer *player = AtomicGet(&(players[old_index]));
+		if (player != NULL) {
+			player->lock();
+
+			if (player->isPlaying()) {
+				player->stop();
+			}
+
+			AtomicSet(&player->resume, false);
+
+			unlock();
+
 			return player;
 		}
 	}
 
-	return AtomicGet(&(players[0]));
+	goto OpenSLContext_getFreePlayer_repeat;
 }

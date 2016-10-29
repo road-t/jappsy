@@ -30,14 +30,31 @@ bool OpenSLPlayer::isStopped() {
 	return state() == SL_PLAYSTATE_STOPPED;
 }
 
-void OpenSLPlayerEventCallback(SLPlayItf caller, void* userData, SLuint32 event) {
+void OpenSLPlayer::EventCallback(SLPlayItf caller, void* userData, SLuint32 event) {
 	OpenSLPlayer* player = (OpenSLPlayer*)userData;
+	if (event == SL_PLAYEVENT_HEADATEND) { // Stop
+		player->lock();
 
-	LOG("OpenSL: PlayerEvent %d", event);
+		AtomicSet(&player->buffersUsed, 0);
+
+		OpenSLSound* sound = AtomicGetPtr(&player->sound);
+		if (sound != NULL) {
+			sound->reset();
+		}
+
+		player->unlock();
+	}
+
+	//LOG("OpenSL: PlayerEvent %d", event);
 }
 
-void OpenSLPlayerBufferCallback(SLBufferQueueItf caller, void* userData) {
-	LOG("OpenSL: BufferEvent");
+void OpenSLPlayer::BufferCallback(SLBufferQueueItf caller, void* userData) {
+	OpenSLPlayer* player = (OpenSLPlayer*)userData;
+	int used = AtomicDecrement(&player->buffersUsed) - 1;
+
+	//LOG("OpenSL: BufferEvent (%d)", used);
+
+	player->queue();
 }
 
 OpenSLPlayer::OpenSLPlayer(OpenSLContext* context) {
@@ -50,7 +67,7 @@ OpenSLPlayer::OpenSLPlayer(OpenSLContext* context) {
 
 	formatPCM.formatType = SL_DATAFORMAT_PCM;
 	formatPCM.numChannels = 2;
-	formatPCM.samplesPerSec = SL_SAMPLINGRATE_44_1;
+	formatPCM.samplesPerSec = SL_SAMPLINGRATE_48;
 	formatPCM.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
 	formatPCM.containerSize = SL_PCMSAMPLEFORMAT_FIXED_16;
 	formatPCM.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT ;
@@ -102,29 +119,47 @@ OpenSLPlayer::OpenSLPlayer(OpenSLContext* context) {
 		return;
 	}
 
-	result = (*player)->RegisterCallback(player, OpenSLPlayerEventCallback, (void*)this);
+	result = (*player)->RegisterCallback(player, EventCallback, (void*)this);
 	if (result != SL_RESULT_SUCCESS) {
 		clear();
 		return;
 	}
 
-	result = (*bufferQueue)->RegisterCallback(bufferQueue, OpenSLPlayerBufferCallback, (void*)this);
+	result = (*bufferQueue)->RegisterCallback(bufferQueue, BufferCallback, (void*)this);
 	if (result != SL_RESULT_SUCCESS) {
 		clear();
 		return;
 	}
 
-	result = (*player)->SetCallbackEventsMask(player, SL_PLAYEVENT_HEADATEND | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED);
+	result = (*player)->SetCallbackEventsMask(player, SL_PLAYEVENT_HEADATEND/* | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED*/);
 	if (result != SL_RESULT_SUCCESS) {
 		clear();
 		return;
+	}
+
+	bufferSize = 4096;
+	for (int i = 0; i < 4; i++) {
+		buffers[i] = memAlloc(uint8_t, buffers[i], bufferSize);
+		if (buffers[i] == NULL) {
+			clear();
+			return;
+		}
 	}
 
 	//result = (*playerSeek)->SetLoop(playerSeek, sound->isLooping() ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
 }
 
 void OpenSLPlayer::clear() {
+	lock();
+
 	if (playerObj != NULL) {
+		for (int i = 0; i < 4; i++) {
+			if (buffers[i] != NULL) {
+				memFree(buffers[i]);
+				buffers[i] = NULL;
+			}
+		}
+
 		(*playerObj)->Destroy(playerObj);
 		player = NULL;
 		playerMuteSolo = NULL;
@@ -132,6 +167,8 @@ void OpenSLPlayer::clear() {
 		playerObj = NULL;
 		bufferQueue = NULL;
 	}
+
+	unlock();
 }
 
 OpenSLPlayer::~OpenSLPlayer() {
@@ -167,12 +204,12 @@ SLuint32 OpenSLPlayer::state() {
 
 SLmillibel OpenSLPlayer::gain_to_attenuation(float gain) {
 	SLmillibel volume_mb;
-	if (gain >= 3.0f) {
+	if (gain >= 1.0f) {
 		(*playerVolume)->GetMaxVolumeLevel(playerVolume, &volume_mb);
 	} else if (gain <= 0.02f) {
 		volume_mb = SL_MILLIBEL_MIN;
 	} else {
-		volume_mb = (SLmillibel)(M_LN2 / logf(3.0f / (3.0f - gain)) * -1000.0f);
+		volume_mb = (SLmillibel)(M_LN2 / logf(1.0f / (1.0f - gain)) * -1000.0f);
 		if (volume_mb > 0) {
 			volume_mb = SL_MILLIBEL_MIN;
 		}
@@ -182,7 +219,7 @@ SLmillibel OpenSLPlayer::gain_to_attenuation(float gain) {
 }
 
 float OpenSLPlayer::gain_from_attenuation(float attenuation) {
-	return (float)powf(10.0f, attenuation / (1000.0f * 20.0f ));
+	return powf(10.0f, attenuation / (1000.0f * 20.0f ));
 }
 
 void OpenSLPlayer::setVolume(float volume) {
@@ -211,7 +248,7 @@ float OpenSLPlayer::getVolume() {
 	return 0.0;
 }
 
-void OpenSLPlayer::pause(){
+void OpenSLPlayer::pause() {
 	if (player == NULL) return;
 
 	//SLresult result;
@@ -220,16 +257,60 @@ void OpenSLPlayer::pause(){
 }
 
 void OpenSLPlayer::setSound(OpenSLSound* sound) {
+	lock();
+
 	if (bufferQueue != NULL) {
-		AtomicSet(&(this->sound), sound);
+		AtomicSetPtr(&(this->sound), sound);
 
 		(*bufferQueue)->Clear(bufferQueue);
-		(*bufferQueue)->Enqueue(bufferQueue, sound->getBuffer(), (SLuint32) sound->getSize());
+		AtomicSet(&buffersUsed, 0);
+		fillBuffers();
 	}
+
+	unlock();
 }
+
+void OpenSLPlayer::queue() {
+	lock();
+
+	if (bufferQueue != NULL) {
+		OpenSLSound* sound = AtomicGetPtr(&this->sound);
+		if (sound != NULL) {
+			int index = AtomicIncrement(&nextBuffer) % 4;
+			AtomicAnd(&nextBuffer, 0x3);
+
+			uint8_t *buffer = AtomicGetPtr(&(buffers[index]));
+
+			//LOG("OpenSLPlayer::queue (Sound:%08X / Buffer:%d:%08X)", (uint32_t)(intptr_t)sound, index, (uint32_t)(intptr_t)buffer);
+
+			size_t size = sound->fillBuffer(buffer, bufferSize);
+
+			if (size > 0) {
+				AtomicIncrement(&buffersUsed);
+				(*bufferQueue)->Enqueue(bufferQueue, buffer, (SLuint32)size);
+			}
+		}
+	}
+
+	unlock();
+}
+
+void OpenSLPlayer::fillBuffers() {
+	lock();
+
+	int count = 2 - AtomicGet(&buffersUsed);
+	for (int i = 0; i < count; i++) {
+		queue();
+	}
+
+	unlock();
+}
+
 
 void OpenSLPlayer::play() {
 	if (player == NULL) return;
+
+	fillBuffers();
 
 	//SLresult result;
 	/*result= */(*player)->SetPlayState(player, SL_PLAYSTATE_PLAYING);
@@ -238,6 +319,26 @@ void OpenSLPlayer::play() {
 void OpenSLPlayer::stop() {
 	if (player == NULL) return;
 
+	lock();
+
 	//SLresult result;
 	/*result=  */(*player)->SetPlayState(player, SL_PLAYSTATE_STOPPED);
+
+	if (bufferQueue != NULL) {
+		(*bufferQueue)->Clear(bufferQueue);
+		AtomicSet(&buffersUsed, 0);
+	}
+
+	unlock();
+}
+
+char* OpenSLPlayer::getBuffer(size_t* size) {
+	lock();
+
+	uint8_t *buffer = buffers[nextBuffer++];
+	if (nextBuffer >= 4) nextBuffer = 0;
+
+	unlock();
+
+	return (char*)buffer;
 }

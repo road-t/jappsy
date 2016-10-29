@@ -21,7 +21,7 @@
 #include <data/uObject.h>
 #include <data/uString.h>
 #include <data/uStream.h>
-#include <sound/uAudioCVT.h>
+#include <sound/uAudioConverter.h>
 
 class Sound : public CObject {
 protected:
@@ -42,16 +42,15 @@ public:
 	void (*resetBuffer)(void* sound); // сбросить буффер в начало
 	void (*closeBuffer)(void* sound) = NULL; // закрыть буффер
 
-	//uint8_t *buffer = NULL;			// буффер содержащий уже считанные данные из (файла/памяти)
-	//size_t bufferSize = 0;			// размер буффера
+	uint8_t *buffer = NULL;			// буффер содержащий уже считанные данные из (файла/памяти)
+	size_t bufferSize = 0;			// размер буффера
 
 	// Длительность в милисекундах
 	uint32_t duration = 0;
+	uint32_t totalSamples = 0;
 
-	// Формат входных аудио данных при считывании
-	struct tAudioSpec spec = {0};
 	// Фильтры преобразования входных данных при считывании в выходные данные в буффере
-	struct tAudioConvert convert = {0};
+	AudioConverter converter;
 };
 
 #endif //JAPPSY_USOUND_H

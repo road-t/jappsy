@@ -559,10 +559,6 @@ void* onCreateSoundCallback(void* userData) {
 	}
 }
 
-#if defined(__JNI__)
-	#include <sound/mp3/uMP3Sound.h>
-#endif
-
 bool Loader::onData(const File* info, Stream* stream) {
 	if (AtomicGet(&shutdown) != 0)
 		return false;
@@ -581,50 +577,17 @@ bool Loader::onData(const File* info, Stream* stream) {
 				return false;
 			}
 #elif defined(__JNI__)
-	#warning PrepareAudio
-			LOG("TODO: Loader::PrepareAudio");
-
-			MP3Sound* test = new MP3Sound();
-			if (test->createBuffer(test)) {
-				LOG("MP3: OpenBuffer");
-				test->openBuffer(test, stream);
-
-				uint8_t buffer[16384];
-				size_t filled = 0;
-				size_t total = 0;
-				uint32_t crc = 0;
-
-				do {
-					total = total + (filled = test->fillBuffer(test, buffer, 16384));
-					crc = mmcrc32(0, buffer, 16384);
-					LOG("MP3: Filled %d (CRC: %08X)", (int) filled, crc);
-				} while (filled != 0);
-				LOG("MP3: Total %d", (int)total);
-
-				total = 0;
-				test->resetBuffer(test);
-				LOG("MP3: Reset");
-
-				do {
-					total = total + (filled = test->fillBuffer(test, buffer, 16384));
-					crc = mmcrc32(0, buffer, 16384);
-					LOG("MP3: Filled %d (CRC: %08X)", (int) filled, crc);
-				} while (filled != 0);
-				LOG("MP3: Total %d", (int)total);
-
-				test->closeBuffer(test);
-				test->deleteBuffer(test);
-			}
-			delete test;
-
 			PrepareAudioThread thread;
-			thread.audio = NULL;
-			thread.size = 0;
-			thread.ready = true;
-			thread.mixer = context->mixer;
-			thread.info = info;
-			GLSound* sound = (GLSound*)MainThreadSync(onCreateSoundCallback, &thread);
-			onLoad(info, sound);
+			if (prepareAudioStream(stream, &thread, false, onAudioReadyCallback, onAudioErrorCallback) && (thread.ready)) {
+				thread.mixer = context->mixer;
+				thread.info = info;
+				GLSound* sound = (GLSound*)MainThreadSync(onCreateSoundCallback, &thread);
+				onLoad(info, sound);
+			} else {
+				return false;
+			}
+#else
+			#error Unsupported platform!
 #endif
 		} catch (...) {
 			return false;

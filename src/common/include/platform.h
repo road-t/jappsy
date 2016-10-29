@@ -173,6 +173,23 @@ extern "C" {
             #include <android/log.h>
 			#include <sys/syscall.h>
             #define LOG(f, ...) __android_log_print(ANDROID_LOG_INFO, "JNI", "(%d) " f, syscall(__NR_gettid)/*(uint32_t)((intptr_t)(pthread_self()))*/, ##__VA_ARGS__);
+
+			#define LOGMEM(ptr, blocks) { \
+				LOG("DUMP: MEMORY %08X", (uint64_t)(intptr_t)ptr); \
+				for (int i = 0; i < blocks; i++) { \
+					LOG("DUMP: %04X : %08X %08X %08X %08X %08X %08X %08X %08", \
+						i * 8 * 4, \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 0) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 1) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 2) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 3) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 4) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 5) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 6) * 4)), \
+						__builtin_bswap32(*(uint32_t*)((uint8_t*)ptr + (i * 8 + 7) * 4)) \
+					); \
+				} \
+			}
         #endif
 	#else
 		#define LOG(f, ...)

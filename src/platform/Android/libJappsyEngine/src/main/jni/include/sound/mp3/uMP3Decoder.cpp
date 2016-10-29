@@ -287,7 +287,7 @@ uint32_t tMPADecoder::sync_buffer() {
 	}
 	if (i < mpa->bytes_left) {
 		i = mpa->bytes_left - i;
-		mpa->next_byte = buf;;
+		mpa->next_byte = buf;
 		mpa->bytes_left -= i;
 		if (i >= 512) {
 			mpa->reservoir_size = 0;
@@ -620,7 +620,12 @@ int tMP3Decoder::init(Stream* stream, int nogap) {
 
 	int32_t n = sizeof(mp3->in_buffer);
 	if (static_cast<uint32_t>(n) > mp3->stream_size) n = (int32_t)mp3->stream_size;
-	n = stream->readBytes(mp3->in_buffer, (uint32_t)n);
+	try {
+		n = stream->readBytes(mp3->in_buffer, (uint32_t)n);
+	} catch (...) {
+		n = 0;
+	}
+
 	mp3->in_buffer_used = (uint32_t)n;
 	if (n < 4) {
 		reset();
@@ -640,6 +645,7 @@ int tMP3Decoder::init(Stream* stream, int nogap) {
 		r = mp3->mpadec->decode(mp3->in_buffer, mp3->in_buffer_used, 0, 0, &mp3->in_buffer_offset, 0);
 		mp3->in_buffer_used -= mp3->in_buffer_offset;
 		if (r != 0) {
+			LOG("r = %d", r);
 			reset();
 			return -1;
 		}
@@ -661,6 +667,7 @@ int tMP3Decoder::init(Stream* stream, int nogap) {
 	mp3->mpainfo.duration = (mp3->mpainfo.frames*mp3->mpainfo.frame_samples + (mp3->mpainfo.frequency >> 1))/mp3->mpainfo.frequency;
 	mp3->init_done = 1;
 	mp3->stream_start += mp3->in_buffer_offset;
+	mp3->total_samples = (uint32_t)(mp3->mpainfo.frames*mp3->mpainfo.frame_samples);
 	return 0;
 }
 

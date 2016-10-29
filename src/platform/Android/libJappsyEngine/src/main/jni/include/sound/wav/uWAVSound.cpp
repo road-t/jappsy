@@ -20,6 +20,10 @@
 extern "C" {
 #endif
 
+bool is_wav(uint32_t sig) {
+	return ((sig == WAVDEC_RIFF) || (sig == WAVDEC_WAVE));
+}
+
 #ifdef __cplusplus
 }
 #endif
@@ -44,14 +48,14 @@ bool WAVSound::wav_openBuffer(WAVSound* sound, Stream* stream) {
 		return -1;
 	}
 	memset(sound->wav,0,sizeof(struct tWAVDecoder));
-	memset(&(sound->spec),0,sizeof(struct tAudioSpec));
+	memset(&(sound->converter.inSpec), 0, sizeof(struct tAudioSpec));
 	try {
 		sound->stream = stream->duplicate();
 	} catch (...) {
 		memFree(sound->wav); sound->wav = NULL;
 		return -1;
 	}
-	if (sound->wav->init(sound->stream,&(sound->spec)) != 0) {
+	if (sound->wav->init(sound->stream,&(sound->converter.inSpec)) != 0) {
 		memFree(sound->wav); sound->wav = NULL;
 		delete sound->stream; sound->stream = NULL;
 		return -1;
@@ -71,14 +75,17 @@ bool WAVSound::wav_openBuffer(WAVSound* sound, Stream* stream) {
 			break;
 	}
 	name.concat(L", ");
-	if (sound->spec.channels > 1) name.concat(L"Stereo"); else name.concat(L"Mono");
-	name.concat(CString::format(L", %d kbps, %d Hz, %d:%02d", sound->wav->bitpersecond, sound->spec.freq, sound->wav->duration/60, sound->wav->duration%60));
+	if (sound->converter.inSpec.channels > 1) name.concat(L"Stereo"); else name.concat(L"Mono");
+	name.concat(CString::format(L", %d kbps, %d Hz, %d:%02d", sound->wav->bitpersecond, sound->converter.inSpec.frequency, sound->wav->duration/60, sound->wav->duration%60));
 	sound->duration = sound->wav->duration * 1000;
 	sound->name = name;
 	sound->desc = formatDesc;
 
-	// Обновить размер фрагмета в байтах
-	calculateAudioSpec(&(sound->spec));
+#ifdef DEBUG
+	CString::format(L"MP3: %ls", (wchar_t*)name).log();
+#endif
+
+	sound->totalSamples = sound->wav->total_samples;
 
 	return 0;
 }
@@ -91,8 +98,7 @@ size_t WAVSound::wav_fillBuffer(WAVSound* sound, void* stream, size_t len) {
 }
 
 void WAVSound::wav_resetBuffer(WAVSound* sound) {
-	sound->wav->reset(&(sound->spec));
-	calculateAudioSpec(&(sound->spec));
+	sound->wav->reset(&(sound->converter.inSpec));
 }
 
 void WAVSound::wav_closeBuffer(WAVSound* sound) {

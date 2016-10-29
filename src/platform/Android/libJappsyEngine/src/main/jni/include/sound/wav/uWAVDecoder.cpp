@@ -15,7 +15,7 @@
  */
 
 #include "uWAVDecoder.h"
-#include <sound/uAudioCVT.h>
+#include <sound/uAudioConverter.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -471,21 +471,21 @@ int tWAVDecoder::init(Stream* stream, struct tAudioSpec* spec) {
 		}
 
 		memset(spec, 0, (sizeof(struct tAudioSpec)));
-		spec->freq = format->frequency;
+		spec->frequency = format->frequency;
 		bitpersecond = format->bitspersample * format->frequency * format->channels;
 		switch (format->bitspersample) {
 			case 4:
 				if (MS_ADPCM_encoded || IMA_ADPCM_encoded) {
-					spec->format = AUDIO_S16;
+					spec->format = AUDIO_FORMAT_S16;
 				} else {
 					is_err = 1;
 				}
 				break;
 			case 8:
-				spec->format = AUDIO_U8;
+				spec->format = AUDIO_FORMAT_U8;
 				break;
 			case 16:
-				spec->format = AUDIO_S16;
+				spec->format = AUDIO_FORMAT_S16;
 				break;
 			default:
 				is_err = 1;
@@ -497,7 +497,6 @@ int tWAVDecoder::init(Stream* stream, struct tAudioSpec* spec) {
 			goto tWAVDecoder_init_done;
 		}
 		spec->channels = (uint8_t) (format->channels);
-		spec->samples = 4096;        // размер буффера по умолчанию
 
 		// ищем начало аудио данных
 		chunk.data = 0;
@@ -516,6 +515,8 @@ int tWAVDecoder::init(Stream* stream, struct tAudioSpec* spec) {
 		this->stream->setLimit(this->stream->getPosition() + datalen);
 
 		duration = datalen / format->byterate; // * 8 / bitpersecond;
+
+		total_samples = datalen / (bitpersecond / 8);
 	}
 
 tWAVDecoder_init_done:

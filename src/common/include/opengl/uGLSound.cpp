@@ -87,7 +87,7 @@ GLSound::~GLSound() {
 void GLSound::update() {
 	if (invalid) {
 		invalid = false;
-		
+
 		GLfloat v = volume;
 		if (volex) {
 			if (v < 0.0) v = 1.0;

@@ -272,6 +272,7 @@ struct tMP3Decoder {
 	Stream* stream;
 	uint32_t stream_size;
 	uint32_t stream_start;
+	uint32_t total_samples;
 	struct tMPADecoderInfo mpainfo;
 	struct tMPATagInfo taginfo;
 	uint32_t in_buffer_offset;

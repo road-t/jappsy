@@ -18,7 +18,11 @@
 #define uMixerH
 
 #include <platform.h>
-#include <data/uString.h>
+
+#if !defined(__IOS__)
+	#include <data/uString.h>
+	#include <data/uStream.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,6 +41,7 @@ extern "C" {
 	bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
 #else
 	bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
+	bool prepareAudioStream(Stream* stream, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
 #endif
 	void destroyAudio(void* audioHandle);
 	void playAudio(void* audioHandle, bool loop);

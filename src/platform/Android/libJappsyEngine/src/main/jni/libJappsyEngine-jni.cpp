@@ -73,6 +73,7 @@ Java_com_jappsy_JappsyEngine_initialize(JNIEnv *env, jclass type, jstring cacheD
 
 	//LOG("Start");
 
+	//return JNI_FALSE;
 	return JNI_TRUE;
 }
 

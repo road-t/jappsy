@@ -229,6 +229,8 @@ Stream* Stream::duplicate() throw(const char*) {
 			throw eOutOfMemory;
 		}
 
+		memcpy(buffer, getBuffer(), m_size);
+
 		result = new Stream(buffer, m_size, true);
 		result->setLimit(getLimit());
 		result->setSourcePath(getSourcePath());

@@ -100,14 +100,12 @@ bool MP3Sound::mp3_openBuffer(MP3Sound* sound, Stream* stream) {
 #endif
 
 	// Заполняем структуру формата данных
-	memset(&(sound->spec),0,sizeof(tAudioSpec));
-	sound->spec.freq = (uint32_t)sound->mpainfo.frequency;
-	sound->spec.format = AUDIO_S16LSB;
-	sound->spec.channels = (uint8_t)sound->mpainfo.channels;
-	sound->spec.samples = (uint16_t)(((sound->spec.freq>>2)+3)&~3); // минимум 1/4 секунды (word aligned)
+	memset(&(sound->converter.inSpec), 0, sizeof(struct tAudioSpec));
+	sound->converter.inSpec.frequency = (uint32_t)sound->mpainfo.frequency;
+	sound->converter.inSpec.format = AUDIO_FORMAT_S16LSB;
+	sound->converter.inSpec.channels = (uint8_t)sound->mpainfo.channels;
 
-	// Обновить размер фрагмета в байтах
-	calculateAudioSpec(&(sound->spec));
+	sound->totalSamples = sound->mp3->total_samples;
 
 	return true;
 }

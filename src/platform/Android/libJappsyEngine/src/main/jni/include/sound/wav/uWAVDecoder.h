@@ -108,6 +108,7 @@ struct tWAVDecoder {
 	struct tIMAADPCMDecoder imaadpcm;
 	Stream* stream;
 	uint32_t stream_start;
+	uint32_t total_samples;
 	uint16_t encoding;
 	uint32_t bitpersecond;
 	uint32_t datalen;

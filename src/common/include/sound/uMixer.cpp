@@ -19,6 +19,8 @@
 #if defined(__JNI__)
 
 #include <sound/uOpenSLContext.h>
+#include <sound/uOpenSLSound.h>
+#include <core/uSystem.h>
 
 #endif
 
@@ -28,15 +30,33 @@ extern "C" {
 
 #if defined(__JNI__)
 
-static OpenSLContext context;
+static OpenSLContext* context = NULL;
+static jlock context_lock = false;
+
+#include <sound/filter/uLowPassFilter.h>
 
 #endif
 
 void initAudioPlayer() {
 #if defined(__JNI__)
-	LOG("OpenSL: initAudioPlayer");
+	//LOG("OpenSL: initAudioPlayer");
 
-	context.init();
+	AtomicLock(&context_lock);
+	if (context == NULL) {
+		try {
+			context = new OpenSLContext();
+		} catch (...) {
+		}
+	}
+	if (context != NULL) {
+		context->init();
+	}
+
+	struct tLowPassFilter* filter = buildLowPassFilter(2048, 0.9, 9);
+
+	systemSleep(1000);
+
+	AtomicUnlock(&context_lock);
 #else
 	#error Unsupported platform!
 #endif
@@ -44,9 +64,17 @@ void initAudioPlayer() {
 
 bool shutdownAudioPlayer() {
 #if defined(__JNI__)
-	LOG("OpenSL: shutdownAudioPlayer");
+	//LOG("OpenSL: shutdownAudioPlayer");
 
-	context.shutdown();
+	AtomicLock(&context_lock);
+	if (context != NULL) {
+		context->shutdown();
+
+		delete context;
+
+		context = NULL;
+	}
+	AtomicUnlock(&context_lock);
 #else
 	#error Unsupported platform!
 #endif
@@ -55,8 +83,13 @@ bool shutdownAudioPlayer() {
 
 void pauseAudioPlayer() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: pauseAudioPlayer");
+	//LOG("OpenSL: pauseAudioPlayer");
+
+	AtomicLock(&context_lock);
+	if (context != NULL) {
+		context->pause();
+	}
+	AtomicUnlock(&context_lock);
 #else
 	#error Unsupported platform!
 #endif
@@ -64,8 +97,13 @@ void pauseAudioPlayer() {
 
 void resumeAudioPlayer() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: resumeAudioPlayer");
+	//LOG("OpenSL: resumeAudioPlayer");
+
+	AtomicLock(&context_lock);
+	if (context != NULL) {
+		context->resume();
+	}
+	AtomicUnlock(&context_lock);
 #else
 	#error Unsupported platform!
 #endif
@@ -78,13 +116,32 @@ bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioR
 #else
 	#error Unsupported platform!
 #endif
-	return false;
+	return true;
+}
+
+bool prepareAudioStream(Stream* stream, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
+#if defined(__JNI__)
+	//LOG("OpenSL: prepareAudio");
+
+	OpenSLSound* sound = new OpenSLSound();
+	if (sound->load(stream)) {
+		onAudioReady(sound, (uint32_t)sound->memoryUsed(), sound->audioSize(), userData);
+	} else {
+		delete sound;
+		onAudioError(userData);
+	}
+#else
+	#error Unsupported platform!
+#endif
+	return true;
 }
 
 void destroyAudio(void* audioHandle) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: destroyAudio");
+	//LOG("OpenSL: destroyAudio");
+
+	OpenSLSound* sound = (OpenSLSound*)audioHandle;
+	delete sound;
 #else
 	#error Unsupported platform!
 #endif
@@ -92,8 +149,15 @@ void destroyAudio(void* audioHandle) {
 
 void playAudio(void* audioHandle, bool loop) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: playAudio");
+	LOG("OpenSL: playAudio");
+
+	AtomicLock(&context_lock);
+	if (context != NULL) {
+		OpenSLSound* sound = (OpenSLSound*)audioHandle;
+		sound->setLoop(loop);
+		sound->play(context);
+	}
+	AtomicUnlock(&context_lock);
 #else
 	#error Unsupported platform!
 #endif
@@ -101,8 +165,10 @@ void playAudio(void* audioHandle, bool loop) {
 
 bool playingAudio(void* audioHandle) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: playingAudio");
+	//LOG("OpenSL: playingAudio");
+
+	OpenSLSound* sound = (OpenSLSound*)audioHandle;
+	return sound->isPlaying();
 #else
 	#error Unsupported platform!
 #endif
@@ -111,8 +177,10 @@ bool playingAudio(void* audioHandle) {
 
 void volumeAudio(void* audioHandle, float volume) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: volumeAudio");
+	LOG("OpenSL: volumeAudio");
+
+	OpenSLSound* sound = (OpenSLSound*)audioHandle;
+	sound->setVolume(volume);
 #else
 	#error Unsupported platform!
 #endif
@@ -120,8 +188,10 @@ void volumeAudio(void* audioHandle, float volume) {
 
 bool pauseAudio(void* audioHandle) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: pauseAudio");
+	LOG("OpenSL: pauseAudio");
+
+	OpenSLSound* sound = (OpenSLSound*)audioHandle;
+	sound->pause();
 #else
 	#error Unsupported platform!
 #endif
@@ -130,8 +200,10 @@ bool pauseAudio(void* audioHandle) {
 
 void stopAudio(void* audioHandle) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: stopAudio");
+	LOG("OpenSL: stopAudio");
+
+	OpenSLSound* sound = (OpenSLSound*)audioHandle;
+	sound->stop();
 #else
 	#error Unsupported platform!
 #endif

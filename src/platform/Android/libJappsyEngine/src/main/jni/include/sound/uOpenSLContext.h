@@ -21,36 +21,33 @@
 
 #include <SLES/OpenSLES.h>
 #include <SLES/OpenSLES_Android.h>
-
-#include <core/uAtomic.h>
+#include <data/uObject.h>
 
 class OpenSLPlayer;
 class OpenSLSound;
 
 #define OPENSL_CHANNELS		16
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+class OpenSLContext : public CObject {
+private:
+	jbool paused = false;
 
-struct OpenSLContext {
+public:
 	SLObjectItf engineObj = NULL;
 	SLEngineItf engine = NULL;
 	SLObjectItf outputMixObj = NULL;
 
-	OpenSLPlayer* players[OPENSL_CHANNELS];
+	OpenSLPlayer* players[OPENSL_CHANNELS] = {0};
 
 	bool init();
 	void shutdown();
+
+	bool isPaused();
 
 	void pause();
 	void resume();
 
 	OpenSLPlayer* getFreePlayer(OpenSLSound* sound);
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif //JAPPSY_UOPENSLCONTEXT_H

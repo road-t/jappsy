@@ -33,8 +33,6 @@ extern "C" {
 static OpenSLContext* context = NULL;
 static jlock context_lock = false;
 
-#include <sound/filter/uLowPassFilter.h>
-
 #endif
 
 void initAudioPlayer() {
@@ -44,17 +42,13 @@ void initAudioPlayer() {
 	AtomicLock(&context_lock);
 	if (context == NULL) {
 		try {
-			context = new OpenSLContext();
+			AtomicSetPtr(&context, new OpenSLContext());
 		} catch (...) {
 		}
 	}
 	if (context != NULL) {
 		context->init();
 	}
-
-	struct tLowPassFilter* filter = buildLowPassFilter(2048, 0.9, 9);
-
-	systemSleep(1000);
 
 	AtomicUnlock(&context_lock);
 #else
@@ -67,12 +61,13 @@ bool shutdownAudioPlayer() {
 	//LOG("OpenSL: shutdownAudioPlayer");
 
 	AtomicLock(&context_lock);
-	if (context != NULL) {
-		context->shutdown();
+	OpenSLContext* ctx = AtomicGetPtr(&context);
+	if (ctx != NULL) {
+		ctx->shutdown();
 
-		delete context;
+		delete ctx;
 
-		context = NULL;
+		AtomicSetPtr(&context, NULL);
 	}
 	AtomicUnlock(&context_lock);
 #else
@@ -86,8 +81,9 @@ void pauseAudioPlayer() {
 	//LOG("OpenSL: pauseAudioPlayer");
 
 	AtomicLock(&context_lock);
-	if (context != NULL) {
-		context->pause();
+	OpenSLContext* ctx = AtomicGetPtr(&context);
+	if (ctx != NULL) {
+		ctx->pause();
 	}
 	AtomicUnlock(&context_lock);
 #else
@@ -100,8 +96,9 @@ void resumeAudioPlayer() {
 	//LOG("OpenSL: resumeAudioPlayer");
 
 	AtomicLock(&context_lock);
-	if (context != NULL) {
-		context->resume();
+	OpenSLContext* ctx = AtomicGetPtr(&context);
+	if (ctx != NULL) {
+		ctx->resume();
 	}
 	AtomicUnlock(&context_lock);
 #else
@@ -111,21 +108,11 @@ void resumeAudioPlayer() {
 
 bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: prepareAudio");
-#else
-	#error Unsupported platform!
-#endif
-	return true;
-}
-
-bool prepareAudioStream(Stream* stream, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError) {
-#if defined(__JNI__)
 	//LOG("OpenSL: prepareAudio");
 
 	OpenSLSound* sound = new OpenSLSound();
-	if (sound->load(stream)) {
-		onAudioReady(sound, (uint32_t)sound->memoryUsed(), sound->audioSize(), userData);
+	if (sound->load(filePath)) {
+		onAudioReady(sound, 0, 0, userData);
 	} else {
 		delete sound;
 		onAudioError(userData);
@@ -149,13 +136,13 @@ void destroyAudio(void* audioHandle) {
 
 void playAudio(void* audioHandle, bool loop) {
 #if defined(__JNI__)
-	LOG("OpenSL: playAudio");
+	//LOG("OpenSL: playAudio");
 
 	AtomicLock(&context_lock);
-	if (context != NULL) {
+	OpenSLContext* ctx = AtomicGetPtr(&context);
+	if (ctx != NULL) {
 		OpenSLSound* sound = (OpenSLSound*)audioHandle;
-		sound->setLoop(loop);
-		sound->play(context);
+		sound->play(ctx, loop);
 	}
 	AtomicUnlock(&context_lock);
 #else
@@ -177,7 +164,7 @@ bool playingAudio(void* audioHandle) {
 
 void volumeAudio(void* audioHandle, float volume) {
 #if defined(__JNI__)
-	LOG("OpenSL: volumeAudio");
+	//LOG("OpenSL: volumeAudio");
 
 	OpenSLSound* sound = (OpenSLSound*)audioHandle;
 	sound->setVolume(volume);
@@ -188,7 +175,7 @@ void volumeAudio(void* audioHandle, float volume) {
 
 bool pauseAudio(void* audioHandle) {
 #if defined(__JNI__)
-	LOG("OpenSL: pauseAudio");
+	//LOG("OpenSL: pauseAudio");
 
 	OpenSLSound* sound = (OpenSLSound*)audioHandle;
 	sound->pause();
@@ -200,7 +187,7 @@ bool pauseAudio(void* audioHandle) {
 
 void stopAudio(void* audioHandle) {
 #if defined(__JNI__)
-	LOG("OpenSL: stopAudio");
+	//LOG("OpenSL: stopAudio");
 
 	OpenSLSound* sound = (OpenSLSound*)audioHandle;
 	sound->stop();
@@ -211,8 +198,7 @@ void stopAudio(void* audioHandle) {
 
 int32_t freeChannels() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: freeChannels");
+	// Unused on Android
 #else
 	#error Unsupported platform!
 #endif
@@ -221,8 +207,7 @@ int32_t freeChannels() {
 
 int32_t activeChannels() {
 #if defined(__JNI__)
-	#warning TODO!
-	LOG("TODO: activeChannels");
+	// Unused on Android
 #else
 	#error Unsupported platform!
 #endif

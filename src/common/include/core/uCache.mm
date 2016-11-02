@@ -523,6 +523,7 @@ Stream* Cache::getData(const CString& path, const CString& file) {
 		try {
 			stream = new Stream(streamptr, (uint32_t)fileSize, true);
 			stream->setModificationDate(modificationDate);
+			stream->setSourcePath(filePath);
 		} catch (...) {
 			memFree(streamptr);
 

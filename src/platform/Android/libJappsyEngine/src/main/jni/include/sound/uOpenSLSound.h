@@ -22,48 +22,40 @@
 #include <data/uString.h>
 #include <sound/uOpenSLContext.h>
 #include <data/uStream.h>
-#include <sound/uSound.h>
 
 class OpenSLSound : public CObject {
-private:
-	Sound* sound = NULL;
-
 public:
 	OpenSLSound();
 	~OpenSLSound();
 
-	CString path;
-	//bool load(const CString& path);
-	bool load(Stream* stream);
+	bool load(const CString& path);
 
 	void setVolume(float volume);
 	float getVolume();
 
-	void play(OpenSLContext* context);
+	void play(OpenSLContext* context, bool loop);
 	void pause();
 	void stop();
 
 	bool isPlaying();
 	bool isPaused();
-	void setLoop(bool loop);
-	bool isLooping();
 
-	size_t memoryUsed();
-	size_t audioSize();
-	size_t fillBuffer(uint8_t* buffer, size_t bufferSize);
 	void reset();
 
+	int fd = -1;
+	off_t fileSize = 0;
+
 protected:
-	jbool loop = false;
 	jbool paused = false;
 	jbool playing = false;
 	jbool rewind = false;
 	float volume = 1.0f;
+
 	OpenSLPlayer* player = NULL;
 	OpenSLContext* context = NULL;
 
-	off_t lastConvertOfs = 0;
-	size_t lastConvertSize = 0;
+private:
+	void clear();
 };
 
 #endif //JAPPSY_UOPENSLSOUND_H

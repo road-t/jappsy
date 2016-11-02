@@ -41,7 +41,6 @@ extern "C" {
 	bool prepareAudio(NSString* filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
 #else
 	bool prepareAudio(const CString& filePath, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
-	bool prepareAudioStream(Stream* stream, void* userData, bool threaded, AudioReadyCallback onAudioReady, AudioErrorCallback onAudioError);
 #endif
 	void destroyAudio(void* audioHandle);
 	void playAudio(void* audioHandle, bool loop);

@@ -16,156 +16,45 @@
 
 #include "uOpenSLPlayer.h"
 #include <core/uAtomic.h>
-#include <sound/uOpenSLSound.h>
+#include <io/uFileIO.h>
+#include <core/uSystem.h>
 
 bool OpenSLPlayer::isPlaying() {
-	return state() == SL_PLAYSTATE_PLAYING;
+	return AtomicGet(&state) == SL_PLAYSTATE_PLAYING;
 }
 
 bool OpenSLPlayer::isPaused() {
-	return state() == SL_PLAYSTATE_PAUSED;
+	return AtomicGet(&state) == SL_PLAYSTATE_PAUSED;
 }
 
 bool OpenSLPlayer::isStopped() {
-	return state() == SL_PLAYSTATE_STOPPED;
+	return AtomicGet(&state) == SL_PLAYSTATE_STOPPED;
 }
 
 void OpenSLPlayer::EventCallback(SLPlayItf caller, void* userData, SLuint32 event) {
 	OpenSLPlayer* player = (OpenSLPlayer*)userData;
-	if (event == SL_PLAYEVENT_HEADATEND) { // Stop
-		player->lock();
-
-		AtomicSet(&player->buffersUsed, 0);
-
-		OpenSLSound* sound = AtomicGetPtr(&player->sound);
-		if (sound != NULL) {
-			sound->reset();
-		}
-
-		player->unlock();
+	if (event == SL_PLAYEVENT_HEADATEND) {
+		player->stop();
 	}
 
 	//LOG("OpenSL: PlayerEvent %d", event);
 }
 
-void OpenSLPlayer::BufferCallback(SLBufferQueueItf caller, void* userData) {
-	OpenSLPlayer* player = (OpenSLPlayer*)userData;
-	int used = AtomicDecrement(&player->buffersUsed) - 1;
-
-	//LOG("OpenSL: BufferEvent (%d)", used);
-
-	player->queue();
-}
-
 OpenSLPlayer::OpenSLPlayer(OpenSLContext* context) {
 	AtomicSet(&(this->context), context);
-
-	SLresult result;
-
-	locatorBufferQueue.locatorType = SL_DATALOCATOR_ANDROIDSIMPLEBUFFERQUEUE;
-	locatorBufferQueue.numBuffers = 16;
-
-	formatPCM.formatType = SL_DATAFORMAT_PCM;
-	formatPCM.numChannels = 2;
-	formatPCM.samplesPerSec = SL_SAMPLINGRATE_48;
-	formatPCM.bitsPerSample = SL_PCMSAMPLEFORMAT_FIXED_16;
-	formatPCM.containerSize = SL_PCMSAMPLEFORMAT_FIXED_16;
-	formatPCM.channelMask = SL_SPEAKER_FRONT_LEFT | SL_SPEAKER_FRONT_RIGHT ;
-	formatPCM.endianness = SL_BYTEORDER_LITTLEENDIAN;
-
-	audioSrc.pLocator = &locatorBufferQueue;
-	audioSrc.pFormat = &formatPCM;
-	locatorOutMix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
-	locatorOutMix.outputMix = context->outputMixObj;
-	audioSnk.pLocator = (void*)&locatorOutMix;
-	audioSnk.pFormat = NULL;
-
-	const SLInterfaceID ids[4] = {SL_IID_ANDROIDSIMPLEBUFFERQUEUE, SL_IID_MUTESOLO, SL_IID_VOLUME};
-	const SLboolean req[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
-
-	result = (*context->engine)->CreateAudioPlayer(context->engine, &playerObj, &audioSrc, &audioSnk, 3, ids, req);
-	if (result != SL_RESULT_SUCCESS) {
-		playerObj = NULL;
-		return;
-	}
-
-	result = (*playerObj)->Realize(playerObj, SL_BOOLEAN_FALSE);
-	if (result != SL_RESULT_SUCCESS) {
-		playerObj = NULL;
-		return;
-	}
-
-	result = (*playerObj)->GetInterface(playerObj, SL_IID_PLAY, &player);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*playerObj)->GetInterface(playerObj, SL_IID_MUTESOLO, &playerMuteSolo);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*playerObj)->GetInterface(playerObj, SL_IID_VOLUME, &playerVolume);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*playerObj)->GetInterface(playerObj, SL_IID_ANDROIDSIMPLEBUFFERQUEUE, &bufferQueue);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*player)->RegisterCallback(player, EventCallback, (void*)this);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*bufferQueue)->RegisterCallback(bufferQueue, BufferCallback, (void*)this);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	result = (*player)->SetCallbackEventsMask(player, SL_PLAYEVENT_HEADATEND/* | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED*/);
-	if (result != SL_RESULT_SUCCESS) {
-		clear();
-		return;
-	}
-
-	bufferSize = 4096;
-	for (int i = 0; i < 4; i++) {
-		buffers[i] = memAlloc(uint8_t, buffers[i], bufferSize);
-		if (buffers[i] == NULL) {
-			clear();
-			return;
-		}
-	}
-
-	//result = (*playerSeek)->SetLoop(playerSeek, sound->isLooping() ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
 }
 
 void OpenSLPlayer::clear() {
 	lock();
 
 	if (playerObj != NULL) {
-		for (int i = 0; i < 4; i++) {
-			if (buffers[i] != NULL) {
-				memFree(buffers[i]);
-				buffers[i] = NULL;
-			}
-		}
+		stop();
 
 		(*playerObj)->Destroy(playerObj);
 		player = NULL;
 		playerMuteSolo = NULL;
 		playerVolume = NULL;
 		playerObj = NULL;
-		bufferQueue = NULL;
 	}
 
 	unlock();
@@ -175,29 +64,95 @@ OpenSLPlayer::~OpenSLPlayer() {
 	clear();
 }
 
-SLuint32 OpenSLPlayer::state() {
+void OpenSLPlayer::setSound(OpenSLSound* sound) {
+	lock();
+
+	clear();
+
 	SLresult result;
 
-	if (player != NULL && bufferQueue != NULL) {
-		SLBufferQueueState state;
+	locatorFD.locatorType = SL_DATALOCATOR_ANDROIDFD;
+	locatorFD.fd = AtomicGet(&sound->fd);
+	locatorFD.offset = 0;
+	locatorFD.length = AtomicGet(&sound->fileSize);
 
-		result = (*bufferQueue)->GetState(bufferQueue, &state);
-		if (result != SL_RESULT_SUCCESS) {
-			return SL_PLAYSTATE_STOPPED;
-		}
+	formatMIME.formatType = SL_DATAFORMAT_MIME;
+	formatMIME.mimeType = NULL;
+	formatMIME.containerType = SL_CONTAINERTYPE_UNSPECIFIED;
 
-		SLuint32 statePlayer;
-		result = (*player)->GetPlayState(player, &statePlayer);
-		if(statePlayer == SL_PLAYSTATE_PLAYING) {
-			if (state.count == 0) {
-				return SL_PLAYSTATE_STOPPED;
-			}
-		}
+	audioSrc.pLocator = &locatorFD;
+	audioSrc.pFormat = &formatMIME;
 
-		return statePlayer;
+	locatorOutMix.locatorType = SL_DATALOCATOR_OUTPUTMIX;
+	locatorOutMix.outputMix = context->outputMixObj;
+
+	audioSnk.pLocator = (void*)&locatorOutMix;
+	audioSnk.pFormat = NULL;
+
+	const SLInterfaceID ids[4] = {SL_IID_SEEK, SL_IID_MUTESOLO, SL_IID_VOLUME};
+	const SLboolean req[4] = {SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE, SL_BOOLEAN_TRUE};
+
+	result = (*context->engine)->CreateAudioPlayer(context->engine, &playerObj, &audioSrc, &audioSnk, 3, ids, req);
+	if (result != SL_RESULT_SUCCESS) {
+		playerObj = NULL;
+		unlock();
+		return;
 	}
 
-	return SL_PLAYSTATE_STOPPED;
+	result = (*playerObj)->Realize(playerObj, SL_BOOLEAN_FALSE);
+	if (result != SL_RESULT_SUCCESS) {
+		playerObj = NULL;
+		unlock();
+		return;
+	}
+
+	result = (*playerObj)->GetInterface(playerObj, SL_IID_PLAY, &player);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	result = (*playerObj)->GetInterface(playerObj, SL_IID_SEEK, &playerSeek);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	result = (*playerObj)->GetInterface(playerObj, SL_IID_MUTESOLO, &playerMuteSolo);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	result = (*playerObj)->GetInterface(playerObj, SL_IID_VOLUME, &playerVolume);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	result = (*player)->RegisterCallback(player, EventCallback, (void*)this);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	result = (*player)->SetCallbackEventsMask(player, SL_PLAYEVENT_HEADATEND/* | SL_PLAYEVENT_HEADATMARKER | SL_PLAYEVENT_HEADATNEWPOS | SL_PLAYEVENT_HEADMOVING | SL_PLAYEVENT_HEADSTALLED*/);
+	if (result != SL_RESULT_SUCCESS) {
+		clear();
+		unlock();
+		return;
+	}
+
+	AtomicSetPtr(&(this->sound), sound);
+
+	accessTime = currentTimeMillis();
+
+	unlock();
 }
 
 #include <math.h>
@@ -223,6 +178,10 @@ float OpenSLPlayer::gain_from_attenuation(float attenuation) {
 }
 
 void OpenSLPlayer::setVolume(float volume) {
+	lock();
+
+	accessTime = currentTimeMillis();
+
 	//SLresult result;
 
 	if (playerVolume != NULL) {
@@ -230,115 +189,119 @@ void OpenSLPlayer::setVolume(float volume) {
 
 		/*result = */(*playerVolume)->SetVolumeLevel(playerVolume, newVolume);
 	}
+
+	unlock();
 }
 
 float OpenSLPlayer::getVolume() {
+	lock();
+
+	accessTime = currentTimeMillis();
+
 	SLresult result;
 
 	if (playerVolume != NULL) {
+
 		SLmillibel millibel;
 
 		result = (*playerVolume)->GetVolumeLevel(playerVolume, &millibel);
 
 		if (result == SL_RESULT_SUCCESS) {
+			unlock();
+
 			return gain_from_attenuation(millibel);
 		}
 	}
+
+	unlock();
 
 	return 0.0;
 }
 
 void OpenSLPlayer::pause() {
-	if (player == NULL) return;
+	lock();
+
+	accessTime = currentTimeMillis();
+
+	if (player == NULL) {
+		unlock();
+
+		return;
+	}
+
+	AtomicCompareExchange(&state, SL_PLAYSTATE_PAUSED, SL_PLAYSTATE_PLAYING);
 
 	//SLresult result;
-
 	/*result = */(*player)->SetPlayState(player, SL_PLAYSTATE_PAUSED);
-}
-
-void OpenSLPlayer::setSound(OpenSLSound* sound) {
-	lock();
-
-	if (bufferQueue != NULL) {
-		AtomicSetPtr(&(this->sound), sound);
-
-		(*bufferQueue)->Clear(bufferQueue);
-		AtomicSet(&buffersUsed, 0);
-		fillBuffers();
-	}
 
 	unlock();
 }
 
-void OpenSLPlayer::queue() {
+void OpenSLPlayer::play(bool loop, bool reset) {
 	lock();
 
-	if (bufferQueue != NULL) {
-		OpenSLSound* sound = AtomicGetPtr(&this->sound);
-		if (sound != NULL) {
-			int index = AtomicIncrement(&nextBuffer) % 4;
-			AtomicAnd(&nextBuffer, 0x3);
+	accessTime = currentTimeMillis();
 
-			uint8_t *buffer = AtomicGetPtr(&(buffers[index]));
+	if (player == NULL) {
+		unlock();
 
-			//LOG("OpenSLPlayer::queue (Sound:%08X / Buffer:%d:%08X)", (uint32_t)(intptr_t)sound, index, (uint32_t)(intptr_t)buffer);
-
-			size_t size = sound->fillBuffer(buffer, bufferSize);
-
-			if (size > 0) {
-				AtomicIncrement(&buffersUsed);
-				(*bufferQueue)->Enqueue(bufferQueue, buffer, (SLuint32)size);
-			}
-		}
+		return;
 	}
-
-	unlock();
-}
-
-void OpenSLPlayer::fillBuffers() {
-	lock();
-
-	int count = 2 - AtomicGet(&buffersUsed);
-	for (int i = 0; i < count; i++) {
-		queue();
-	}
-
-	unlock();
-}
-
-
-void OpenSLPlayer::play() {
-	if (player == NULL) return;
-
-	fillBuffers();
 
 	//SLresult result;
+	if (reset) (*playerSeek)->SetPosition(playerSeek, 0, SL_SEEKMODE_FAST);
+	/*result = */(*playerSeek)->SetLoop(playerSeek, loop ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
 	/*result= */(*player)->SetPlayState(player, SL_PLAYSTATE_PLAYING);
+
+	AtomicSet(&state, SL_PLAYSTATE_PLAYING);
+	AtomicSet(&this->loop, loop);
+
+	unlock();
+}
+
+void OpenSLPlayer::restore() {
+	lock();
+
+	accessTime = currentTimeMillis();
+
+	if (player == NULL) {
+		unlock();
+
+		return;
+	}
+
+	if (isPaused() && AtomicExchange(&resume, false)) {
+		if (AtomicExchange(&reset, false)) (*playerSeek)->SetPosition(playerSeek, 0, SL_SEEKMODE_FAST);
+		(*playerSeek)->SetLoop(playerSeek, AtomicGet(&loop) ? SL_BOOLEAN_TRUE : SL_BOOLEAN_FALSE, 0, SL_TIME_UNKNOWN);
+		(*player)->SetPlayState(player, SL_PLAYSTATE_PLAYING);
+
+		AtomicSet(&state, SL_PLAYSTATE_PLAYING);
+	}
+
+	unlock();
 }
 
 void OpenSLPlayer::stop() {
-	if (player == NULL) return;
-
 	lock();
+
+	accessTime = currentTimeMillis();
+	AtomicSet(&state, SL_PLAYSTATE_STOPPED);
+	AtomicSet(&resume, false);
+	AtomicSet(&reset, false);
+
+	if (player == NULL) {
+		unlock();
+
+		return;
+	}
 
 	//SLresult result;
 	/*result=  */(*player)->SetPlayState(player, SL_PLAYSTATE_STOPPED);
 
-	if (bufferQueue != NULL) {
-		(*bufferQueue)->Clear(bufferQueue);
-		AtomicSet(&buffersUsed, 0);
+	OpenSLSound* sound = AtomicGetPtr(&this->sound);
+	if (sound != NULL) {
+		sound->reset();
 	}
 
 	unlock();
-}
-
-char* OpenSLPlayer::getBuffer(size_t* size) {
-	lock();
-
-	uint8_t *buffer = buffers[nextBuffer++];
-	if (nextBuffer >= 4) nextBuffer = 0;
-
-	unlock();
-
-	return (char*)buffer;
 }

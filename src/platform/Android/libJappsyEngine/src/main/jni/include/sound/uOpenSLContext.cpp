@@ -144,11 +144,7 @@ void OpenSLContext::resume() {
 			OpenSLPlayer *player = AtomicGet(&(players[i]));
 			if (player != NULL) {
 				player->lock();
-
-				if (player->isPaused() && (AtomicExchange(&player->resume, false))) {
-					player->play();
-				}
-
+				player->restore();
 				player->unlock();
 			}
 		}
@@ -178,7 +174,7 @@ OpenSLContext_getFreePlayer_repeat:
 				old_access = player->accessTime;
 			}
 
-			if (!player->isPlaying()) {
+			if (player->isStopped()) {
 				unlock();
 
 				AtomicSet(&player->resume, false);

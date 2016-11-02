@@ -578,7 +578,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 			}
 #elif defined(__JNI__)
 			PrepareAudioThread thread;
-			if (prepareAudioStream(stream, &thread, false, onAudioReadyCallback, onAudioErrorCallback) && (thread.ready)) {
+			if (prepareAudio(stream->getSourcePath(), &thread, false, onAudioReadyCallback, onAudioErrorCallback) && (thread.ready)) {
 				thread.mixer = context->mixer;
 				thread.info = info;
 				GLSound* sound = (GLSound*)MainThreadSync(onCreateSoundCallback, &thread);

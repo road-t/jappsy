@@ -20,39 +20,45 @@
 #include <platform.h>
 #include <data/uObject.h>
 #include <sound/uOpenSLContext.h>
-
-class OpenSLSound;
+#include <sound/uOpenSLSound.h>
 
 class OpenSLPlayer : public CObject {
 public:
 	OpenSLPlayer(struct OpenSLContext* context);
 	virtual ~OpenSLPlayer();
 
-	float getVolume() ;
-	void setVolume(float volume) ;
+	void setSound(OpenSLSound* sound);
+
+	float getVolume();
+	void setVolume(float volume);
+
 	void pause();
-	void play();
+	void play(bool loop, bool reset);
 	void stop();
-	SLuint32 state();
+	void restore();
+
 	bool isPlaying();
 	bool isPaused();
 	bool isStopped();
-	void setSound(OpenSLSound* sound);
 
 	OpenSLSound* sound = NULL;
 	uint64_t accessTime = 0;
 	jbool resume = false;
+	jbool reset = false;
 
 protected:
 	virtual void clear();
+
+	int state = SL_PLAYSTATE_STOPPED;
+	jbool loop = false;
 
 	OpenSLContext* context;
 
 	SLmillibel gain_to_attenuation(float gain);
 	static float gain_from_attenuation(float attenuation);
 
-	SLDataLocator_AndroidSimpleBufferQueue locatorBufferQueue;
-	SLDataFormat_PCM formatPCM;
+	SLDataLocator_AndroidFD locatorFD = {0};
+	SLDataFormat_MIME formatMIME = {0};
 
 	SLDataSource audioSrc = {0};
 	SLDataLocator_OutputMix locatorOutMix = {0};
@@ -61,21 +67,10 @@ protected:
 	SLObjectItf playerObj = NULL;
 	SLPlayItf player = NULL;
 	SLVolumeItf playerVolume = NULL;
+	SLSeekItf playerSeek = NULL;
 	SLMuteSoloItf playerMuteSolo = NULL;
 
-	SLBufferQueueItf bufferQueue = NULL;
-
 	static void EventCallback(SLPlayItf caller, void* userData, SLuint32 event);
-	static void BufferCallback(SLBufferQueueItf caller, void* userData);
-
-	uint32_t buffersUsed = 0;
-	uint8_t* buffers[4] = {0};
-	size_t bufferSize = 0;
-	int nextBuffer = 0;
-
-	char* getBuffer(size_t* size);
-	void queue();
-	void fillBuffers();
 };
 
 #endif //JAPPSY_UOPENSLPLAYER_H

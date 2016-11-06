@@ -23,6 +23,7 @@
 
 @interface OMView()
 
+@property(strong,nonatomic)NSString *basePath;
 @property(strong,nonatomic)NSString *token;
 @property(strong,nonatomic)NSString *sessid;
 @property(strong,nonatomic)NSString *devid;
@@ -116,8 +117,9 @@
 @synthesize llvError;
 @synthesize llhError;
 
-- (instancetype) init:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData {
+- (instancetype) init:(NSString*)basePath token:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData {
     if ((self = [super init])) {
+        _basePath = [NSString stringWithString:basePath];
         _token = [NSString stringWithString:token];
         _sessid = [NSString stringWithString:sessid];
         _devid = [NSString stringWithString:devid];
@@ -827,7 +829,7 @@ void onScript(int index, const CString& script, void* userData) {
 
 - (BOOL) onStart {
     if ([gameView onStart]) {
-        engine = new class OMGame(_token, _sessid, _devid, _locale);
+        engine = new class OMGame(_basePath, _token, _sessid, _devid, _locale);
         engine->setOnUpdateState(onUpdateState, (__bridge void*)self);
         engine->setWebCallbacks(onLocation, onScript, (__bridge void*)self);
         [gameView engine:engine];

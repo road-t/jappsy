@@ -57,7 +57,7 @@ typedef void (*OMViewCloseCallback)(void* userData);
 
 @interface OMView : UIView
 
-- (instancetype) init:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData;
+- (instancetype) init:(NSString*)basePath token:(NSString*)token sessid:(NSString*)sessid devid:(NSString*)devid locale:(NSString*)locale onclose:(OMViewCloseCallback)callback userData:(void*)userData;
 
 - (void) orientationChanged:(NSNotification *)notification;
 

@@ -1996,7 +1996,7 @@ void OMGame::onWebFail(int index, CString& error) {
 #endif
 }
 
-OMGame::OMGame(const CString& token, const CString& sessid, const CString& devid, const CString& locale) {
+OMGame::OMGame(const CString& basePath, const CString& token, const CString& sessid, const CString& devid, const CString& locale) {
     this->token = token;
     this->sessid = sessid;
     this->devid = devid;
@@ -2023,7 +2023,7 @@ OMGame::OMGame(const CString& token, const CString& sessid, const CString& devid
     paintSpriteLeftCenter.setColor(0xFFFFFFFF).setAlignX(GLAlignX::LEFT).setAlignY(GLAlignY::MIDDLE);
 
     LOG("OMGame > Setup Base URL");
-    setBasePath(L"https://om.jappsy.com/jappsy/");
+    setBasePath(basePath);
 
     LOG("OMGame > Json Preload Config");
     const char *sOMPreloadRes =

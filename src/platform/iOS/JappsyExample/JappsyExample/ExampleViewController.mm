@@ -262,12 +262,14 @@ void onCloseCallback(void* userData) {
 
 - (void) menuSelect03:(UIButton*)sender {
 	if (omView == NULL) {
+		NSString* basePath = @"https://dev03-om.jappsy.com/jappsy/"; // Demo server
+		//NSString* basePath = @"https://om.jappsy.com/jappsy/"; // Production server
 		NSString* token = @"e994a237491a85ff72b9f737bbf47047cfbc6dbb0897ea1eea5e75338a4b13c3";
 		NSString* sessid = @"8ea5f70b15263872760d7e14ce8e579a";
 		NSString* devid = @"";
 		NSString* locale = @"RU";
 		
-		omView = [[OMView alloc] init:token sessid:sessid devid:devid locale:locale onclose:onCloseCallback userData:(__bridge void*)self];
+		omView = [[OMView alloc] init:basePath token:token sessid:sessid devid:devid locale:locale onclose:onCloseCallback userData:(__bridge void*)self];
 		[layoutView03 addSubview:omView];
 
 		[layoutView03 addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:omView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:layoutView03 attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],999)];

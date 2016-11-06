@@ -124,7 +124,7 @@ public:
     CString devid;
     CString locale;
     
-    OMGame(const CString& token, const CString& sessid, const CString& devid, const CString& locale);
+    OMGame(const CString& basePath, const CString& token, const CString& sessid, const CString& devid, const CString& locale);
     ~OMGame();
     
     int32_t mantra = 0;

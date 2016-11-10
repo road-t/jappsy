@@ -59,7 +59,7 @@ public class OMWebView extends WebView {
 
 	private class OMWebViewClient extends WebViewClient {
 		@Override public boolean shouldOverrideUrlLoading(WebView view, String url) {
-			if (url.startsWith("ios:")) {
+			if (url.startsWith("app:")) {
 				if (engine != 0) {
 					OMEngine.onWebLocation(engine, index, url);
 				}

@@ -44,7 +44,7 @@
 
 - (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     NSString* url = [[request URL] absoluteString];
-    if ([url hasPrefix:@"ios:"]) {
+    if ([url hasPrefix:@"app:"]) {
         if (_engine != NULL) {
             CString location = url;
             _engine->onWebLocation(_index, location);

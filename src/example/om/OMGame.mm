@@ -1960,7 +1960,7 @@ bool onCalendarMonthError(const Loader::File* info, void* userData) {
 }
 
 void OMGame::onWebLocation(int index, CString& location) {
-    if (location.equals(L"ios:init")) {
+    if (location.equals(L"app:init")) {
         if (index == OMVIEW_GAME) {
             webScript(OMVIEW_GAME, CString::format(L"updateLang('%ls'); enableCalendarDay();", (wchar_t*)locale));
             updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
@@ -1968,19 +1968,19 @@ void OMGame::onWebLocation(int index, CString& location) {
             webScript(OMVIEW_HELP,  CString::format(L"updateLang('%ls'); enableInfo();", (wchar_t*)locale));
             updateGrace(0);
         }
-    } else if (location.equals(L"ios:close")) {
+    } else if (location.equals(L"app:close")) {
         if (index != OMVIEW_HELP) {
             updateState(OMVIEW_HIDE | OMVIEW_ANIMATE);
         } else {
             updateState(OMVIEW_GAME | OMVIEW_ANIMATE);
         }
-    } else if (location.startsWith(L"ios:calendarDay:")) {
+    } else if (location.startsWith(L"app:calendarDay:")) {
         if (AtomicLockTry(&lockCalendarDay)) {
-            context->loader->load(location.replace(L"ios:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
+            context->loader->load(location.replace(L"app:calendarDay:", L"./calendar/"), L"web", L"calendarDay", onCalendarDayLoad, onCalendarDayError, this);
         }
-    } else if (location.startsWith(L"ios:calendarMonth:")) {
+    } else if (location.startsWith(L"app:calendarMonth:")) {
         if (AtomicLockTry(&lockCalendarMonth)) {
-            context->loader->load(location.replace(L"ios:calendarMonth:", L"./calendar/"), L"web", L"calendarMonth", onCalendarMonthLoad, onCalendarMonthError, this);
+            context->loader->load(location.replace(L"app:calendarMonth:", L"./calendar/"), L"web", L"calendarMonth", onCalendarMonthLoad, onCalendarMonthError, this);
         }
     }
 }

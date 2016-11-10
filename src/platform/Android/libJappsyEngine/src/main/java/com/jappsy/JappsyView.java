@@ -309,12 +309,14 @@ public class JappsyView extends GLSurfaceView {
 
 	/* ANTI-DEADLOCK OVERRIDES */
 
+	/*
 	@TargetApi(24)
 	@Override public void surfaceRedrawNeeded(SurfaceHolder holder) {
 		JappsyEngine.lockGLThread();
 		super.surfaceRedrawNeeded(holder);
 		JappsyEngine.unlockGLThread();
 	}
+	*/
 
 	@Override public void surfaceCreated(SurfaceHolder holder) {
 		JappsyEngine.lockGLThread();

@@ -22,6 +22,10 @@ public class OMEngine {
 		System.loadLibrary("GameOM-jni");
 	}
 
-	public static native long onCreate();
+	public static native long onCreate(OMView view, String basePath, String token, String sessid, String devid, String locale);
+	public static native void setMinimized(long engine, boolean minimized);
 
+	public static native void onWebLocation(long engine, int index, String location);
+	public static native void onWebReady(long engine, int index);
+	public static native void onWebFail(long engine, int index, String error);
 }

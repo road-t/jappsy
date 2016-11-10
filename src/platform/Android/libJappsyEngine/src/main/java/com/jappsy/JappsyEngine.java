@@ -55,4 +55,9 @@ public class JappsyEngine {
 	public static native void onFrame(long handle);
 
 	public static native void onTouch(long handle, MotionEvent event);
+
+	/* ANTI-DEADLOCK */
+
+	public static native void lockGLThread();
+	public static native void unlockGLThread();
 }

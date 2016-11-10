@@ -128,6 +128,33 @@ GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
 }
 
+#if defined(__JNI__)
+
+struct ReleaseGLEngineThreadData {
+	void* onUpdateStateUserData;
+	void* onwebUserData;
+};
+
+void* onReleaseGLEngineThread(void* userData) {
+	struct ReleaseGLEngineThreadData* thread = (struct ReleaseGLEngineThreadData*)userData;
+
+	JNIEnv* env = GetThreadEnv();
+
+	if (thread->onUpdateStateUserData != NULL) {
+		env->DeleteGlobalRef((jobject)thread->onUpdateStateUserData);
+	}
+
+	if (thread->onwebUserData != NULL) {
+		env->DeleteGlobalRef((jobject)thread->onwebUserData);
+	}
+
+	ReleaseThreadEnv();
+
+	return NULL;
+}
+
+#endif
+
 GLEngine::~GLEngine() {
 	if (context != NULL) {
 		delete context;
@@ -135,6 +162,12 @@ GLEngine::~GLEngine() {
 	if (cache != NULL) {
 		delete cache;
 	}
+#if defined(__JNI__)
+	struct ReleaseGLEngineThreadData thread;
+	thread.onUpdateStateUserData = onUpdateStateUserData;
+	thread.onwebUserData = onwebUserData;
+	MainThreadSync(onReleaseGLEngineThread, &thread);
+#endif
 }
 
 void GLEngine::shutdown() {

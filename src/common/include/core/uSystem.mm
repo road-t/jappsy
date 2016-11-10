@@ -201,7 +201,8 @@ static int threadMessagePipeCallback(int fd, int events, void *data) {
 		if (fd == openglThreadMessagePipe[0]) {
 			AtomicDecrement(&openglThreadMessagePipeEvents);
 		}
-		//LOG("(%d) Got message!", fd);
+
+		//LOG("MessageLoop(%d): Message (Start)", fd);
 
 		volatile struct ThreadSyncData *syncData = AtomicGetPtr(&(msg.syncData));
 
@@ -253,6 +254,8 @@ static int threadMessagePipeCallback(int fd, int events, void *data) {
 				}
 			}
 		}
+
+		//LOG("MessageLoop(%d): Message (Done)", fd);
 	}
 
 	LOG("MessageLoop(%d): Read Messages (Done)", fd);

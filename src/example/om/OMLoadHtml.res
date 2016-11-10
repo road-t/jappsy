@@ -19,7 +19,8 @@ R"JAPPSYRAWSTRING(
 		position: absolute;
 		top: 0;
 		left: 0;
-		
+		overflow: none;
+
 		font: normal 0.18in sans-serif;
 		color: #fff;
 
@@ -40,42 +41,54 @@ R"JAPPSYRAWSTRING(
 	}
 
 	.navigation {
-		background: #000  url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAYAAABHLFpgAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAAAHElEQVR42mJgYGD4z8TAwMAwSgxLwl01Gl0MMAC/aAKN62kIcAAAAABJRU5ErkJggg==') no-repeat scroll 0 -0.5px / 100% 0.5in;
 		height: 0.48in;
+
+		background-color: #000;
+		background-repeat: no-repeat;
+		background-attachment: scroll;
+		background-position: 0px -1px;
+		background-position: 0px -0.5px;
+		background-size: 100% 0.5in;
+		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAABkCAYAAABHLFpgAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAAAHElEQVR42mJgYGD4z8TAwMAwSgxLwl01Gl0MMAC/aAKN62kIcAAAAABJRU5ErkJggg==');
 	}
-	
+
 	.arrow-left {
 		position: absolute;
 		left: 0;
 		top: 0;
 		width: 0.48in;
 		height: 0.48in;
-		background: transparent url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAACXElEQVR42mL6//8/AyWYiYFCMGoALgPOMv7HiYkywPg/IwMDAyo2/s8IFSfSBQwMqHgIugAXHk2JGAAAAAD//2IaLQ+GXHlAtAG4ciNJLsCWG4eYC4goC0ZTIgQAAAAA//+iuDwY8PJkwINw1AEj0AFnGfHj0SgY/g4w/o8fj0bBqAOGmgMAAAAA///s2DEKACAQA8H///pK4YoQ8MoR7KfYQuM9AAAAAADQA9KSWS4af4D3y883rAEauGlgrzfluqsBDdw10F4NAAAAAJRnAAAA///s2ckJACAMBMD+u7YAHx5BomaEbWAwBDbp/UD5fqL8FwQAAAAAAAAAAADwDcBqj7yTqwH6fiqWQOdlBAAAAAAgfQ2Ozimz55Zn1+CJGAEAAAAAAAAAAAAAAKKvAQAA///s27ENADAIA7D/v+4DTFUGIswJVhAdUv0AKwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8TVlPWALiAHOjK1uWlgAAAAAAaHoHpMvSzqAVAAAAAABnUAJq3gGLP0xJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcmwcAAP//7NzRCQAhDETB/ru2BcGsIWQGroOHh37s+v0A+wk4AhEAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEggJAfe8QDN4/3BHC3n9T7NWw8+QUgAASAABAAy6+Br7u81bu+roE4AbwDeAfACYAAEAACQADeAQQQugZO+ASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAGQcQAAAP//AwCi7CgqtTYIHwAAAABJRU5ErkJggg==') no-repeat scroll 0 0 / 100% 100%;
+
+		background-color: transparent;
+		background-repeat: no-repeat;
+		background-attachment: scroll;
+		background-position: 0px 0px;
+		background-size: 100% 100%;
+		background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAAG0OVFdAAAACXBIWXMAAAsTAAALEwEAmpwYAAABNmlDQ1BQaG90b3Nob3AgSUNDIHByb2ZpbGUAAHjarY6xSsNQFEDPi6LiUCsEcXB4kygotupgxqQtRRCs1SHJ1qShSmkSXl7VfoSjWwcXd7/AyVFwUPwC/0Bx6uAQIYODCJ7p3MPlcsGo2HWnYZRhEGvVbjrS9Xw5+8QMUwDQCbPUbrUOAOIkjvjB5ysC4HnTrjsN/sZ8mCoNTIDtbpSFICpA/0KnGsQYMIN+qkHcAaY6addAPAClXu4vQCnI/Q0oKdfzQXwAZs/1fDDmADPIfQUwdXSpAWpJOlJnvVMtq5ZlSbubBJE8HmU6GmRyPw4TlSaqo6MukP8HwGK+2G46cq1qWXvr/DOu58vc3o8QgFh6LFpBOFTn3yqMnd/n4sZ4GQ5vYXpStN0ruNmAheuirVahvAX34y/Axk/96FpPYgAAACBjSFJNAAB6JQAAgIMAAPn/AACA6AAAUggAARVYAAA6lwAAF2/XWh+QAAACXElEQVR42mL6//8/AyWYiYFCMGoALgPOMv7HiYkywPg/IwMDAyo2/s8IFSfSBQwMqHgIugAXHk2JGAAAAAD//2IaLQ+GXHlAtAG4ciNJLsCWG4eYC4goC0ZTIgQAAAAA//+iuDwY8PJkwINw1AEj0AFnGfHj0SgY/g4w/o8fj0bBqAOGmgMAAAAA///s2DEKACAQA8H///pK4YoQ8MoR7KfYQuM9AAAAAADQA9KSWS4af4D3y883rAEauGlgrzfluqsBDdw10F4NAAAAAJRnAAAA///s2ckJACAMBMD+u7YAHx5BomaEbWAwBDbp/UD5fqL8FwQAAAAAAAAAAADwDcBqj7yTqwH6fiqWQOdlBAAAAAAgfQ2Ozimz55Zn1+CJGAEAAAAAAAAAAAAAAKKvAQAA///s27ENADAIA7D/v+4DTFUGIswJVhAdUv0AKwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8TVlPWALiAHOjK1uWlgAAAAAAaHoHpMvSzqAVAAAAAABnUAJq3gGLP0xJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABcmwcAAP//7NzRCQAhDETB/ru2BcGsIWQGroOHh37s+v0A+wk4AhEAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEggJAfe8QDN4/3BHC3n9T7NWw8+QUgAASAABAAy6+Br7u81bu+roE4AbwDeAfACYAAEAACQADeAQQQugZO+ASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAGQcQAAAP//AwCi7CgqtTYIHwAAAABJRU5ErkJggg==');
 	}
-	
+
 	#canvas {
 		width: 1.5in;
 		height: 1.5in;
 	}
-		
+
 </style>
 
 <script language="javascript" type="text/javascript">
-
 	var LANG = "{LANG}";
 
 	var canvas = null;
 	var percent = 0;
-	
+
 	var lang = {
 		"RU": {
 			prayerWheel: "Молитвенный барабан",
 		},
-		
+
 		"EN": {
 			prayerWheel: "Prayer wheel",
 		},
-		
+
 		get: function(lang, id) {
 			if (this[lang] === undefined) {
 				lang = "EN";
@@ -83,17 +96,17 @@ R"JAPPSYRAWSTRING(
 			return this[lang][id];
 		}
 	}
-	
+
 	function setPercent(value) {
 		percent = parseInt(value);
 	}
-	
+
 	function onFrame() {
 		var context = canvas.getContext('2d');
-		
+
 		context.clearRect(0, 0, canvas.width, canvas.height);
 		context.save();
-		
+
 		var now = new Date().getTime();
 		for (var i = 0; i < 24; i++) {
 			context.globalAlpha = ((now + (i * 1000 / 24)) % 1000) / 1000;
@@ -115,7 +128,7 @@ R"JAPPSYRAWSTRING(
 		context.textAlign = 'center';
 		context.textBaseline = 'middle';
 		context.fillText(percent.toFixed(0) + '%', Math.floor(canvas.width / 2), Math.floor(canvas.height / 2));
-		
+
 		requestAnimFrame(onFrame);
 	}
 
@@ -123,28 +136,25 @@ R"JAPPSYRAWSTRING(
 		window.setTimeout(callback, 1000 / 30);
 	}
 
-	window.requestAnimFrame = ( function(callback){
-		return window.requestAnimationFrame ||
+	window.requestAnimFrame = window.requestAnimationFrame ||
 			window.webkitRequestAnimationFrame ||
 			window.mozRequestAnimationFrame ||
 			window.oRequestAnimationFrame ||
 			window.msRequestAnimationFrame ||
 			unlimitFrame;
-	} )();
-	
+
 	window.onload = function() {
 		canvas = document.getElementById('canvas');
-		
+
 		var navi = document.getElementById('navigation');
 		navi.innerHTML = lang.get(LANG, 'prayerWheel');
-		
+
 		requestAnimFrame(onFrame);
 	}
 
     function onClose() {
         window.location = "ios:close";
     }
-
 </script>
 
 </head>
@@ -163,4 +173,5 @@ R"JAPPSYRAWSTRING(
 		</tr>
 	</table>
 </body>
+</html>
 )JAPPSYRAWSTRING"

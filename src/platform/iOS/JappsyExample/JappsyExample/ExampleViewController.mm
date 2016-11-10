@@ -187,7 +187,7 @@
 	[hiddenView addTarget:self action:@selector(showLayout:) forControlEvents:UIControlEventTouchUpInside];
 	[hiddenView setOpaque:NO];
 	hiddenView.backgroundColor = [UIColor blackColor];
-	hiddenView.alpha = 0.8;
+	hiddenView.alpha = 0.5;
 	[hiddenView setTranslatesAutoresizingMaskIntoConstraints:NO];
 	[self.view addSubview: hiddenView];
 	

@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.pm.ConfigurationInfo;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
@@ -30,6 +31,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -45,6 +47,11 @@ import javax.microedition.khronos.opengles.GL10;
  * OpenGL Surface
  */
 public class JappsyView extends GLSurfaceView {
+
+	public static final int ORIENTATION_PORTRAIT = 0;
+	public static final int ORIENTATION_LANDSCAPE = 1;
+	public static final int ORIENTATION_FACEUP = 2;
+	public static final int ORIENTATION_FACEDOWN = 3;
 
 	private static final String TAG = "JappsyView";
 	private Activity m_activity;
@@ -70,7 +77,7 @@ public class JappsyView extends GLSurfaceView {
 	 */
 	private int m_line;
 
-	protected long m_context = 0;
+	public long m_context = 0;
 
 	private boolean m_stopping = false;
 
@@ -268,48 +275,14 @@ public class JappsyView extends GLSurfaceView {
 		m_context = 0;
 	}
 
-	@Override public void onResume() {
-		super.onResume();
-		JappsyEngine.onResume(m_context);
-	}
-
-	@Override public void onPause() {
-		JappsyEngine.onPause(m_context);
-		super.onPause();
-	}
-
-	private Activity m_restoreActivity = null;
-	private View m_restoreView = null;
-
-	/**
-	 * Enter fullscreen mode replacing target activity with single OpenGL view
-	 * @param target current active activity
-	 */
-	public void enterFullscreen(Activity target) {
-		// Запоминаем содержимое и заменяем
-		m_restoreActivity = target;
-		m_restoreView = ((ViewGroup) target.findViewById(android.R.id.content)).getChildAt(0);
-		if (m_restoreView != this) {
-			target.setContentView(this);
-		}
-
+	public void enterFullscreen() {
 		m_methods.onEnterFullScreen();
 		m_activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
-	/**
-	 * Exit fullscreen mode restoring target activity
-	 */
 	public void exitFullscreen() {
 		m_methods.onExitFullScreen();
 		m_activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		// Восстанавливаем содержимое
-		if ((m_restoreView != this) && (m_restoreView != null)) {
-			m_restoreActivity.setContentView(m_restoreView);
-		}
-		m_restoreView = null;
-		m_restoreActivity = null;
 	}
 
 	private int m_pointId1 = 0;
@@ -319,4 +292,71 @@ public class JappsyView extends GLSurfaceView {
 		return true;
 	}
 
+	/*
+	@Override public void draw(Canvas canvas) {
+		Log.d("OpenGL", "draw");
+	}
+
+	@Override protected void dispatchDraw(Canvas canvas) {
+		Log.d("OpenGL", "dispatchDraw");
+		super.dispatchDraw(canvas);
+	}
+
+	@Override protected void onDraw(Canvas canvas) {
+		Log.d("OpenGL", "onDraw");
+	}
+	*/
+
+	/* ANTI-DEADLOCK OVERRIDES */
+
+	@TargetApi(24)
+	@Override public void surfaceRedrawNeeded(SurfaceHolder holder) {
+		JappsyEngine.lockGLThread();
+		super.surfaceRedrawNeeded(holder);
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override public void surfaceCreated(SurfaceHolder holder) {
+		JappsyEngine.lockGLThread();
+		super.surfaceCreated(holder);
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override public void surfaceDestroyed(SurfaceHolder holder) {
+		JappsyEngine.lockGLThread();
+		super.surfaceDestroyed(holder);
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override public void onPause() {
+		JappsyEngine.onPause(m_context);
+		JappsyEngine.lockGLThread();
+		super.onPause();
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override public void onResume() {
+		JappsyEngine.lockGLThread();
+		super.onResume();
+		JappsyEngine.unlockGLThread();
+		JappsyEngine.onResume(m_context);
+	}
+
+	@Override public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+		JappsyEngine.lockGLThread();
+		super.surfaceChanged(holder, format, w, h);
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override protected void finalize() throws Throwable {
+		JappsyEngine.lockGLThread();
+		super.finalize();
+		JappsyEngine.unlockGLThread();
+	}
+
+	@Override protected void onDetachedFromWindow() {
+		JappsyEngine.lockGLThread();
+		super.onDetachedFromWindow();
+		JappsyEngine.unlockGLThread();
+	}
 }

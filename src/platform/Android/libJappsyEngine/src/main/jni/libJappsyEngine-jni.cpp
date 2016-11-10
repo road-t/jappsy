@@ -240,6 +240,18 @@ Java_com_jappsy_JappsyEngine_onUpdate(JNIEnv *env, jclass type, jlong handle, ji
 	}
 }
 
+static volatile jlock OpenGLThreadLock = false;
+
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_lockGLThread(JNIEnv *env, jclass type) {
+	AtomicLock(&OpenGLThreadLock);
+}
+
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_unlockGLThread(JNIEnv *env, jclass type) {
+	AtomicUnlock(&OpenGLThreadLock);
+}
+
 static int color = 0;
 
 JNIEXPORT void JNICALL
@@ -247,7 +259,10 @@ Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
 	//LOG("onFrame");
 
 	//LOG("OpenGL Thread Message Loop (Start)");
-	OpenGLThreadMessageLooper();
+	if (AtomicLockTry(&OpenGLThreadLock)) {
+		AtomicUnlock(&OpenGLThreadLock);
+		OpenGLThreadMessageLooper();
+	}
 	//LOG("OpenGL Thread Message Loop (End)");
 
 	if (handle != 0) {
@@ -261,6 +276,13 @@ Java_com_jappsy_JappsyEngine_onFrame(JNIEnv *env, jclass type, jlong handle) {
 						engine->onRender();
 					} catch (...) {
 					}
+				} else {
+					float c = (float) color / 255.0f;
+					glClearColor(c, c, c, 1.0f);
+					glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+					color++;
+					if (color >= 256) color = 0;
 				}
 			}
 		}

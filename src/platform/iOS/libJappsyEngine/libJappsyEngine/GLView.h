@@ -22,7 +22,7 @@
 #include <opengl/uGLEngine.h>
 #include <event/uMotionEvent.h>
 
-class GLContext {
+class GLView {
 public:
 	EAGLContext* context = NULL;
 	GLEngine* engine = NULL;
@@ -37,8 +37,8 @@ public:
 	GLint width;
 	GLint height;
 	
-	GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*);
-	~GLContext();
+	GLView(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*);
+	~GLView();
 	void update(CAEAGLLayer* layer) throw(const char*);
 	void render();
 	void touch(MotionEvent* event);

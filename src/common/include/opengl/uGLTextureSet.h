@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef JAPPSY_UGLTEXTURE_H
-#define JAPPSY_UGLTEXTURE_H
+#ifndef JAPPSY_UGLTEXTURESET_H
+#define JAPPSY_UGLTEXTURESET_H
 
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
@@ -23,7 +23,7 @@
 
 class GLRender;
 
-class GLTexture : public CObject {
+class GLTextureSet : public CObject {
 public:
 	constexpr static int NONE = 0;
 	constexpr static int SMOOTH = 1;
@@ -35,8 +35,8 @@ public:
 	GLint height = 0;
 	Vector<GLint> handles1iv;
 	
-	GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
-	~GLTexture();
+	GLTextureSet(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	~GLTextureSet();
 	
 	GLuint bind(GLuint index, GLint uniform = -1);
 };
@@ -44,8 +44,8 @@ public:
 class GLTextures : public CObject {
 private:
 	GLRender* context = NULL;
-	VectorMap<CString&, GLTexture*> list;
-	GLTexture* defaultTexture;
+	VectorMap<CString&, GLTextureSet*> list;
+	GLTextureSet* defaultTexture;
 
 	//void remove(const CString& key);
 public:
@@ -54,12 +54,12 @@ public:
 	GLTextures(GLRender* context) throw(const char*);
 	~GLTextures();
 	
-	GLTexture* get(const CString& key) throw(const char*);
-	GLTexture* createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*);
-	GLTexture* createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
+	GLTextureSet* get(const CString& key) throw(const char*);
+	GLTextureSet* createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*);
+	GLTextureSet* createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*);
 	
 	GLuint createTextureHandle(GLint width, GLint height, int style, void* data) throw(const char*);
 	void releaseTextureHandle(GLuint handle);
 };
 
-#endif //JAPPSY_UGLTEXTURE_H
+#endif //JAPPSY_UGLTEXTURESET_H

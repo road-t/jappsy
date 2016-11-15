@@ -15,7 +15,7 @@
  */
 
 #import "JappsyView.h"
-#import "GLContext.h"
+#import "GLView.h"
 #include <event/uMotionEvent.h>
 #include <core/uSystem.h>
 #include <opengl/uGLEngine.h>
@@ -30,7 +30,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 }
 
 @interface JappsyView () {
-	GLContext* _renderer;
+	GLView* _renderer;
     EAGLContext* _context;
     NSInteger _interval;
     CADisplayLink* _displayLink;
@@ -193,7 +193,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 			if (_context && [EAGLContext setCurrentContext:_context]) {
 				try {
 					CAEAGLLayer *eaglLayer = (CAEAGLLayer*)self.layer;
-					_renderer = memNew(_renderer, GLContext(_context, eaglLayer, self.contentScaleFactor));
+					_renderer = memNew(_renderer, GLView(_context, eaglLayer, self.contentScaleFactor));
 				} catch (const char* e) {
 				}
 			}

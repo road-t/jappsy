@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-#include "GLContext.h"
+#include "GLView.h"
 #include <core/uMemory.h>
 
-GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*) {
+GLView::GLView(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) throw(const char*) {
 	this->context = context;
 	
 	glGenFramebuffers(1, &frameBuffer);
@@ -72,7 +72,7 @@ GLContext::GLContext(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor
 	GetGLError();
 }
 
-void GLContext::release() {
+void GLView::release() {
 	if (frameBuffer) {
 		glDeleteFramebuffers(1, &frameBuffer);
 		frameBuffer = 0;
@@ -94,11 +94,11 @@ void GLContext::release() {
 	}
 }
 
-GLContext::~GLContext() {
+GLView::~GLView() {
 	release();
 }
 
-void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
+void GLView::update(CAEAGLLayer* layer) throw(const char*) {
 	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 	[context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
@@ -142,7 +142,7 @@ void GLContext::update(CAEAGLLayer* layer) throw(const char*) {
 
 static int color = 0;
 
-void GLContext::render() {
+void GLView::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	
 	if (engine != NULL) {
@@ -160,12 +160,12 @@ void GLContext::render() {
 	[context presentRenderbuffer:GL_RENDERBUFFER];
 }
 
-void GLContext::touch(MotionEvent* event) {
+void GLView::touch(MotionEvent* event) {
 	if (engine != null)
 		this->engine->onTouch(event);
 }
 
-void GLContext::initialize(GLEngine* engine) {
+void GLView::initialize(GLEngine* engine) {
 	this->engine = engine;
 	engine->onUpdate(width, height);
 	engine->onRender();

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "uGLTexture.h"
+#include "uGLTextureSet.h"
 #include <opengl/uGLRender.h>
 #include <core/uMemory.h>
 
-GLTexture::GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+GLTextureSet::GLTextureSet(GLRender* context, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	this->context = context;
 	int32_t count = handles.count();
 	if (count > 0) {
@@ -36,7 +36,7 @@ GLTexture::GLTexture(GLRender* context, Vector<GLuint>& handles, GLint width, GL
 	this->height = height;
 }
 
-GLTexture::~GLTexture() {
+GLTextureSet::~GLTextureSet() {
 	int32_t count = handles.count();
 	if (handles.count() > 0) {
 		for (int i = 0; i < count; i++) {
@@ -45,7 +45,7 @@ GLTexture::~GLTexture() {
 	}
 }
 
-GLuint GLTexture::bind(GLuint index, GLint uniform) {
+GLuint GLTextureSet::bind(GLuint index, GLint uniform) {
 	for (int i = 0; i < handles.count(); i++) {
 		GLuint handle = handles.get(i);
 		context->activeTexture(index);
@@ -75,17 +75,17 @@ GLTextures::GLTextures(GLRender* context) throw(const char*) {
 
 GLTextures::~GLTextures() {
 	int32_t count = list.count();
-	GLTexture** items = list.items();
+	GLTextureSet** items = list.items();
 	for (int i = 0; i < count; i++) {
 		delete items[i];
 	}
 }
 
-GLTexture* GLTextures::get(const CString& key) throw(const char*) {
+GLTextureSet* GLTextures::get(const CString& key) throw(const char*) {
 	return list.get(key);
 }
 
-GLTexture* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*) {
+GLTextureSet* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4fv) throw(const char*) {
 	GLuint handle;
 	glGenTextures(1, &handle);
 	CheckGLError();
@@ -109,7 +109,7 @@ GLTexture* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4f
 
 		Vector<GLuint> handles;
 		handles.push(handle);
-		GLTexture* texture = new GLTexture(context, handles, 1, 1);
+		GLTextureSet* texture = new GLTextureSet(context, handles, 1, 1);
 		try {
 			list.put(key, texture);
 		} catch (...) {
@@ -127,9 +127,9 @@ GLTexture* GLTextures::createSolidTexture(const CString& key, const Vec4& rgba4f
 	}
 }
 
-GLTexture* GLTextures::createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
+GLTextureSet* GLTextures::createTexture(const CString& key, Vector<GLuint>& handles, GLint width, GLint height) throw(const char*) {
 	list.remove(key);
-	GLTexture* texture = new GLTexture(context, handles, width, height);
+	GLTextureSet* texture = new GLTextureSet(context, handles, width, height);
 	try {
 		list.put(key, texture);
 	} catch (...) {
@@ -157,7 +157,7 @@ GLuint GLTextures::createTextureHandle(GLint width, GLint height, int style, voi
 		throw;
 	}
 	
-	if (style & GLTexture::SMOOTH) {
+	if (style & GLTextureSet::SMOOTH) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	} else {
@@ -165,7 +165,7 @@ GLuint GLTextures::createTextureHandle(GLint width, GLint height, int style, voi
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 	
-	if (style & GLTexture::REPEAT) {
+	if (style & GLTextureSet::REPEAT) {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	} else {

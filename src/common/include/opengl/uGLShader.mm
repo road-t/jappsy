@@ -112,7 +112,7 @@ bool GLShader::checkReady() {
 		GLObjectData** items = this->textures.items();
 		for (int i = count-1; i >= 0; i--) {
 			if (items[i]->isReference()) {
-				GLTexture* texture;
+				GLTextureSet* texture;
 				try {
 					texture = context->textures->get((wchar_t*)(items[i]->getTarget()));
 				} catch (...) {

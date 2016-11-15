@@ -50,7 +50,7 @@ GLMaterialTexture::GLMaterialTexture(GLRender* context, const CString& textureRe
 
 bool GLMaterialTexture::checkReady() {
 	if ((this->texture != NULL) && (this->texture->isReference())) {
-		GLTexture* texture;
+		GLTextureSet* texture;
 		try {
 			texture = context->textures->get(this->texture->getTarget());
 		} catch (...) {

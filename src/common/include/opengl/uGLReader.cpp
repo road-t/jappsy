@@ -16,7 +16,7 @@
 
 #include "uGLReader.h"
 #include <opengl/uGLRender.h>
-#include <opengl/uGLTexture.h>
+#include <opengl/uGLTextureSet.h>
 #include <opengl/uGLShader.h>
 #include <opengl/uGLObjectData.h>
 #include <data/uVector.h>
@@ -79,7 +79,7 @@ void* GLReader::CreateTextureErrorCallback(void* threadData) {
 	return NULL;
 }
 
-GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* stream) throw(const char*) {
+GLTextureSet* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* stream) throw(const char*) {
 	stream->setPosition(0);
 	uint32_t head = (uint32_t)stream->readU32();
 	if ((head == GLReader::SDFFHEAD) || (head == GLReader::SDFIHEAD) || (head == GLReader::JIMGHEAD)) {
@@ -88,7 +88,7 @@ GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* st
 		thread.key = (wchar_t*)key;
 		thread.width = stream->readU32();
 		thread.height = stream->readU32();
-		thread.style = GLTexture::NONE;
+		thread.style = GLTextureSet::NONE;
 		int distance = 0; //unused
 		
 		if (head != GLReader::JIMGHEAD) {
@@ -121,7 +121,7 @@ GLTexture* GLReader::createTexture(GLRender* ctx, const CString& key, Stream* st
 				chunk = (uint32_t)stream->readU32();
 			}
 			
-			return (GLTexture*)(OpenGLThreadSync(CreateTextureCallback, &thread));
+			return (GLTextureSet*)(OpenGLThreadSync(CreateTextureCallback, &thread));
 		} catch (...) {
 			(void)OpenGLThreadSync(CreateTextureErrorCallback, &thread);
 			throw;

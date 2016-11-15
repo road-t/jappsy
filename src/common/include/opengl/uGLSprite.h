@@ -20,7 +20,7 @@
 #include <opengl/uOpenGL.h>
 #include <data/uObject.h>
 #include <data/uVector.h>
-#include <opengl/uGLTexture.h>
+#include <opengl/uGLTextureSet.h>
 #include <opengl/uGLPaint.h>
 #include <opengl/uGLCamera.h>
 
@@ -29,7 +29,7 @@ class GLRender;
 class GLSprite : public CObject {
 public:
 	GLRender* context = NULL;
-	GLTexture* texture = NULL;
+	GLTextureSet* texture = NULL;
 	CString key;
 	GLint width = 0;
 	GLint height = 0;

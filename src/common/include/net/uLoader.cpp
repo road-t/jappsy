@@ -594,7 +594,7 @@ bool Loader::onData(const File* info, Stream* stream) {
 		}
 	} else if (info->ext.compareToIgnoreCase(L"jimg") == 0) {
 		try {
-			GLTexture* texture = GLReader::createTexture(context, info->key, stream);
+			GLTextureSet* texture = GLReader::createTexture(context, info->key, stream);
 			onLoad(info, texture);
 		} catch (...) {
 			return false;

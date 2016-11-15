@@ -24,7 +24,7 @@
 #include <data/uStream.h>
 
 class GLRender;
-class GLTexture;
+class GLTextureSet;
 class GLShader;
 
 class GLReader : public CObject {
@@ -48,7 +48,7 @@ public:
 	
 	constexpr static int JENDCHUNK = 0x444E454A;	// Jappsy End Chunk
 	
-	static GLTexture* createTexture(GLRender* ctx, const CString& key, Stream* stream) throw(const char*);
+	static GLTextureSet* createTexture(GLRender* ctx, const CString& key, Stream* stream) throw(const char*);
 	static GLShader* createShader(GLRender* ctx, const CString& key, Stream* stream) throw(const char*);
 	
 private:

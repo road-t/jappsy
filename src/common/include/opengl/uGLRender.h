@@ -27,7 +27,7 @@
 #include <opengl/uGLFrame.h>
 #include <opengl/uGLTouchScreen.h>
 #include <opengl/uGLPaint.h>
-#include <opengl/uGLTexture.h>
+#include <opengl/uGLTextureSet.h>
 #include <opengl/uGLShader.h>
 #include <opengl/uGLSprite.h>
 #include <opengl/uGLScene.h>

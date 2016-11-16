@@ -125,6 +125,7 @@ void* onFatalCallback(const CString& error, void* userData) {
 }
 
 GLEngine::GLEngine() {
+	testContext = new GLContext();
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
 }
 
@@ -158,6 +159,9 @@ void* onReleaseGLEngineThread(void* userData) {
 GLEngine::~GLEngine() {
 	if (context != NULL) {
 		delete context;
+	}
+	if (testContext != NULL) {
+		delete testContext;
 	}
 	if (cache != NULL) {
 		delete cache;
@@ -225,6 +229,8 @@ void GLEngine::onRender() {
 }
 
 void GLEngine::onUpdate(int width, int height) {
+	testContext->detachFramebuffer();
+	testContext->defaultFrameBuffer->resize(width, height);
 	onResize(width, height);
 	context->frame->width = width;
 	context->frame->height = height;

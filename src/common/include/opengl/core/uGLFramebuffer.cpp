@@ -18,26 +18,65 @@
 #include "uGLContext.h"
 
 GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(context) {
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
-	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&colorRenderBuffer);
-	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&depthRenderBuffer);
-	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&stencilRenderBuffer);
-	
 	state |= GLFrameBufferGrabbed;
+	
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
 
-	if (colorRenderBuffer == GL_NONE) {
-		throw eOpenGL;
+	GLint type = GL_NONE;
+	
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+	if (type != GL_NONE) {
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&depthRenderBuffer);
+	} else {
+		depthRenderBuffer = GL_NONE;
 	}
 	
-	GLuint restoreRenderBuffer;
-	glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-		
-	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+	if (type != GL_NONE) {
+		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&stencilRenderBuffer);
+	} else {
+		stencilRenderBuffer = GL_NONE;
+	}
 	
-	glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+	if (type == GL_NONE) {
+		throw eOpenGL;
+	}
+	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&colorRenderBuffer);
+
+	if (type == GL_TEXTURE) {
+		if (depthRenderBuffer != GL_NONE) {
+			GLuint restoreRenderBuffer;
+			glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
 		
+			glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+		
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+		} else if (stencilRenderBuffer != NULL) {
+			GLuint restoreRenderBuffer;
+			glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+			
+			glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+			
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+		} else {
+			throw eOpenGL;
+		}
+	} else {
+		GLuint restoreRenderBuffer;
+		glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+		
+		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+		
+		glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+	}
+	
 	defaultViewport.set(0, 0, width, height);
 
 	if (depthRenderBuffer != GL_NONE) state |= GLAttachmentDepth;
@@ -143,14 +182,62 @@ void GLFrameBuffer::update() throw(const char*) {
 		
 		if ((state & GLFrameBufferGrabbed) != 0) {
 			glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
-			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&colorRenderBuffer);
-			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&depthRenderBuffer);
-			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, (GLint*)&stencilRenderBuffer);
 			
-			if (colorRenderBuffer == GL_NONE) {
-				throw eOpenGL;
+			GLint type = GL_NONE;
+			
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+			if (type != GL_NONE) {
+				glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&depthRenderBuffer);
+			} else {
+				depthRenderBuffer = GL_NONE;
+			}
+
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+			if (type != GL_NONE) {
+				glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&stencilRenderBuffer);
+			} else {
+				stencilRenderBuffer = GL_NONE;
 			}
 			
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+			if (type == GL_NONE) {
+				throw eOpenGL;
+			}
+			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&colorRenderBuffer);
+			
+			if (type == GL_TEXTURE) {
+				if (depthRenderBuffer != GL_NONE) {
+					GLuint restoreRenderBuffer;
+					glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+					
+					glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+					
+					glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+				} else if (stencilRenderBuffer != NULL) {
+					GLuint restoreRenderBuffer;
+					glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+					
+					glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+					
+					glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+				} else {
+					throw eOpenGL;
+				}
+			} else {
+				GLuint restoreRenderBuffer;
+				glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+				
+				glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
+				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+				
+				glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+			}
+
 			state = (state & (~GLAttachmentDepth)) | ((depthRenderBuffer != GL_NONE) ? GLAttachmentDepth : 0);
 			state = (state & (~GLAttachmentStencil)) | ((stencilRenderBuffer != GL_NONE) ? GLAttachmentStencil : 0);
 		} else {

@@ -22,6 +22,8 @@
 #include <net/uLoader.h>
 #include <core/uCache.h>
 
+#include <opengl/core/uGLContext.h>
+
 class GLRender;
 
 class GLEngine : public CObject {
@@ -32,6 +34,7 @@ public:
 	typedef void (*onWebScriptCallback)(int index, const CString& script, void* userData);
 	
 protected:
+	GLContext* testContext = NULL;
 	GLRender* context = NULL;
 	
 	onUpdateStateCallback onUpdateState = NULL;

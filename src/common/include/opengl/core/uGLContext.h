@@ -51,8 +51,10 @@ private:
 	
 	/** OpenGL Framebuffers **/
 	
-private:
+public:
 	GLFrameBuffer* defaultFrameBuffer = NULL;
+	
+private:
 	GLFrameBuffer* currentFrameBuffer = NULL;
 	
 public:

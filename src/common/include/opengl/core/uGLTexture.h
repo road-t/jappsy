@@ -19,15 +19,17 @@
 
 #include <opengl/core/uGLTypes.h>
 
+struct GLContextState;
 class GLContext;
 
 class GLTexture : public CObject {
-	friend class GLContext;
+	friend struct GLContextState;
 	
 protected:
 	GLContext* context = NULL;
 	uint32_t state = 0;
 	GLuint handle;
+	uint32_t attached;
 	GLint width;
 	GLint height;
 	GLRect dirtyRect;
@@ -45,12 +47,24 @@ public:
 	
 protected:
 	void resize(uint32_t width, uint32_t height) throw(const char*);
-	void destroy(GLuint index = -1);
+	void destroy();
 	
 public:
 	void setMode(uint32_t mode) throw(const char*);
 private:
-	void update();
+	void validate();
+
+private:
+	onUpdateRect updateRect = NULL;
+	void* updateRectUserData = NULL;
+	
+public:
+	void setOnUpdateRectCallback(onUpdateRect callback, void* userData = NULL);
+	
+	void dirty();
+	void dirty(GLint left, GLint top, GLint right, GLint bottom);
+	
+	
 };
 
 

@@ -23,6 +23,7 @@
 #include <data/uVector.h>
 #include <data/uJSON.h>
 
+#include <opengl/core/uGLContext.h>
 #include <opengl/uGLEngine.h>
 #include <opengl/uGLFrame.h>
 #include <opengl/uGLTouchScreen.h>
@@ -146,7 +147,7 @@ public:
 	GLuint aTextureCoord;
 };
 
-class GLRender : public CObject {
+class GLRender : public GLContext {
 private:
 	static const char* extensions;
 	static bool isExtensionSupported(const char *extension);
@@ -203,7 +204,6 @@ public:
 	
 	void updateRatio(GLfloat width, GLfloat height);
 	
-	void resetBlend();
 	void activeTexture(GLint index);
 	void cleanup(GLint index);
 	

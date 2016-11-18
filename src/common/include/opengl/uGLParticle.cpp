@@ -289,12 +289,13 @@ void GLParticleSystem::render(GLObject* object, const GLfloat time, GLCamera* ca
 	GLScene* scene = object->scene;
 	GLParticleShader* shader = context->shaderParticle;
 	
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE); // Искры
-	//gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); // Капли краски
-	//gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_COLOR); // Пузыри
-	//gl.blendFunc(gl.ONE_MINUS_DST_COLOR, gl.ONE_MINUS_SRC_COLOR); // Хлопья / Конфети
-	//gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.blendEquation(gl.FUNC_REVERSE_SUBTRACT);
+	context->stackBlend.push(context->state.blend);
+	context->state.enableBlend();
+	context->state.setBlend(GL_SRC_ALPHA, GL_ONE, GL_FUNC_ADD); // Искры
+	//context->state.setBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_ADD); // Капли краски
+	//context->state.setBlend(GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_FUNC_ADD); // Пузыри
+	//context->state.setBlend(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_FUNC_ADD); // Хлопья / Конфети
+	//context->state.setBlend(GLSRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_REVERSE_SUBTRACT);
 	
 	GLuint index = shader->shader->bind(0);
 	
@@ -347,7 +348,7 @@ void GLParticleSystem::render(GLObject* object, const GLfloat time, GLCamera* ca
 	glDisableVertexAttribArray(shader->aTime);
 	
 	context->cleanup(index);
-	context->resetBlend();
+	context->state.setFrom(context->stackBlend.pop());
 }
 
 GLParticles::GLParticles(GLRender* context) throw(const char*) {

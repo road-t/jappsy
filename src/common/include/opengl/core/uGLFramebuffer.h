@@ -17,19 +17,24 @@
 #ifndef JAPPSY_UGLFRAMEBUFFER_H
 #define JAPPSY_UGLFRAMEBUFFER_H
 
-#include <opengl/core/uGLTexture.h>
+#include <opengl/core/uGLContextState.h>
 
 class GLContext;
 
 class GLFrameBuffer : public GLTexture {
+	friend struct GLContextState;
 	friend class GLContext;
 	
 protected:
-	GLRect defaultViewport;
 	GLuint frameBuffer;
+	GLuint renderBuffer;
 	GLuint colorRenderBuffer;
 	GLuint depthRenderBuffer;
 	GLuint stencilRenderBuffer;
+	
+	GLSize newSize;
+	
+	GLContextState contextState;
 
 private:
 	// Grab current OpenGL Framebuffer (window frame buffer)
@@ -45,15 +50,9 @@ private:
 	void destroy();
 	
 public:
-	// Invalidate for size update
 	void resize(GLint newWidth, GLint newHeight);
 private:
-	void update() throw(const char*);
-	
-public:
-	// Invalidate for update content
-	void invalidate();
-	void invalidate(GLint left, GLint top, GLint right, GLint bottom);
+	void validate() throw(const char*);
 };
 
 #endif //JAPPSY_UGLFRAMEBUFFER_H

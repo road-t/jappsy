@@ -34,7 +34,6 @@ public:
 	typedef void (*onWebScriptCallback)(int index, const CString& script, void* userData);
 	
 protected:
-	GLContext* testContext = NULL;
 	GLRender* context = NULL;
 	
 	onUpdateStateCallback onUpdateState = NULL;

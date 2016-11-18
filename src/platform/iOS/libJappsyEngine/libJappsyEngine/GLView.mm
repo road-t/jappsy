@@ -50,20 +50,24 @@ GLView::GLView(EAGLContext* context, CAEAGLLayer* layer, float scaleFactor) thro
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 		GetGLFramebufferStatus();
 	} catch (const char* e) {
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		glDeleteRenderbuffers(1, &depthRenderBuffer); depthRenderBuffer = 0;
 		glDeleteRenderbuffers(1, &colorRenderBuffer); colorRenderBuffer = 0;
 		glDeleteFramebuffers(1, &frameBuffer); frameBuffer = 0;
 		throw e;
 	}
-	
+
 	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)	{
 		NSLog(@"failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		release();
 		throw eOpenGL;
 	}
 	
 	NSLog(@"%s %s", glGetString(GL_RENDERER), glGetString(GL_VERSION));
-	
+
 	glDisable(GL_DEPTH_TEST);
 	glDisable(GL_CULL_FACE);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -99,6 +103,7 @@ GLView::~GLView() {
 }
 
 void GLView::update(CAEAGLLayer* layer) throw(const char*) {
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 	[context renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer];
 	glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
@@ -108,6 +113,8 @@ void GLView::update(CAEAGLLayer* layer) throw(const char*) {
 	
 	glGenRenderbuffers(1, &depthRenderBuffer);
 	if (glGetError() == GL_OUT_OF_MEMORY) {
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		glDeleteRenderbuffers(1, &colorRenderBuffer); colorRenderBuffer = 0;
 		glDeleteFramebuffers(1, &frameBuffer); frameBuffer = 0;
 		throw eOutOfMemory;
@@ -121,6 +128,8 @@ void GLView::update(CAEAGLLayer* layer) throw(const char*) {
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 		GetGLFramebufferStatus();
 	} catch (const char* e) {
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		glDeleteRenderbuffers(1, &depthRenderBuffer); depthRenderBuffer = 0;
 		glDeleteRenderbuffers(1, &colorRenderBuffer); colorRenderBuffer = 0;
 		glDeleteFramebuffers(1, &frameBuffer); frameBuffer = 0;
@@ -132,6 +141,8 @@ void GLView::update(CAEAGLLayer* layer) throw(const char*) {
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 	{
 		NSLog(@"Failed to make complete framebuffer object %x", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+		glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+		glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		release();
 		throw eOpenGL;
 	}

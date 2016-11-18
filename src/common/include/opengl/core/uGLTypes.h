@@ -35,17 +35,44 @@
 #define GLSmoothMag				0x00000020
 #define GLSmooth				(GLSmoothMin | GLSmoothMag)
 
-#define GLDirty					0x01000000
-#define GLDirtyResize			0x10000000
-#define GLTextureInvalid		0x20000000
+#define GLDirty					0x01000000		// Dirty Content
+#define GLDirtyResize			0x02000000		// Dirty Content On Resize
+#define GLTextureInvalid		0x04000000		// Invalid Texture State
 
 #define GLAttachmentColor		0x00010000		// This flag means its frame buffer
 #define GLAttachmentDepth		0x00020000
 #define GLAttachmentStencil		0x00040000
 
-#define GLFrameBufferInvalid	0x40000000
+#define GLFrameBufferInvalid	0x10000000		// Invalid Framebuffer State
 
+#define GLFrameBufferRestore	0x40000000		// Restore Default State
 #define GLFrameBufferGrabbed	0x80000000
+
+#define GLActiveTextureLimit	8
+
+struct GLSize {
+	GLint width;
+	GLint height;
+	
+	inline GLSize() {}
+	
+	inline GLSize(GLint width, GLint height) {
+		this->width = width; this->height = height;
+	}
+	
+	inline GLSize(const GLSize& size) {
+		width = size.width; height = size.height;
+	}
+	
+	inline void set(GLint width, GLint height) {
+		this->width = width; this->height = height;
+	}
+	
+	inline GLSize& operator = (const GLSize& rhs) {
+		width = rhs.width; height = rhs.height;
+		return *this;
+	}
+};
 
 struct GLRect {
 	GLint left;
@@ -80,5 +107,7 @@ struct GLRect {
 		return ((left >= right) || (top >= bottom));
 	}
 };
+
+typedef void (*onUpdateRect)(const GLRect& updateRect, void* userData);
 
 #endif //JAPPSY_UGLTYPES_H

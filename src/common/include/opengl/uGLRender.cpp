@@ -83,11 +83,10 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	extensions = (const char*)glGetString(GL_EXTENSIONS);
 	isNPOTSupported = isExtensionSupported("GL_OES_texture_npot");
 	
+	state.setDepth(1.0, 0.0, 1.0, GL_LEQUAL);
+	state.setBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_ADD);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glClearDepthf(1.0);
-	glDepthFunc(GL_LEQUAL);
-	resetBlend();
 	
 	glGenBuffers(1, &m_squareBuffer);
 	glGenBuffers(1, &m_textureBuffer);
@@ -172,12 +171,6 @@ void GLRender::updateRatio(GLfloat width, GLfloat height) {
 	}
 }
 
-void GLRender::resetBlend() {
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-	glBlendEquation(GL_FUNC_ADD);
-}
-
 void GLRender::activeTexture(GLint index) {
 	switch (index) {
 		case 1: glActiveTexture(GL_TEXTURE1); break;
@@ -230,10 +223,11 @@ void GLRender::fill(uint32_t color) {
 }
 
 void GLRender::fillAlpha(uint8_t alpha) {
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
+	stackColorMask.push(state.colorMask);
+	state.setColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_TRUE);
 	glClearColor(0.0, 0.0, 0.0, (GLfloat)alpha / 255.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
-	glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+	state.setFrom(stackColorMask.pop());
 }
 
 void GLRender::fillDepth() {
@@ -247,9 +241,9 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 	
 	if (((paint.m_color & 0xFF000000) != 0) && (shaderSquareFill != NULL)) {
 		if ((paint.m_color & 0xFF000000) != 0xFF000000)
-			glEnable(GL_BLEND);
+			state.enableBlend();
 		else
-			glDisable(GL_BLEND);
+			state.disableBlend();
 		
 		glUseProgram(shaderSquareFill->program);
 		
@@ -266,12 +260,11 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		
 		glDisableVertexAttribArray(shaderSquareFill->aVertexPosition);
-		glDisable(GL_BLEND);
 		glUseProgram(0);
 	}
 	
 	if (((paint.m_strokeColor & 0xFF000000) != 0) && (shaderSquareStroke != NULL)) {
-		glEnable(GL_BLEND);
+		state.enableBlend();
 		glUseProgram(shaderSquareStroke->program);
 		
 		glUniformMatrix4fv(shaderSquareStroke->uLayerProjectionMatrix, 1, GL_FALSE, projection16fv);
@@ -292,7 +285,6 @@ void GLRender::drawRect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const GL
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		
 		glDisableVertexAttribArray(shaderSquareStroke->aVertexPosition);
-		glDisable(GL_BLEND);
 		glUseProgram(0);
 	}
 }
@@ -305,7 +297,7 @@ void GLRender::drawTexture(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const
 	if (shaderSquareTexture == NULL)
 		return;
 	
-	glEnable(GL_BLEND);
+	state.enableBlend();
 	glUseProgram(shaderSquareTexture->program);
 	
 	glUniformMatrix4fv(shaderSquareTexture->uLayerProjectionMatrix, 1, GL_FALSE, projection16fv);
@@ -349,7 +341,7 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 	GLuint uWorldTime = (GLuint)glGetUniformLocation(program, "uWorldTime");
 	GLuint uTexture = (GLuint)glGetUniformLocation(program, "uTexture");
 	
-	glEnable(GL_BLEND);
+	state.enableBlend();
 	GLuint index = shader->bind(0, uTexture);
 	
 	glUniform1f(uTime, localTime - floorf(localTime));
@@ -373,7 +365,6 @@ void GLRender::drawEffect(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const 
 	glDisableVertexAttribArray(aTextureCoord);
 	
 	cleanup(index);
-	glDisable(GL_BLEND);
 }
 
 void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, const CString& key, GLfloat localTime, GLfloat worldTime) {
@@ -399,7 +390,7 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 	static GLint* effectTextures = effectTexturesVector.items();
 	effectTextures[0] = uTexture0;
 	effectTextures[1] = uTexture1;
-	glEnable(GL_BLEND);
+	state.enableBlend();
 	GLuint index = shader->bind(0, effectTexturesVector);
 	
 	glUniform2f(uTime, localTime - floorf(localTime), worldTime - floorf(worldTime));
@@ -422,7 +413,6 @@ void GLRender::drawEffectMobile(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2, 
 	glDisableVertexAttribArray(aTextureCoord);
  
 	cleanup(index);
-	glDisable(GL_BLEND);
 }
 
 bool GLRender::createShaders(JSONObject* shaders, void* library) throw(const char*) {

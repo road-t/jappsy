@@ -40,6 +40,8 @@
 		C341B2A01D569A8C00D2D70F /* libz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C341B29F1D569A8C00D2D70F /* libz.framework */; };
 		C342E4A01DDB1CDA00B5AE0E /* uGLTypes.h in Headers */ = {isa = PBXBuildFile; fileRef = C342E49F1DDB1CDA00B5AE0E /* uGLTypes.h */; };
 		C342E4A21DDB1DA200B5AE0E /* uGLTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C342E4A11DDB1DA200B5AE0E /* uGLTypes.cpp */; };
+		C342E4A51DDCE55C00B5AE0E /* uGLContextState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C342E4A31DDCE55C00B5AE0E /* uGLContextState.cpp */; };
+		C342E4A61DDCE55C00B5AE0E /* uGLContextState.h in Headers */ = {isa = PBXBuildFile; fileRef = C342E4A41DDCE55C00B5AE0E /* uGLContextState.h */; };
 		C3486E201DAFB72100850F78 /* uMixer.h in Headers */ = {isa = PBXBuildFile; fileRef = C3486E1E1DAFB72100850F78 /* uMixer.h */; };
 		C3486E211DAFB72100850F78 /* uMixer.m in Sources */ = {isa = PBXBuildFile; fileRef = C3486E1F1DAFB72100850F78 /* uMixer.m */; };
 		C34FD9571D5B54EB0022FF71 /* uGLFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */; };
@@ -150,6 +152,8 @@
 		C341B29F1D569A8C00D2D70F /* libz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libz.framework; path = "../../../../../Library/Developer/Xcode/DerivedData/JappsyExample-augtpmclbrsmqydvonmpkjlqzief/Build/Products/Debug-iphonesimulator/libz.framework"; sourceTree = "<group>"; };
 		C342E49F1DDB1CDA00B5AE0E /* uGLTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uGLTypes.h; path = core/uGLTypes.h; sourceTree = "<group>"; };
 		C342E4A11DDB1DA200B5AE0E /* uGLTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uGLTypes.cpp; path = core/uGLTypes.cpp; sourceTree = "<group>"; };
+		C342E4A31DDCE55C00B5AE0E /* uGLContextState.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = uGLContextState.cpp; path = core/uGLContextState.cpp; sourceTree = "<group>"; };
+		C342E4A41DDCE55C00B5AE0E /* uGLContextState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = uGLContextState.h; path = core/uGLContextState.h; sourceTree = "<group>"; };
 		C3486E1E1DAFB72100850F78 /* uMixer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = uMixer.h; sourceTree = "<group>"; };
 		C3486E1F1DAFB72100850F78 /* uMixer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = uMixer.m; sourceTree = "<group>"; };
 		C34FD9531D5B54EB0022FF71 /* uGLFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = uGLFrame.cpp; sourceTree = "<group>"; };
@@ -462,6 +466,8 @@
 				C342E4A11DDB1DA200B5AE0E /* uGLTypes.cpp */,
 				C3FD59841DD9B2260054A1E1 /* uGLTexture.h */,
 				C3FD59831DD9B2260054A1E1 /* uGLTexture.cpp */,
+				C342E4A41DDCE55C00B5AE0E /* uGLContextState.h */,
+				C342E4A31DDCE55C00B5AE0E /* uGLContextState.cpp */,
 				C3FD59821DD9B2260054A1E1 /* uGLFramebuffer.h */,
 				C3FD59811DD9B2260054A1E1 /* uGLFramebuffer.cpp */,
 				C3FD598A1DD9C23C0054A1E1 /* uGLContext.h */,
@@ -528,6 +534,7 @@
 				C34FD9B61D5BBBB70022FF71 /* GLView.h in Headers */,
 				C35900B41D6540AA00C1D154 /* uGLReader.h in Headers */,
 				C3FD59881DD9B2260054A1E1 /* uGLTexture.h in Headers */,
+				C342E4A61DDCE55C00B5AE0E /* uGLContextState.h in Headers */,
 				C34FDA4A1D5C97AC0022FF71 /* uGLTypeface.h in Headers */,
 				C35900D21D6542C700C1D154 /* uGLObject.h in Headers */,
 			);
@@ -603,6 +610,7 @@
 				C34FDA5F1D5CB7350022FF71 /* uLoader.cpp in Sources */,
 				C35900D91D6542C700C1D154 /* uGLSprite.cpp in Sources */,
 				C35900CF1D6542C700C1D154 /* uGLModel.cpp in Sources */,
+				C342E4A51DDCE55C00B5AE0E /* uGLContextState.cpp in Sources */,
 				C33FC40C1D68CCFC000D33D4 /* uGLObjectData.cpp in Sources */,
 				C35900CD1D6542C700C1D154 /* uGLLight.cpp in Sources */,
 				C35900C91D6542C700C1D154 /* uGLDrawing.cpp in Sources */,

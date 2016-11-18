@@ -125,7 +125,6 @@ void* onFatalCallback(const CString& error, void* userData) {
 }
 
 GLEngine::GLEngine() {
-	testContext = new GLContext();
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
 }
 
@@ -159,9 +158,6 @@ void* onReleaseGLEngineThread(void* userData) {
 GLEngine::~GLEngine() {
 	if (context != NULL) {
 		delete context;
-	}
-	if (testContext != NULL) {
-		delete testContext;
 	}
 	if (cache != NULL) {
 		delete cache;
@@ -225,12 +221,13 @@ void GLEngine::setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptC
 }
 
 void GLEngine::onRender() {
-	this->context->frame->loop();
+	context->beginFramebufferUpdate(*(context->mainFrameBuffer));
+	context->frame->loop();
+	context->endFramebufferUpdate();
 }
 
 void GLEngine::onUpdate(int width, int height) {
-	testContext->detachFramebuffer();
-	testContext->defaultFrameBuffer->resize(width, height);
+	context->resize(width, height);
 	onResize(width, height);
 	context->frame->width = width;
 	context->frame->height = height;

@@ -26,7 +26,7 @@ GLTexture::GLTexture(GLContext& context, uint32_t rgba) throw(const char*) {
 	glGenTextures(1, &handle);
 	CheckGLError();
 	
-	GLuint restore = context.attachTexture(handle);
+	GLuint restore = context.state.attachTemporaryTexture(handle);
 	
 	uint8_t data[4];
 	*((uint32_t*)data) = rgba;
@@ -36,7 +36,7 @@ GLTexture::GLTexture(GLContext& context, uint32_t rgba) throw(const char*) {
 	try {
 		CheckGLError();
 	} catch (...) {
-		context.attachTexture(restore);
+		glBindTexture(GL_TEXTURE_2D, restore);
 		glDeleteTextures(1, &handle);
 		handle = GL_NONE;
 		throw;
@@ -46,7 +46,7 @@ GLTexture::GLTexture(GLContext& context, uint32_t rgba) throw(const char*) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	context.attachTexture(restore);
+	glBindTexture(GL_TEXTURE_2D, restore);
 
 	width = height = 1;
 	state = GLRepeat | GLSmoothNone;
@@ -57,7 +57,7 @@ GLTexture::GLTexture(GLContext& context, const Vec4& rgba) throw(const char*) {
 	glGenTextures(1, &handle);
 	CheckGLError();
 	
-	GLuint restore = context.attachTexture(handle);
+	GLuint restore = context.state.attachTemporaryTexture(handle);
 	
 	uint8_t data[4] = { (uint8_t)(rgba.r * 255), (uint8_t)(rgba.g * 255), (uint8_t)(rgba.b * 255), (uint8_t)(rgba.a * 255) };
 	
@@ -66,7 +66,7 @@ GLTexture::GLTexture(GLContext& context, const Vec4& rgba) throw(const char*) {
 	try {
 		CheckGLError();
 	} catch (...) {
-		context.attachTexture(restore);
+		glBindTexture(GL_TEXTURE_2D, restore);
 		glDeleteTextures(1, &handle);
 		handle = GL_NONE;
 		throw;
@@ -76,7 +76,7 @@ GLTexture::GLTexture(GLContext& context, const Vec4& rgba) throw(const char*) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	context.attachTexture(restore);
+	glBindTexture(GL_TEXTURE_2D, restore);
 	
 	width = height = 1;
 	state |= GLRepeat | GLSmoothNone;
@@ -104,7 +104,7 @@ GLTexture::GLTexture(GLContext& context, uint32_t width, uint32_t height, uint32
 	glGenTextures(1, &handle);
 	CheckGLError();
 
-	GLuint restore = context.attachTexture(handle);
+	GLuint restore = context.state.attachTemporaryTexture(handle);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 	if (data == NULL) {
@@ -113,7 +113,7 @@ GLTexture::GLTexture(GLContext& context, uint32_t width, uint32_t height, uint32
 	try {
 		CheckGLError();
 	} catch (...) {
-		context.attachTexture(restore);
+		glBindTexture(GL_TEXTURE_2D, restore);
 		glDeleteTextures(1, &handle);
 		handle = GL_NONE;
 		throw;
@@ -122,8 +122,8 @@ GLTexture::GLTexture(GLContext& context, uint32_t width, uint32_t height, uint32
 	this->width = width;
 	this->height = height;
 	setMode(mode);
-	update();
-	context.attachTexture(restore);
+	validate();
+	glBindTexture(GL_TEXTURE_2D, restore);
 
 	this->context = &context;
 }
@@ -149,14 +149,14 @@ void GLTexture::resize(uint32_t newWidth, uint32_t newHeight) throw(const char*)
 			throw;
 		}
 
-		GLuint restore = context->attachTexture(handle);
+		GLuint restore = context->state.attachTemporaryTexture(handle);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, newWidth, newHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelData);
 		mmfree(pixelData);
 		try {
 			CheckGLError();
 		} catch (...) {
-			context->attachTexture(restore);
+			glBindTexture(GL_TEXTURE_2D, restore);
 			destroy();
 			throw;
 		}
@@ -165,10 +165,10 @@ void GLTexture::resize(uint32_t newWidth, uint32_t newHeight) throw(const char*)
 		height = newHeight;
 		dirtyRect.set(0, 0, newWidth, newHeight);
 		state |= GLTextureInvalid | GLDirty;
-		update();
-		context->attachTexture(restore);
+		validate();
+		glBindTexture(GL_TEXTURE_2D, restore);
 
-		context->reattachTexture(*this);
+		context->state.reattachTexture(*this);
 	}
 }
 
@@ -176,23 +176,19 @@ GLTexture::~GLTexture() {
 	destroy();
 }
 
-void GLTexture::destroy(GLuint index) {
+void GLTexture::destroy() {
 	if ((context != NULL) && (handle != GL_NONE)) {
-		if (index != -1) {
-			context->detachTexture(index);
-		} else {
-			context->detachTexture(*this);
-		}
+		context->state.detachTexture(*this);
 		glDeleteTextures(1, &handle);
 		handle = GL_NONE;
 	}
 }
 
-void GLTexture::update() {
+void GLTexture::validate() {
 	if ((state & GLTextureInvalid) != 0) {
 		state &= ~GLTextureInvalid;
 		
-		GLuint index = context->attachTexture(*this);
+		GLuint restore = context->state.attachTemporaryTexture(handle);
 		
 		if ((state & GLSmoothMin) != 0) {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -221,9 +217,33 @@ void GLTexture::update() {
 		} else {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		}
+		
+		glBindTexture(GL_TEXTURE_2D, restore);
 	}
 }
 
 void GLTexture::setMode(uint32_t mode) throw(const char*) {
 	state = (state & (~GLRepeatMask)) | (mode & GLRepeatMask) | GLTextureInvalid;
+}
+
+void GLTexture::setOnUpdateRectCallback(onUpdateRect callback, void* userData) {
+	updateRect = callback;
+	updateRectUserData = userData;
+}
+
+void GLTexture::dirty() {
+	dirtyRect.set(0, 0, width, height);
+	state |= GLDirty;
+}
+
+void GLTexture::dirty(GLint left, GLint top, GLint right, GLint bottom) {
+	if ((state & GLDirty) == 0) {
+		dirtyRect.set(left, top, right, bottom);
+	} else {
+		dirtyRect |= GLRect(left, top, right, bottom);
+	}
+	dirtyRect &= GLRect(0, 0, width, height);
+	if (!dirtyRect.isEmpty()) {
+		state |= GLDirty;
+	}
 }

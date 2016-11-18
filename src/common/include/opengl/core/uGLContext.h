@@ -17,50 +17,47 @@
 #ifndef JAPPSY_UGLCONTEXT_H
 #define JAPPSY_UGLCONTEXT_H
 
-#include <opengl/uOpenGL.h>
-#include <data/uObject.h>
-#include <data/uVector.h>
-
-#include <opengl/core/uGLTexture.h>
 #include <opengl/core/uGLFramebuffer.h>
 
 class GLContext : public CObject {
 	friend class GLTexture;
+	friend class GLFrameBuffer;
 	
 public:
 	GLContext();
 	~GLContext();
 	
-	void reset();
-	
-	/** OpenGL Textures **/
-	
-private:
-	GLuint activeTextureIndex = 0;
-	GLTexture* attachedTextures[32] = {0};
+public:
+	GLContextState state;
+
+	Vector<GLContextState> stackState;
+	Vector<GLContextStateViewport> stackViewport;
+	Vector<GLContextStateScissor> stackScissor;
+	Vector<GLContextStateDepth> stackDepth;
+	Vector<GLContextStateStencil> stackStencil;
+	Vector<GLContextStateColorMask> stackColorMask;
+	Vector<GLContextStateBlend> stackBlend;
+	Vector<GLContextStateTexture> stackTexture;
+	Vector<GLContextStateFrameBuffer> stackFrameBuffer;
 
 public:
-	GLuint attachTexture(GLTexture& texture, GLuint index = 0, GLint uniform = -1) throw(const char*);
-	void detachTexture(GLTexture& texture) throw(const char*);
-	bool reattachTexture(GLTexture& texture) throw(const char*);
+	GLFrameBuffer* mainFrameBuffer = NULL;
 	
-private:
-	GLuint attachTexture(GLuint handle);
-	
-	void detachTexture(GLuint index);
-	
-	/** OpenGL Framebuffers **/
-	
-public:
-	GLFrameBuffer* defaultFrameBuffer = NULL;
-	
-private:
-	GLFrameBuffer* currentFrameBuffer = NULL;
-	
-public:
-	void attachFramebuffer(GLFrameBuffer& buffer) throw(const char*);
-	void detachFramebuffer() throw(const char*);
-	bool isAttachedFramebuffer(GLFrameBuffer& buffer);
+	void reset();
+	void resize(GLint width, GLint height);
+
+	void pushState();
+	bool popState();
+		
+	void beginFramebufferUpdate(GLFrameBuffer& buffer) throw(const char*);
+	void endFramebufferUpdate() throw(const char*);
+
+	// Framebuffer must support stencil buffer
+	void beginClipUpdate();
+	void clearClip();
+	void endClipUpdate();
+	void beginClip(bool inverse = false);
+	void endClip();
 };
 
 #endif //JAPPSY_UGLCONTEXT_H

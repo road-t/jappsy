@@ -157,7 +157,7 @@ void GLSprite::render(const Vec2& position, const GLuint frame, const GLPaint* p
 	GLCamera* cam = (camera != NULL) ? camera : context->cameras->gui;
 	cam->update();
 	
-	glEnable(GL_BLEND);
+	context->state.enableBlend();
 	glUseProgram(shader->program);
 	
 	if (paint != NULL) {

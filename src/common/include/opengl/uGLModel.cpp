@@ -289,7 +289,8 @@ void GLModel::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	GLScene* scene = object->scene;
 	GLModelShader* shader = context->shaderModel;
 	
-	glEnable(GL_DEPTH_TEST);
+	context->stackDepth.push(context->state.depth);
+	context->state.enableDepth();
 	
 	/*GLuint index = */(void)shader->shader->bind(0);
 	
@@ -301,7 +302,7 @@ void GLModel::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	glEnableVertexAttribArray(shader->aTextureCoord);
 	glEnableVertexAttribArray(shader->aVertexNormal);
 	
-	glEnable(GL_BLEND);
+	context->state.enableBlend();
 	
 	scene->modelView16fv.multiply(scene->camera->view16fv, object->objectMatrix).multiply(object->modelMatrix);
 	scene->modelViewProjection16fv.multiply(scene->camera->projection16fv, scene->modelView16fv);
@@ -318,8 +319,7 @@ void GLModel::render(GLObject* object, const GLfloat time, GLCamera* camera) {
 	
 	context->cleanup(3);
 	
-	glDisable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
+	context->state.setFrom(context->stackDepth.pop());
 }
 
 bool GLModel::checkReady() {

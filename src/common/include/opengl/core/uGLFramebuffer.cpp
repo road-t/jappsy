@@ -19,25 +19,27 @@
 
 GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(context) {
 	state |= GLFrameBufferGrabbed;
-	
+
+#if defined(__IOS__)
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
+	glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&renderBuffer);
 
 	GLint type = GL_NONE;
-	
+
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
 	if (type != GL_NONE) {
 		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&depthRenderBuffer);
 	} else {
 		depthRenderBuffer = GL_NONE;
 	}
-	
+
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
 	if (type != GL_NONE) {
 		glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&stencilRenderBuffer);
 	} else {
 		stencilRenderBuffer = GL_NONE;
 	}
-	
+
 	glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
 	if (type == GL_NONE) {
 		throw eOpenGL;
@@ -46,50 +48,58 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 
 	if (type == GL_TEXTURE) {
 		if (depthRenderBuffer != GL_NONE) {
-			GLuint restoreRenderBuffer;
-			glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-		
 			glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
 			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 		
-			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 		} else if (stencilRenderBuffer != NULL) {
-			GLuint restoreRenderBuffer;
-			glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-			
 			glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
 			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 			
-			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 		} else {
 			throw eOpenGL;
 		}
 	} else {
-		GLuint restoreRenderBuffer;
-		glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-		
 		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 		
-		glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 	}
-	
-	defaultViewport.set(0, 0, width, height);
 
 	if (depthRenderBuffer != GL_NONE) state |= GLAttachmentDepth;
 	if (stencilRenderBuffer != GL_NONE) state |= GLAttachmentStencil;
 	state |= GLAttachmentColor | GLDirty;
 	
 	dirtyRect.set(0, 0, width, height);
+
+	contextState.restoreDefault();
+	contextState.viewport.rect.set(0, 0, width, height);
+#elif defined(__JNI__)
+	newSize.set(0, 0);
+	frameBuffer = renderBuffer = depthRenderBuffer = stencilRenderBuffer = colorRenderBuffer = GL_NONE;
+	state |= GLFrameBufferInvalid | GLAttachmentColor | GLDirtyResize | GLFrameBufferRestore;
+#else
+	#error Unsupported platform!
+#endif
+
+	contextState.frameBuffer.attached = this;
 }
 
 GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style, void* data) throw(const char*) : GLTexture(context, width, height, style, data) {
+	renderBuffer = GL_NONE;
 	glGenFramebuffers(1, &frameBuffer);
 	CheckGLError();
-	context.attachFramebuffer(*this);
+	
+	GLuint restoreFrameBuffer;
+	GLuint restoreRenderBuffer;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&restoreFrameBuffer);
+	glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
 	
 	if ((style & GLAttachmentStencil) != 0) {
@@ -97,6 +107,8 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		try {
 			CheckGLError();
 		} catch (...) {
+			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 			destroy();
 			throw;
 		}
@@ -105,6 +117,8 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		try {
 			CheckGLError();
 		} catch (...) {
+			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 			destroy();
 			throw;
 		}
@@ -116,6 +130,8 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		try {
 			CheckGLError();
 		} catch (...) {
+			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 			destroy();
 			throw;
 		}
@@ -124,15 +140,21 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		try {
 			CheckGLError();
 		} catch (...) {
+			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 			destroy();
 			throw;
 		}
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 	}
 
-	defaultViewport.set(0, 0, width, height);
+	glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 	
 	state |= (style & (GLAttachmentStencil | GLAttachmentDepth)) | GLAttachmentColor;
+	
+	contextState.frameBuffer.attached = this;
+	contextState.viewport.rect.set(0, 0, width, height);
 }
 
 GLFrameBuffer::~GLFrameBuffer() {
@@ -142,8 +164,6 @@ GLFrameBuffer::~GLFrameBuffer() {
 void GLFrameBuffer::destroy() {
 	if ((state & GLFrameBufferGrabbed) == 0) {
 		if ((context != NULL) && (frameBuffer != GL_NONE)) {
-			context->detachFramebuffer();
-		
 			if (depthRenderBuffer != GL_NONE) {
 				glDeleteRenderbuffers(1, &depthRenderBuffer);
 				depthRenderBuffer = GL_NONE;
@@ -162,29 +182,36 @@ void GLFrameBuffer::destroy() {
 
 void GLFrameBuffer::resize(GLint newWidth, GLint newHeight) {
 	if ((width != newWidth) || (height != newHeight) || ((state & GLFrameBufferGrabbed) != 0)) {
-		defaultViewport.set(0, 0, newWidth, newHeight);
-	
-		state |= GLFrameBufferInvalid | GLDirtyResize;
+		newSize.set(newWidth, newHeight);
+		state |= GLFrameBufferInvalid;
 		
-		if (context->isAttachedFramebuffer(*this)) {
-			update();
+		if (context->state.frameBuffer.attached == this) {
+			validate();
+			context->state.setFrom(contextState.viewport);
 		}
-	} else if ((defaultViewport.right != newWidth) || (defaultViewport.bottom != newHeight)) {
-		defaultViewport.set(0, 0, newWidth, newHeight);
-		
-		state &= (~(GLFrameBufferInvalid | GLDirtyResize));
+	} else if ((state & (GLFrameBufferInvalid | GLDirtyResize)) == (GLFrameBufferInvalid | GLDirtyResize)) {
+		if ((width == newWidth) && (height != newHeight)) {
+			state &= ~GLFrameBufferInvalid;
+		}
 	}
 }
 
-void GLFrameBuffer::update() throw(const char*) {
+void GLFrameBuffer::validate() throw(const char*) {
 	if ((state & GLFrameBufferInvalid) != 0) {
-		state = (state & (~GLFrameBufferInvalid));
+		state = (state & (~GLFrameBufferInvalid)) | GLDirtyResize;
 		
 		if ((state & GLFrameBufferGrabbed) != 0) {
+			if ((state & GLFrameBufferRestore) != 0) {
+				state &= ~GLFrameBufferRestore;
+				contextState.restoreDefault();
+			}
+
 			glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
-			
+			glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&renderBuffer);
+
+#if defined(__IOS__)
 			GLint type = GL_NONE;
-			
+
 			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
 			if (type != GL_NONE) {
 				glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, (GLint*)&depthRenderBuffer);
@@ -198,7 +225,7 @@ void GLFrameBuffer::update() throw(const char*) {
 			} else {
 				stencilRenderBuffer = GL_NONE;
 			}
-			
+
 			glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
 			if (type == GL_NONE) {
 				throw eOpenGL;
@@ -207,42 +234,40 @@ void GLFrameBuffer::update() throw(const char*) {
 			
 			if (type == GL_TEXTURE) {
 				if (depthRenderBuffer != GL_NONE) {
-					GLuint restoreRenderBuffer;
-					glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-					
 					glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
 					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 					
-					glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+					glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 				} else if (stencilRenderBuffer != NULL) {
-					GLuint restoreRenderBuffer;
-					glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-					
 					glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
 					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 					
-					glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+					glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 				} else {
 					throw eOpenGL;
 				}
 			} else {
-				GLuint restoreRenderBuffer;
-				glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
-				
 				glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
 				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
 				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
 				
-				glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+				glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 			}
 
 			state = (state & (~GLAttachmentDepth)) | ((depthRenderBuffer != GL_NONE) ? GLAttachmentDepth : 0);
 			state = (state & (~GLAttachmentStencil)) | ((stencilRenderBuffer != GL_NONE) ? GLAttachmentStencil : 0);
+#elif defined(__JNI__)
+			width = newSize.width;
+			height = newSize.height;
+			state |= GLAttachmentDepth;
+#else
+			#error Unsupported platform!
+#endif
 		} else {
 			try {
-				GLTexture::resize(defaultViewport.right, defaultViewport.bottom);
+				GLTexture::resize(newSize.width, newSize.height);
 			} catch (...) {
 				destroy();
 				throw;
@@ -297,23 +322,10 @@ void GLFrameBuffer::update() throw(const char*) {
 				}
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 			}
+			
+			glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		}
-	}
-}
-
-void GLFrameBuffer::invalidate() {
-	dirtyRect.set(0, 0, width, height);
-	state |= GLDirty;
-}
-
-void GLFrameBuffer::invalidate(GLint left, GLint top, GLint right, GLint bottom) {
-	if ((state & GLDirty) == 0) {
-		dirtyRect.set(left, top, right, bottom);
-	} else {
-		dirtyRect |= GLRect(left, top, right, bottom);
-	}
-	dirtyRect &= defaultViewport;
-	if (!dirtyRect.isEmpty()) {
-		state |= GLDirty;
+		
+		contextState.viewport.rect.set(0, 0, width, height);
 	}
 }

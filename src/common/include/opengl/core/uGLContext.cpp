@@ -22,12 +22,7 @@ GLContext::GLContext() {
 
 GLContext::~GLContext() {
 	memDelete(mainFrameBuffer);
-	
-	for (GLuint index = 0; index < GLActiveTextureLimit; index++) {
-		if (state.textures.attached[index] != NULL) {
-			state.detachTexture(*(state.textures.attached[index]));
-		}
-	}
+	memDelete(programTexture);
 }
 
 void GLContext::reset() {
@@ -43,6 +38,11 @@ void GLContext::reset() {
 #endif
 
 	//glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	if (programTexture != NULL) {
+		memDelete(programTexture);
+	}
+	programTexture = memNew(programTexture, GLProgramTexture(*this));
 }
 
 void GLContext::resize(GLint width, GLint height) {
@@ -59,36 +59,6 @@ bool GLContext::popState() {
 		return true;
 	}
 	return false;
-}
-
-void GLContext::beginFramebufferUpdate(GLFrameBuffer& buffer) throw(const char*) {
-	if ((buffer.state & GLFrameBufferGrabbed) == 0) {
-		if (buffer.frameBuffer == GL_NONE) {
-			throw eOpenGL;
-		}
-	}
-	
-	if ((state.frameBuffer.attached != &buffer) && (state.frameBuffer.attached != NULL)) {
-		stackState.push(state);
-	}
-	
-	if ((buffer.state & GLFrameBufferGrabbed) == 0) {
-		buffer.validate();
-	}
-	if (state.frameBuffer.attached != NULL) {
-		glBindFramebuffer(GL_FRAMEBUFFER, buffer.frameBuffer);
-	}
-	if ((buffer.state & GLFrameBufferGrabbed) != 0) {
-		buffer.validate();
-	}
-
-	state.setFrom(buffer.contextState);
-}
-
-void GLContext::endFramebufferUpdate() throw(const char*) {
-	if (!popState()) {
-		state.frameBuffer.attached = NULL;
-	}
 }
 
 void GLContext::beginClipUpdate() {

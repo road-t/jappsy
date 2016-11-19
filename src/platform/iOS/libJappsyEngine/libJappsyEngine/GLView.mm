@@ -156,8 +156,10 @@ static int color = 0;
 void GLView::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 	
+	bool update = true;
+	
 	if (engine != NULL) {
-		engine->onRender();
+		update = engine->onRender();
 	} else {
 		float c = (float)color / 255.0f;
 		glClearColor(c, c, c, 1.0f);
@@ -167,8 +169,10 @@ void GLView::render() {
 		if (color >= 256) color = 0;
 	}
 	
-	glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
-	[context presentRenderbuffer:GL_RENDERBUFFER];
+	if (update) {
+		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
+		[context presentRenderbuffer:GL_RENDERBUFFER];
+	}
 }
 
 void GLView::touch(MotionEvent* event) {

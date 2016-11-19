@@ -34,8 +34,6 @@ protected:
 	
 	GLSize newSize;
 	
-	GLContextState contextState;
-
 private:
 	// Grab current OpenGL Framebuffer (window frame buffer)
 	GLFrameBuffer(GLContext& context) throw(const char*);
@@ -53,6 +51,15 @@ public:
 	void resize(GLint newWidth, GLint newHeight);
 private:
 	void validate() throw(const char*);
+	
+private:
+	onRectCallback prepareRect = NULL;
+	void* prepareRectUserData = NULL;
+	
+public:
+	void setOnPrepareRectCallback(onRectCallback callback, void* userData = NULL);
+
+	bool update() throw(const char*);
 };
 
 #endif //JAPPSY_UGLFRAMEBUFFER_H

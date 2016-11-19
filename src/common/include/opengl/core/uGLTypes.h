@@ -108,6 +108,6 @@ struct GLRect {
 	}
 };
 
-typedef void (*onUpdateRect)(const GLRect& updateRect, void* userData);
+typedef void (*onRectCallback)(void* target, const GLRect& rect, void* userData);
 
 #endif //JAPPSY_UGLTYPES_H

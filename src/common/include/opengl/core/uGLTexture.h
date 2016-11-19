@@ -29,7 +29,7 @@ protected:
 	GLContext* context = NULL;
 	uint32_t state = 0;
 	GLuint handle;
-	uint32_t attached;
+	
 	GLint width;
 	GLint height;
 	GLRect dirtyRect;
@@ -54,17 +54,20 @@ public:
 private:
 	void validate();
 
-private:
-	onUpdateRect updateRect = NULL;
+protected:
+	onRectCallback updateRect = NULL;
 	void* updateRectUserData = NULL;
 	
 public:
-	void setOnUpdateRectCallback(onUpdateRect callback, void* userData = NULL);
+	void setOnUpdateRectCallback(onRectCallback callback, void* userData = NULL);
 	
 	void dirty();
 	void dirty(GLint left, GLint top, GLint right, GLint bottom);
 	
+	void update();
 	
+	void attachTexture(GLuint index);
+	static void detachTexture(GLuint index);
 };
 
 

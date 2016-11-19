@@ -17,13 +17,6 @@
 #include "uGLContextState.h"
 #include "uGLFramebuffer.h"
 
-static GLenum GLTextureIndexes[32] = {
-	GL_TEXTURE0, GL_TEXTURE1, GL_TEXTURE2, GL_TEXTURE3, GL_TEXTURE4, GL_TEXTURE5, GL_TEXTURE6, GL_TEXTURE7,
-	GL_TEXTURE8, GL_TEXTURE9, GL_TEXTURE10, GL_TEXTURE11, GL_TEXTURE12, GL_TEXTURE13, GL_TEXTURE14, GL_TEXTURE15,
-	GL_TEXTURE16, GL_TEXTURE17, GL_TEXTURE18, GL_TEXTURE19, GL_TEXTURE20, GL_TEXTURE21, GL_TEXTURE22, GL_TEXTURE23,
-	GL_TEXTURE24, GL_TEXTURE25, GL_TEXTURE26, GL_TEXTURE27, GL_TEXTURE28, GL_TEXTURE29, GL_TEXTURE30, GL_TEXTURE31
-};
-
 GLContextState::GLContextState() {
 	viewport.rect.set(0, 0, 0, 0);
 	
@@ -49,13 +42,6 @@ GLContextState::GLContextState() {
 	blend.sFactor = GL_ONE; // GL_SRC_ALPHA
 	blend.dFactor = GL_ONE_MINUS_SRC_ALPHA; // GL_ONE_MINUS_SRC_ALPHA
 	blend.mode = GL_FUNC_ADD;
-	
-	textures.active = 0;
-	for (GLuint i = 0; i < GLActiveTextureLimit; i++) {
-		textures.attached[i] = NULL;
-	}
-	
-	frameBuffer.attached = NULL;
 }
 
 void GLContextState::restoreDefault() {
@@ -99,23 +85,16 @@ void GLContextState::restoreDefault() {
 	glBlendFunc(blend.sFactor, blend.dFactor);
 	glBlendEquation(blend.mode);
 	
-	textures.active = 0;
-	for (int i = GLActiveTextureLimit - 1; i >= 0; i--) {
-		glActiveTexture(GLTextureIndexes[i]);
-		glBindTexture(GL_TEXTURE_2D, GL_NONE);
-		textures.attached[i] = NULL;
-	}
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void GLContextState::setFrom(const GLContextState& restore) {
-	setFrom(restore.frameBuffer);
 	setFrom(restore.viewport);
 	setFrom(restore.scissor);
 	setFrom(restore.depth);
 	setFrom(restore.stencil);
 	setFrom(restore.colorMask);
 	setFrom(restore.blend);
-	setFrom(restore.textures);
 }
 
 void GLContextState::setFrom(const GLContextStateViewport& restore) {
@@ -145,43 +124,6 @@ void GLContextState::setFrom(const GLContextStateColorMask& restore) {
 void GLContextState::setFrom(const GLContextStateBlend& restore) {
 	if (restore.enabled == GL_TRUE) { enableBlend(); } else { disableBlend(); }
 	setBlend(restore.sFactor, restore.dFactor, restore.mode);
-}
-
-void GLContextState::setFrom(const GLContextStateTexture& restore) {
-	for (int index = GLActiveTextureLimit - 1; index >= 0; index--) {
-		GLTexture* target = restore.attached[index];
-
-		if (textures.attached[index] != target) {
-			if (textures.active != index) {
-				textures.active = index;
-				glActiveTexture(GLTextureIndexes[index]);
-			}
-			
-			if (target == NULL) {
-				glBindTexture(GL_TEXTURE_2D, GL_NONE);
-			} else {
-				glBindTexture(GL_TEXTURE_2D, target->handle);
-			}
-			
-			textures.attached[index] = target;
-		}
-	}
-
-	if (textures.active != restore.active) {
-		textures.active = restore.active;
-		glActiveTexture(GLTextureIndexes[restore.active]);
-	}
-}
-
-void GLContextState::setFrom(const GLContextStateFrameBuffer& restore) {
-	if (frameBuffer.attached != restore.attached) {
-		if ((frameBuffer.attached != NULL) && (restore.attached != NULL)) {
-			glBindFramebuffer(GL_FRAMEBUFFER, restore.attached->frameBuffer);
-			glBindRenderbuffer(GL_RENDERBUFFER, restore.attached->renderBuffer);
-		}
-
-		frameBuffer.attached = restore.attached;
-	}
 }
 
 void GLContextState::setViewport(GLint left, GLint top, GLint right, GLint bottom) {
@@ -303,119 +245,5 @@ void GLContextState::setBlend(GLenum sFactor, GLenum dFactor, GLenum mode) {
 		blend.mode = mode;
 		glBlendFunc(sFactor, dFactor);
 		glBlendEquation(mode);
-	}
-}
-
-GLuint GLContextState::attachTexture(GLTexture& texture, GLuint index, GLint uniform) throw(const char*) {
-	if (texture.handle == GL_NONE) {
-		throw eOpenGL;
-	}
-	
-	if (index >= GLActiveTextureLimit) {
-		index = 0;
-	}
-	
-	GLTexture* target = textures.attached[index];
-	uint32_t indexBit;
-	
-	if (target == &texture) {
-		goto attachTexture_setUniform;
-	}
-	
-	indexBit = (uint32_t)(1 << index);
-	
-	if (target != NULL) {
-		target->attached &= ~indexBit;
-	}
-	
-	if (textures.active != index) {
-		textures.active = index;
-		glActiveTexture(GLTextureIndexes[index]);
-	}
-	
-	glBindTexture(GL_TEXTURE_2D, texture.handle);
-	
-	textures.attached[index] = &texture;
-	texture.attached |= indexBit;
-	
-attachTexture_setUniform:
-	if (uniform != -1) {
-		glUniform1i(uniform, index);
-	}
-	
-	return index;
-}
-
-void GLContextState::detachTexture(GLTexture& texture) throw(const char*) {
-	if (texture.handle == GL_NONE) {
-		throw eOpenGL;
-	}
-	
-	uint32_t bits = texture.attached;
-	GLuint index = 0;
-	while (bits != 0) {
-		if ((bits & 1) != 0) {
-			detachTextureIndex(index);
-		}
-
-		index++;
-		bits >>= 1;
-	}
-	
-	texture.attached = 0;
-}
-
-bool GLContextState::reattachTexture(GLTexture& texture) throw(const char*) {
-	if (texture.handle == GL_NONE) {
-		throw eOpenGL;
-	}
-	
-	uint32_t bits = texture.attached;
-	if (bits != 0) {
-		GLuint index = 0;
-		while (bits != 0) {
-			if ((bits & 1) != 0) {
-				if (textures.active != index) {
-					textures.active = index;
-					glActiveTexture(GLTextureIndexes[index]);
-				}
-			
-				glBindTexture(GL_TEXTURE_2D, texture.handle);
-			}
-			
-			index++;
-			bits >>= 1;
-		}
-		
-		return true;
-	}
-	
-	return false;
-}
-
-GLuint GLContextState::attachTemporaryTexture(GLuint handle) {
-	glBindTexture(GL_TEXTURE_2D, handle);
-	
-	if (textures.attached[textures.active] != NULL) {
-		return textures.attached[textures.active]->handle;
-	}
-	
-	return GL_NONE;
-}
-
-void GLContextState::detachTextureIndex(GLuint index) {
-	if (index >= GLActiveTextureLimit) {
-		index = 0;
-	}
-	
-	if (textures.attached[index] != NULL) {
-		textures.attached[index] = NULL;
-		
-		if (textures.active != index) {
-			textures.active = index;
-			glActiveTexture(GLTextureIndexes[index]);
-		}
-		
-		glBindTexture(GL_TEXTURE_2D, GL_NONE);
 	}
 }

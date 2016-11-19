@@ -18,6 +18,7 @@
 #define JAPPSY_UGLCONTEXT_H
 
 #include <opengl/core/uGLFramebuffer.h>
+#include <opengl/core/uGLProgram.h>
 
 class GLContext : public CObject {
 	friend class GLTexture;
@@ -37,11 +38,10 @@ public:
 	Vector<GLContextStateStencil> stackStencil;
 	Vector<GLContextStateColorMask> stackColorMask;
 	Vector<GLContextStateBlend> stackBlend;
-	Vector<GLContextStateTexture> stackTexture;
-	Vector<GLContextStateFrameBuffer> stackFrameBuffer;
 
 public:
 	GLFrameBuffer* mainFrameBuffer = NULL;
+	GLProgramTexture* programTexture = NULL;
 	
 	void reset();
 	void resize(GLint width, GLint height);
@@ -49,9 +49,6 @@ public:
 	void pushState();
 	bool popState();
 		
-	void beginFramebufferUpdate(GLFrameBuffer& buffer) throw(const char*);
-	void endFramebufferUpdate() throw(const char*);
-
 	// Framebuffer must support stencil buffer
 	void beginClipUpdate();
 	void clearClip();

@@ -126,6 +126,8 @@ void* onFatalCallback(const CString& error, void* userData) {
 
 GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
+	context->mainFrameBuffer->setOnPrepareRectCallback((onRectCallback)onPrepareRectCallback, this);
+	context->mainFrameBuffer->setOnUpdateRectCallback((onRectCallback)onUpdateRectCallback, this);
 }
 
 #if defined(__JNI__)
@@ -220,10 +222,19 @@ void GLEngine::setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptC
 	onwebUserData = userData;
 }
 
-void GLEngine::onRender() {
-	context->beginFramebufferUpdate(*(context->mainFrameBuffer));
-	context->frame->loop();
-	context->endFramebufferUpdate();
+void GLEngine::onPrepareRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine) {
+	// Prepare Textures and Framebuffers for render
+}
+
+void GLEngine::onUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine) {
+	// Render rect
+	engine->context->frame->loop();
+}
+
+bool GLEngine::onRender() {
+	// Temporary dirty each frame
+	context->mainFrameBuffer->dirty();
+	return context->mainFrameBuffer->update();
 }
 
 void GLEngine::onUpdate(int width, int height) {

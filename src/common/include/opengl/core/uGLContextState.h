@@ -161,45 +161,6 @@ struct GLContextStateBlend {
 	}
 };
 
-struct GLContextStateTexture {
-	GLuint active;
-	GLTexture* attached[GLActiveTextureLimit];
-	
-	inline GLContextStateTexture() {}
-	
-	inline GLContextStateTexture(const GLContextStateTexture& rhs) {
-		memcpy(this, &rhs, sizeof(GLContextStateTexture));
-	}
-	
-	inline GLContextStateTexture& operator =(const GLContextStateTexture& rhs) {
-		memcpy(this, &rhs, sizeof(GLContextStateTexture));
-		return *this;
-	}
-	
-	inline bool operator ==(const GLContextStateTexture& rhs) const {
-		return memcmp(this, &rhs, sizeof(GLContextStateTexture)) == 0;
-	}
-};
-
-struct GLContextStateFrameBuffer {
-	GLFrameBuffer* attached;
-
-	inline GLContextStateFrameBuffer() {}
-	
-	inline GLContextStateFrameBuffer(const GLContextStateFrameBuffer& rhs) {
-		memcpy(this, &rhs, sizeof(GLContextStateFrameBuffer));
-	}
-	
-	inline GLContextStateFrameBuffer& operator =(const GLContextStateFrameBuffer& rhs) {
-		memcpy(this, &rhs, sizeof(GLContextStateFrameBuffer));
-		return *this;
-	}
-	
-	inline bool operator ==(const GLContextStateFrameBuffer& rhs) const {
-		return memcmp(this, &rhs, sizeof(GLContextStateFrameBuffer)) == 0;
-	}
-};
-
 struct GLContextState {
 	GLContextStateViewport viewport;
 	GLContextStateScissor scissor;
@@ -207,8 +168,6 @@ struct GLContextState {
 	GLContextStateStencil stencil;
 	GLContextStateColorMask colorMask;
 	GLContextStateBlend blend;
-	GLContextStateTexture textures;
-	GLContextStateFrameBuffer frameBuffer;
 	
 	GLContextState();
 
@@ -233,8 +192,6 @@ struct GLContextState {
 	void setFrom(const GLContextStateStencil& restore);
 	void setFrom(const GLContextStateColorMask& restore);
 	void setFrom(const GLContextStateBlend& restore);
-	void setFrom(const GLContextStateTexture& restore);
-	void setFrom(const GLContextStateFrameBuffer& restore);
 	
 	/* Base Functions */
 	
@@ -258,12 +215,6 @@ struct GLContextState {
 	void enableBlend();
 	void disableBlend();
 	void setBlend(GLenum sFactor, GLenum dFactor, GLenum mode);
-	
-	GLuint attachTexture(GLTexture& texture, GLuint index = 0, GLint uniform = -1) throw(const char*);
-	void detachTexture(GLTexture& texture) throw(const char*);
-	bool reattachTexture(GLTexture& texture) throw(const char*);
-	GLuint attachTemporaryTexture(GLuint handle);
-	void detachTextureIndex(GLuint index);
 };
 
 #endif //JAPPSY_UGLCONTEXTSTATE_H

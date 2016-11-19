@@ -72,7 +72,12 @@ public:
 	
 	// Engine
 	
-	void onRender();
+private:
+	static void onPrepareRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine);
+	static void onUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine);
+	
+public:
+	bool onRender();
 	void onUpdate(int width, int height);
 	void onTouch(MotionEvent* event);
 

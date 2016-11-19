@@ -76,8 +76,7 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 	
 	dirtyRect.set(0, 0, width, height);
 
-	contextState.restoreDefault();
-	contextState.viewport.rect.set(0, 0, width, height);
+	context.state.restoreDefault();
 #elif defined(__JNI__)
 	newSize.set(0, 0);
 	frameBuffer = renderBuffer = depthRenderBuffer = stencilRenderBuffer = colorRenderBuffer = GL_NONE;
@@ -85,8 +84,6 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 #else
 	#error Unsupported platform!
 #endif
-
-	contextState.frameBuffer.attached = this;
 }
 
 GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style, void* data) throw(const char*) : GLTexture(context, width, height, style, data) {
@@ -152,9 +149,6 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 	glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 	
 	state |= (style & (GLAttachmentStencil | GLAttachmentDepth)) | GLAttachmentColor;
-	
-	contextState.frameBuffer.attached = this;
-	contextState.viewport.rect.set(0, 0, width, height);
 }
 
 GLFrameBuffer::~GLFrameBuffer() {
@@ -184,11 +178,6 @@ void GLFrameBuffer::resize(GLint newWidth, GLint newHeight) {
 	if ((width != newWidth) || (height != newHeight) || ((state & GLFrameBufferGrabbed) != 0)) {
 		newSize.set(newWidth, newHeight);
 		state |= GLFrameBufferInvalid;
-		
-		if (context->state.frameBuffer.attached == this) {
-			validate();
-			context->state.setFrom(contextState.viewport);
-		}
 	} else if ((state & (GLFrameBufferInvalid | GLDirtyResize)) == (GLFrameBufferInvalid | GLDirtyResize)) {
 		if ((width == newWidth) && (height != newHeight)) {
 			state &= ~GLFrameBufferInvalid;
@@ -203,7 +192,7 @@ void GLFrameBuffer::validate() throw(const char*) {
 		if ((state & GLFrameBufferGrabbed) != 0) {
 			if ((state & GLFrameBufferRestore) != 0) {
 				state &= ~GLFrameBufferRestore;
-				contextState.restoreDefault();
+				context->state.restoreDefault();
 			}
 
 			glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&frameBuffer);
@@ -283,6 +272,7 @@ void GLFrameBuffer::validate() throw(const char*) {
 				stencilRenderBuffer = GL_NONE;
 			}
 
+			//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, handle, 0);
 			
 			if ((state & GLAttachmentStencil) != 0) {
@@ -325,7 +315,60 @@ void GLFrameBuffer::validate() throw(const char*) {
 			
 			glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		}
-		
-		contextState.viewport.rect.set(0, 0, width, height);
 	}
+}
+
+void GLFrameBuffer::setOnPrepareRectCallback(onRectCallback callback, void* userData) {
+	prepareRect = callback;
+	prepareRectUserData = userData;
+}
+
+bool GLFrameBuffer::update() throw(const char*) {
+	if ((state & (GLDirty | GLDirtyResize | GLFrameBufferInvalid)) != 0) {
+		if (updateRect != NULL) {
+			if ((state & GLFrameBufferInvalid) != 0) {
+				dirtyRect.set(0, 0, newSize.width, newSize.height);
+			} else if ((state & GLDirtyResize) != 0) {
+				dirtyRect.set(0, 0, width, height);
+			}
+			
+			if (prepareRect != NULL) {
+				if ((state & GLFrameBufferGrabbed) != 0) {
+					GLuint restoreFrameBuffer;
+					GLuint restoreRenderBuffer;
+					glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&restoreFrameBuffer);
+					glGetIntegerv(GL_RENDERBUFFER_BINDING, (GLint*)&restoreRenderBuffer);
+				
+					prepareRect(this, dirtyRect, prepareRectUserData);
+				
+					glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
+					glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
+				} else {
+					prepareRect(this, dirtyRect, prepareRectUserData);
+				}
+			}
+			
+			if ((state & GLFrameBufferGrabbed) == 0) {
+				glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+			}
+			try {
+				validate();
+			} catch (...) {
+				glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+				throw;
+			}
+			context->state.setViewport(0, 0, width, height);
+
+			updateRect(this, dirtyRect, updateRectUserData);
+			
+			glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+
+			dirtyRect.set(0, 0, 0, 0);
+			state &= ~(GLDirty | GLDirtyResize);
+			
+			return true;
+		}
+	}
+	
+	return false;
 }

@@ -54,6 +54,9 @@ public:
 	void setBasePath(const CString& basePath);
 	void preload(const char* json);
 	void load(const char* json);
+
+	void mixerVolume(GLfloat volume);
+	bool mixerPlaying();
 	
 	// State
 	

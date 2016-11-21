@@ -311,6 +311,65 @@ Java_com_jappsy_JappsyEngine_onTouch(JNIEnv *env, jclass type, jlong handle, job
 	}
 }
 
+struct SetMixerVolumeThreadData {
+	JappsyEngine* context;
+	GLfloat volume;
+};
+
+void* onSetMixerVolumeCallback(void* threadData) {
+	struct SetMixerVolumeThreadData* thread = (struct SetMixerVolumeThreadData*)threadData;
+	if (thread != NULL) {
+		if (thread->context != NULL) {
+			if (!AtomicGet(&(thread->context->stopping))) {
+				GLEngine* engine = AtomicGet(&(thread->context->engine));
+
+				if (engine != NULL) {
+					engine->mixerVolume((GLfloat)thread->volume);
+				}
+			}
+		}
+		mmfree(thread);
+	}
+
+	return NULL;
+}
+
+JNIEXPORT void JNICALL
+Java_com_jappsy_JappsyEngine_setMixerVolume(JNIEnv *env, jclass type, jlong handle, jfloat volume) {
+	if (handle != 0) {
+		struct SetMixerVolumeThreadData* thread = (struct SetMixerVolumeThreadData*)mmalloc(sizeof(struct SetMixerVolumeThreadData));
+		if (thread != NULL) {
+			thread->context = (JappsyEngine *) (intptr_t) (handle);
+			thread->volume = (GLfloat)volume;
+
+			MainThreadAsync(onSetMixerVolumeCallback, NULL, thread);
+		}
+	}
+}
+
+void* onIsMixerPlaying(void* threadData) {
+	if (threadData != NULL) {
+		JappsyEngine *context = (JappsyEngine*)threadData;
+		GLEngine *engine = AtomicGet(&(context->engine));
+
+		if (engine != NULL) {
+			return (engine->mixerPlaying() ? context : NULL);
+		}
+	}
+
+	return NULL;
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_jappsy_JappsyEngine_isMixerPlaying(JNIEnv *env, jclass type, jlong handle) {
+	if (handle != 0) {
+		JappsyEngine *context = (JappsyEngine *) (intptr_t) (handle);
+		if (!AtomicGet(&(context->stopping))) {
+			return (jboolean)((MainThreadSync(onIsMixerPlaying, context) == context) ? JNI_TRUE : JNI_FALSE);
+		}
+	}
+}
+
 #ifdef __cplusplus
 }
 #endif

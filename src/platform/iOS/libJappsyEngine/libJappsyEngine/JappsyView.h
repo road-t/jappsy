@@ -35,4 +35,7 @@ NSLayoutConstraint* ConstraintPriotiry(NSLayoutConstraint* constraint, UILayoutP
 - (void) drawView:(id)sender;
 - (void) engine:(void*)refEngine;
 
+- (void) mixerVolume:(float)volume;
+- (BOOL) isMixerPlaying;
+
 @end

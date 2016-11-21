@@ -238,6 +238,45 @@ public class JappsyMain extends Activity {
         layoutView02.setVisibility(View.GONE);
         layoutView03.setVisibility(View.GONE);
 
+        // Media Controls
+        {
+            Button volumeDownButton = new Button(this);
+            volumeDownButton.setOnClickListener(new Button.OnClickListener() { @Override public void onClick(View v) { volumeDown(v); } });
+            volumeDownButton.setBackgroundColor(Color.DKGRAY);
+            volumeDownButton.setText("-");
+            volumeDownButton.setTextColor(Color.WHITE);
+            mainView.addView(volumeDownButton);
+
+            mainView.addConstraint(new Constraint(volumeDownButton, Constraint.LEFT, mainView, Constraint.LEFT, 1.0, 8.0, 999));
+            mainView.addConstraint(new Constraint(volumeDownButton, Constraint.TOP, mainView, Constraint.CENTERY, 1.0, -25.0, 999));
+            mainView.addConstraint(new Constraint(volumeDownButton, Constraint.WIDTH, null, Constraint.NONE, 1.0, 50.0, 999));
+            mainView.addConstraint(new Constraint(volumeDownButton, Constraint.HEIGHT, null, Constraint.NONE, 1.0, 50.0, 999));
+
+            Button volumeUpButton = new Button(this);
+            volumeUpButton.setOnClickListener(new Button.OnClickListener() { @Override public void onClick(View v) { volumeUp(v); } });
+            volumeUpButton.setBackgroundColor(Color.DKGRAY);
+            volumeUpButton.setText("+");
+            volumeUpButton.setTextColor(Color.WHITE);
+            mainView.addView(volumeUpButton);
+
+            mainView.addConstraint(new Constraint(volumeUpButton, Constraint.LEFT, volumeDownButton, Constraint.RIGHT, 1.0, 8.0, 998));
+            mainView.addConstraint(new Constraint(volumeUpButton, Constraint.TOP, mainView, Constraint.CENTERY, 1.0, -25.0, 999));
+            mainView.addConstraint(new Constraint(volumeUpButton, Constraint.WIDTH, null, Constraint.NONE, 1.0, 50.0, 999));
+            mainView.addConstraint(new Constraint(volumeUpButton, Constraint.HEIGHT, null, Constraint.NONE, 1.0, 50.0, 999));
+
+            Button mixerCheckButton = new Button(this);
+            mixerCheckButton.setOnClickListener(new Button.OnClickListener() { @Override public void onClick(View v) { mixerCheck(v); } });
+            mixerCheckButton.setBackgroundColor(Color.DKGRAY);
+            mixerCheckButton.setText("*");
+            mixerCheckButton.setTextColor(Color.WHITE);
+            mainView.addView(mixerCheckButton);
+
+            mainView.addConstraint(new Constraint(mixerCheckButton, Constraint.LEFT, volumeUpButton, Constraint.RIGHT, 1.0, 8.0, 997));
+            mainView.addConstraint(new Constraint(mixerCheckButton, Constraint.TOP, mainView, Constraint.CENTERY, 1.0, -25.0, 999));
+            mainView.addConstraint(new Constraint(mixerCheckButton, Constraint.WIDTH, null, Constraint.NONE, 1.0, 50.0, 999));
+            mainView.addConstraint(new Constraint(mixerCheckButton, Constraint.HEIGHT, null, Constraint.NONE, 1.0, 50.0, 999));
+        }
+
         setContentView(mainView);
 
         /*
@@ -259,6 +298,30 @@ public class JappsyMain extends Activity {
 
         setContentView(m_main);
         */
+    }
+
+    private float volume = 1.0f;
+
+    public void volumeDown(View sender) {
+        if (omView != null) {
+            volume -= 0.1f;
+            if (volume < 0.0f) volume = 0.0f;
+            omView.mixerVolume(volume);
+        }
+    }
+
+    public void volumeUp(View sender) {
+        if (omView != null) {
+            volume += 0.1f;
+            if (volume > 1.0f) volume = 1.0f;
+            omView.mixerVolume(volume);
+        }
+    }
+
+    public void mixerCheck(View sender) {
+        if (omView != null) {
+            omView.isMixerPlaying();
+        }
     }
 
     public void showLayout(View sender) {

@@ -249,6 +249,20 @@ void GLSoundMixer::mixMaxVolume(GLfloat volume, GLfloat maxvolume) {
 	}
 }
 
+bool GLSoundMixer::mixPlaying() {
+	// TODO: Optimize playing state check
+
+	int32_t count = list.count();
+	GLSound** items = list.items();
+	for (int i = 0; i < count; i++) {
+		if (items[i]->mixPlaying()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void GLSoundMixer::update() {
 	int32_t count = listFx.count();
 	GLSound** items = listFx.items();

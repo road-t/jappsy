@@ -64,6 +64,9 @@ typedef void (*OMViewCloseCallback)(void* userData);
 - (BOOL) onStart;
 - (BOOL) onStop;
 
+- (void) mixerVolume:(float)volume;
+- (BOOL) isMixerPlaying;
+
 - (void) updateState:(int)state;
 
 @end

@@ -194,6 +194,17 @@ void GLEngine::load(const char* json) {
 	context->loader->load(json);
 }
 
+void GLEngine::mixerVolume(GLfloat volume) {
+	LOG("Volume: %d%%", (int)roundf(volume * 100.0f));
+	context->mixer->mixMaxVolume(volume, 1.0f);
+}
+
+bool GLEngine::mixerPlaying() {
+	bool result = context->mixer->mixPlaying();
+	LOG("Mixer: %s", (result ? "Playing" : "Stopped"));
+	return result;
+}
+
 void GLEngine::updateState(int state) {
 	if (onUpdateState != NULL)
 		onUpdateState(state, onUpdateStateUserData);

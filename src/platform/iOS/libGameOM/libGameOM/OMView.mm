@@ -849,4 +849,12 @@ void onScript(int index, const CString& script, void* userData) {
     return [gameView onStop];
 }
 
+- (void) mixerVolume:(float)volume {
+    [gameView mixerVolume:volume];
+}
+
+- (BOOL) isMixerPlaying {
+    return [gameView isMixerPlaying];
+}
+
 @end

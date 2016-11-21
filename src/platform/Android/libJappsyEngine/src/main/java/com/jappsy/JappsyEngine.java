@@ -56,6 +56,9 @@ public class JappsyEngine {
 
 	public static native void onTouch(long handle, MotionEvent event);
 
+	public static native void setMixerVolume(long handle, float volume);
+	public static native boolean isMixerPlaying(long handle);
+
 	/* ANTI-DEADLOCK */
 
 	public static native void lockGLThread();

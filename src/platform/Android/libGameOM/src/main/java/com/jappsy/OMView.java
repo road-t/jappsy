@@ -772,4 +772,12 @@ public class OMView extends ConstraintView {
 	public void exitFullscreen() {
 		gameView.exitFullscreen();
 	}
+
+	public void mixerVolume(float volume) {
+		gameView.mixerVolume(volume);
+	}
+
+	public boolean isMixerPlaying() {
+		return gameView.isMixerPlaying();
+	}
 }

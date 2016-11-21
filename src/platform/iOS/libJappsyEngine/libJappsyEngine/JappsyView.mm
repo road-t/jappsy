@@ -403,4 +403,30 @@ static int32_t pointerId = 1;
 	[self touchesEnded:touches withEvent:event];
 }
 
+struct SetMixerVolumeThreadData {
+	GLView* context;
+	GLfloat volume;
+};
+
+void* onSetMixerVolumeCallback(void* threadData) {
+	struct SetMixerVolumeThreadData* thread = (struct SetMixerVolumeThreadData*)threadData;
+	if (thread != NULL) {
+		if (thread->context != NULL) {
+		}
+		mmfree(thread);
+	}
+	
+	return NULL;
+}
+
+- (void) mixerVolume:(float)volume {
+	if (!_stopping) {
+		_renderer->engine->mixerVolume((GLfloat)volume);
+	}
+}
+
+- (BOOL) isMixerPlaying {
+	return (_renderer->engine->mixerPlaying() ? TRUE : FALSE);
+}
+
 @end

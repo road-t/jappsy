@@ -361,4 +361,12 @@ public class JappsyView extends GLSurfaceView {
 		super.onDetachedFromWindow();
 		JappsyEngine.unlockGLThread();
 	}
+
+	public void mixerVolume(float volume) {
+		JappsyEngine.setMixerVolume(m_context, volume);
+	}
+
+	public boolean isMixerPlaying() {
+		return JappsyEngine.isMixerPlaying(m_context);
+	}
 }

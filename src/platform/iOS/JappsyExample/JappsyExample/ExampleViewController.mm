@@ -200,6 +200,49 @@
 	[layoutView02 setHidden:YES];
 	[layoutView03 setHidden:YES];
 	
+	// Media Controls
+	
+	{
+		UIButton* volumeDownButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[volumeDownButton addTarget:self action:@selector(volumeDown:) forControlEvents:UIControlEventTouchUpInside];
+		[volumeDownButton setOpaque:NO];
+		volumeDownButton.backgroundColor = [UIColor darkGrayColor];
+		[volumeDownButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[volumeDownButton setTitle:@"-" forState:UIControlStateNormal];
+		[self.view addSubview: volumeDownButton];
+		
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeDownButton attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeft multiplier:1.0 constant:8.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeDownButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeDownButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeDownButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+
+		UIButton* volumeUpButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[volumeUpButton addTarget:self action:@selector(volumeUp:) forControlEvents:UIControlEventTouchUpInside];
+		[volumeUpButton setOpaque:NO];
+		volumeUpButton.backgroundColor = [UIColor darkGrayColor];
+		[volumeUpButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[volumeUpButton setTitle:@"+" forState:UIControlStateNormal];
+		[self.view addSubview: volumeUpButton];
+		
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeUpButton attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:volumeDownButton attribute:NSLayoutAttributeRight multiplier:1.0 constant:8.0],998)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeUpButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeUpButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:volumeUpButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+
+		UIButton* mixerCheckButton = [UIButton buttonWithType:UIButtonTypeCustom];
+		[mixerCheckButton addTarget:self action:@selector(mixerCheck:) forControlEvents:UIControlEventTouchUpInside];
+		[mixerCheckButton setOpaque:NO];
+		mixerCheckButton.backgroundColor = [UIColor darkGrayColor];
+		[mixerCheckButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+		[mixerCheckButton setTitle:@"*" forState:UIControlStateNormal];
+		[self.view addSubview: mixerCheckButton];
+		
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:volumeUpButton attribute:NSLayoutAttributeRight multiplier:1.0 constant:8.0],997)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
+	}
+	
 	// Disable Animation Rotation and Keyboard
 	//[UIView setAnimationsEnabled:NO];
 	
@@ -208,6 +251,30 @@
 	
 	// Black Background With White Status Bar
 	[self setNeedsStatusBarAppearanceUpdate];
+}
+
+float volume = 1.0f;
+
+- (void) volumeDown:(UIButton*)sender {
+	if (omView != NULL) {
+		volume -= 0.1f;
+		if (volume < 0.0f) volume = 0.0f;
+		[omView mixerVolume:volume];
+	}
+}
+
+- (void) volumeUp:(UIButton*)sender {
+	if (omView != NULL) {
+		volume += 0.1f;
+		if (volume > 1.0f) volume = 1.0f;
+		[omView mixerVolume:volume];
+	}
+}
+
+- (void) mixerCheck:(UIButton*)sender {
+	if (omView != NULL) {
+		[omView isMixerPlaying];
+	}
 }
 
 - (void) showLayout:(UIButton*)sender {

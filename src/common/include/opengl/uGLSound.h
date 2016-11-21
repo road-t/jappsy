@@ -96,6 +96,7 @@ public:
 	void removeFx(GLSound* sound);
 	
 	void mixMaxVolume(GLfloat volume, GLfloat maxvolume);
+	bool mixPlaying();
 	void update();
 	void stop();
 };

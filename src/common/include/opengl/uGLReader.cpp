@@ -155,9 +155,9 @@ void* GLReader::CreateShaderSourceCallback(void* threadData) {
 	GLuint sh = 0;
 	try {
 		if ((thread->chunk == GLReader::VGZCHUNK) || (thread->chunk == GLReader::VSHCHUNK)) {
-			sh = thread->context->shaders->createVertexShader(thread->shaderSource);
+			sh = GLProgram::createVertexShader(thread->shaderSource);
 		} else {
-			sh = thread->context->shaders->createFragmentShader(thread->shaderSource);
+			sh = GLProgram::createFragmentShader(thread->shaderSource);
 		}
 	} catch (...) {
 		throw;
@@ -167,7 +167,7 @@ void* GLReader::CreateShaderSourceCallback(void* threadData) {
 		shd = memNew(shd, GLObjectData(thread->context));
 		shd->setShader(sh, false);
 	} catch (...) {
-		thread->context->shaders->releaseShader(sh);
+		GLProgram::releaseShader(sh);
 		if (shd != NULL) {
 			memDelete(shd);
 			shd = NULL;
@@ -224,7 +224,7 @@ void* GLReader::CreateShaderTextureCallback(void* threadData) {
 void* GLReader::CreateShaderProgramCallback(void* threadData) {
 	struct CreateShaderThreadData* thread = (struct CreateShaderThreadData*)threadData;
 	
-	thread->program = thread->context->shaders->createProgram(thread->vsh->getShader(), thread->fsh->getShader());
+	thread->program = GLProgram::createProgram(thread->vsh->getShader(), thread->fsh->getShader());
 	
 	return NULL;
 }
@@ -249,7 +249,7 @@ void* GLReader::CreateShaderErrorCallback(void* threadData) {
 	}
 	
 	if (thread->program != 0) {
-		thread->context->shaders->releaseProgram(thread->program);
+		GLProgram::releaseProgram(thread->program);
 		thread->program = 0;
 	}
 	

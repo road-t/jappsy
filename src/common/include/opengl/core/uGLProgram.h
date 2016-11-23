@@ -26,16 +26,33 @@ struct GLProgramVariable {
 
 class GLProgram : public CObject {
 	friend struct GLContextState;
+
+	friend class GLObjectData;
+	friend class GLReader;
+	friend class GLShader;
+	friend class GLShaders;
 	
 protected:
+	static GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);
+	static GLuint createFragmentShader(const char* fragmentShaderSource) throw(const char*);
+	static void releaseShader(GLuint shader);
+	
+	static GLuint createProgram(GLuint vertexShader, GLuint fragmentShader) throw(const char*);
+	static void releaseProgram(GLuint program);
+
+protected:
 	GLContext* context = NULL;
+	
+	GLuint vertexShader = GL_NONE;
+	GLuint fragmentShader = GL_NONE;
+	GLuint handle = GL_NONE;
 	
 public:
 	GLProgram(GLContext& context, const char* vsh, const char* fsh, const GLProgramVariable* attributes = NULL, const GLProgramVariable* uniforms = NULL) throw(const char*);
 	~GLProgram();
 	
-private:
-	void destroy();
+protected:
+	void release();
 };
 
 class GLProgramTextureVariables {
@@ -45,9 +62,10 @@ protected:
 	GLuint aTextureCoord;
 	GLuint uSize;
 	GLuint uPosition;
+	GLuint uTexture;
 	
 	const GLProgramVariable attributes[3];
-	const GLProgramVariable uniforms[4];
+	const GLProgramVariable uniforms[5];
 	
 	GLProgramTextureVariables();
 };
@@ -55,6 +73,8 @@ protected:
 class GLProgramTexture : private GLProgramTextureVariables, public GLProgram {
 public:
 	GLProgramTexture(GLContext& context);
+	
+	void render(GLTexture& texture, const Mat4& projection, const Vec2& size, const Vec2& position);
 };
 
 #endif

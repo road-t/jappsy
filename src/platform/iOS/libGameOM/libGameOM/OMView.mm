@@ -199,7 +199,11 @@
         lpvError = lphError = llvError = llhError = NULL;
         
         _startup = TRUE;
+#ifdef DEMO
+        _state = OMVIEW_HIDE | OMVIEW_STOP | OMVIEW_RESUME | OMVIEW_GAME;
+#else
         _state = OMVIEW_HIDE | OMVIEW_STOP | OMVIEW_RESUME | OMVIEW_LOAD;
+#endif
 
         [self setTranslatesAutoresizingMaskIntoConstraints:NO];
         self.backgroundColor = [UIColor blackColor];

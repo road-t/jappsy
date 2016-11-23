@@ -57,13 +57,6 @@ public:
 	GLShader* get(const CString& key) throw(const char*);
 	GLShader* createShader(const CString& key, GLObjectData* vsh, GLObjectData* fsh, GLuint program, Vector<GLObjectData*>& textures) throw(const char*);
 	
-	GLuint createVertexShader(const char* vertexShaderSource) throw(const char*);
-	GLuint createFragmentShader(const char* fragmentShaderSource) throw(const char*);
-	void releaseShader(GLuint shader);
-	
-	GLuint createProgram(GLuint vertexShader, GLuint fragmentShader) throw(const char*);
-	void releaseProgram(GLuint program);
-
 private: // Thread Safe
 	static void* CreateVertexShaderCallback(void* threadData);
 	static void* CreateFragmentShaderCallback(void* threadData);

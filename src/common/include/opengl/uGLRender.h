@@ -148,10 +148,6 @@ public:
 };
 
 class GLRender : public GLContext {
-private:
-	static const char* extensions;
-	static bool isExtensionSupported(const char *extension);
-	
 public:
 	GLEngine* engine = NULL;
 	
@@ -188,9 +184,6 @@ public:
 	GLSquareFillShader* shaderSquareFill = NULL;
 	GLSquareStrokeShader* shaderSquareStroke = NULL;
 	GLSquareTextureShader* shaderSquareTexture = NULL;
-	
-	GLint maxTextureSize;
-	bool isNPOTSupported;
 	
 	GLuint m_squareBuffer;
 	GLuint m_textureBuffer;

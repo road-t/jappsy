@@ -1534,9 +1534,15 @@ void OMGame::onPreload() {
     }
 
     LOG("OMGame > Json Load Config");
+#ifndef DEBUG
     const char *sOMLoadRes =
         #include "OMLoad.res"
     ;
+#else
+    const char *sOMLoadRes =
+        #include "OMLoad_debug.res"
+    ;
+#endif
     
     status.count = 0;
     status.total = 0;
@@ -2026,9 +2032,15 @@ OMGame::OMGame(const CString& basePath, const CString& token, const CString& ses
     setBasePath(basePath);
 
     LOG("OMGame > Json Preload Config");
+#ifndef DEBUG
     const char *sOMPreloadRes =
         #include "OMPreload.res"
     ;
+#else
+    const char *sOMPreloadRes =
+        #include "OMPreload_debug.res"
+    ;
+#endif
 
     LOG("OMGame > Start Preloading");
     preload(sOMPreloadRes);

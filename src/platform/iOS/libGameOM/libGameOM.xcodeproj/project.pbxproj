@@ -26,6 +26,8 @@
 		C340852C1D67D3EA007D4835 /* GLKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLKit.framework; path = System/Library/Frameworks/GLKit.framework; sourceTree = SDKROOT; };
 		C3416E611DAD08A500298835 /* OMErrorHtml.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMErrorHtml.res; sourceTree = "<group>"; };
 		C3486E221DAFBE2000850F78 /* OMView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OMView.h; path = ../../../../example/om/OMView.h; sourceTree = "<group>"; };
+		C34D9FE31DE5F1ED00A33F32 /* OMLoad_debug.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMLoad_debug.res; sourceTree = "<group>"; };
+		C34D9FE41DE5F1ED00A33F32 /* OMPreload_debug.res */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = OMPreload_debug.res; sourceTree = "<group>"; };
 		C34FD9A41D5BBB220022FF71 /* libGameOM.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = libGameOM.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C34FD9A71D5BBB220022FF71 /* libGameOM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = libGameOM.h; sourceTree = "<group>"; };
 		C34FD9A91D5BBB220022FF71 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -103,6 +105,8 @@
 				C3513FC11D762E7100DC6362 /* OMGame.h */,
 				C35BCA0F1DA139C100C37558 /* OMPreload.res */,
 				C3513FC31D762E7100DC6362 /* OMLoad.res */,
+				C34D9FE41DE5F1ED00A33F32 /* OMPreload_debug.res */,
+				C34D9FE31DE5F1ED00A33F32 /* OMLoad_debug.res */,
 				C3513FC61D762E7100DC6362 /* OMShaders.res */,
 				C3513FC71D762E7100DC6362 /* OMSprites.res */,
 				C3513FBF1D762E7100DC6362 /* OMDrawings.res */,

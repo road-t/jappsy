@@ -49,14 +49,14 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 	if (type == GL_TEXTURE) {
 		if (depthRenderBuffer != GL_NONE) {
 			glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 		
 			glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 		} else if (stencilRenderBuffer != NULL) {
 			glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
-			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+			glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 			
 			glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 		} else {
@@ -64,12 +64,15 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 		}
 	} else {
 		glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+		glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 		
 		glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 	}
 
+	bufferWidth = width;
+	bufferHeight = height;
+	
 	if (depthRenderBuffer != GL_NONE) state |= GLAttachmentDepth;
 	if (stencilRenderBuffer != GL_NONE) state |= GLAttachmentStencil;
 	state |= GLAttachmentColor | GLDirty;
@@ -84,9 +87,16 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context) throw(const char*) : GLTexture(
 #else
 	#error Unsupported platform!
 #endif
+	
+	projection16fv.set(0);
+	projection16fv[0] = 2.0f / bufferWidth;
+	projection16fv[5] = -2.0f / bufferHeight;
+	projection16fv[12] = -1.0f;
+	projection16fv[13] = 1.0f;
+	projection16fv[10] = projection16fv[15] = 1.0f;
 }
 
-GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style, void* data) throw(const char*) : GLTexture(context, width, height, style, data) {
+GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style, void* data) throw(const char*) : GLTexture(context, width, -height, style, data) {
 	renderBuffer = GL_NONE;
 	glGenFramebuffers(1, &frameBuffer);
 	CheckGLError();
@@ -106,17 +116,17 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		} catch (...) {
 			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
-			destroy();
+			release();
 			throw;
 		}
 		glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, width, height);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, bufferWidth, bufferHeight);
 		try {
 			CheckGLError();
 		} catch (...) {
 			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
-			destroy();
+			release();
 			throw;
 		}
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilRenderBuffer);
@@ -129,17 +139,17 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 		} catch (...) {
 			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
-			destroy();
+			release();
 			throw;
 		}
 		glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, bufferWidth, bufferHeight);
 		try {
 			CheckGLError();
 		} catch (...) {
 			glBindFramebuffer(GL_FRAMEBUFFER, restoreFrameBuffer);
 			glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
-			destroy();
+			release();
 			throw;
 		}
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
@@ -149,13 +159,20 @@ GLFrameBuffer::GLFrameBuffer(GLContext& context, GLint width, GLint height, uint
 	glBindRenderbuffer(GL_RENDERBUFFER, restoreRenderBuffer);
 	
 	state |= (style & (GLAttachmentStencil | GLAttachmentDepth)) | GLAttachmentColor;
+	
+	projection16fv.set(0);
+	projection16fv[0] = 2.0f / bufferWidth;
+	projection16fv[5] = -2.0f / bufferHeight;
+	projection16fv[12] = -1.0f;
+	projection16fv[13] = 1.0f;
+	projection16fv[10] = projection16fv[15] = 1.0f;
 }
 
 GLFrameBuffer::~GLFrameBuffer() {
-	destroy();
+	release();
 }
 
-void GLFrameBuffer::destroy() {
+void GLFrameBuffer::release() {
 	if ((state & GLFrameBufferGrabbed) == 0) {
 		if ((context != NULL) && (frameBuffer != GL_NONE)) {
 			if (depthRenderBuffer != GL_NONE) {
@@ -224,14 +241,14 @@ void GLFrameBuffer::validate() throw(const char*) {
 			if (type == GL_TEXTURE) {
 				if (depthRenderBuffer != GL_NONE) {
 					glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 					
 					glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 				} else if (stencilRenderBuffer != NULL) {
 					glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
-					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+					glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 					
 					glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 				} else {
@@ -239,17 +256,20 @@ void GLFrameBuffer::validate() throw(const char*) {
 				}
 			} else {
 				glBindRenderbuffer(GL_RENDERBUFFER, colorRenderBuffer);
-				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, (GLint*)&width);
+				glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, (GLint*)&height);
 				
 				glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer);
 			}
+			
+			bufferWidth = width;
+			bufferHeight = height;
 
 			state = (state & (~GLAttachmentDepth)) | ((depthRenderBuffer != GL_NONE) ? GLAttachmentDepth : 0);
 			state = (state & (~GLAttachmentStencil)) | ((stencilRenderBuffer != GL_NONE) ? GLAttachmentStencil : 0);
 #elif defined(__JNI__)
-			width = newSize.width;
-			height = newSize.height;
+			bufferWidth = width = newSize.width;
+			bufferHeight = height = newSize.height;
 			state |= GLAttachmentDepth;
 #else
 			#error Unsupported platform!
@@ -258,7 +278,7 @@ void GLFrameBuffer::validate() throw(const char*) {
 			try {
 				GLTexture::resize(newSize.width, newSize.height);
 			} catch (...) {
-				destroy();
+				release();
 				throw;
 			}
 			
@@ -280,15 +300,15 @@ void GLFrameBuffer::validate() throw(const char*) {
 				try {
 					CheckGLError();
 				} catch (...) {
-					destroy();
+					release();
 					throw;
 				}
 				glBindRenderbuffer(GL_RENDERBUFFER, stencilRenderBuffer);
-				glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, width, height);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, bufferWidth, bufferHeight);
 				try {
 					CheckGLError();
 				} catch (...) {
-					destroy();
+					release();
 					throw;
 				}
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencilRenderBuffer);
@@ -299,15 +319,15 @@ void GLFrameBuffer::validate() throw(const char*) {
 				try {
 					CheckGLError();
 				} catch (...) {
-					destroy();
+					release();
 					throw;
 				}
 				glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
-				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
+				glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, bufferWidth, bufferHeight);
 				try {
 					CheckGLError();
 				} catch (...) {
-					destroy();
+					release();
 					throw;
 				}
 				glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
@@ -315,6 +335,13 @@ void GLFrameBuffer::validate() throw(const char*) {
 			
 			glBindRenderbuffer(GL_RENDERBUFFER, GL_NONE);
 		}
+
+		projection16fv.set(0);
+		projection16fv[0] = 2.0f / bufferWidth;
+		projection16fv[5] = -2.0f / bufferHeight;
+		projection16fv[12] = -1.0f;
+		projection16fv[13] = 1.0f;
+		projection16fv[10] = projection16fv[15] = 1.0f;
 	}
 }
 
@@ -327,7 +354,7 @@ bool GLFrameBuffer::update() throw(const char*) {
 	if ((state & (GLDirty | GLDirtyResize | GLFrameBufferInvalid)) != 0) {
 		if (updateRect != NULL) {
 			if ((state & GLFrameBufferInvalid) != 0) {
-				dirtyRect.set(0, 0, newSize.width, newSize.height);
+				dirtyRect.set(0, 0, abs(newSize.width), abs(newSize.height));
 			} else if ((state & GLDirtyResize) != 0) {
 				dirtyRect.set(0, 0, width, height);
 			}
@@ -357,9 +384,16 @@ bool GLFrameBuffer::update() throw(const char*) {
 				glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 				throw;
 			}
-			context->state.setViewport(0, 0, width, height);
+			context->state.setSize(width, height);
+			context->state.setViewport(0, 0, bufferWidth, bufferHeight);
+			
+			context->stackScissor.push(context->state.scissor);
+			context->state.setScissor(dirtyRect.left, dirtyRect.top, dirtyRect.right, dirtyRect.bottom);
+			context->state.enableScissor();
 
 			updateRect(this, dirtyRect, updateRectUserData);
+			
+			context->state.setFrom(context->stackScissor.pop());
 			
 			glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
 

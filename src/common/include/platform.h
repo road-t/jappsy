@@ -17,6 +17,13 @@
 #ifndef JAPPSY_PLATFORM_H
 #define JAPPSY_PLATFORM_H
 
+#ifndef DEMO
+	//#warning Demo Mode for Testing
+	//#define DEMO
+#else
+	#undef DEMO
+#endif
+
 #ifndef DEBUG
 	//#warning Remove Always Debug Mode
 	//#define DEBUG

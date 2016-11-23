@@ -28,7 +28,7 @@ GLObjectData::~GLObjectData() {
 				}
 			}
 		} else if (m_type == GLObjectDataType::SHADER) {
-			m_context->shaders->releaseShader(m_handles[0]);
+			GLProgram::releaseShader(m_handles[0]);
 		}
 	}
 }

@@ -128,6 +128,13 @@ GLEngine::GLEngine() {
 	context = new GLRender(this, 1920, 1080, ::onFrameCallback, ::onTouchCallback);
 	context->mainFrameBuffer->setOnPrepareRectCallback((onRectCallback)onPrepareRectCallback, this);
 	context->mainFrameBuffer->setOnUpdateRectCallback((onRectCallback)onUpdateRectCallback, this);
+
+#ifdef DEMO
+	testFrameBuffer = new GLFrameBuffer(*context, 100, 100, GLRepeatNone | GLSmooth, NULL);
+	testFrameBuffer->setOnUpdateRectCallback((onRectCallback)onTestUpdateRectCallback, this);
+	
+	testTexture = new GLTexture(*context, 32, 20, GLRepeatNone | GLSmooth, NULL);
+#endif
 }
 
 #if defined(__JNI__)
@@ -158,6 +165,11 @@ void* onReleaseGLEngineThread(void* userData) {
 #endif
 
 GLEngine::~GLEngine() {
+#ifdef DEMO
+	delete testTexture;
+	delete testFrameBuffer;
+#endif
+	
 	if (context != NULL) {
 		delete context;
 	}
@@ -233,13 +245,37 @@ void GLEngine::setWebCallbacks(onWebLocationCallback onweblocation, onWebScriptC
 	onwebUserData = userData;
 }
 
+#ifdef DEMO
+void GLEngine::onTestUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine) {
+	glClearColor(1.0f, 0.5f, 0.0f, 0.7f);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	engine->context->programTexture->render(*engine->testTexture, target->projection16fv, Vec2(64, 64), Vec2(10, 10));
+}
+
+int testHeight = 0;
+#endif
+
 void GLEngine::onPrepareRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine) {
 	// Prepare Textures and Framebuffers for render
+
+#ifdef DEMO
+	testHeight++;
+	if (testHeight == 100) testHeight = 0;
+	
+	engine->testFrameBuffer->resize(100, -(100 + abs(testHeight - 50)));
+	engine->testFrameBuffer->dirty();
+	engine->testFrameBuffer->update();
+#endif
 }
 
 void GLEngine::onUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine) {
 	// Render rect
 	engine->context->frame->loop();
+#ifdef DEMO
+	engine->context->programTexture->render(*engine->testFrameBuffer, target->projection16fv, Vec2(100, 100), Vec2(10, 10));
+	engine->context->programTexture->render(*engine->testTexture, target->projection16fv, Vec2(100, 100), Vec2(60, 60));
+#endif
 }
 
 bool GLEngine::onRender() {

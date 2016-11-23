@@ -202,6 +202,7 @@
 	
 	// Media Controls
 	
+#ifdef DEMO
 	{
 		UIButton* volumeDownButton = [UIButton buttonWithType:UIButtonTypeCustom];
 		[volumeDownButton addTarget:self action:@selector(volumeDown:) forControlEvents:UIControlEventTouchUpInside];
@@ -242,6 +243,7 @@
 		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
 		[self.view addConstraint:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:mixerCheckButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0 constant:50.0],999)];
 	}
+#endif
 	
 	// Disable Animation Rotation and Keyboard
 	//[UIView setAnimationsEnabled:NO];

@@ -23,12 +23,33 @@
 class GLContext : public CObject {
 	friend class GLTexture;
 	friend class GLFrameBuffer;
+	friend class GLProgramTexture;
+
+	friend class GLEngine;
+	friend class GLSprite;
+	friend class GLModel;
+	friend class GLParticleSystem;
 	
+protected:
+	static const char* extensions;
+	static bool isExtensionSupported(const char *extension);
+	GLuint NPOT(GLuint value);
+
+	GLuint maxTextureIndex = 0;
+	GLuint maxTextureSize = 0;
+	bool isNPOTSupported = false;
+
 public:
-	GLContext();
-	~GLContext();
+	GLContext() throw(const char*);
+	~GLContext();	
+
+protected:
+	// Normal, FlipX, FlipY, FlipXY
+	GLuint rectArrayBuffers[4] = { GL_NONE, GL_NONE, GL_NONE, GL_NONE };
 	
-public:
+	/* Program & Shader base functions */
+	
+protected:
 	GLContextState state;
 
 	Vector<GLContextState> stackState;
@@ -39,16 +60,55 @@ public:
 	Vector<GLContextStateColorMask> stackColorMask;
 	Vector<GLContextStateBlend> stackBlend;
 
-public:
 	GLFrameBuffer* mainFrameBuffer = NULL;
 	GLProgramTexture* programTexture = NULL;
 	
-	void reset();
+protected:
+	void release();
+	
+public:
+	void reset() throw(const char*);
 	void resize(GLint width, GLint height);
-
+	
+public: // State Change/Save/Restore
 	void pushState();
 	bool popState();
-		
+	
+	void pushViewport();
+	void popViewport();
+	void pushScissor();
+	void popScissor();
+	void pushDepth();
+	void popDepth();
+	void pushStencil();
+	void popStencil();
+	void pushColorMask();
+	void popColorMask();
+	void pushBlend();
+	void popBlend();
+
+	void setViewport(GLint left, GLint top, GLint right, GLint bottom);
+	
+	void enableScissor();
+	void disableScissor();
+	void setScissor(GLint left, GLint top, GLint right, GLint bottom);
+	
+	void enableDepth();
+	void disableDepth();
+	void setDepth(GLclampf depth, GLclampf zNear, GLclampf zFar, GLenum func);
+	
+	void enableStencil();
+	void disableStencil();
+	void setStencil(GLenum func, GLint ref, GLuint mask, GLenum fail, GLenum zFail, GLenum zPass);
+	void setClearStencil(GLint s);
+	
+	void setColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
+	
+	void enableBlend();
+	void disableBlend();
+	void setBlend(GLenum sFactor, GLenum dFactor, GLenum mode);
+
+public: // Clipping mask by stencil
 	// Framebuffer must support stencil buffer
 	void beginClipUpdate();
 	void clearClip();

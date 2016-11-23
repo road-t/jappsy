@@ -44,6 +44,11 @@ GLContextState::GLContextState() {
 	blend.mode = GL_FUNC_ADD;
 }
 
+void GLContextState::setSize(GLuint width, GLuint height) {
+	size.x = width;
+	size.y = height;
+}
+
 void GLContextState::restoreDefault() {
 	glDisable(GL_CULL_FACE);
 
@@ -129,7 +134,7 @@ void GLContextState::setFrom(const GLContextStateBlend& restore) {
 void GLContextState::setViewport(GLint left, GLint top, GLint right, GLint bottom) {
 	if ((viewport.rect.left != left) || (viewport.rect.top != top) || (viewport.rect.right != right) || (viewport.rect.bottom != bottom)) {
 		viewport.rect.set(left, top, right, bottom);
-		glViewport(left, top, right - left, bottom - top);
+		glViewport(left, size.y - bottom, right - left, bottom - top);
 	}
 }
 
@@ -150,7 +155,7 @@ void GLContextState::disableScissor() {
 void GLContextState::setScissor(GLint left, GLint top, GLint right, GLint bottom) {
 	if ((scissor.rect.left != left) || (scissor.rect.top != top) || (scissor.rect.right != right) || (scissor.rect.bottom != bottom)) {
 		scissor.rect.set(left, top, right, bottom);
-		glScissor(left, top, right - left, bottom - top);
+		glScissor(left, size.y - bottom, right - left, bottom - top);
 	}
 }
 

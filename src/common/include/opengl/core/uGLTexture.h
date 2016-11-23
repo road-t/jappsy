@@ -24,14 +24,18 @@ class GLContext;
 
 class GLTexture : public CObject {
 	friend struct GLContextState;
+	friend class GLProgramTexture;
 	
 protected:
 	GLContext* context = NULL;
 	uint32_t state = 0;
 	GLuint handle;
+	GLuint rectArrayBuffer;
 	
-	GLint width;
-	GLint height;
+	GLuint width;
+	GLuint height;
+	GLuint bufferWidth;
+	GLuint bufferHeight;
 	GLRect dirtyRect;
 	
 protected:
@@ -42,12 +46,12 @@ public:
 	// Create OpenGL Texture
 	GLTexture(GLContext& context, uint32_t rgba) throw(const char*);
 	GLTexture(GLContext& context, const Vec4& rgba) throw(const char*);
-	GLTexture(GLContext& context, uint32_t width, uint32_t height, uint32_t mode = (GLRepeat | GLSmooth), void* data = NULL) throw(const char*);
+	GLTexture(GLContext& context, GLint width, GLint height, uint32_t mode = (GLRepeatNone | GLSmooth), void* data = NULL) throw(const char*);
 	~GLTexture();
 	
 protected:
-	void resize(uint32_t width, uint32_t height) throw(const char*);
-	void destroy();
+	void resize(GLint width, GLint height) throw(const char*);
+	void release();
 	
 public:
 	void setMode(uint32_t mode) throw(const char*);

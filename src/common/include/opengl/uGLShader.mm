@@ -43,7 +43,7 @@ GLShader::~GLShader() {
 	}
 	
 	if (program != 0) {
-		context->shaders->releaseProgram(program);
+		GLProgram::releaseProgram(program);
 		program = 0;
 	}
 	
@@ -100,7 +100,7 @@ bool GLShader::checkReady() {
 		GLuint frameShader = this->fsh->getShader();
 		
 		try {
-			this->program = context->shaders->createProgram(vertexShader, frameShader);
+			this->program = GLProgram::createProgram(vertexShader, frameShader);
 		} catch (...) {
 			return false;
 		}
@@ -233,96 +233,6 @@ GLShader* GLShaders::createShader(const CString& key, GLObjectData* vsh, GLObjec
 	}
 }
 
-GLuint GLShaders::createVertexShader(const char* vertexShaderSource) throw(const char*) {
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	CheckGLError();
-	
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-	
-	GLint status = GL_FALSE;
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE) {
-#ifdef DEBUG
-		GLint logLen = 0;
-		glGetShaderiv(vertexShader, GL_INFO_LOG_LENGTH, &logLen);
-		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
-			glGetShaderInfoLog(vertexShader, logLen, &logLen, log);
-			CString::format(L"OpenGL Vertex Shader Log:\r\n%s", (char*)log).log();
-			memFree(log);
-		}
-#endif
-		glDeleteShader(vertexShader);
-		throw eOpenGL;
-	}
-	
-	return vertexShader;
-}
-
-GLuint GLShaders::createFragmentShader(const char* fragmentShaderSource) throw(const char*) {
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	CheckGLError();
-	
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	
-	GLint status = GL_FALSE;
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
-	if (status == GL_FALSE) {
-#ifdef DEBUG
-		GLint logLen = 0;
-		glGetShaderiv(fragmentShader, GL_INFO_LOG_LENGTH, &logLen);
-		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
-			glGetShaderInfoLog(fragmentShader, logLen, &logLen, log);
-			CString::format(L"OpenGL Fragment Shader Log:\r\n%s", (char*)log).log();
-			memFree(log);
-		}
-#endif
-		glDeleteShader(fragmentShader);
-		throw eOpenGL;
-	}
-	
-	return fragmentShader;
-}
-
-void GLShaders::releaseShader(GLuint shader) {
-	glDeleteShader(shader);
-}
-
-GLuint GLShaders::createProgram(GLuint vertexShader, GLuint fragmentShader) throw(const char*) {
-	GLuint program = glCreateProgram();
-	CheckGLError();
-
-	glAttachShader(program, vertexShader);
-	glAttachShader(program, fragmentShader);
-	glLinkProgram(program);
-	
-	GLint status = GL_FALSE;
-	glGetProgramiv(program, GL_LINK_STATUS, &status);
-	if (status == GL_FALSE) {
-#ifdef DEBUG
-		GLint logLen = 0;
-		glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLen);
-		if (logLen > 0) {
-			GLchar* log = memAlloc(GLchar, log, (size_t)logLen + 1);
-			glGetProgramInfoLog(program, logLen, &logLen, log);
-			CString::format(L"OpenGL Program Log:\r\n%s", (char*)log).log();
-			memFree(log);
-		}
-#endif
-		glDeleteProgram(program);
-		throw eOpenGL;
-	}
-	
-	return program;
-}
-
-void GLShaders::releaseProgram(GLuint program) {
-	glDeleteProgram(program);
-}
-
 // THREAD SAFE
 
 struct CreateShaderDataThreadData {
@@ -338,7 +248,7 @@ void* GLShaders::CreateVertexShaderCallback(void* threadData) {
 	
 	GLuint sh = 0;
 	try {
-		sh = thread->context->shaders->createVertexShader(thread->shaderSource);
+		sh = GLProgram::createVertexShader(thread->shaderSource);
 	} catch (...) {
 		throw;
 	}
@@ -347,7 +257,7 @@ void* GLShaders::CreateVertexShaderCallback(void* threadData) {
 		shd = memNew(shd, GLObjectData(thread->context));
 		shd->setShader(sh, false);
 	} catch (...) {
-		thread->context->shaders->releaseShader(sh);
+		GLProgram::releaseShader(sh);
 		if (shd != NULL) {
 			memDelete(shd);
 			shd = NULL;
@@ -368,7 +278,7 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 	
 	GLuint sh = 0;
 	try {
-		sh = thread->context->shaders->createFragmentShader(thread->shaderSource);
+		sh = GLProgram::createFragmentShader(thread->shaderSource);
 	} catch (...) {
 		throw;
 	}
@@ -377,7 +287,7 @@ void* GLShaders::CreateFragmentShaderCallback(void* threadData) {
 		shd = memNew(shd, GLObjectData(thread->context));
 		shd->setShader(sh, false);
 	} catch (...) {
-		thread->context->shaders->releaseShader(sh);
+		GLProgram::releaseShader(sh);
 		if (shd != NULL) {
 			memDelete(shd);
 			shd = NULL;

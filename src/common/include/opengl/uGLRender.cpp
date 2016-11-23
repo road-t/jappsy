@@ -21,37 +21,6 @@
 
 #include <math.h>
 
-const char* GLRender::extensions = NULL;
-
-bool GLRender::isExtensionSupported(const char *extension) {
-	if (extensions == NULL)
-		return false;
-	
-	const char *start;
-	const char *where, *terminator;
-	
-	where = strchr(extension, ' ');
-	if ( where || *extension == '\0' )
-		return false;
-	
-	for ( start = extensions; ; ) {
-		where = strstr( start, extension );
-		
-		if ( !where )
-			break;
-		
-		terminator = where + strlen( extension );
-		
-		if ( where == start || *(where - 1) == ' ' )
-			if ( *terminator == ' ' || *terminator == '\0' )
-				return true;
-		
-		start = terminator;
-	}
-	
-	return false;
-}
-
 GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::onFrameCallback onframe, GLTouchScreen::onTouchCallback ontouch) {
 	this->engine = engine;
 	this->width = width;
@@ -77,11 +46,6 @@ GLRender::GLRender(GLEngine* engine, uint32_t width, uint32_t height, GLFrame::o
 	cameras->createCamera(L"gui")->size(width, height)->layer(0, 0);
 	cameras->createCamera(L"background")->size(width, height)->background();
 	lightsMaxCount = 6;
-	
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-	
-	extensions = (const char*)glGetString(GL_EXTENSIONS);
-	isNPOTSupported = isExtensionSupported("GL_OES_texture_npot");
 	
 	state.setDepth(1.0, 0.0, 1.0, GL_LEQUAL);
 	state.setBlend(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_FUNC_ADD);

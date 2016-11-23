@@ -162,6 +162,8 @@ struct GLContextStateBlend {
 };
 
 struct GLContextState {
+	Vec2 size;
+	
 	GLContextStateViewport viewport;
 	GLContextStateScissor scissor;
 	GLContextStateDepth depth;
@@ -183,6 +185,8 @@ struct GLContextState {
 	inline bool operator ==(const GLContextState& rhs) const {
 		return memcmp(this, &rhs, sizeof(GLContextState)) == 0;
 	}
+	
+	void setSize(GLuint width, GLuint height);
 	
 	void restoreDefault();
 	void setFrom(const GLContextState& restore);

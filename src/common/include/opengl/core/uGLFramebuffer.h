@@ -34,18 +34,21 @@ protected:
 	
 	GLSize newSize;
 	
+public:
+	Mat4 projection16fv;
+	
 private:
 	// Grab current OpenGL Framebuffer (window frame buffer)
 	GLFrameBuffer(GLContext& context) throw(const char*);
 	
 public:
 	// Create OpenGL Framebuffer
-	GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style = (GLRepeat | GLSmooth), void* data = NULL) throw(const char*);
+	GLFrameBuffer(GLContext& context, GLint width, GLint height, uint32_t style = (GLRepeatNone | GLSmooth), void* data = NULL) throw(const char*);
 	
 	~GLFrameBuffer();
 	
 private:
-	void destroy();
+	void release();
 	
 public:
 	void resize(GLint newWidth, GLint newHeight);

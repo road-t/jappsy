@@ -45,6 +45,11 @@ protected:
 	
 public:
 	Cache* cache = NULL;
+	
+#ifdef DEMO
+	GLFrameBuffer* testFrameBuffer = NULL;
+	GLTexture* testTexture = NULL;
+#endif
 
 	GLEngine();
 	virtual ~GLEngine();
@@ -76,6 +81,10 @@ public:
 	// Engine
 	
 private:
+#ifdef DEMO
+	static void onTestUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine);
+#endif
+	
 	static void onPrepareRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine);
 	static void onUpdateRectCallback(GLFrameBuffer* target, const GLRect& rect, GLEngine* engine);
 	

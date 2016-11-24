@@ -291,7 +291,7 @@
 
     
     lpvError = lphError = [[NSMutableArray alloc] init];
-    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
+    [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0 constant:0.0],899)];
     [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0 constant:0.0],899)];
     [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0 constant:0.0],899)];
     [lpvError addObject:ConstraintPriotiry([NSLayoutConstraint constraintWithItem:errorView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0 constant:0.0],899)];

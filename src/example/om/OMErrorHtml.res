@@ -108,7 +108,7 @@ R"JAPPSYRAWSTRING(
 	}
 
     function onClose() {
-        window.location = "ios:close";
+        window.location = "app:close";
     }
 
 </script>

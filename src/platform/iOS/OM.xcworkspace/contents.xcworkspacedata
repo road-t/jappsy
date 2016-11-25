@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workspace
+   version = "1.0">
+   <FileRef
+      location = "group:libGameOM/libGameOM.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:libJappsyEngine/libJappsyEngine.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:libz/libz.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "container:OmLauncher/OmLauncher.xcodeproj">
+   </FileRef>
+</Workspace>
